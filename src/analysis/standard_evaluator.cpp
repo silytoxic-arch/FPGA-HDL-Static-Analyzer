@@ -5639,14 +5639,45 @@ void checkDefinitelyEmptyVerilogFor(AnalysisResult& result, const core::SourceFi
     }
     const auto checkedBinary = [](std::string_view op, std::int64_t left,
                                   std::int64_t right) -> std::optional<std::int64_t> {
-        const auto bounded = [](__int128 value) -> std::optional<std::int64_t> {
-            if (value < std::numeric_limits<std::int64_t>::min() ||
-                value > std::numeric_limits<std::int64_t>::max()) return std::nullopt;
-            return static_cast<std::int64_t>(value);
+        const auto checkedAdd = [](std::int64_t lhs, std::int64_t rhs)
+                -> std::optional<std::int64_t> {
+            if ((rhs > 0 && lhs > std::numeric_limits<std::int64_t>::max() - rhs) ||
+                (rhs < 0 && lhs < std::numeric_limits<std::int64_t>::min() - rhs)) {
+                return std::nullopt;
+            }
+            return lhs + rhs;
         };
-        if (op == "+") return bounded(static_cast<__int128>(left) + right);
-        if (op == "-") return bounded(static_cast<__int128>(left) - right);
-        if (op == "*") return bounded(static_cast<__int128>(left) * right);
+        const auto checkedSubtract = [](std::int64_t lhs, std::int64_t rhs)
+                -> std::optional<std::int64_t> {
+            if ((rhs < 0 && lhs > std::numeric_limits<std::int64_t>::max() + rhs) ||
+                (rhs > 0 && lhs < std::numeric_limits<std::int64_t>::min() + rhs)) {
+                return std::nullopt;
+            }
+            return lhs - rhs;
+        };
+        const auto checkedMultiply = [](std::int64_t lhs, std::int64_t rhs)
+                -> std::optional<std::int64_t> {
+            const auto magnitude = [](std::int64_t value) -> std::uint64_t {
+                return value >= 0 ? static_cast<std::uint64_t>(value)
+                                  : static_cast<std::uint64_t>(-(value + 1)) + 1;
+            };
+            const bool negative = (lhs < 0) != (rhs < 0);
+            const auto lhsMagnitude = magnitude(lhs);
+            const auto rhsMagnitude = magnitude(rhs);
+            const auto maximumMagnitude = negative
+                ? static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()) + 1
+                : static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max());
+            if (lhsMagnitude != 0 && rhsMagnitude > maximumMagnitude / lhsMagnitude) {
+                return std::nullopt;
+            }
+            const auto product = lhsMagnitude * rhsMagnitude;
+            if (!negative) return static_cast<std::int64_t>(product);
+            if (product == maximumMagnitude) return std::numeric_limits<std::int64_t>::min();
+            return -static_cast<std::int64_t>(product);
+        };
+        if (op == "+") return checkedAdd(left, right);
+        if (op == "-") return checkedSubtract(left, right);
+        if (op == "*") return checkedMultiply(left, right);
         if (op == "/") {
             if (right == 0 || (left == std::numeric_limits<std::int64_t>::min() && right == -1))
                 return std::nullopt;
@@ -5659,7 +5690,10 @@ void checkDefinitelyEmptyVerilogFor(AnalysisResult& result, const core::SourceFi
         }
         if (op == "<<") {
             if (right < 0 || right > 62 || left < 0) return std::nullopt;
-            return bounded(static_cast<__int128>(left) << right);
+            if (left > (std::numeric_limits<std::int64_t>::max() >> right)) {
+                return std::nullopt;
+            }
+            return left << right;
         }
         if (op == ">>") {
             if (right < 0 || right > 62 || left < 0) return std::nullopt;

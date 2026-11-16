@@ -9,6 +9,8 @@ include(CTest)
 include(GNUInstallDirs)
 
 add_library(fpga_build_options INTERFACE)
+target_compile_definitions(fpga_build_options INTERFACE
+    $<$<PLATFORM_ID:Windows>:NOMINMAX>)
 target_compile_options(fpga_build_options INTERFACE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /utf-8>
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)

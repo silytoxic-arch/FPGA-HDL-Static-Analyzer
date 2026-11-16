@@ -1781,10 +1781,41 @@ std::optional<std::int64_t> vhdlNativeStaticIntegerExpression(
     std::function<std::optional<std::int64_t>()> parseUnary;
     std::function<std::optional<std::int64_t>()> parsePrimary;
 
-    const auto checked = [](const __int128 value) -> std::optional<std::int64_t> {
-        if (value < std::numeric_limits<std::int64_t>::min() ||
-            value > std::numeric_limits<std::int64_t>::max()) return std::nullopt;
-        return static_cast<std::int64_t>(value);
+    const auto checkedAdd = [](std::int64_t left, std::int64_t right)
+            -> std::optional<std::int64_t> {
+        if ((right > 0 && left > std::numeric_limits<std::int64_t>::max() - right) ||
+            (right < 0 && left < std::numeric_limits<std::int64_t>::min() - right)) {
+            return std::nullopt;
+        }
+        return left + right;
+    };
+    const auto checkedSubtract = [](std::int64_t left, std::int64_t right)
+            -> std::optional<std::int64_t> {
+        if ((right < 0 && left > std::numeric_limits<std::int64_t>::max() + right) ||
+            (right > 0 && left < std::numeric_limits<std::int64_t>::min() + right)) {
+            return std::nullopt;
+        }
+        return left - right;
+    };
+    const auto checkedMultiply = [](std::int64_t left, std::int64_t right)
+            -> std::optional<std::int64_t> {
+        const auto magnitude = [](std::int64_t value) -> std::uint64_t {
+            return value >= 0 ? static_cast<std::uint64_t>(value)
+                              : static_cast<std::uint64_t>(-(value + 1)) + 1;
+        };
+        const bool negative = (left < 0) != (right < 0);
+        const auto leftMagnitude = magnitude(left);
+        const auto rightMagnitude = magnitude(right);
+        const auto maximumMagnitude = negative
+            ? static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()) + 1
+            : static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max());
+        if (leftMagnitude != 0 && rightMagnitude > maximumMagnitude / leftMagnitude) {
+            return std::nullopt;
+        }
+        const auto product = leftMagnitude * rightMagnitude;
+        if (!negative) return static_cast<std::int64_t>(product);
+        if (product == maximumMagnitude) return std::numeric_limits<std::int64_t>::min();
+        return -static_cast<std::int64_t>(product);
     };
 
     parsePrimary = [&]() -> std::optional<std::int64_t> {
@@ -1814,7 +1845,9 @@ std::optional<std::int64_t> vhdlNativeStaticIntegerExpression(
             const bool negative = tokens[cursor++].text == "-";
             const auto value = parseUnary();
             if (!value) return std::nullopt;
-            return negative ? checked(-static_cast<__int128>(*value)) : value;
+            if (!negative) return value;
+            if (*value == std::numeric_limits<std::int64_t>::min()) return std::nullopt;
+            return -*value;
         }
         return parsePrimary();
     };
@@ -1825,9 +1858,12 @@ std::optional<std::int64_t> vhdlNativeStaticIntegerExpression(
                (tokens[cursor].text == "*" || tokens[cursor].text == "/")) {
             const bool divide = tokens[cursor++].text == "/";
             const auto right = parseUnary();
-            if (!right || (divide && *right == 0)) return std::nullopt;
-            value = divide ? checked(static_cast<__int128>(*value) / *right)
-                           : checked(static_cast<__int128>(*value) * *right);
+            if (!right || (divide && (*right == 0 ||
+                (*value == std::numeric_limits<std::int64_t>::min() && *right == -1)))) {
+                return std::nullopt;
+            }
+            value = divide ? std::optional<std::int64_t>(*value / *right)
+                           : checkedMultiply(*value, *right);
             if (!value) return std::nullopt;
         }
         return value;
@@ -1840,8 +1876,8 @@ std::optional<std::int64_t> vhdlNativeStaticIntegerExpression(
             const bool subtract = tokens[cursor++].text == "-";
             const auto right = parseMulDiv();
             if (!right) return std::nullopt;
-            value = subtract ? checked(static_cast<__int128>(*value) - *right)
-                             : checked(static_cast<__int128>(*value) + *right);
+            value = subtract ? checkedSubtract(*value, *right)
+                             : checkedAdd(*value, *right);
             if (!value) return std::nullopt;
         }
         return value;
