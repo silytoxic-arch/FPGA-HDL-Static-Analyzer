@@ -1,0 +1,14 @@
+{
+  "scope": "single-component",
+  "fileKey": "QGY5w6p4GZ4ibG5Ek1oFFT",
+  "pageId": "0:1",
+  "componentId": "20:76",
+  "reviewFrameId": "20:77",
+  "previewInstanceIds": ["20:91", "20:101", "20:111"],
+  "preservedComponentId": "18:58",
+  "preservedReviewFrameId": "18:59",
+  "activeRevision": "V2",
+  "revisionLedger": "figma-icon-v2-state.json",
+  "createdVariableIds": ["VariableID:18:48", "VariableID:18:49", "VariableID:18:50", "VariableID:18:51"],
+  "completedSteps": ["discovery", "color-bindings", "icon-component", "multi-size-preview", "visual-review", "asset-export"]
+}

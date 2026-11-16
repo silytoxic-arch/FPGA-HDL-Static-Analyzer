@@ -1,0 +1,5 @@
+module alpha;
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+endmodule
+module beta;
+endmodule

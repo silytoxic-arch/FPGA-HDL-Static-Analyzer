@@ -1,0 +1,29 @@
+# Local build trees and IDE state
+/build/
+/build-*/
+/out/
+/.vs/
+/_CPack_Packages/
+/CMakeUserPresets.json
+*.user
+*.suo
+*.VC.db
+
+# Generated release artifacts are produced by GitHub Actions
+/releases/
+/*.zip
+*.exe
+*.dll
+*.dmg
+
+# Local reverse-engineering/OCR scratch space and caches
+/tmp/
+*.log
+**/__pycache__/
+*.py[cod]
+.DS_Store
+
+# Historical generated audit snapshots exceed GitHub's practical repository
+# size. The reproducible audit script and canonical implementation ledger stay
+# tracked; Actions and local builds can regenerate point-in-time snapshots.
+/docs/evidence/t_linter_after_*.json

@@ -1,0 +1,25 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Address: 181347dd8
+REF[0] from=18001fb90 type=WRITE source=DEFAULT function=18001fb70 FUN_18001fb70
+REF[1] from=18001fbaa type=WRITE source=DEFAULT function=18001fb70 FUN_18001fb70
+REF[2] from=1804d5767 type=READ source=DEFAULT function=1804d56f0 FUN_1804d56f0
+REF[3] from=1804d577e type=READ source=DEFAULT function=1804d56f0 FUN_1804d56f0
+REF[4] from=1804d5789 type=READ source=DEFAULT function=1804d56f0 FUN_1804d56f0
+REF[5] from=1804d5793 type=READ source=DEFAULT function=1804d56f0 FUN_1804d56f0
+REF[6] from=1804d22f8 type=READ source=DEFAULT function=1804d20e0 FUN_1804d20e0
+REF[7] from=1804d239a type=READ source=DEFAULT function=1804d20e0 FUN_1804d20e0
+REF[8] from=180db452f type=READ source=DEFAULT function=180db4520 FUN_180db4520
+REF[9] from=180db454e type=READ source=DEFAULT function=180db4520 FUN_180db4520
+REF[10] from=180db4541 type=DATA source=ANALYSIS function=180db4520 FUN_180db4520
+REF[11] from=180db4558 type=DATA source=ANALYSIS function=180db4520 FUN_180db4520
+REF[12] from=180db4568 type=DATA source=ANALYSIS function=180db4520 FUN_180db4520
+REF[13] from=180db4578 type=DATA source=ANALYSIS function=180db4520 FUN_180db4520
+REF[14] from=1804d5772 type=DATA source=ANALYSIS function=1804d56f0 FUN_1804d56f0
+REF[15] from=1804d57aa type=DATA source=ANALYSIS function=1804d56f0 FUN_1804d56f0
+REF[16] from=18001fb82 type=DATA source=ANALYSIS function=18001fb70 FUN_18001fb70
+REF[17] from=18001fb9e type=DATA source=ANALYSIS function=18001fb70 FUN_18001fb70
+REF[18] from=180c8fb00 type=DATA source=ANALYSIS function=180c8fb00 Unwind@180c8fb00
+REF[19] from=180c8fb0c type=DATA source=ANALYSIS function=180c8fb0c Unwind@180c8fb0c
+REF[20] from=180c8fb20 type=DATA source=ANALYSIS function=180c8fb20 Unwind@180c8fb20
+REF[21] from=180c8fb2c type=DATA source=ANALYSIS function=180c8fb2c Unwind@180c8fb2c
+References: 22

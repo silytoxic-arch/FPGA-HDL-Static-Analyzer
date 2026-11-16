@@ -1,0 +1,2 @@
+module ignored_generated_file;
+endmodule

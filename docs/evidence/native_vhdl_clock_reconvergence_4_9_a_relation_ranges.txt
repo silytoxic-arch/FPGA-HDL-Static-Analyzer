@@ -1,0 +1,22 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Native rule: GJB9765_VHDL_4_9_a
+Public rule: R-9-1
+Function: FUN_18069ed00 @ 0x18069ed00
+Complete setup disassembly SHA-256: c32a8276b652da113fab2b298b06dc17ead56bc5f47520ce53ba6dc754ddb03e
+
+Observed ordered-tree range construction after FUN_1804d56f0:
+
+  0x18069ef90..0x18069efed  lower_bound(1)
+  0x18069f000..0x18069f12e  iterate until lower_bound(2)
+  0x18069f150..0x18069f19e  lower_bound(2), then lower_bound(3)
+  0x18069f1b0..0x18069f2de  iterate the second range
+
+Each visited relation record contributes its normalized +0x48 name through
+FUN_1804d77f0 to the original relation-name set at rbp-0x68. No range beginning
+at key 3 or key 4 is traversed. Therefore the exact admitted keys are 1 and 2.
+
+The shared FUN_1804d56f0 producer has already been recovered for R-9-2/R-9-4:
+key 1 is a proven static asynchronous action followed by an ELSIF/ELSE edge;
+key 2 is an edge found in the main IF condition; key 3 has no recognized edge;
+key 4 has a later edge but its preceding action is not proven static.

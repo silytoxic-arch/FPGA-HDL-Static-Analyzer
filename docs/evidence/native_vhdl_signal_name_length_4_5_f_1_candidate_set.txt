@@ -1,0 +1,73 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Method: Ghidra 12.1.4 read-only static decompilation of a freshly analyzed PE image.
+Project: reverse-tools/ghidra-a5-2-project/T_Linter_A5_2
+This is decompiler evidence, not original source or runtime observation.
+
+Call boundary
+-------------
+FUN_1805e5770 has one non-recursive code caller:
+
+  0x1805e4ae2 -> FUN_1805e4790
+
+Its other code reference is the recursive call at 0x1805e5ddb. Therefore the
+candidate traversal used by rule slot 0 is not a shared helper reached from an
+unrelated rule path.
+
+Recovered enum names
+--------------------
+The native enum-name function FUN_1808ea310 maps the candidate values to:
+
+  0x04 AST_FUNCTION
+  0x06 AST_WIRE
+  0x0a AST_LOCALPARAM
+  0x13 AST_IDENTIFIER
+  0x52 AST_ALWAYS
+  0x54 AST_BLOCK
+  0x75 AST_ARCHITECTURE
+  0x76 AST_ENTITY
+  0x77 AST_TYPE
+  0x78 AST_SIGNAL
+  0x79 AST_VARIABLE
+  0x8e AST_PROCEDURE
+  0x9f AST_SUBTYPE
+  0xa3 AST_GENERIC
+  0xa4 AST_PORT
+
+Candidate predicate in FUN_1805e5770
+------------------------------------
+The helper always recurses through every child at the end of the function. It
+is not restricted to roots of type 0x75/0x54/0xa3/0xa4.
+
+For a current AST_ARCHITECTURE, AST_BLOCK, AST_GENERIC or AST_PORT node, every
+direct child whose type is AST_SIGNAL, AST_VARIABLE, AST_WIRE, AST_LOCALPARAM
+or AST_IDENTIFIER is compared with the configured minimum/maximum and appended
+to the too-short or too-long vector.
+
+The current node itself is a candidate when it is AST_ARCHITECTURE, AST_ENTITY,
+AST_TYPE, AST_PROCEDURE, AST_SUBTYPE or AST_FUNCTION and has a nonempty name.
+A named AST_ALWAYS is also a candidate unless its name is exactly `process` or
+`PROCESS`.
+
+AST_BLOCK has an additional native gate: its stored name must be longer than
+0x16 (22) bytes and must not begin with the internal parser container names
+`enterProcess_statement` or `enterSequential_statement`. Consequently a source
+block label of 21 or 22 bytes is excluded even though the global maximum is 20;
+a non-synthetic 23-byte block label is reported.
+
+Thresholds and multiplicity
+---------------------------
+The constructor defaults the inclusive name range to 1..20 bytes. The run can
+parse optional rule-object strings into the two integer fields, but the supplied
+client has no recovered binding for nondefault values. Every appended AST node
+is reported independently; no name-based deduplication is visible.
+
+Product boundary
+----------------
+The source adapter now covers the source-identifiable entity, architecture,
+type, subtype, signal, variable, constant/localparam, port, generic, function,
+procedure, labeled process and labeled block subset, including the recovered
+22-byte AST_BLOCK admission gate. Proprietary AST_IDENTIFIER children whose
+source role cannot be bound safely, generated/error-recovery nodes, extended
+identifiers, external threshold configuration and exact traversal order remain
+unknown. Clean results remain ManualReviewRequired.

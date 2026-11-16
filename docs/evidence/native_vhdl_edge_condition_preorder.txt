@@ -1,0 +1,71 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Method: offline Ghidra 12.1.4 static analysis; target was not executed
+
+FUN_1804c4430 edge recognizer
+--------------------------------
+The recognizer takes the first child of the supplied AST_COND and initializes
+the recursive collector filter from 0x180ee30c0. A read-only 32-byte memory
+read at that address returned:
+
+  65 00 00 00 66 00 00 00 45 00 00 00 25 00 00 00
+  00 00 00 00 00 00 00 00 22 05 93 19 00 00 00 00
+
+The first four little-endian uint32 values are 0x65, 0x66, 0x45 and 0x25.
+The DLL AST enum mapper identifies them as:
+
+  0x65 AST_POSEDGE
+  0x66 AST_NEGEDGE
+  0x45 AST_LOGIC_AND
+  0x25 AST_BIT_AND
+
+FUN_1804f3870 traversal
+-----------------------
+For a non-null node, FUN_1804f3870 first scans the filter integers and appends
+the current AST pointer to the output vector if its type matches. It then loops
+over the current node's child vector from index zero upward and recursively
+calls itself for each child. Therefore the candidate vector is AST preorder:
+current matching node before matching descendants, with siblings in child
+order. The filter order does not reorder nodes; it only tests membership.
+
+FUN_1804c4430 consumes that vector from index zero upward and stops on the
+first successful candidate. AST_LOGIC_AND/AST_BIT_AND candidates are passed to
+FUN_1804d4cc0. AST_POSEDGE/AST_NEGEDGE candidates are accepted only when the
+case-folded node name is exactly rising_edge/falling_edge and there is exactly
+one AST_IDENTIFIER child.
+
+FUN_1804d4cc0 legacy event idiom
+--------------------------------
+The helper requires an AND node with at least two direct children and scans
+all direct children without requiring their source order. It recognizes:
+
+  * an AST_IDENTIFIER with exactly one AST_ATTRIBUTE_DESIGNATOR child whose
+    case-folded name is exactly event; and
+  * an AST_EQ with exactly two children containing an AST_IDENTIFIER and one
+    of the two embedded binary character constants.
+
+It compares the case-folded event identifier with the equality identifier,
+requires a resolved non-empty output name and edge value other than 3, and
+returns success. Consequently equality/event operands may be swapped across a
+direct AND, source parentheses do not survive as an obstacle, AST_LOGIC_OR and
+AST_BIT_OR are not legacy-edge candidates, and a recognized descendant AND or
+edge call remains discoverable through an otherwise unsupported parent node.
+
+Source evidence digests
+-----------------------
+r6_4_recursive_collector.txt
+  d44fc79fee9535b0d2976fc85e8c5c0ad72df7bd10e53b59ede0614dbce9d3dc
+a5_29_condition_helpers.txt
+  24e8f30ecb4fc06aaec6f57f2092eb4c794dd51f46c75ff6be77e885147d8e90
+a5_29_category2_admission_and_layout.txt
+  0da5ff5ef5b14872f54587a2e44c158cc0454611e05a3594d425765cd34951bc
+a5_29_ast_enum_mapper.txt
+  78d56f0b3146c837c180974a5279ef43a718bc17c2507e45d1e7597d8b9bd7b0
+
+Remaining boundary
+------------------
+The proprietary frontend's exact AST construction for malformed expressions,
+overloaded or selected names, extended identifiers and recovery nodes remains
+unresolved. The product implementation therefore admits only syntactically
+bounded basic identifiers, exact binary literals and source expression trees
+whose child order can be reconstructed without claiming full frontend parity.

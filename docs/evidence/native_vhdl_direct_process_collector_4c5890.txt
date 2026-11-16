@@ -1,0 +1,27 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Function: FUN_1804c5890 @ 0x1804c5890
+Provider: Ghidra 12.1.4, saved project tlinter-4-8-e, read-only/noanalysis
+Observed: 2026-11-09
+
+Recovered direct-child traversal:
+
+  for each direct child of param_1:
+      if child.type != AST_ARCHITECTURE (0x75): continue
+      for each direct child of that architecture:
+          if child.type == AST_ALWAYS / VHDL process (0x52):
+              append child pointer to the output vector
+
+The helper does not recurse. A process nested below an AST generate, block,
+subprogram or another concurrent node is therefore not passed to
+FUN_1804d56f0 by callers that use this collector. Appends retain root-child
+order and architecture-child order; there is no name or pointer deduplication.
+
+Key decompiler observations:
+
+  *(int *)(root_child + 4) == 0x75
+  *(int *)(architecture_child + 4) == 0x52
+  output.end receives architecture_child, then advances by 8 bytes
+
+This is static analysis of the supplied binary. It does not observe vendor
+execution or establish proprietary frontend lowering for malformed input.

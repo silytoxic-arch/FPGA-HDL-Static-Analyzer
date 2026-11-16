@@ -1,0 +1,120 @@
+#include "analysis/rule_localization.h"
+
+#include <algorithm>
+#include <array>
+
+namespace fpga::analysis {
+namespace {
+struct RuleText {
+    std::string_view id;
+    std::string_view summary;
+};
+
+constexpr std::array ChineseRuleTexts{
+    RuleText{"STYLE-001", "行尾存在多余空白"},
+    RuleText{"STYLE-002", "代码行宽超过 120 列"},
+    RuleText{"SV-ALWAYS-COMB-EVENT-CONTROL", "always_comb 中出现显式事件控制，破坏自动敏感语义"},
+    RuleText{"SV-ALWAYS-FF-EVENT-CONTROL", "always_ff 没有事件控制或包含多个事件控制"},
+    RuleText{"SV-ALWAYS-FF-NONEDGE-EVENT", "always_ff 的事件控制不包含 posedge 或 negedge"},
+    RuleText{"SV-ALWAYS-LATCH-EVENT-CONTROL", "always_latch 中出现显式事件控制"},
+    RuleText{"SV-ALWAYS-LATCH-NO-LATCH", "always_latch 没有推断出锁存器"},
+    RuleText{"CDC-DIRECT-CROSSING", "寄存器信号在同一设计单元内直接跨越时钟域"},
+    RuleText{"RDC-MULTI-CLOCK-ASYNC-RESET", "同一异步复位直接控制多个时钟域"},
+    RuleText{"VL-SEQ-BLOCKING", "边沿触发过程中使用阻塞赋值"},
+    RuleText{"VL-COMB-NONBLOCKING", "组合过程中使用非阻塞赋值"},
+    RuleText{"VL-DEFPARAM", "使用 defparam 跨层次覆盖实例参数"},
+    RuleText{"VL-ALWAYS-NO-SUSPENSION", "普通 always 不含事件、延时或 wait 挂起点"},
+    RuleText{"VL-EMPTY-CASE-ITEM", "case 选择项为空，不执行任何 RTL 行为"},
+    RuleText{"VL-EMPTY-CONDITIONAL-BRANCH", "if/else 分支为空，可能存在多余分号或遗漏逻辑"},
+    RuleText{"VL-IMPLICIT-NET", "使用了未声明标识符，可能创建隐式网络"},
+    RuleText{"VL-MIXED-ASSIGNMENT-STYLE", "同一过程中对同一信号混用阻塞与非阻塞赋值"},
+    RuleText{"VL-SIDE-EFFECT-CONDITION", "条件表达式包含会修改状态的赋值或自增/自减操作"},
+    RuleText{"VL-CASEX", "使用 casex 可能隐藏 X/Z 状态问题"},
+    RuleText{"VL-OVERLAPPING-WILDCARD-CASE", "casez/casex 通配模式存在交集，结果依赖源码顺序"},
+    RuleText{"VL-CASE-DEFAULT", "case 语句缺少 default 分支"},
+    RuleText{"VL-CASE-ITEM-VALUE-OUT-OF-RANGE", "case 选择值超出选择器可表示范围"},
+    RuleText{"VHDL-NONSTD-NUMERIC", "使用了非标准 VHDL 数值运算包"},
+    RuleText{"VHDL-BUFFER-PORT", "实体端口使用 buffer 模式"},
+    RuleText{"VHDL-CASE-OTHERS", "case 语句缺少 when others 兜底分支"},
+    RuleText{"VHDL-PROCESS-NO-SUSPENSION", "VHDL process 没有敏感列表或 wait 挂起点"},
+    RuleText{"VHDL-SHARED-VARIABLE", "使用了需要同步保护的 shared variable"},
+    RuleText{"VHDL-WAIT", "RTL 中使用了综合支持依赖工具的 wait 语句"},
+    RuleText{"VHDL-WAIT-WITH-SENSITIVITY", "带敏感列表的 process 中出现显式 wait"},
+    RuleText{"STRUCT-DUPLICATE-UNIT", "项目中存在重名 module 或 entity 定义"},
+    RuleText{"STRUCT-DUPLICATE-NAMED-PARAMETER", "同一实例重复覆盖同一命名参数"},
+    RuleText{"STRUCT-DUPLICATE-NAMED-PORT", "同一实例重复连接同一命名端口"},
+    RuleText{"STRUCT-DUPLICATE-PARAMETER-DECLARATION", "接口中重复声明 parameter 或 generic"},
+    RuleText{"STRUCT-DUPLICATE-PORT-DECLARATION", "接口中重复声明同名端口"},
+    RuleText{"STRUCT-DUPLICATE-SIGNAL-DECLARATION", "同一作用域内重复声明信号"},
+    RuleText{"STRUCT-MISSING-REQUIRED-PARAMETER", "实例没有覆盖无默认值的必需参数"},
+    RuleText{"STRUCT-MIXED-PARAMETER-OVERRIDE-STYLE", "参数覆盖列表混用位置和命名方式"},
+    RuleText{"STRUCT-UNRESOLVED-INSTANCE", "实例目标不在当前分析输入或 black box 声明中"},
+    RuleText{"STRUCT-UNKNOWN-NAMED-PORT", "命名连接端口不存在于目标接口"},
+    RuleText{"STRUCT-UNKNOWN-NAMED-PARAMETER", "命名参数不存在于目标接口"},
+    RuleText{"STRUCT-UNCONNECTED-INPUT-PORT", "实例遗漏或悬空必需输入端口"},
+    RuleText{"STRUCT-UNCONNECTED-OUTPUT-PORT", "实例遗漏或悬空输出/双向端口"},
+    RuleText{"STRUCT-VHDL-ASSOCIATION-ORDER", "VHDL association 顺序无效"},
+    RuleText{"STRUCT-MIXED-PORT-CONNECTION-STYLE", "同一实例混用位置和命名端口连接"},
+    RuleText{"STRUCT-POSITIONAL-PORT-COUNT", "位置端口连接数量超过目标接口端口数量"},
+    RuleText{"STRUCT-POSITIONAL-PARAMETER-COUNT", "位置参数覆盖数量超过目标声明数量"},
+    RuleText{"STRUCT-RECURSIVE-INSTANCE", "module/entity 实例关系形成递归环路"},
+    RuleText{"SYNTAX-UNTERMINATED-COMMENT", "块注释到文件结尾仍未闭合"},
+    RuleText{"SYNTAX-UNTERMINATED-STRING", "字符串到行尾或文件结尾仍未闭合"},
+    RuleText{"SYNTAX-UNMATCHED-DELIMITER", "右括号没有匹配的左括号"},
+    RuleText{"SYNTAX-UNCLOSED-DELIMITER", "左括号没有匹配的右括号"},
+    RuleText{"SYNTAX-UNEXPECTED-CLOSER", "结束关键字没有对应的起始结构"},
+    RuleText{"SYNTAX-UNCLOSED-CONSTRUCT", "HDL 语言结构没有正确闭合"},
+    RuleText{"PP-INCLUDE-NOT-FOUND", "找不到 include 指令引用的文件"},
+    RuleText{"PP-UNEXPECTED-DIRECTIVE", "条件编译结束/分支指令没有对应起点"},
+    RuleText{"PP-INVALID-DIRECTIVE", "define 或 include 指令参数无效"},
+    RuleText{"PP-UNCLOSED-CONDITIONAL", "条件编译块缺少对应的 endif"},
+    RuleText{"RTL-ASYNC-RESET-POLARITY-MISMATCH", "异步复位事件边沿与复位分支有效电平不一致"},
+    RuleText{"RTL-ASYNC-RESET-NOT-FIRST", "异步复位没有作为过程中的首个独立条件"},
+    RuleText{"RTL-ASYNC-RESET-UNGUARDED-LOGIC", "异步复位条件链之后仍有未受保护的独立赋值"},
+    RuleText{"RTL-CASE-ITEM-WIDTH-MISMATCH", "case 选择项宽度与选择器宽度不一致"},
+    RuleText{"RTL-BITWISE-WIDTH-MISMATCH", "位运算两侧的静态位宽不一致"},
+    RuleText{"RTL-MULTIPLE-DRIVERS", "信号由多个独立来源驱动"},
+    RuleText{"RTL-NEGATIVE-SHIFT-AMOUNT", "移位操作使用负的常量移位量"},
+    RuleText{"RTL-MULTIPLE-CASE-DEFAULT", "同一 case 包含多个兜底分支"},
+    RuleText{"RTL-COMBINATIONAL-LOOP", "组合逻辑信号依赖形成反馈环路"},
+    RuleText{"RTL-COMPARISON-WIDTH-MISMATCH", "比较运算两侧的静态位宽不一致"},
+    RuleText{"RTL-ARITHMETIC-RESULT-WIDTH-RISK", "算术运算结果可能超出赋值目标位宽"},
+    RuleText{"RTL-COMPLEX-EDGE-EVENT", "边沿事件使用组合表达式、位选或索引"},
+    RuleText{"RTL-CONSTANT-CONDITION", "运行时条件可以被静态证明为常量"},
+    RuleText{"RTL-DERIVED-CLOCK", "本地 RTL 生成的信号被用作时钟"},
+    RuleText{"RTL-DIVIDE-BY-ZERO", "除法、取模或余数运算使用常量零分母"},
+    RuleText{"RTL-DUPLICATE-CASE-ITEM", "同一 case 中存在完全重复的选择项"},
+    RuleText{"RTL-DUPLICATE-CONDITION", "同一条件分支链中存在重复条件"},
+    RuleText{"RTL-DUPLICATE-SENSITIVITY", "显式敏感列表包含重复项"},
+    RuleText{"RTL-EMPTY-PROCESS", "过程没有可执行行为"},
+    RuleText{"RTL-NONSYNTHESIZABLE-DELAY", "RTL 中使用了不可移植综合的仿真延时"},
+    RuleText{"RTL-OUT-OF-RANGE-SELECT", "常量位索引或切片边界超出信号声明范围"},
+    RuleText{"RTL-INPUT-DRIVEN", "输入端口在设计单元内部被驱动"},
+    RuleText{"RTL-UNDRIVEN-OUTPUT", "输出端口没有驱动源"},
+    RuleText{"RTL-UNDRIVEN-SIGNAL", "被读取的内部信号没有驱动源"},
+    RuleText{"RTL-UNUSED-ASYNC-RESET", "异步复位位于敏感列表中但过程体没有读取该信号"},
+    RuleText{"RTL-UNUSED-INPUT-PORT", "输入端口未被本地逻辑使用或转发"},
+    RuleText{"RTL-UNUSED-PARAMETER", "parameter、localparam 或 generic 从未被引用"},
+    RuleText{"RTL-UNUSED-SIGNAL", "内部信号从未被读取"},
+    RuleText{"RTL-WIDTH-TRUNCATION", "赋值源宽度大于目标宽度，可能发生截断"},
+    RuleText{"RTL-INCOMPLETE-SENSITIVITY", "组合过程敏感列表遗漏了读取信号"},
+    RuleText{"RTL-REDUNDANT-SENSITIVITY", "组合过程敏感列表包含未读取信号"},
+    RuleText{"RTL-LATCH-INFERRED", "组合过程部分控制路径未赋值，可能推断锁存器"},
+    RuleText{"RTL-MIXED-CLOCK-EDGE", "同一时钟同时用于上升沿和下降沿过程"},
+    RuleText{"RTL-MIXED-RESET-MODE", "同一复位信号同时采用同步和异步方式"},
+    RuleText{"RTL-MIXED-SIGNEDNESS-ARITHMETIC", "算术表达式混合使用有符号和无符号信号"},
+    RuleText{"RTL-RESET-POLARITY-CONFLICT", "同一复位信号的有效极性不一致"},
+    RuleText{"RTL-SELF-ASSIGNMENT", "过程赋值将信号直接写回自身"},
+    RuleText{"RTL-SHIFT-AMOUNT-OUT-OF-RANGE", "常量移位量大于或等于操作数位宽"},
+    RuleText{"RTL-MULTIPLE-CLOCKS-PER-PROCESS", "同一时序过程包含多个独立时钟"},
+};
+static_assert(ChineseRuleTexts.size() == 96);
+} // namespace
+
+std::string_view chineseRuleSummary(std::string_view ruleId) {
+    const auto found = std::find_if(ChineseRuleTexts.begin(), ChineseRuleTexts.end(),
+        [ruleId](const RuleText& entry) { return entry.id == ruleId; });
+    return found == ChineseRuleTexts.end() ? "检测到 HDL 代码问题" : found->summary;
+}
+
+} // namespace fpga::analysis

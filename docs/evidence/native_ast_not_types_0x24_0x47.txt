@@ -1,0 +1,49 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Method: Ghidra 12.1.4 read-only static decompilation and data-string reads.
+This is analysis evidence, not original source and not a runtime observation.
+
+Enum-name switch observation
+----------------------------
+The recovered AST-name switch selects these static string objects:
+
+  case 0x24: puVar3 = &UNK_180f4ee70
+  case 0x45: puVar3 = &UNK_180f4f008
+  case 0x46: puVar3 = &UNK_180f4f018
+  case 0x47: puVar3 = &UNK_180f4f028
+
+ReadStringsAt.java resolved the objects as:
+
+  180f4ee70 = AST_BIT_NOT
+  180f4f008 = AST_LOGIC_AND
+  180f4f018 = AST_LOGIC_OR
+  180f4f028 = AST_LOGIC_NOT
+
+Source record:
+  /Users/pinger/Desktop/Codex-test/reverse-tools/ghidra/ghidra_12.1.4_PUBLIC/application.log
+  switch lines 2445-2551; string reads lines 2951-2970
+
+Width-helper cross-check
+------------------------
+FUN_1808f46c0 groups type 0x24 with width-preserving unary nodes and recursively
+calls itself for the first child. Types 0x45, 0x46 and 0x47 instead set the
+result width to one and clear the companion flag. This independently matches
+bitwise NOT versus logical NOT behavior.
+
+Source record:
+  /Users/pinger/Desktop/Codex-test/reverse-tools/evidence/t_linter_pass4/expression_width_helper.txt
+  cases 0x24 at lines 869-883 and 0x45..0x47 at lines 919-929
+
+Conclusion used by A-9-6
+------------------------
+FUN_18060fc80 accepts both exact unary enum classes, but only when the chosen
+root has exactly one direct AST_IDENTIFIER(0x13) child. The product therefore
+models the shared VHDL source shape `not <identifier>` and rejects indexed or
+selected names, calls, nested NOT and unrelated unary operators.
+
+Remaining unknown
+-----------------
+The proprietary VHDL frontend's exact overload/type-resolution decision that
+chooses AST_BIT_NOT versus AST_LOGIC_NOT for every predefined and user-defined
+`not` overload is not recovered. Unsupported clean paths remain manual review;
+this evidence does not establish full native equivalence for A-9-6.

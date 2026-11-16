@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/branding">
+    <file alias="app-icon.png">../../assets/branding/hdl-analyzer-icon-1024.png</file>
+  </qresource>
+</RCC>

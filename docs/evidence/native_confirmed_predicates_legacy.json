@@ -1,0 +1,234 @@
+[
+  {
+    "clause": "GJB9765.4.8.a",
+    "predicate": "Sequential CASE selector is reported when literal, a declared constant identifier, or a compound expression whose identifier descendants are all declared constants. FUN_180608bc0 contributes direct generic identifiers through the now cross-confirmed entity(0x76) -> generic(0xa3) -> identifier(0x13) path; the run also contributes recursively found type-0x0a declarations carrying byte +0x178. Case-folded name lookup is observed. Product binds entity generics to their named architecture and covers architecture/process constant declarations plus bounded literal/operator expressions.",
+    "predicateEvidence": [
+      "ev_bc0f722c9b21f3f1bebb5edbc5e7316797c851c5d91e88e91a9096d6f7d98ca4",
+      "ev_0045125577774a59b95281d68c8a30bc680ec3ce1750c75bddd6a5789dc89c47",
+      "ev_175fe37265fd337fda2ce81459024ad8d4cf613bc779baa1430a338955202284",
+      "ev_5798100ee296ea297f6d3f504ff53fde08e2db04adfedf884d5598860304f2b4"
+    ],
+    "limitations": "The remaining type-0x0a flag producers, package visibility, subprogram declarations, shadowing, aliases, function evaluation and all parser node categories remain unverified. Product admits entity generics and explicit architecture/process constants in one named architecture plus bounded selector syntax. No diagnostic is ManualReviewRequired, not proof of compliance or full native equivalence.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": [
+      "entity generic selector accepted",
+      "process-local constant selector accepted",
+      "generic names isolated across entity roots"
+    ]
+  },
+  {
+    "clause": "GJB9765.4.14.a.1",
+    "predicate": "Native collector records source lines for AST types 0x93, 0x94, 0x52, 0x75 and 0x7b. At the line immediately before each recorded node, the run function strips content from the first -- and reports if any earlier byte is not space, Tab or newline. The product implements the bounded sequential PROCESS case; other AST type mappings are not established.",
+    "predicateEvidence": [
+      "ev_790668283906571028e81f81bf57008817febb31ba396b5d38567cb6d83dcb5b",
+      "ev_3dd60213fcc200982d81dcaa3f48fa82e51baff98d2c033bfd5171bd187bf08a"
+    ],
+    "limitations": "The authoritative names of AST types 0x93, 0x94, 0x52, 0x75 and 0x7b are not fully recovered. Only independently recognised sequential PROCESS starts on short physical lines are admitted; other section boundaries, multiline labels, long lines, and source admission remain review-required. A clean result is not proof of full compliance.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": "Adjacent sequential processes, blank separator, comment-only separator, inline trailing comment and postponed labeled process"
+  },
+  {
+    "clause": "GJB9765.4.14.b.1",
+    "predicate": "In each fgets(512) source chunk (at most 511 data bytes), a recognised first code byte or a Tab before the next recognised byte suppresses the warning; a subsequent recognised byte or end of a nonempty chunk reports a warning. The two byte classes are taken from the native bit masks. Each fgets chunk increments the diagnostic ordinal. The product now reproduces this chunking instead of excluding long physical lines.",
+    "predicateEvidence": [
+      "ev_18d4943dfaaee8f0aa7b3c890ddda29c8b39c5fe4fd31f7481114ce8ba9ee4f6"
+    ],
+    "limitations": "Ordinary Windows text-mode CRLF-to-LF translation is reproduced from the PE target and fopen mode, but NUL, Ctrl-Z, locale/code-page conversion, stream errors, duplicate source records, file mutation and exact diagnostic column presentation remain unverified. The exact native source-admission and path handling remain unverified. Packaged prose mentions uniform Tab width, but no width comparison was observed in this predicate. A clean result remains ManualReviewRequired.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": "Leading spaces, leading Tab, whitespace-only chunk, indented comment, Tab-before-code boundary, 511-byte split and chunk diagnostic ordinal"
+  },
+  {
+    "clause": "GJB9765.4.14.b.2",
+    "predicate": "For each fgets(512) source chunk (at most 511 data bytes), the native function reports if the chunk ends in ASCII space followed by LF, or ASCII space followed by CRLF. It does not report trailing Tab or an unterminated final chunk. Each fgets chunk increments the diagnostic ordinal. The product now reproduces this chunking and does not join a space in one chunk to an LF in the next.",
+    "predicateEvidence": [
+      "ev_85d543f2dad139b11c46626c705dbcaade605b36564317949dfe2ab259432a27"
+    ],
+    "limitations": "Ordinary Windows text-mode CRLF-to-LF translation is reproduced from the PE target and fopen mode, but NUL, Ctrl-Z, locale/code-page conversion, stream errors, duplicate source records, file mutation and exact diagnostic column presentation remain unverified. Native source admission and path handling remain unverified. A clean result remains ManualReviewRequired. The former generic STYLE-001 mapping overreported trailing Tabs and unterminated EOF lines; this rule uses a dedicated predicate.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": "LF, CRLF, trailing Tab, comment-only and whitespace-only chunks, unterminated final chunk, 511-byte boundary and chunk diagnostic ordinal"
+  },
+  {
+    "clause": "GJB9765.4.14.b.3",
+    "predicate": "Build one alignment group for each sequential VHDL IF containing its if/elsif/else keyword records, and one group for each sequential CASE containing case and direct when records. Strip -- comments, locate each recorded keyword on its physical line, and expand tabs to four-column stops. Report IF branches whose display column differs from the opening if; for CASE, report every when not strictly right of case and every later when whose display column differs from the first when.",
+    "predicateEvidence": [
+      "ev_a39fe443829bce6c25db2f71db7f0951e6cda79dac416c76278906e0bc593bca",
+      "ev_aa1ed509b11af39111945ecd1a31ee93dde701d51e407026fbf41f6c58e00228",
+      "ev_66ec6161160253483e284ae1b60b5068478ce309bf81dd16a35c283a93dd5670",
+      "ev_f31132677fd202edca2f346ccc9d0177554b977f02a4f4c5fb576326b48c84d7",
+      "ev_2cf36ac4802a0e52d54cf39e117f828436954264b4a65bb6e37fe94939763965",
+      "ev_06101853f6d490feb0e321f3132b9c2b2d9746108a8accbba049f0000b3cddab",
+      "ev_75eb1b920fee8bf8b30378814942a2e6d302e5e08e794df9ef95eb21283fe117",
+      "ev_46de9bfc8fbdde797a1914c576bf88d6b9f7e742423b5a025490d267baa0d3c9",
+      "ev_0ca7e7307b797af7f90a3417fecdf844efdbcd740f4fafa31eb15eff4dd67cf5"
+    ],
+    "limitations": "The proprietary AST enum names 0x57, 0x58, 0xab and 0xac and parser flags at offsets 0x183/0x184 remain unofficial. The product adapter covers sequential IF/ELSIF/ELSE and CASE/WHEN syntax, excludes generate and conditional assignments, and preserves nested CASE scope; malformed syntax, other AST forms, native strstr ambiguity and duplicate suppression remain unverified. No diagnostic therefore remains ManualReviewRequired and full native equivalence is not claimed.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": [
+      "attachment violating example reports misaligned elsif, else and final when; compliant example reports none",
+      "tabs and spaces reaching the same display column are treated as aligned",
+      "each when at or left of its case independently violates the strict-depth predicate",
+      "one shallow and off-baseline later when emits both recovered native messages",
+      "a later when deeper than case but different from the first when emits only the same-level message",
+      "if-generate and conditional signal assignment keywords are excluded",
+      "nested case statements retain independent first-when baselines"
+    ]
+  },
+  {
+    "clause": "GJB9765.4.14.b.4",
+    "predicate": "Build an IF branch tree containing if/elsif/else records; recursively link only the first nested IF below each branch. On the recorded physical lines, strip -- comments, locate each keyword, expand tabs to four-column stops, and warn when a linked child IF display column is less than or equal to its parent branch column.",
+    "predicateEvidence": [
+      "ev_37e19937fe90d98240c2159037ca786ce936b9e7211afb729ee6b0873675f7d8",
+      "ev_d7422141e14ebceda8bcf2a88688e89dbcdea92477af9ab085c8902f049d508c",
+      "ev_4bcab576fca1868e7a0d2e63b68be85dcb6153133d132da8a59c89be50b57e0d",
+      "ev_016bfbc44bffe9b8849d844cb85929b760af4d72d169ba3b57927984afafb671"
+    ],
+    "limitations": "The authoritative names of the native condition flag and AST types 0xab, 0xac and 0x58 remain unverified. The product adapter covers sequential VHDL IF/ELSIF/ELSE syntax and excludes if-generate; malformed trees, nested constructs not represented by the token stack, native source substring ambiguity and exact duplicate suppression remain unknown. No diagnostic remains ManualReviewRequired and full native equivalence is not claimed.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": [
+      "attachment violating nested IF produces one diagnostic and compliant example produces none",
+      "elsif and else branches independently link their first nested IF",
+      "a child one display column deeper is admitted because the native predicate is strictly greater-than",
+      "a second sibling nested IF is not substituted for the first linked child",
+      "if-generate is excluded from the bounded sequential IF adapter"
+    ]
+  },
+  {
+    "clause": "GJB9765.4.14.b.5",
+    "predicate": "Recursively group AST type 0xa4 children, retain the first child and later-line children except type 0x53, find each recorded name on its source line after removing -- comments, expand tabs to four-column stops, and report every adjacent display-column change.",
+    "predicateEvidence": [
+      "ev_d59ff35799c0a91827200d23d8202f7645b633a56c140dacecc10166c29c5f39",
+      "ev_acc99eee4c201699c1c866e866290ba2436a1fdbdbcf3c139871051839e08dc9"
+    ],
+    "limitations": "AST type 0xa4 and excluded child type 0x53 have not been mapped to authoritative enum names. The product adapter covers port clauses and consecutive signal/variable declaration runs; other proprietary AST groupings, raw strstr substring ambiguity, generated locations, missing names and exact diagnostic multiplicity remain unverified. No diagnostic therefore remains ManualReviewRequired and full native equivalence is not claimed.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": [
+      "attachment violating port declaration columns produce two adjacent-change diagnostics",
+      "tab and four spaces reaching the same display column produce no diagnostic",
+      "signal and variable declaration runs are checked independently",
+      "an unrelated declaration terminates a bounded signal run",
+      "same-line declaration children after the first are excluded"
+    ]
+  },
+  {
+    "clause": "GJB9765.4.1.b",
+    "predicate": "Native entry iterates generated port-association records and emits for a selected unconnected/non-exempt record shape. Product checks omitted or explicitly OPEN required input ports using same-architecture component declarations or resolved entities; input defaults are treated as connected by VHDL semantics.",
+    "predicateEvidence": [
+      "ev_50ec8f0396aa07a615105392b734a76f6a52593e8e2f2441e9a5f398bd598db7",
+      "ev_cddded3216ef82ad13311e000b763a60784f3866ad939ac6980c1b2eaa26e5c9"
+    ],
+    "limitations": "Native record field meanings, exact AST selectors, positional associations, defaults, black-box/project binding, and full algorithm equivalence remain unverified. Example matching is not vendor equivalence.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp:checkVhdlComponentPortConnections",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": "omitted input, connected input, explicit OPEN, defaulted input, architecture scope"
+  },
+  {
+    "clause": "GJB9765.4.1.c",
+    "predicate": "Native entry shares the port-association collector with 4.1.b but reports a different record shape. Product reports omitted output formals while accepting explicitly OPEN unused outputs, using same-architecture component declarations or resolved entities.",
+    "predicateEvidence": [
+      "ev_bb07ab51975a22dc8b298ccc1f2b54db18bffb251e206a24a00c3b4df0cf008b",
+      "ev_cddded3216ef82ad13311e000b763a60784f3866ad939ac6980c1b2eaa26e5c9"
+    ],
+    "limitations": "Native record field meanings, exact AST selectors, positional associations, project binding, and full algorithm equivalence remain unverified. Example matching is not vendor equivalence.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp:checkVhdlComponentPortConnections",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": "omitted output, explicit OPEN, resolved entity output, architecture scope"
+  },
+  {
+    "clause": "GJB9765.4.2.c",
+    "predicate": "Native FUN_18078bbc0 records each VHDL entity name, builds the condition-control table only from AST_PORT direct AST_WIRE children, AST_GENERIC direct identifiers and AST_SIGNAL nodes, and builds an exemption set from direct entity-port children whose byte +0x104 is set. FUN_18078c370 admits a direct three-child ASSIGN_LE carrying a named WHEN data source, a table-resolved operand in an AST_LT/LE/EQ/EQX/GE/GT relation and an inactive AST_CONSTANT/STRING_LITERAL/CHARACTER_LITERAL containing Z; AST_NE/NEX are excluded by its exact bit mask. AST_CONSTANT declarations, AST_VARIABLE and AST_ALIAS are not inserted into that control table. Its AST_IF/COND/ELSE branch admits a two-arm IF whose THEN block assigns data and whose final ELSE assigns Z to the same target. FUN_18078ae30 reports these candidates unless the current entity exactly equals shared setTopModule and the target is in the INOUT set. Product isolates architecture/entity scopes and implements both bounded source-visible candidate shapes, the port/generic/signal control categories and the selected-top INOUT exemption.",
+    "predicateEvidence": [
+      "ev_0e2820bc56c108c74cbf9288e64d63c58742b213335097c583bdc2205f1af7ab",
+      "ev_bab82d7ffc9b587caf647c21c1f812b7a9b987bc893d0b6468e92689d22a6208",
+      "ev_af5e7a852961241391732336b1e1511cf33e73275aef08013c217669a51b0ba9",
+      "/Users/pinger/Desktop/Codex-test/reverse-tools/evidence/vhdl_4_2_c/top_and_helpers.c",
+      "/Users/pinger/Desktop/Codex-test/reverse-tools/evidence/vhdl_4_2_c/compare_call_block.txt",
+      "/Users/pinger/Desktop/Codex-test/reverse-tools/evidence/vhdl_4_2_c/type2str.c",
+      "docs/evidence/native_vhdl_internal_tristate_4_2_c_findings.md#原生观察"
+    ],
+    "limitations": "Alias and cross-instance propagation, configurations and generate structures, actual/formal resolution, aggregate and complex selected targets, malformed recovery and exact diagnostic multiplicity remain unresolved. Product source adaptation is bounded to explicit direct-name/select data and direct IF/ELSE statements; inferred roots are only a compatibility fallback when no explicit top is configured. Clean results remain ManualReviewRequired and full native equivalence is not claimed.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": [
+      "generic control accepted",
+      "constant control excluded",
+      "process variable control excluded",
+      "alias control excluded",
+      "nested IF assignment excluded from outer direct THEN map",
+      "same-level ELSIF excluded from two-arm IF candidate",
+      "nested CASE assignment excluded from direct THEN map",
+      "nested LOOP assignment excluded from direct THEN map",
+      "compound AND condition excluded from direct WHEN candidate",
+      "compound AND condition excluded from process IF candidate",
+      "arithmetic-contained control excluded from direct WHEN relation lookup",
+      "arithmetic-contained control excluded from process IF relation lookup",
+      "declared direct right relation operand accepted"
+    ]
+  },
+  {
+    "clause": "GJB9765.4.5.e",
+    "predicate": "Native run rejects selected names that do not begin with literal clk_ using a case-insensitive prefix comparison. Product applies this to parsed clock candidates and conservatively to clock-marked VHDL ports, as illustrated by the packaged CLK and C1_clk counterexamples.",
+    "predicateEvidence": [
+      "ev_ec182ef40a94ff6e8d75359f85e530b722654f25849544326c8504e836a29d3a",
+      "ev_5bc843956998c4f19286c500ae9637aa4da9cad9861e845d50d703b9407649cb",
+      "ev_38d28a2a9a0f98140f3a209414e8ae07adc926bb0e02397f7b2b4429dd1fe789",
+      "ev_fa241b95a38473ba11a907d11de12c25b08f8eefd82982fe2396871f9da63dc8"
+    ],
+    "limitations": "The complete native candidate-name collector, AST flags, signal/port classification and diagnostic order remain unverified. The product's clock-marked-port admission is documentation-derived, not proven identical to native collection. No diagnostic is not a compliance proof.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": "published CLK/C1_clk and clk_50/C1 examples; clk versus clk_ prefix and uppercase casefold boundaries"
+  },
+  {
+    "clause": "GJB9765.4.5.f.1",
+    "predicate": "Native constructor defaults the inclusive byte range to 1..20. Slot 0 FUN_1805e4790 calls recursive FUN_1805e5770, which always descends through every child. Current FUNCTION, ARCHITECTURE, ENTITY, TYPE, PROCEDURE and SUBTYPE nodes with nonempty names are candidates. Named ALWAYS nodes are candidates except exact process/PROCESS placeholders. BLOCK is admitted only above 22 bytes and excludes two synthetic parser containers. Direct SIGNAL, VARIABLE, WIRE, LOCALPARAM and IDENTIFIER children of architecture/block/generic/port containers are also compared. Product implements the source-identifiable entity, architecture, type, subtype, signal, variable, constant, port, generic, function, procedure, labeled-process and labeled-block subset, including the native 22-byte block gate.",
+    "predicateEvidence": [
+      "ev_3601a6511a5ae0ab2ab5774e646c4d539c09e490e215d0787a1eb795993a79bf",
+      "ev_54bd8bcc694146b085e51d2c31448b76c63c8f43f3966e56a2d8d7a86fe9be49",
+      "ev_ee40a7de917d054ad0f2ab65f470653ad85425410a04a4c35e2e9de587250563",
+      "docs/evidence/native_vhdl_signal_name_length_4_5_f_1_candidate_set.txt",
+      "docs/evidence/native_vhdl_signal_name_length_4_5_f_1_findings.md#原生观察"
+    ],
+    "limitations": "The supplied client exposes no binding for nondefault minimum/maximum strings. Proprietary direct IDENTIFIER child roles that cannot be safely source-bound, generated/error-recovery nodes, extended identifiers, exact source-location ownership and native traversal order remain unresolved. Product covers the recovered source-identifiable classes, retains ManualReviewRequired on clean results and does not claim full frontend equivalence.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": []
+  },
+  {
+    "clause": "GJB9765.4.6.f",
+    "predicate": "Native slot 0 FUN_180772510 builds driver groups and compares same-target driver pairs. Shape helper FUN_180775050 recognizes an AST_ASSIGN_LE(0x56) only when it has a direct identifier target, an AST_WHEN(0xb6) carrying a direct data identifier and a relation-derived resolved control name, plus an admitted direct constant-family inactive branch. The entry reports if either pair record lacks any of its three required fields. When both records are complete, it compares their extracted control-name strings and skips the pair only when those names match. The packaged compliant B/C/D drivers use different A relation constants but the same extracted control A, corroborating this boundary. Product exempts only direct-data simple-relation ELSE-Z drivers whose control source is shared across every pair, and also covers the documented declared-component OUT plus local assignment path.",
+    "predicateEvidence": [
+      "ev_982a769700f868228aa94da64e031116a9f0b1037f4c9199e0811e3831a9582c",
+      "ev_a0769ec98ec45f1313372f18cd322b34143713336780574d1f0b0958a2c8a15b",
+      "docs/evidence/native_vhdl_multiple_drivers_4_6_f_findings.md#recovered-tri-state-pair-boundary",
+      "reverse-tools/evidence/r6_7_tristate_pair_exemption.txt#sha256=db44512812349b41dde41c8e66fac0d8eb9872897f71f7879d775f4e81ffc764"
+    ],
+    "limitations": "Formal names for AST 0x58 and constant-family 0xb2/0xb3, complete resolved-name-map production, AST_PROCESS(0xaa) tri-state lowering, full driver/netlist construction, hierarchy and cross-file binding, resolution functions, selected/indexed targets, malformed recovery and exact native diagnostic multiplicity remain unresolved. Product restricts the exemption to directly parsed source shapes, reports unsupported multiple-driver pairs, and leaves unsupported clean paths ManualReviewRequired; full vendor equivalence is not claimed.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp:checkVhdlMultipleDrivers",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": "ordinary/tri-state mixed, shared-control explicit tri-state, different controls, complex data expression, reversed relation operands, ordinary double, single driver, component OUT plus local assignment"
+  },
+  {
+    "clause": "GJB9765.4.8.e",
+    "predicate": "Native FUN_180609b30 admits only AST_ALWAYS(0x52) roots. FUN_1806097d0 recursively appends every AST_NULL(0xb0) and every zero-child AST_BLOCK(0x54), without deduplication; the parent collector additionally appends an AST_ALWAYS whose first AST_BLOCK contains exactly one AST_EDGE(0x67), covering an event/sensitivity-only empty process. Product reports the definite source forms: NULL, empty process bodies, empty IF/ELSIF/ELSE arms, empty CASE alternatives and empty loops, once per matched empty node.",
+    "predicateEvidence": [
+      "ev_03c2e7fc28f3ac2d6a7397346eb0e367427144af10cee275fc9e47026b833434",
+      "ev_4468d660a6b85e939eed70e8d04e61d0eef84a00819bd5f8b3161edb445651e0",
+      "ev_897fe9becfc0e6752408fe7748adf095b7cc4dfe4b38b6b3c6e5f79682dc6f18",
+      "docs/evidence/native_vhdl_empty_statement_4_8_e_findings.md",
+      "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_entry.c#sha256=cc7d198c1dfae47b702e9d056afb482b9371971bb58e4e1e4258b405b4b98ece",
+      "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers.c#sha256=3f15f5cd445834aacef093eb3be4d18986a5d57a4ae6a87122c2613cac0c268d",
+      "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers2.c#sha256=45a44f1c43fecd33476317bcbe43c38aaf8339376dff4226f22c63202d783dbc"
+    ],
+    "limitations": "The AST_EDGE name is supported by the adjacent enum mapping and observed empty-process shape rather than vendor debug symbols. Macro/generated constructs, malformed recovery, subprogram lowering, every VHDL-2008 sequential form, diagnostic wording and complete frontend equivalence remain unverified. Unsupported no-finding paths remain ManualReviewRequired.",
+    "implementationSource": "src/analysis/standard_evaluator.cpp",
+    "regressionSource": "tests/standard_accuracy_tests.cpp",
+    "additionalTests": ["empty CASE alternative", "empty LOOP body", "explicit NULL", "empty IF arm", "empty process body", "populated branches"]
+  }
+]

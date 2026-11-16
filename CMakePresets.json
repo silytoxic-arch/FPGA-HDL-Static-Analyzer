@@ -1,0 +1,26 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": {"major": 3, "minor": 24, "patch": 0},
+  "configurePresets": [
+    {
+      "name": "windows-vs2022",
+      "displayName": "Windows x64 / Visual Studio 2022 / Qt 6",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/windows-vs2022",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "$env{QT_ROOT}",
+        "FPGA_ANALYZER_BUILD_GUI": "ON",
+        "BUILD_TESTING": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {"name": "windows-debug", "configurePreset": "windows-vs2022", "configuration": "Debug"},
+    {"name": "windows-release", "configurePreset": "windows-vs2022", "configuration": "Release"}
+  ],
+  "testPresets": [
+    {"name": "windows-debug", "configurePreset": "windows-vs2022", "configuration": "Debug", "output": {"outputOnFailure": true}},
+    {"name": "windows-release", "configurePreset": "windows-vs2022", "configuration": "Release", "output": {"outputOnFailure": true}}
+  ]
+}

@@ -1,0 +1,65 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Provider: Ghidra 12.1.4, completed default auto-analysis database
+Rule: GJB10157_VLOG.9.2.6 (public ID R-11-6)
+
+Constructor and vtable
+----------------------
+FUN_180023e60 registers GJB10157_VLOG.9.2.6 and installs
+Yosys::GJB10157_VLOG_9_2_6::vftable at 0x180ef51c8.
+
+slot 0  0x180583ca0  rule consumer / diagnostic emitter
+slot 1  0x180716130  AST_CASE admission predicate
+slot 2  0x180697020  returns false
+slot 3  0x18003e7e0  string cleanup
+slot 4  0x18062d400  registration helper
+slot 5  0x180583c50  destructor
+
+Admission predicate: FUN_180716130
+----------------------------------
+The function returns true only when the candidate is AST_CASE (type 0x57),
+byte +0x183 is zero, and the direct child vector is nonempty.  The +0x183 gate
+excludes the already observed IF/ELSIF/ELSE-lowered CASE path; its formal field
+name and all producers remain unavailable.
+
+Consumer: FUN_180583ca0
+-----------------------
+For each admitted CASE, the consumer iterates every direct child.  A child is
+considered only when its type lies in 0x58..0x5a, mapped to
+AST_COND/AST_CONDX/AST_CONDZ.  It then reads only the first direct child of
+that branch node.  The branch is reported when that first child exists and is
+none of:
+
+* AST_CONSTANT (0x10)
+* AST_REALVALUE (0x11)
+* AST_BLOCK (0x54)
+* AST_DEFAULT (0x5b)
+
+No loop inspects a second or later comma-separated case choice before deciding
+the branch.  The consumer emits once for every rejected branch node and does
+not break the outer child loop, so two rejected branches yield two diagnostics.
+Each diagnostic uses the branch node's source path at +0x1e0 and line at
++0x210, not the CASE selector location.
+
+The fixed 56-byte GB18030 string at 0x180ef5210 decodes exactly to:
+
+    case语句的分支语句必须使用常量,禁止使用变量或者逻辑运算.
+
+Product boundary
+----------------
+The source adapter runs after configured conditional preprocessing.  It now
+mirrors the proven first-child boundary: only the first comma-separated choice
+can create a diagnostic, and there is at most one output per case item.  Later
+runtime choices after a constant first choice are deliberately ignored.
+
+Constant folding performed before the native consumer has not been recovered.
+The product therefore reports only first choices with a proven runtime
+dependency.  Constant expressions, unresolved names, macro/elaboration forms
+and unsupported grammar remain ManualReviewRequired instead of being guessed.
+
+Unknowns
+--------
+The exact +0x183 field, native collection phase relative to simplification and
+constant folding, macro/include provenance, package/class resolution, generated
+and malformed nodes, source-column handling, waiver behavior and traversal
+ordering remain unverified.  Full binary equivalence is not claimed.

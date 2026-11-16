@@ -1,0 +1,59 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+=== 0x18069a710 FUN_18069a710 ===
+completed=true; error=
+
+void FUN_18069a710(ulonglong *param_1,undefined8 *param_2,undefined8 param_3,undefined8 param_4)
+
+{
+  undefined8 *puVar1;
+  undefined8 *puVar2;
+  
+  puVar1 = (undefined8 *)param_1[1];
+  if ((param_2 < puVar1) && (puVar2 = (undefined8 *)*param_1, puVar2 <= param_2)) {
+    if (puVar1 == (undefined8 *)param_1[2]) {
+      FUN_180698d70(param_1,1,param_3,param_4,0xfffffffffffffffe);
+    }
+    puVar1 = (undefined8 *)(*param_1 + (((longlong)param_2 - (longlong)puVar2) / 0x28) * 0x28);
+    puVar2 = (undefined8 *)param_1[1];
+    if (puVar2 != (undefined8 *)0x0) {
+      *puVar2 = *puVar1;
+      FUN_1800d7720(puVar2 + 1,puVar1 + 1);
+    }
+  }
+  else {
+    if (puVar1 == (undefined8 *)param_1[2]) {
+      FUN_180698d70(param_1,1,param_3,param_4,0xfffffffffffffffe);
+    }
+    puVar1 = (undefined8 *)param_1[1];
+    if (puVar1 != (undefined8 *)0x0) {
+      *puVar1 = *param_2;
+      FUN_1800d7720(puVar1 + 1,param_2 + 1);
+    }
+  }
+  param_1[1] = param_1[1] + 0x28;
+  return;
+}
+
+=== 0x1804c0de0 FUN_1804c0de0 ===
+completed=true; error=
+
+undefined8 * FUN_1804c0de0(undefined8 *param_1,undefined8 *param_2,undefined8 param_3)
+
+{
+  *param_1 = *param_2;
+  param_1[4] = 0xf;
+  param_1[3] = 0;
+  *(undefined1 *)(param_1 + 1) = 0;
+  FUN_180040550(param_1 + 1,param_3,0,0xffffffffffffffff,0,0xfffffffffffffffe);
+  return param_1;
+}
+
+Observation: FUN_1804c0de0 constructs one 0x28-byte candidate record from an
+AST pointer and a copied name. FUN_18069a710 then appends one record and advances
+the vector end by 0x28. It has no name, AST-pointer, or source-line comparison;
+the in-vector branch only protects against source aliasing during reallocation.
+Consequently, de-duplication occurs inside the per-condition name map used by
+FUN_180698e40, not across different source conditions or different AST_COND
+children of an AST_WHEN assignment.

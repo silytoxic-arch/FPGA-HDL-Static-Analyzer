@@ -1,0 +1,373 @@
+#pragma once
+
+#include "analysis/vhdl_edge_condition.h"
+#include <algorithm>
+#include <map>
+#include <set>
+
+namespace fpga::analysis {
+
+struct VhdlClockControlModel {
+    std::size_t architectureToken{}, processToken{};
+    unsigned nativeClassCandidate{}; // Bounded source reconstruction, not a vendor run.
+    VhdlEdgeCondition edge;
+    std::vector<std::size_t> equalityIdentifierTokens;
+    // Packaged GJB9765.4.10.h example: one edge-only process whose direct
+    // assignments all force constants. This documented branch is separate
+    // from the recovered native clock/control-name intersection.
+    bool clockDrivesOnlyConstants{false};
+};
+struct VhdlClockControlOverlap {
+    std::size_t architectureToken{}, clockToken{}, equalityIdentifierToken{};
+    std::string name;
+};
+struct VhdlClockControlScan {
+    std::vector<VhdlClockControlModel> models;
+    std::vector<VhdlClockControlOverlap> overlaps;
+    // This rule remains Partial even when all input fits this subset. Empty
+    // overlaps never prove compliance. Unknown/unsupported syntax sets this.
+    bool incomplete{false};
+    bool partial{true};
+};
+
+namespace vhdl_clock_detail {
+inline std::string lower(std::string s) {
+    for (auto& c:s) if (c>='A' && c<='Z') c=static_cast<char>(c-'A'+'a');
+    return s;
+}
+inline bool basic(const parser::HdlToken& t) {
+    if (t.kind!=parser::HdlTokenKind::Identifier || t.text.empty()) return false;
+    const auto letter=[](char c){return (c>='a'&&c<='z')||(c>='A'&&c<='Z');};
+    if (!letter(t.text.front())) return false;
+    bool underscore=false;
+    for (char c:t.text) {
+        if (!letter(c) && !(c>='0'&&c<='9') && c!='_') return false;
+        if (c=='_' && underscore) return false;
+        underscore=c=='_';
+    }
+    return !underscore;
+}
+struct Branch { std::size_t conditionBegin{},conditionEnd{},bodyBegin{},bodyEnd{}; };
+struct If { std::size_t begin{},end{}; std::vector<Branch> branches; };
+class Scanner {
+    const core::SourceFile& source;
+    const std::vector<parser::HdlToken>& t;
+    VhdlClockControlScan result;
+    using Names=std::set<std::string>;
+    bool word(std::size_t i,std::string_view w) const {
+        return i<t.size() && t[i].kind==parser::HdlTokenKind::Identifier && lower(t[i].text)==w;
+    }
+    bool scalar(std::size_t i) const { return word(i,"std_logic")||word(i,"std_ulogic"); }
+    std::size_t unitEnd(std::size_t start,std::string_view kind,const std::string& name) const {
+        for (auto i=start;i+1<t.size();++i) {
+            if (kind=="architecture" && word(i,"process") && (i==0 || !word(i-1,"end"))) {
+                auto stop=i+1;
+                while (stop+1<t.size() && !(word(stop,"end")&&word(stop+1,"process"))) ++stop;
+                if (stop+1==t.size()) return t.size();
+                i=stop+1; continue;
+            }
+            if (word(i,"end") && (word(i+1,kind)||word(i+1,name)||t[i+1].text==";")) return i;
+        }
+        return t.size();
+    }
+    bool bound(std::size_t i,const Names& names) const {
+        return i<t.size() && basic(t[i]) && names.contains(lower(t[i].text));
+    }
+    bool ieee(std::size_t a,std::size_t b) const {
+        bool found=false;
+        for (auto i=a;i<b;++i)
+            if (word(i,"use")) {
+                if (i+6>=b) return false;
+                // Additional IEEE packages in the packaged example do not
+                // introduce a user-defined rising_edge. Imports from another
+                // library remain unsupported because they can shadow it.
+                if (!(word(i+1,"ieee") && t[i+2].text=="." && basic(t[i+3]) &&
+                    t[i+4].text=="." && word(i+5,"all") && t[i+6].text==";"))
+                    return false;
+                if (word(i+3,"std_logic_1164")) found=true;
+            }
+        return found;
+    }
+    // Only literals whose text is present contiguously in source. No constant
+    // evaluation, parameter names, aggregates or function calls are inferred.
+    bool literal(std::size_t a,std::size_t b) const {
+        if (a>=b) return false;
+        const auto start=t[a].offset, stop=t[b-1].offset+t[b-1].text.size();
+        if (stop>source.content().size()) return false;
+        const auto text=source.content().substr(start,stop-start);
+        if (text.size()==3 && text.front()=='\'' && text.back()=='\'' &&
+            std::string_view("01xXzZuUwWlLhH-").find(text[1])!=std::string_view::npos) return true;
+        if (text.size()>=2 && text.front()=='"' && text.back()=='"') {
+            for (std::size_t i=1;i+1<text.size();++i)
+                if (std::string_view("01xXzZuUwWlLhH-").find(text[i])==std::string_view::npos) return false;
+            return true;
+        }
+        if (b-a!=1 || t[a].kind!=parser::HdlTokenKind::Number) return false;
+        return std::all_of(text.begin(),text.end(),[](char c){return (c>='0'&&c<='9')||c=='_';});
+    }
+    bool eq(std::size_t a,std::size_t b,const Names& names,std::size_t& chosen) const {
+        // Exact direct EQ operands. No logical wrappers, selected names or
+        // descendant comparisons; native first identifier operand wins.
+        for (auto i=a;i<b;++i) if (t[i].text=="=") {
+            if (i==a+1 && bound(a,names) &&
+                ((i+2==b && bound(i+1,names)) || literal(i+1,b))) { chosen=a; return true; }
+            if (i+2==b && bound(i+1,names) && literal(a,i)) { chosen=i+1; return true; }
+            return false;
+        }
+        return false;
+    }
+    bool condition(std::size_t a,std::size_t b,const Names& names) const {
+        std::size_t unused{};
+        return (b==a+1 && bound(a,names)) ||
+            (b==a+2 && word(a,"not") && bound(a+1,names)) || eq(a,b,names,unused);
+    }
+    bool readIf(std::size_t a,std::size_t limit,If& out) const {
+        if (!word(a,"if")) return false;
+        out.begin=a;
+        auto cond=a+1;
+        auto then=cond;
+        for (;then<limit && !word(then,"then");++then)
+            if (word(then,"if")||word(then,"end")||t[then].text==";") return false;
+        if (then==limit) return false;
+        Branch branch{cond,then,then+1,0};
+        unsigned depth=0;
+        bool seenElse=false;
+        for (auto i=then+1;i<limit;++i) {
+            if (word(i,"end") && word(i+1,"if")) {
+                if (depth) { --depth; ++i; continue; }
+                branch.bodyEnd=i; out.branches.push_back(branch);
+                if (i+2>=limit || t[i+2].text!=";") return false;
+                out.end=i+3; return true;
+            }
+            if (word(i,"if")) { ++depth; continue; }
+            if (depth) continue;
+            if (word(i,"elsif")||word(i,"else")) {
+                if (seenElse) return false;
+                branch.bodyEnd=i; out.branches.push_back(branch);
+                if (word(i,"else")) { seenElse=true; branch={i,i,i+1,0}; continue; }
+                cond=i+1; then=cond;
+                for (;then<limit && !word(then,"then");++then)
+                    if (word(then,"end")||t[then].text==";") return false;
+                if (then==limit) return false;
+                branch={cond,then,then+1,0}; i=then;
+            }
+        }
+        return false;
+    }
+    bool assignments(std::size_t a,std::size_t b,const Names& names,bool constants) const {
+        bool assigned=false;
+        while (a<b) {
+            if (word(a,"null") && a+1<b && t[a+1].text==";") { a+=2; continue; }
+            if (!bound(a,names) || a+1>=b) return false;
+            auto rhs=a+2;
+            if (t[a+1].text!="<=") {
+                if (a+2>=b || t[a+1].text!="<" || t[a+2].text!="=" ||
+                    t[a+2].offset!=t[a+1].offset+1) return false;
+                rhs=a+3;
+            }
+            auto end=rhs;
+            while (end<b && t[end].text!=";") ++end;
+            if (end==b || (!literal(rhs,end) &&
+                (constants || end!=rhs+1 || !bound(rhs,names)))) return false;
+            assigned=true; a=end+1;
+        }
+        return !constants || assigned;
+    }
+    bool controlIf(const If& control,const Names& names,bool requireConstant,
+                   std::vector<std::size_t>& equalities) const {
+        for (const auto& br:control.branches) {
+            if (br.conditionBegin!=br.conditionEnd) {
+                if (!condition(br.conditionBegin,br.conditionEnd,names)) return false;
+                std::size_t index{};
+                if (eq(br.conditionBegin,br.conditionEnd,names,index)) equalities.push_back(index);
+            }
+            if (!assignments(br.bodyBegin,br.bodyEnd,names,requireConstant)) return false;
+        }
+        return true;
+    }
+    bool edgeBody(const Branch& br,const Names& names,bool classOne,
+                  std::vector<std::size_t>& equalities) const {
+        if (br.bodyBegin==br.bodyEnd) return false; // VHDL requires a statement (e.g. null).
+        if (!word(br.bodyBegin,"if"))
+            return assignments(br.bodyBegin,br.bodyEnd,names,false);
+        If control;
+        if (!readIf(br.bodyBegin,br.bodyEnd,control) || control.end!=br.bodyEnd) return false;
+        if (!classOne) return controlIf(control,names,false,equalities);
+        // 68c2c0: first BLOCK's direct IF, only its own first COND. ELSIF
+        // isn't scanned here. Restrict to one constant then body (+else).
+        if (control.branches.size()>2 ||
+            (control.branches.size()==2 && control.branches[1].conditionBegin!=control.branches[1].conditionEnd)) return false;
+        const auto& first=control.branches.front();
+        if (!condition(first.conditionBegin,first.conditionEnd,names) ||
+            !assignments(first.bodyBegin,first.bodyEnd,names,true)) return false;
+        std::size_t index{};
+        if (eq(first.conditionBegin,first.conditionEnd,names,index)) {
+            // single lower name requirement: identifier=identifier with two
+            // different names is NOT the reset-like single-name subset.
+            Names used;
+            for (auto i=first.conditionBegin;i<first.conditionEnd;++i)
+                if (bound(i,names)) used.insert(lower(t[i].text));
+            if (used.size()==1) equalities.push_back(index);
+        }
+        return control.branches.size()==1 || assignments(control.branches[1].bodyBegin,
+            control.branches[1].bodyEnd,names,false);
+    }
+    void process(std::size_t p,std::size_t stop,std::size_t architecture,const Names& names) {
+        if (p>0 && word(p-1,"postponed")) { result.incomplete=true; return; }
+        auto begin=p+1;
+        if (begin<stop && t[begin].text=="(") {
+            ++begin;
+            while (begin<stop && t[begin].text!=")") {
+                if (!bound(begin,names) && t[begin].text!="," && !word(begin,"all")) {
+                    result.incomplete=true; return;
+                }
+                ++begin;
+            }
+            if (begin==stop) { result.incomplete=true; return; }
+            ++begin;
+        }
+        if (word(begin,"is")) ++begin;
+        if (!word(begin,"begin")) { result.incomplete=true; return; }
+        ++begin;
+        If outer;
+        if (!readIf(begin,stop,outer) || outer.end!=stop) { result.incomplete=true; return; }
+        VhdlClockControlModel model; model.architectureToken=architecture; model.processToken=p;
+        const auto& first=outer.branches.front();
+        model.edge=parseVhdlEdgeCondition(source,t,first.conditionBegin,first.conditionEnd);
+        if (model.edge.status==VhdlEdgeConditionStatus::Matched && bound(model.edge.clockToken,names)) {
+            // Flat class2 only: no outer ELSIF/ELSE. This avoids silently
+            // accepting collector branch-map paths outside the known subset.
+            if (outer.branches.size()!=1 || !edgeBody(first,names,false,model.equalityIdentifierTokens)) {
+                result.incomplete=true; return;
+            }
+            // Deliberately narrow source adapter for the packaged violation:
+            // no nested control, at least one direct assignment, and every
+            // RHS is a literal. A normal edge-triggered data assignment stays
+            // outside this branch.
+            if (!word(first.bodyBegin,"if"))
+                model.clockDrivesOnlyConstants=
+                    assignments(first.bodyBegin,first.bodyEnd,names,true);
+            model.nativeClassCandidate=2;
+        } else {
+            if (outer.branches.size()!=2 ||
+                !condition(first.conditionBegin,first.conditionEnd,names) ||
+                !assignments(first.bodyBegin,first.bodyEnd,names,true)) { result.incomplete=true; return; }
+            const auto& next=outer.branches[1];
+            model.edge=parseVhdlEdgeCondition(source,t,next.conditionBegin,next.conditionEnd);
+            if (model.edge.status!=VhdlEdgeConditionStatus::Matched || !bound(model.edge.clockToken,names) ||
+                !edgeBody(next,names,true,model.equalityIdentifierTokens)) { result.incomplete=true; return; }
+            std::size_t index{};
+            if (eq(first.conditionBegin,first.conditionEnd,names,index)) model.equalityIdentifierTokens.push_back(index);
+            model.nativeClassCandidate=1;
+        }
+        result.models.push_back(std::move(model));
+    }
+    void declaredNames(std::size_t a,std::size_t b,Names& names,bool ports) const {
+        // Restrict signal/port declarations to bare scalar IEEE types. Reject
+        // selected/indexed names later, and do not bind subtype aliases.
+        for (auto i=a;i<b;++i) {
+            if (!ports && !word(i,"signal")) continue;
+            auto start=ports?i:i+1;
+            if (!basic(t[start])) continue;
+            auto colon=start+1;
+            while (colon<b && t[colon].text==",") colon+=2;
+            if (colon>=b || t[colon].text!=":") continue;
+            auto type=colon+1;
+            if (ports && (word(type,"in")||word(type,"out")||word(type,"inout")||word(type,"buffer"))) ++type;
+            if (type>=b || !scalar(type)) continue;
+            if (type+1<b && t[type+1].text!=";" && t[type+1].text!=")") continue;
+            for (auto n=start;n<colon;n+=2) if (basic(t[n])) names.insert(lower(t[n].text));
+        }
+    }
+public:
+    Scanner(const core::SourceFile& s,const std::vector<parser::HdlToken>& tokens):source(s),t(tokens){}
+    VhdlClockControlScan run() {
+        if (source.language()!=core::HdlLanguage::Vhdl) { result.incomplete=true; return result; }
+        std::map<std::string,Names> entities;
+        std::set<std::string> ieeeEntities;
+        std::size_t context=0;
+        for (std::size_t i=0;i<t.size();++i) {
+            if (word(i,"entity") && i+2<t.size() && basic(t[i+1]) && word(i+2,"is")) {
+                const auto end=unitEnd(i+3,"entity",lower(t[i+1].text));
+                if (end==t.size()) { result.incomplete=true; break; }
+                Names names;
+                bool shadow=false;
+                for (auto j=i+3;j<end;++j)
+                    if (word(j,"function")||word(j,"procedure")||word(j,"alias")||word(j,"type")||
+                        word(j,"subtype")||word(j,"package")||word(j,"use")) shadow=true;
+                const auto entityIeee=ieee(context,i);
+                if (entityIeee && !shadow) {
+                    for (auto p=i+3;p<end;++p) if (word(p,"port") && p+1<end && t[p+1].text=="(") {
+                        auto stop=p+2; while (stop<end && t[stop].text!=")") ++stop;
+                        declaredNames(p+2,stop,names,true); break;
+                    }
+                }
+                const auto entityName=lower(t[i+1].text);
+                entities[entityName]=std::move(names);
+                if (entityIeee && !shadow) ieeeEntities.insert(entityName);
+                auto semi=end+1; while (semi<t.size()&&t[semi].text!=";") ++semi;
+                i=semi; context=std::min(i+1,t.size());
+            } else if (word(i,"architecture") && i+4<t.size() && basic(t[i+1]) &&
+                       word(i+2,"of") && basic(t[i+3]) && word(i+4,"is")) {
+                const auto arch=i;
+                const auto end=unitEnd(i+5,"architecture",lower(t[i+1].text));
+                if (end==t.size()) { result.incomplete=true; break; }
+                const auto entity=entities.find(lower(t[i+3].text));
+                auto begin=i+5;
+                while (begin<end && !word(begin,"begin")) ++begin;
+                bool shadow=false;
+                for (auto j=i+5;j<begin;++j)
+                    if (word(j,"function") || word(j,"procedure") || word(j,"package") ||
+                        word(j,"alias") || word(j,"subtype") || word(j,"type")) shadow=true;
+                for (auto j=i+5;j<begin;++j) if (word(j,"use")) shadow=true;
+                for (auto j=begin;j<end;++j)
+                    if (word(j,"generate")||word(j,"block")) shadow=true;
+                bool hasInterveningUse=false;
+                for (auto j=context;j<i;++j) if (word(j,"use")) hasInterveningUse=true;
+                const auto entityName=lower(t[i+3].text);
+                const bool boundIeee=ieee(context,i) ||
+                    (!hasInterveningUse && ieeeEntities.contains(entityName));
+                if (!boundIeee || entity==entities.end() || shadow || begin==end) {
+                    result.incomplete=true;
+                } else {
+                    auto names=entity->second; declaredNames(i+5,begin,names,false);
+                    for (auto p=begin+1;p<end;++p) if (word(p,"process") && !word(p-1,"end")) {
+                        auto stop=p+1;
+                        while (stop+1<end && !(word(stop,"end")&&word(stop+1,"process"))) ++stop;
+                        if (stop+1==end) { result.incomplete=true; break; }
+                        process(p,stop,arch,names);
+                        auto semi=stop+2;
+                        while (semi<end&&t[semi].text!=";") ++semi;
+                        p=semi;
+                    }
+                }
+                auto semi=end+1; while (semi<t.size()&&t[semi].text!=";") ++semi;
+                i=semi; context=std::min(i+1,t.size());
+            }
+        }
+        for (const auto& clock:result.models) for (const auto& control:result.models) {
+            if (clock.architectureToken!=control.architectureToken) continue;
+            for (const auto index:control.equalityIdentifierTokens)
+                if (lower(t[index].text)==clock.edge.clockName) {
+                    const auto duplicate=std::any_of(result.overlaps.begin(),result.overlaps.end(),[&](const auto& x){
+                        return x.architectureToken==clock.architectureToken && x.clockToken==clock.edge.clockToken;
+                    });
+                    if (!duplicate) result.overlaps.push_back({clock.architectureToken,clock.edge.clockToken,index,clock.edge.clockName});
+                }
+        }
+        if (result.models.empty()) result.incomplete=true;
+        return std::move(result);
+    }
+};
+} // namespace vhdl_clock_detail
+
+// Native run ev_8db32876e0c5e664daa8d39b05e03aafd03e235a87160ab608419944718e1add;
+// classifier assembly ev_78ded7eaead89d9cd328278a0fc9eba39dcbc0365a11f5e2ba70c9a45bed2898.
+// Actual bounded source parsing and declaration binding; no metadata-only claim.
+// Deliberate safety differences: IEEE context, scalar declarations, architecture
+// isolation, local shadow rejection, and unsupported => incomplete/ManualReview.
+[[nodiscard]] inline VhdlClockControlScan scanVhdlClockControl(
+    const core::SourceFile& source,const std::vector<parser::HdlToken>& tokens) {
+    return vhdl_clock_detail::Scanner(source,tokens).run();
+}
+} // namespace fpga::analysis

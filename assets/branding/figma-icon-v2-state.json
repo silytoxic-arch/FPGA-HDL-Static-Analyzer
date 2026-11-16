@@ -1,0 +1,18 @@
+{
+  "scope": "single-component",
+  "fileKey": "QGY5w6p4GZ4ibG5Ek1oFFT",
+  "pageId": "0:1",
+  "componentId": "20:76",
+  "reviewFrameId": "20:77",
+  "heroInstanceId": "20:81",
+  "previewInstanceIds": ["20:91", "20:101", "20:111"],
+  "reusedVariableIds": ["VariableID:18:49", "VariableID:18:50", "VariableID:18:51"],
+  "bindingCount": 7,
+  "preservedComponentId": "18:58",
+  "preservedReviewFrameId": "18:59",
+  "completedSteps": ["discovery", "reuse-foundations", "icon-component", "multi-size-preview", "visual-review", "asset-export"],
+  "pendingValidations": [],
+  "svgExport": "hdl-analyzer-icon.svg",
+  "pngExport": "hdl-analyzer-icon-1024.png",
+  "reviewScreenshot": "icon-preview-v2.png"
+}

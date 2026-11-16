@@ -1,0 +1,29 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Native rule: GJB9765_VHDL_4_9_a
+Public rule: R-9-1
+Entry: FUN_18069ed00 @ 0x18069ed00
+Leaf helper: FUN_18069fb50 @ 0x18069fb50
+
+Recovered final-root gate:
+
+  iVar2 = *(int *)(rhs + 4);
+  uVar1 = iVar2 - 0x24;
+  if (((uVar1 < 0x24) &&
+       ((0xe0000019fU >> (uVar1 & 0x3f) & 1) != 0)) ||
+      iVar2 == 0xb6) {
+      count = 0;
+      success = FUN_18069fb50(..., rhs, ..., &visitedLeaves, &count);
+      if (success == 1 && count > 1) report();
+  }
+
+Set bits in 0xe0000019f after adding base 0x24:
+
+  0x24, 0x25, 0x26, 0x27, 0x28,
+  0x2b, 0x2c,
+  0x45, 0x46, 0x47
+
+The mask therefore does not admit shift/rotate AST roots. AST_WHEN(0xb6)
+is admitted by the separate equality branch. FUN_18069fb50 recursively walks
+all children and increments the match count only for AST_IDENTIFIER(0x13)
+leaves found in the active relation container.

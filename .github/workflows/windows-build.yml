@@ -1,0 +1,58 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    name: Windows x64 / Qt 6 / MSVC 2022
+    runs-on: windows-2025
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4.5.0
+        with:
+          version: "6.8.3"
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: Configure, build, test, and package
+        shell: pwsh
+        run: ./scripts/package_windows.ps1 -QtRoot "$env:QT_ROOT_DIR"
+
+      - name: Verify packaged executables
+        shell: pwsh
+        run: |
+          $cli = Get-ChildItem build/windows-install/bin/fpga_analyzer_cli.exe
+          $gui = Get-ChildItem build/windows-install/bin/fpga_analyzer.exe
+          & $cli.FullName --version
+          if (-not $gui.Exists) { throw "Missing GUI executable" }
+          Get-ChildItem build/windows-release-package/*.zip | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)" | Set-Content -Encoding ascii "$($_.FullName).sha256"
+          }
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v7
+        with:
+          name: FPGA-HDL-Static-Analyzer-Windows-x64
+          path: |
+            build/windows-release-package/*.zip
+            build/windows-release-package/*.sha256
+          if-no-files-found: error
+          retention-days: 30

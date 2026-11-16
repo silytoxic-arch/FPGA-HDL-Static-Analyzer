@@ -1,0 +1,82 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule registration string: GJB10157_VLOG.9.2.9
+Analysis engine: Ghidra 12.1.4, previously fully analyzed project T_Linter_A5_2
+Evidence type: static disassembly/decompilation; no target execution
+
+Constructor and vtable
+======================
+FUN_1800240a0 references the rule string at 0x180ef5598 and installs
+Yosys::GJB10157_VLOG_9_2_9::vftable at 0x180ef5568.
+
+vtable 0x180ef5568:
+  slot 0  FUN_1805849d0  rule consumer/emitter
+  slot 1  FUN_1807238a0  root selector
+  slot 2  FUN_180697020
+  slot 3  FUN_18003e7e0
+  slot 4  FUN_18062d400
+  slot 5  FUN_180584980
+
+Root selector
+=============
+FUN_1807238a0 returns true exactly when *(int *)(node + 4) == 2.
+The recovered Yosys enum mapping identifies type 2 as AST_MODULE.
+
+CASE collector
+==============
+FUN_1805853a0 recursively walks the selected module root. It appends a node only
+when all of these conditions hold:
+  * node type +4 == 0x57 (AST_CASE);
+  * node line +0x210 differs from the selected module root line;
+  * the node has at least one direct child;
+  * the first direct child type +4 == 0x13 (AST_IDENTIFIER).
+
+The call site at 0x180584c60..0x180584c73 passes:
+  RCX = rule object, RDX = module child, R8D = module line,
+  R9 = output CASE vector.
+
+Default branch and assignment collection
+========================================
+FUN_1805849d0 visits every gathered CASE and every direct child. A branch is
+processed only when:
+  * branch type is 0x58, 0x59 or 0x5a (AST_COND/CONDX/CONDZ);
+  * the branch has more than one direct child;
+  * its first child type is 0x5b (AST_DEFAULT).
+
+Only the branch's second child is passed to FUN_1804f3870. The requested type
+set is {0x55, 0x56}, so that recursive helper gathers AST_ASSIGN_EQ and
+AST_ASSIGN_LE descendants. Other branch children are not used as roots.
+
+Assignment filter and X collector
+=================================
+For every gathered assignment, FUN_1805849d0 requires exactly two direct
+children. It searches one byte "$" (0x24) in the generic string field +0x48 of
+the assignment's first child and skips the assignment when found.
+
+The assembly at 0x180584dd3..0x180584df5 calls FUN_180585480 with:
+  RCX = rule object, RDX = assignment node,
+  R8D = selected module root line, R9 = output constant vector.
+
+FUN_180585480 recursively walks the complete assignment subtree. It appends a
+node once for every encoded byte 0x02 only when:
+  * node type +4 == 0x10 (AST_CONSTANT);
+  * node line +0x210 differs from the selected module root line.
+
+The consumer tests only whether the resulting vector is nonempty. Therefore one
+assignment emits at most one diagnostic even if it contains several X constants,
+while separate violating assignment nodes emit separately. Encoded byte 0x02 is
+the X state in the corroborated Yosys/T-Linter constant representation; Z is not
+admitted by this helper.
+
+Diagnostic
+==========
+The consumer emits at the AST_DEFAULT branch path (+0x1e0) and line (+0x210),
+with internal severity "Warning" and fixed GB18030 bytes at 0x180ef55b0:
+  避免在default分支中出现包含'x'的值.
+
+Static-analysis boundary
+========================
+The exact proprietary Yosys revision, frontend simplification before this pass,
+the semantic purpose of the module-line exclusion, generated/malformed AST
+ownership, macro/include provenance, column reconstruction, waiver processing,
+and traversal order outside the recovered loops remain unknown.

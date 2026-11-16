@@ -1,0 +1,79 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Analysis: Ghidra 12.1.4 offline static decompilation
+
+Functions:
+- 0x1806841f0 FUN_1806841f0 (assignment-map producer)
+- 0x1806826a0 FUN_1806826a0 (rule entry and propagation/reporting)
+
+Immutable raw decompile digests:
+- FUN_1806841f0: 96af6f8dcc87b1a52d99a13a7613b016e03c71b89af922cd8a3ba3f479beb6a2
+- FUN_1806826a0: a2e6a7de33248c5854f5430646bc8a69e07316c74eee6bfefc42d5eba770164a
+
+Observed producer boundary:
+
+1. FUN_1806841f0 enters assignment-map construction only while the current
+   node type is AST_ARCHITECTURE(0x75), then iterates that node's direct child
+   vector. A child must be AST_ASSIGN_LE(0x56), have at least two children, and
+   have AST_IDENTIFIER(0x13) as its first child. Assignments nested below a
+   process, subprogram, block or generate node are reached by recursion but are
+   never reconsidered as direct architecture children.
+
+2. For the broad relation map DAT_181361150 the RHS test is:
+
+     rhsType = child[1].type
+     delta = rhsType - 0x24
+     (delta < 0x24 && ((0xe0f00019f >> delta) & 1) != 0)
+       || rhsType == 0xb6
+
+   Set-bit expansion gives exact admitted types:
+
+     0x24, 0x25, 0x26, 0x27, 0x28, 0x2b, 0x2c,
+     0x3c, 0x3d, 0x3e, 0x3f, 0x45, 0x46, 0x47,
+     plus AST_WHEN(0xb6)
+
+   Cross-rule enum recovery maps these to direct unary NOT, bit/logical
+   AND/OR/XOR/XNOR/NAND/NOR, binary ADD/SUB/MUL/DIV, and conditional WHEN.
+   AST_IDENTIFIER, function-call roots, shifts and unary POS/NEG are absent.
+
+3. For the gate-candidate map DAT_181361160 the exact RHS test is:
+
+     ((rhsType - 0x25U) & 0xffffffde) == 0
+
+   It admits only 0x25, 0x26, 0x45 and 0x46: bit/logical AND and OR.
+
+4. Both maps are name-keyed trees. The producer obtains the existing-or-new
+   value slot and unconditionally writes the current AST pointer into it:
+
+     relationNode[8] = *assignmentChildren
+     *FUN_1800d9720(&DAT_181361160, normalizedTarget) = assignmentChildren[1]
+
+   Therefore a later admitted direct assignment to the same normalized target
+   overwrites the earlier stored location in that map; the maps do not retain
+   a vector of every same-name assignment.
+
+Observed entry boundary:
+
+- FUN_1806826a0 clears DAT_181361150/160/170 for each design root, calls
+  FUN_1806841f0, copies those per-root maps into the design relation objects,
+  performs iterative relation propagation, and reports the candidate AST line
+  only after its normalized name intersects the recovered clock relation.
+- Report de-duplication is performed on source path plus physical line before
+  emitting. The source location comes from the stored gate-candidate AST, not
+  from the clock-event use site.
+
+Product consequence:
+
+- R-9-3 must not propagate through bare aliases, function calls, shifts,
+  process assignments, generated assignments or other non-admitted roots.
+- Direct XOR/XNOR/NAND/NOR, binary ADD/SUB/MUL/DIV and WHEN may carry the
+  dependency relation but are not themselves gate candidates.
+- Only a reachable direct architecture AND/OR assignment reports, and repeated
+  admitted assignments to one target retain the last candidate location.
+
+Unknowns retained:
+
+Component/primitive clock gating, hierarchy/configuration expansion, selected
+or extended names, overload resolution, malformed frontend trees, the exact
+formal names of every intermediate relation container, and complete native
+ordering across duplicate design roots remain unresolved.

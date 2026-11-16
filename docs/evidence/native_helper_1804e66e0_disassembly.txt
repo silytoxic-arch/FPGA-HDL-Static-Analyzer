@@ -1,0 +1,50 @@
+Static observation transcript
+Target: /Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Tool: Apple objdump, COFF x86-64 disassembly
+Command range: 0x1804e66e0..0x1804e6748
+Captured: 2026-10-25 Asia/Shanghai
+
+1804e66e0: 4c 8b 01                     movq    (%rcx), %r8
+1804e66e3: 41 b2 01                     movb    $1, %r10b
+1804e66e6: 41 83 78 04 52               cmpl    $82, 4(%r8)
+1804e66eb: 75 59                        jne     0x1804e6746
+1804e66ed: 49 8b 40 10                  movq    16(%r8), %rax
+1804e66f1: 45 33 c9                     xorl    %r9d, %r9d
+1804e66f4: 49 2b 40 08                  subq    8(%r8), %rax
+1804e66f8: 48 c1 f8 03                  sarq    $3, %rax
+1804e66fc: 48 85 c0                     testq   %rax, %rax
+1804e66ff: 74 40                        je      0x1804e6741
+1804e6701: 49 8b 50 08                  movq    8(%r8), %rdx
+1804e6710: 48 8b 02                     movq    (%rdx), %rax
+1804e6713: 8b 48 04                     movl    4(%rax), %ecx
+1804e6716: 83 e9 65                     subl    $101, %ecx
+1804e6719: 83 f9 01                     cmpl    $1, %ecx
+1804e671c: 76 20                        jbe     0x1804e673e
+1804e671e: 49 8b 48 10                  movq    16(%r8), %rcx
+1804e6722: 41 ff c1                     incl    %r9d
+1804e6725: 49 2b 48 08                  subq    8(%r8), %rcx
+1804e6729: 48 83 c2 08                  addq    $8, %rdx
+1804e672d: 48 c1 f9 03                  sarq    $3, %rcx
+1804e6731: 49 63 c1                     movslq  %r9d, %rax
+1804e6734: 48 3b c1                     cmpq    %rcx, %rax
+1804e6737: 72 d7                        jb      0x1804e6710
+1804e6739: 41 0f b6 c2                  movzbl  %r10b, %eax
+1804e673d: c3                           retq
+1804e673e: 45 32 d2                     xorb    %r10b, %r10b
+1804e6741: 41 0f b6 c2                  movzbl  %r10b, %eax
+1804e6745: c3                           retq
+1804e6746: 32 c0                        xorb    %al, %al
+1804e6748: c3                           retq
+
+Observed control predicate, using the independently recovered AST enum map:
+- Return false when the root type is not AST_ALWAYS(0x52).
+- Start true for AST_ALWAYS.
+- Iterate immediate children only.
+- Return false on the first child whose type is 0x65 or 0x66
+  (AST_POSEDGE or AST_NEGEDGE).
+- Return true for an empty AST_ALWAYS or when all immediate children have
+  other types, including AST_EDGE(0x67).
+
+This transcript is a static observation. It does not establish the source
+frontend's exact lowering for malformed, generated or macro-expanded syntax.

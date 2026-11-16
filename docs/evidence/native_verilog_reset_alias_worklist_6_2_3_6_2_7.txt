@@ -1,0 +1,58 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Method: Ghidra 12.1.4 read-only static decompilation.
+This is analysis evidence, not original source and not a runtime observation.
+
+FUN_180758410 work-list observation
+-----------------------------------
+After matching assignments whose destination is in the current relation-name
+set, direct AST_IDENTIFIER(0x13) sources and the sole AST_IDENTIFIER child of
+AST_LOGIC_NOT(0x47)/AST_BIT_NOT(0x24) are inserted into a next-source tree.
+Non-alias continuous roots and admitted procedural assignments take the
+diagnostic-construction path.
+
+At the end of each iteration the recovered pseudocode performs:
+
+  FUN_18075a210(&current_names);
+  iterate next_sources:
+      if (FUN_180676aa0(&visited_names, source_name) == 0)
+          FUN_180579cf0(&current_names, source_name);
+  repeat while current_names is non-empty
+
+The source loop and direct-child classifier are preserved in retained Evidence
+ev_84ff04283d5bc45c830f2cd48b7030d46eb94114556b32aa556a0b8308ae6833,
+notably pseudocode lines 996-1037 and 1176-1195 in the local exported record.
+
+Helper cross-checks
+-------------------
+Read-only targeted decompilation confirms:
+
+- FUN_18075a210 destroys all tree entries, resets the root's left/right/parent
+  links to itself, and writes element count zero. It clears the current work set.
+- FUN_180676aa0 starts at the matching tree range and returns the count of equal
+  entries. The caller's zero comparison is therefore an unseen-name test.
+- FUN_180579cf0 delegates to the tree insertion routine FUN_180198f00.
+
+Conclusion used by the product
+------------------------------
+The native rule performs transitive, visited-name-deduplicated traversal of
+direct and single-NOT continuous reset aliases. A chain such as
+`async_rst <- alias_rst <- (A & B)` reaches and reports the upstream non-alias
+driver. A direct/inverted alias cycle terminates without a diagnostic proof.
+
+Diagnostic multiplicity
+-----------------------
+The visited tree is consulted only before a source name is inserted into the
+next work set. Inside one current-name iteration, FUN_180758410 loops over every
+matching assignment record; each non-alias record independently executes the
+diagnostic construction and append calls. There is no name- or line-based
+deduplication in that block. Consequently two distinct non-alias assignment
+AST nodes report twice even on one physical line, while two alias branches that
+converge on one source name visit that source once.
+
+Remaining unknown
+-----------------
+The initial asynchronous-reset relation producer, hierarchy/library semantics,
+macros, generate elaboration, compound targets and ordering across different
+design roots remain unresolved. Unsupported clean paths remain
+ManualReviewRequired.

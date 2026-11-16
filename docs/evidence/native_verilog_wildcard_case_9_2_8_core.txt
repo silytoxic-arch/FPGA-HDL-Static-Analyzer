@@ -1,0 +1,70 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Provider: Ghidra 12.1.4, completed default auto-analysis database
+Rule: GJB10157_VLOG.9.2.8 (public ID A-11-2)
+
+Constructor and vtable
+----------------------
+0x180024010 registers the exact string GJB10157_VLOG.9.2.8 and installs
+Yosys::GJB10157_VLOG_9_2_8::vftable at 0x180ef5458.
+
+slot 0  0x1805843e0  rule consumer / diagnostic emitter
+slot 1  0x180697020  returns false
+slot 2  0x180716130  AST_CASE admission predicate
+slot 3  0x18003e7e0  string cleanup
+slot 4  0x18062d400  registration helper
+slot 5  0x180584390  destructor
+
+Admission predicate: FUN_180716130
+----------------------------------
+The function returns true only when all of these are true:
+
+* node type at +0x04 equals 0x57 (AST_CASE);
+* byte +0x183 equals zero;
+* the child vector at +0x08..+0x10 is nonempty.
+
+The same +0x183 zero gate is used by the recovered case-default rule and
+excludes the observed IF/ELSIF/ELSE-lowered CASE representation.  The exact
+field name remains unavailable.
+
+Consumer: FUN_1805843e0
+-----------------------
+For each admitted AST_CASE record stored in the rule group map, the function
+iterates the node's direct child vector.  A child is reportable exactly when:
+
+    unsigned(child.type - 0x59) < 2
+
+That is AST_CONDX (0x59) or AST_CONDZ (0x5a).  On the first matching child the
+function constructs one Warning from the CASE node's own source path at
++0x1e0 and line at +0x210, emits it, and immediately breaks the child loop.
+Therefore one AST_CASE produces at most one diagnostic regardless of its item
+count.  A CASE without a CONDX/CONDZ child produces no diagnostic.
+
+The fixed 25-byte GB18030 message at 0x180ef54a0 decodes to:
+
+    避免使用casex与casez语句.
+
+Parser corroboration
+--------------------
+The official Yosys Verilog parser creates one AST_CONDX or AST_CONDZ node for
+each case_item according to the active casex/casez kind.  Its case_body may be
+empty.  This corroborates the source-level boundary: a complete nonempty
+casex/casez is reportable once; an empty construct has no matching item child.
+Source consulted 2026-11-10:
+https://github.com/YosysHQ/yosys/blob/main/frontends/verilog/verilog_parser.y
+
+Product boundary
+----------------
+The independent source adapter runs after configured conditional preprocessing,
+requires a closed selector and matching endcase, and requires at least one
+syntactically identifiable case item.  It emits once at the casex/casez keyword.
+Empty and incomplete constructs are not diagnosed and remain noncompliant-status
+unknown through ManualReviewRequired rather than being certified compliant.
+
+Unknowns
+--------
+The proprietary frontend revision, formal name and every producer of +0x183,
+macro/include provenance beyond the product preprocessor, malformed recovery,
+generated/simplified AST ownership, exact column selection, waiver processing,
+and native traversal ordering remain unverified.  Full binary equivalence is
+not claimed.

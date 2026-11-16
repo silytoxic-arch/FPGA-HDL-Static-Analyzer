@@ -1,0 +1,30 @@
+# Copy to .fpga-lint.conf in the directory where the analyzer is run.
+# Command-line options append to these list values and override fail-on.
+
+fail-on warning
+
+# Adopt an existing project incrementally after generating this file with
+# --write-baseline .fpga-lint-baseline.
+# baseline .fpga-lint-baseline
+
+# Verilog/SystemVerilog preprocessing inputs.
+include-dir rtl/include
+define FPGA_FAMILY_7SERIES=1
+
+# Reuse a simulator source list instead of passing every HDL path on the CLI.
+# file-list project/files.f
+
+# Disable a rule for the entire project.
+disable STYLE-001
+
+# Override a rule's effective level without disabling it.
+severity RTL-LATCH-INFERRED error
+severity RTL-UNUSED-SIGNAL warning
+
+# Resolve vendor/library modules without requiring their source code.
+blackbox xpm_fifo_async
+blackbox IBUFDS
+
+# * and ? wildcards match normalized paths.
+exclude **/generated/**
+exclude **/build/**

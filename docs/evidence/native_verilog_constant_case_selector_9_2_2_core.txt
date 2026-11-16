@@ -1,0 +1,61 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Provider: Ghidra 12.1.4, completed default auto-analysis database
+Rule: GJB10157_VLOG.9.2.2 (public ID R-11-2)
+
+Constructor and vtable
+----------------------
+FUN_180023c20 registers GJB10157_VLOG.9.2.2 and installs
+Yosys::GJB10157_VLOG_9_2_2::vftable at 0x180ef4cd8.
+
+slot 0  0x180581600  rule consumer / diagnostic emitter
+slot 1  0x180581b90  candidate selector
+slot 2  0x180697020  returns false
+slot 3  0x18003e7e0  string cleanup
+slot 4  0x18062d400  registration helper
+slot 5  0x1805815b0  destructor
+
+Candidate selector: FUN_180581b90
+---------------------------------
+The selector returns true only when all conditions hold:
+
+* node type at +0x04 is 0x57 (AST_CASE);
+* byte +0x183 equals zero;
+* the direct child vector is nonempty;
+* the first direct child's type is 0x10 or 0x11
+  (AST_CONSTANT or AST_REALVALUE).
+
+Consumer: FUN_180581600
+-----------------------
+The consumer iterates each stored record and independently repeats the same
+four checks.  Every matching CASE produces exactly one diagnostic.  It does
+not inspect case item labels or branch bodies.  The source path and line are
+read from the CASE node at +0x1e0 and +0x210.
+
+The fixed 39-byte GB18030 message at 0x180ef4d20 decodes exactly to:
+
+    禁止在case语句的控制表达式中使用固定值.
+
+The native diagnostic severity string is Warning.  The product's mandatory
+GJB10157 profile intentionally maps public rule R-11-2 to Error severity while
+preserving the recovered message and predicate.
+
+Product boundary
+----------------
+The source adapter checks case/casex/casez selectors after configured
+conditional preprocessing.  It requires a closed selector and a matching
+endcase before reporting.  A complete empty case with a constant selector is
+still reported because the selector itself is the first AST_CASE child.
+Incomplete source is not diagnosed and remains ManualReviewRequired.
+
+The product resolves numeric parameter/localparam expressions conservatively.
+The native pass position relative to simplification and constant folding is
+not recovered, so unknown functions, overrides and unresolved expressions are
+not guessed constant or compliant.
+
+Unknowns
+--------
+The formal name and all producers of +0x183, exact frontend/pass ordering,
+parameter overrides, packages/classes, arbitrary constant functions, complete
+macro/include provenance, generated/malformed nodes, exact column and traversal
+ordering remain unverified.  Full native equivalence is not claimed.
