@@ -23,7 +23,7 @@ ZIP。主要输出位置：
 - `build\windows-install\bin\fpga_analyzer_cli.exe`
 - `build\windows-release-package\FPGA-HDL-Static-Analyzer-<版本>-Windows-AMD64.zip`
 
-仓库内置的 `.github/workflows/windows-build.yml` 会在 GitHub 托管的 Windows 2025、
+仓库内置的 `.github/workflows/windows-build.yml` 会在 GitHub 托管的 Windows Server 2022、
 Visual Studio 2022 和 Qt 6.8.3 环境中执行同一脚本。每次推送到 `main`、提交针对
 `main` 的拉取请求，或在 Actions 页面手动触发工作流时，都会重新编译、运行测试并上传
 名为 `FPGA-HDL-Static-Analyzer-Windows-x64` 的 ZIP 工件及其 SHA-256 校验文件。

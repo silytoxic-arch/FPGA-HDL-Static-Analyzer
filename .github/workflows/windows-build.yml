@@ -17,7 +17,10 @@ concurrency:
 jobs:
   build-windows:
     name: Windows x64 / Qt 6 / MSVC 2022
-    runs-on: windows-2025
+    # Pin the runner to the Visual Studio 2022 image. The moving
+    # windows-2025 image now ships Visual Studio 2026 and cannot satisfy the
+    # existing "Visual Studio 17 2022" CMake preset.
+    runs-on: windows-2022
     timeout-minutes: 60
 
     steps:
