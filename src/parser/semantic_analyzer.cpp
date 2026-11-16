@@ -16,7 +16,7 @@
 #include <unordered_set>
 
 namespace fpga::parser {
-namespace {
+namespace detail {
 
 std::string lower(std::string value) {
     std::ranges::transform(value, value.begin(),
@@ -6857,18 +6857,18 @@ std::vector<SemanticIssue> analyzeVhdl(const core::SourceFile& source,
     return issues;
 }
 
-} // namespace
+} // namespace detail
 
 std::vector<SemanticIssue> analyzeSemantics(const core::SourceFile& source) {
     if (source.language() == core::HdlLanguage::Verilog ||
-        source.language() == core::HdlLanguage::SystemVerilog) return analyzeVerilog(source);
-    if (source.language() == core::HdlLanguage::Vhdl) return analyzeVhdl(source);
+        source.language() == core::HdlLanguage::SystemVerilog) return detail::analyzeVerilog(source);
+    if (source.language() == core::HdlLanguage::Vhdl) return detail::analyzeVhdl(source);
     return {};
 }
 
 std::vector<SemanticIssue> analyzeVhdlUnreachableComparisons(const core::SourceFile& source) {
     if (source.language() != core::HdlLanguage::Vhdl) return {};
-    auto issues = analyzeVhdl(source, true);
+    auto issues = detail::analyzeVhdl(source, true);
     std::erase_if(issues, [](const auto& issue) {
         return issue.ruleId != "RTL-UNREACHABLE-RANGE-COMPARISON";
     });
@@ -6877,7 +6877,7 @@ std::vector<SemanticIssue> analyzeVhdlUnreachableComparisons(const core::SourceF
 
 std::vector<SemanticIssue>
 analyzeUnusedVhdlGenerics(const std::vector<core::SourceFile>& sources) {
-    return analyzeUnusedVhdlGenericsImpl(sources);
+    return detail::analyzeUnusedVhdlGenericsImpl(sources);
 }
 
 } // namespace fpga::parser
