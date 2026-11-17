@@ -14508,22 +14508,28 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                           : "实例" + instance.name + "未使用命名关联端口映射连接");
             }
             if (!vhdl) {
-                // Native 5.3.1 reports AST_ARGUMENT whose first child is not
-                // AST_CONSTANT(16), AST_IDENTIFIER(19), AST_PREFIX(20).
+                // Native 5.3.1 slot 2 admits AST_CELL(0x4f). Its run examines
+                // every direct AST_ARGUMENT(13) child of each admitted cell
+                // and reports independently when that argument's first child
+                // is not AST_CONSTANT(16), AST_IDENTIFIER(19), or
+                // AST_PREFIX(20). Source and physical line come from the first
+                // child; the record has no column and uses one fixed message.
                 // Our parser marks only source expressions with a known
                 // non-admitted root; unknown syntax stays under review.
                 // ev_efbd0c9b79d5a3d8a287fcabac46eb74e69b3fbc052895287945719c4057ea1a
+                // ev_2931001d50d0a817c327e36f2110c5a6b8262d6ef85f7f36049a336d94f9a687
+                // docs/evidence/native_verilog_port_actual_expression_5_3_1_findings.md
                 for (const auto& connection : instance.namedConnections) {
                     if (!connection.actualExpression) continue;
                     emit(result, "GJB10157.5.3.1", source,
-                         connection.actualLocation.line, connection.actualLocation.column,
-                         "端口实参使用表达式：" + instance.name + "." + connection.formal);
+                         connection.actualLocation.line, 1,
+                         "端口例化时禁止使用表达式");
                 }
                 for (const auto& connection : instance.positionalConnections) {
                     if (!connection.actualExpression) continue;
                     emit(result, "GJB10157.5.3.1", source,
-                         connection.location.line, connection.location.column,
-                         "位置端口实参使用表达式：" + instance.name);
+                         connection.location.line, 1,
+                         "端口例化时禁止使用表达式");
                 }
             }
         }
@@ -16618,6 +16624,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.5.2.15") ||
                 (left.ruleId == "GJB10157.5.2.17" &&
                  right.ruleId == "GJB10157.5.2.17") ||
+                (left.ruleId == "GJB10157.5.3.1" &&
+                 right.ruleId == "GJB10157.5.3.1") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

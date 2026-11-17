@@ -4303,18 +4303,28 @@ int main() {
           std::ranges::all_of(result.violations | std::views::filter([](const auto& item) {
               return item.ruleId == "GJB10157.5.3.1";
           }), [](const auto& item) {
-              return item.line == 3 && item.severity == analysis::Severity::Warning;
-          }), "native port-actual rule diagnoses each named binary expression as Warning");
+              return item.line == 3 && item.column == 1 &&
+                     item.severity == analysis::Severity::Warning &&
+                     item.message == "端口例化时禁止使用表达式";
+          }), "native port-actual rule preserves per-argument multiplicity and fixed diagnostic");
     result = analyze("module child(input a,b,c); endmodule\n"
                      "module top(input a,b,output c);\n"
                      "child u(a, ~b, c);\nendmodule\n");
-    check(count(result, "GJB10157.5.3.1") == 1,
-          "native port-actual rule diagnoses a positional unary expression");
+    check(count(result, "GJB10157.5.3.1") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.1" && item.line == 3 &&
+                     item.column == 1 && item.message == "端口例化时禁止使用表达式";
+          }), "native port-actual rule locates a positional unary expression by line only");
     result = analyze("module child(input a,b,c); endmodule\n"
                      "module top(input [3:0] a, output c);\n"
                      "child u(.a(a[1]), .b(1'b0), .c(c));\nendmodule\n");
     check(count(result, "GJB10157.5.3.1") == 0,
           "native port-actual rule admits identifier selections and constants");
+    result = analyze("module child(input a); endmodule\n"
+                     "module top(input a);\n"
+                     "child u(.a(top.a));\nendmodule\n");
+    check(count(result, "GJB10157.5.3.1") == 0,
+          "native AST_PREFIX admission keeps a hierarchical identifier actual clear");
     result = analyze("module child(input a,b,c); endmodule\n"
                      "module top(input a,b,output c);\n"
                      "child u(.a((a)), .b(), .c(c));\nendmodule\n");

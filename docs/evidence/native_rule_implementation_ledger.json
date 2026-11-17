@@ -3343,11 +3343,14 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native run visits AST_ARGUMENT(13) nodes with a nonempty child vector and emits Warning when the first child AST type is neither AST_CONSTANT(16), AST_IDENTIFIER(19), nor AST_PREFIX(20). Product classifies bounded Verilog instance port actual source shapes and reports known expression roots, including unary, binary, concatenation and ternary forms.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Native slot 2 FUN_18071a060 admits only AST_CELL(0x4f). FUN_180542990 visits every direct AST_ARGUMENT(13) child of each admitted cell; an empty argument has no first child and is skipped. For each nonempty argument it examines only the first child and emits one Warning when that type is neither AST_CONSTANT(16), AST_IDENTIFIER(19), nor AST_PREFIX(20). There is no first-match break or name deduplication, so multiple invalid arguments on one line retain identical diagnostic multiplicity. File and physical line come from the first child +0x1e0/+0x210 and no column is written. PE bytes at 0x180eef310 decode from GB18030 to the exact fixed message 端口例化时禁止使用表达式. Product mirrors the cell/direct-argument boundary, bounded admitted source roots, per-argument multiplicity, fixed message and line-only location.",
       "predicateEvidence": [
         "ev_efbd0c9b79d5a3d8a287fcabac46eb74e69b3fbc052895287945719c4057ea1a",
-        "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b"
+        "ev_2931001d50d0a817c327e36f2110c5a6b8262d6ef85f7f36049a336d94f9a687",
+        "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
+        "reverse-tools/evidence/t_linter_pass64/r3_1_port_actual.txt#sha256=482e63c3ff0f6a1f8a5a8e45a91e1b21c2775ee10ad4b06f8f141c4c7f75744b",
+        "docs/evidence/native_verilog_port_actual_expression_5_3_1_findings.md"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -3356,7 +3359,9 @@
       "additionalTests": "tests/standard_accuracy_tests.cpp",
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.3.1.html",
-        "sha256": "25264b730d28987a2583d6786edb52e2b5825bf373f360b9b11de743f708cb8e"
+        "sha256": "25264b730d28987a2583d6786edb52e2b5825bf373f360b9b11de743f708cb8e",
+        "nativeFindings": "docs/evidence/native_verilog_port_actual_expression_5_3_1_findings.md",
+        "release": "docs/v1_4_200_release.md"
       },
       "exampleChecks": [
         {
@@ -3370,7 +3375,7 @@
           "matched": true
         }
       ],
-      "limitations": "Native AST_ARGUMENT parent admission, frontend constant folding, macro/generate constructs, AST_PREFIX source correspondence, unsupported actual syntax and exact diagnostic text/order remain unknown. Product reports only recognized expression shapes; no alarm remains manual review."
+      "limitations": "Complete macro/include/generate AST construction, malformed recovery, frontend constant folding, every proprietary source form lowered to AST_PREFIX and global diagnostic ordering remain unknown. Product reports only recognized expression roots and keeps unsupported shapes unresolved; no alarm remains ManualReviewRequired and full proprietary frontend equivalence is not claimed."
     },
     {
       "publicRuleId": "R-3-2",

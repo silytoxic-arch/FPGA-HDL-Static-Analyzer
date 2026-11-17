@@ -1,0 +1,66 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Analysis: offline Ghidra decompilation and PE byte decoding; no target execution
+
+Rule: GJB10157_VLOG.5.3.1 / public R-3-1
+Constructor: 0x180021ca0
+Vtable: 0x180eef2c8
+Run: FUN_180542990 (0x180542990)
+Cell selector: FUN_18071a060 (0x18071a060)
+
+Observed selector:
+
+    bool FUN_18071a060(unused, node) {
+        return *(int *)(node + 4) == 0x4f;
+    }
+
+The DLL AST-name table maps 0x4f to AST_CELL.
+
+Observed run predicate:
+
+    for each root in rule_object + 0xa8:
+        for each direct child of root:
+            if child.type == 0x0d and child has at least one child:
+                first = child.children[0]
+                type = first.type
+                if type != 0x10 and type != 0x13 and type != 0x14:
+                    emit Warning at first.file + 0x1e0,
+                                    first.line + 0x210
+
+The DLL AST-name table maps:
+
+- 0x0d = AST_ARGUMENT
+- 0x10 = AST_CONSTANT
+- 0x13 = AST_IDENTIFIER
+- 0x14 = AST_PREFIX
+
+No first-match break or name-based deduplication is present. Every invalid
+direct AST_ARGUMENT of every admitted AST_CELL independently reaches emission.
+The diagnostic record carries file and physical line from the argument's first
+child; no source-column field is written.
+
+Message bytes at VA 0x180eef310 (24 bytes):
+
+    b6 cb bf da c0 fd bb af ca b1 bd fb d6 b9 ca b9
+    d3 c3 b1 ed b4 ef ca bd
+
+GB18030 decoding:
+
+    端口例化时禁止使用表达式
+
+Evidence IDs:
+
+- run pseudocode:
+  ev_efbd0c9b79d5a3d8a287fcabac46eb74e69b3fbc052895287945719c4057ea1a
+- AST_CELL selector:
+  ev_2931001d50d0a817c327e36f2110c5a6b8262d6ef85f7f36049a336d94f9a687
+- DLL AST type table:
+  ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b
+
+Unknowns:
+
+- complete macro/include/generate AST construction and malformed recovery;
+- frontend constant folding before AST_ARGUMENT creation;
+- every proprietary source form lowered to AST_PREFIX;
+- diagnostic ordering across module-map keys and generated cells.
+

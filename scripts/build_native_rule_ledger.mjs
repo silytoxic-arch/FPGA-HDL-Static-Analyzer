@@ -548,9 +548,9 @@ const confirmed = {
     limitations: 'The unique +0x2a9 producer, copy path, selector and diagnostic text are recovered. The producer virtual slot name, complete macro/include parser recovery, malformed syntax, all interface/program extension semantics, cross-file diagnostic ordering and full frontend equivalence remain unresolved. Product is a bounded explicit-source adapter; preprocessing failures are not guessed and no alarm remains manual review.'
   },
   'GJB10157.5.3.1': {
-    predicate: 'Native run visits AST_ARGUMENT(13) nodes with a nonempty child vector and emits Warning when the first child AST type is neither AST_CONSTANT(16), AST_IDENTIFIER(19), nor AST_PREFIX(20). Product classifies bounded Verilog instance port actual source shapes and reports known expression roots, including unary, binary, concatenation and ternary forms.',
-    evidence: ['ev_efbd0c9b79d5a3d8a287fcabac46eb74e69b3fbc052895287945719c4057ea1a', 'ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b'],
-    limitations: 'Native AST_ARGUMENT parent admission, frontend constant folding, macro/generate constructs, AST_PREFIX source correspondence, unsupported actual syntax and exact diagnostic text/order remain unknown. Product reports only recognized expression shapes; no alarm remains manual review.'
+    predicate: 'Native slot 2 FUN_18071a060 admits only AST_CELL(0x4f). FUN_180542990 visits every direct AST_ARGUMENT(13) child of each admitted cell; an empty argument has no first child and is skipped. For each nonempty argument it examines only the first child and emits one Warning when that type is neither AST_CONSTANT(16), AST_IDENTIFIER(19), nor AST_PREFIX(20). There is no first-match break or name deduplication, so multiple invalid arguments on one line retain identical diagnostic multiplicity. File and physical line come from the first child +0x1e0/+0x210 and no column is written. PE bytes at 0x180eef310 decode from GB18030 to the exact fixed message 端口例化时禁止使用表达式. Product mirrors the cell/direct-argument boundary, bounded admitted source roots, per-argument multiplicity, fixed message and line-only location.',
+    evidence: ['ev_efbd0c9b79d5a3d8a287fcabac46eb74e69b3fbc052895287945719c4057ea1a', 'ev_2931001d50d0a817c327e36f2110c5a6b8262d6ef85f7f36049a336d94f9a687', 'ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b', 'reverse-tools/evidence/t_linter_pass64/r3_1_port_actual.txt#sha256=482e63c3ff0f6a1f8a5a8e45a91e1b21c2775ee10ad4b06f8f141c4c7f75744b', 'docs/evidence/native_verilog_port_actual_expression_5_3_1_findings.md'],
+    limitations: 'Complete macro/include/generate AST construction, malformed recovery, frontend constant folding, every proprietary source form lowered to AST_PREFIX and global diagnostic ordering remain unknown. Product reports only recognized expression roots and keeps unsupported shapes unresolved; no alarm remains ManualReviewRequired and full proprietary frontend equivalence is not claimed.'
   },
   'GJB10157.5.3.2': {
     predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180543030 resolves the configured top-module entry, iterates its contained AST_WIRE(6) records, requires at least one direction byte at +0xa0/+0xa1, and emits when any of twelve non-wire/non-reg type flags at +0xa7/+0xa8/+0x109/+0x29c..+0x29f/+0x2a2..+0x2a6 is set. Packaged ANSI and non-ANSI examples identify wand, wor, tri, integer and time as rejected while implicit wire, explicit wire and reg remain clear. Product applies the recovered top-level and direction gates and reports each parsed port carrying an evidenced non-wire/non-reg Verilog type.',
@@ -1064,6 +1064,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.5.2.17',
   'GJB10157.5.2.18',
   'GJB10157.5.2.7',
+  'GJB10157.5.3.1',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1388,6 +1389,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.5.2.9': {
         nativeFindings: 'docs/evidence/native_verilog_positional_ports_5_2_9_findings.md',
         release: 'docs/v1_4_198_release.md'
+      }, 'GJB10157.5.3.1': {
+        nativeFindings: 'docs/evidence/native_verilog_port_actual_expression_5_3_1_findings.md',
+        release: 'docs/v1_4_200_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'
