@@ -713,9 +713,9 @@ const confirmed = {
     limitations: 'Complete proprietary frontend admission for macro/include/generated or malformed module roots and map behavior for duplicate same-name roots remain unresolved. Product operates on uniquely parsed source modules; no alarm remains ManualReviewRequired and full frontend equivalence is not claimed. The packaged examples carry intended filenames in parser comments; the audit harness uses them.'
   },
   'GJB10157.5.2.9': {
-    predicate: 'Native run recursively collects AST_ARGUMENT(13) descendants per AST root and emits one Warning on the first empty argument-name string (+0x58 length zero), then breaks. Product maps positional cell ports to this core predicate and emits at most once per parsed Verilog design unit.',
-    evidence: ['ev_6659c1428a97450292d463e44400d3a98c8a36293bdf30761102a33f30cffc76', 'ev_90de243667744365d1adc00c2a5571260bb3e2e2df08f1c6761bebb0f92a38e8', 'ev_2148b633a698afcb26c5e94d994d52969dc623bbcd931daae04a4f0fa1f1b67c', 'ev_d02a3a7b6216e84a9e2e87d6b439ba09f213ce9520a3e520c4538722f755f236', 'ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b'],
-    limitations: 'Native AST_ARGUMENT parent coverage, root grouping, macro/generated constructs and exact diagnostic severity/location remain unresolved. Product reports at first instance rather than native root, and retains ManualReview when no alarm.'
+    predicate: 'Constructor FUN_180021b80 installs vtable 0x180eef1d8. Slot 1 FUN_18071a060 admits only AST_CELL(0x4f), and slot 0 FUN_1806d30d0 recursively collects AST_ARGUMENT(13) below each admitted cell. The first argument whose name length at +0x58 is zero emits one record and breaks only that cell loop, so each positional instance reports once regardless of its positional-port count. The message concatenates GB18030 fragments as 实例<normalized-cell-name>未使用命名关联端口映射连接; source path +0x1e0 and physical line +0x210 come from the cell and no native column is stored. The native record says Warning while the shipped GJB10157 profiles configure this rule as Error; product follows the selected standard profile and reproduces the predicate, multiplicity, exact text and line-only location.',
+    evidence: ['ev_6659c1428a97450292d463e44400d3a98c8a36293bdf30761102a33f30cffc76', 'ev_90de243667744365d1adc00c2a5571260bb3e2e2df08f1c6761bebb0f92a38e8', 'ev_2148b633a698afcb26c5e94d994d52969dc623bbcd931daae04a4f0fa1f1b67c', 'ev_2931001d50d0a817c327e36f2110c5a6b8262d6ef85f7f36049a336d94f9a687', 'ev_d02a3a7b6216e84a9e2e87d6b439ba09f213ce9520a3e520c4538722f755f236', 'ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b', 'docs/evidence/native_verilog_positional_ports_5_2_9_findings.md#原生实现观察'],
+    limitations: 'Complete proprietary macro/include/generate cell construction, escaped and non-ASCII normalization, implicit connections, malformed recovery, cell traversal order and the downstream mechanism reconciling the internal Warning record with profile Error remain unresolved. Product uses parsed positional port associations, profile Error and column 1; no alarm remains ManualReviewRequired and full frontend equivalence is not claimed.'
   },
   'GJB10157.5.2.7': {
     predicate: 'Native slot 0 iterates the module-name map at rule object +0x68. It opens root+0x1e0 only when a map value contains exactly one nonnull AST_MODULE(2), then reads each physical line, searches for the exact eight-byte `include sequence and a colon anywhere on that line, and emits once per matching line per admitted module-map entry. Thus a shared file with two distinct uniquely bound modules reports twice, a module-free file is not scanned, and a duplicate same-name module group is skipped. Product reproduces the raw byte predicate, map-entry multiplicity, recovered Error severity and exact GB18030 message.',
@@ -1051,6 +1051,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.5.2.5',
   'GJB10157.5.2.6',
   'GJB10157.5.2.8',
+  'GJB10157.5.2.9',
   'GJB10157.5.2.10',
   'GJB9765.4.5.f.29',
   'GJB9765.4.5.g',
@@ -1383,6 +1384,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.5.2.3': {
         nativeFindings: 'docs/evidence/native_verilog_keyword_5_2_3_findings.md',
         release: 'docs/v1_4_197_release.md'
+      }, 'GJB10157.5.2.9': {
+        nativeFindings: 'docs/evidence/native_verilog_positional_ports_5_2_9_findings.md',
+        release: 'docs/v1_4_198_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'

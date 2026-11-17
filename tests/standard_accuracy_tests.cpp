@@ -6932,13 +6932,27 @@ int main() {
           "only uniquely bound module-name entries contribute native file scans");
     result = analyze("module child(input aa); endmodule\n"
                      "module top(input aa); child first(aa); child second(aa); endmodule\n");
-    check(count(result, "GJB10157.5.2.9") == 1,
-          "native positional-argument predicate stops after one finding per AST root");
+    check(count(result, "GJB10157.5.2.9") == 2 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.2.9" &&
+                     item.message == "实例first未使用命名关联端口映射连接" &&
+                     item.line == 2 && item.column == 1 &&
+                     item.severity == analysis::Severity::Error;
+          }) && std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.2.9" &&
+                     item.message == "实例second未使用命名关联端口映射连接" &&
+                     item.line == 2 && item.column == 1;
+          }),
+          "native cell admission reports each positional instance with exact text and no-column mapping");
     result = analyze("module child(input aa); endmodule\n"
                      "module first(input aa); child left(aa); endmodule\n"
                      "module second(input aa); child right(aa); endmodule\n");
     check(count(result, "GJB10157.5.2.9") == 2,
-          "separate design units each retain a positional-port finding");
+          "separate design units each retain their positional-cell finding");
+    result = analyze("module child(input aa, input bb); endmodule\n"
+                     "module top(input aa, input bb); child both(aa, bb); endmodule\n");
+    check(count(result, "GJB10157.5.2.9") == 1,
+          "one cell with several unnamed AST_ARGUMENT children reports only once");
     result = analyze("module child(input aa); endmodule\n"
                      "module top(input aa); child first(.aa(aa)); child second(.aa(aa)); endmodule\n");
     check(count(result, "GJB10157.5.2.9") == 0,

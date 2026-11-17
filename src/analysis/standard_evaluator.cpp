@@ -14419,7 +14419,6 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             emit(result, "GJB9765.4.2.a", source, unit.location.line, unit.location.column,
                  "设计单元没有输入或输出端口");
         }
-        bool reportedVerilogPositional = false;
         for (const auto& instance : unit.instances) {
             if (vhdl) {
                 // Native helper groups children of AST 0x93/0x94 whose type
@@ -14470,15 +14469,19 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                 // and emits at the first other child before breaking. Thus a
                 // mixed or positional instance produces at most one finding.
                 // ev_b5f39d3c2222897018de21db1dddbd6a429f292f203f844aa6413c58c004bb07
-                // Verilog 5.2.9 separately checks empty-name AST_ARGUMENT
-                // descendants and stops after the first match per AST root.
+                // Verilog 5.2.9 slot 1 admits AST_CELL(0x4f). Slot 0 then
+                // recursively checks that cell's AST_ARGUMENT descendants and
+                // stops after the first empty argument name, so every
+                // positional cell emits once (not once per design unit). The
+                // native record uses the cell name/source/physical line and
+                // has no column.
+                // ev_2931001d50d0a817c327e36f2110c5a6b8262d6ef85f7f36049a336d94f9a687
                 // ev_2148b633a698afcb26c5e94d994d52969dc623bbcd931daae04a4f0fa1f1b67c
-                if (vhdl || !reportedVerilogPositional) {
-                    emit(result, vhdl ? "GJB9765.4.1.a" : "GJB10157.5.2.9",
-                         source, instance.location.line, instance.location.column,
-                         "实例使用了位置端口映射：" + instance.name);
-                    if (!vhdl) reportedVerilogPositional = true;
-                }
+                emit(result, vhdl ? "GJB9765.4.1.a" : "GJB10157.5.2.9",
+                     source, instance.location.line,
+                     vhdl ? instance.location.column : 1,
+                     vhdl ? "实例使用了位置端口映射：" + instance.name
+                          : "实例" + instance.name + "未使用命名关联端口映射连接");
             }
             if (!vhdl) {
                 // Native 5.3.1 reports AST_ARGUMENT whose first child is not
