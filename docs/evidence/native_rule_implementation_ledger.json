@@ -2673,10 +2673,12 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Seven declaration types including FUNCTION; normalized ASCII casefold exact membership in six recovered category tables. First enabled AND matching category wins; earlier enabled nonmatch continues. The shipped rule HTML explicitly prohibits the first four recovered families (VHDL, Verilog, SystemVerilog and SDF/EDIF), so product uses those four as its documented-standard fallback while preserving explicit project overrides. Because native consumes parsed AST declarations, product applies configured conditional preprocessing before its bounded source declaration adapter.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructor FUN_180021790 registers GJB10157_VLOG.5.2.3 and installs vtable 0x180eeca70; active slot FUN_180535e60 iterates the ordered module-name map at object+0xa8 and admits only a group containing exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79), TASK(3) and FUNCTION(4). Each original normalized name is ASCII case-folded for exact membership in six recovered category tables. Categories are tested in VHDL, Verilog, SystemVerilog, SDF/EDIF, PSL, Windows order; first enabled and matching category wins while an earlier enabled nonmatch continues. Each branch emits Error at the candidate physical line with no native column and concatenates its exact fixed prefix directly with the original normalized name. The shipped rule HTML explicitly prohibits the first four families, so product uses those four as its documented-standard fallback while preserving explicit project overrides and reproduces the per-module-group boundary and exact diagnostic surface.",
       "predicateEvidence": [
-        "docs/evidence/native_verilog_keyword_5_2_3_findings.md",
+        "../reverse-tools/evidence/t_linter_pass61/r2_3_decompile.txt#sha256=dab46701b0cda3bbeda3430c019f545b8bf193de8d4fa908ef0f43bdaae82c52",
+        "../reverse-tools/evidence/t_linter_pass61/r2_3_strings.txt#sha256=64a44e3ebbb6aaa0fb8d0a0e8cda46c51387e6926bf31f3e7c4947b9da7ae7e4",
+        "docs/evidence/native_verilog_keyword_5_2_3_findings.md#原生实现观察",
         "ev_e1ff709dbf6ffe9075286c99ef5e824912ce9dc45827378aaf7d79cd5afdfe26",
         "ev_e1297c18f51d2cc9b7fecbc64009446b553e2a77709a5091e4e8de912db21e25",
         "ev_8c1fb3bcfa6481b3630b2df37c62ca49f48f3768c0f7e33d9ad58e2d3722c4e6",
@@ -2700,7 +2702,7 @@
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.3.html",
         "sha256": "88e1302718a21d233ae60bdf92b75bcf02795328d8661feed5f57413348a0e74",
         "nativeFindings": "docs/evidence/native_verilog_keyword_5_2_3_findings.md",
-        "release": "docs/v1_4_12_release.md"
+        "release": "docs/v1_4_197_release.md"
       },
       "exampleChecks": [
         {
