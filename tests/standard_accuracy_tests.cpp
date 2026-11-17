@@ -5899,6 +5899,38 @@ int main() {
         "assign OUT2 = IN1 & IN2; endmodule\n");
     check(count(result, "GJB10157.5.3.3") == 2,
           "attachment 5.3.3 reports top-level procedural assignment and compound continuous RHS");
+    check(std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.3" && item.line == 3 && item.column == 1 &&
+                     item.severity == analysis::Severity::Warning &&
+                     item.message == "顶层probe包含胶连逻辑OUT3";
+          }) && std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.3" && item.line == 4 && item.column == 1 &&
+                     item.severity == analysis::Severity::Warning &&
+                     item.message == "顶层probe包含胶连逻辑OUT2";
+          }), "native top-glue rule preserves dynamic message, Warning and line-only location");
+    result = analyzeVerilog(
+        "module probe(input A, B, output reg Y); always @* begin Y = A; Y = B; end endmodule\n");
+    check(count(result, "GJB10157.5.3.3") == 2 &&
+          std::ranges::all_of(result.violations | std::views::filter([](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.3";
+          }), [](const auto& item) {
+              return item.line == 1 && item.column == 1 &&
+                     item.message == "顶层probe包含胶连逻辑Y";
+          }), "native top-glue rule retains identical same-line per-assignment multiplicity");
+    result = analyzeVerilog(
+        "module probe(input A,B, output Y,Z); assign Y=A&B, Z=A|B; endmodule\n");
+    check(count(result, "GJB10157.5.3.3") == 2 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.3" &&
+                     item.message == "顶层probe包含胶连逻辑Y";
+          }) && std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.3" &&
+                     item.message == "顶层probe包含胶连逻辑Z";
+          }), "native top-glue rule preserves one AST_ASSIGN per comma-separated net assignment");
+    result = analyzeVerilog(
+        "module probe(input A,B, output Y,Z); assign Y=A, Z=B; endmodule\n");
+    check(count(result, "GJB10157.5.3.3") == 0,
+          "comma-separated direct identifier wire-through assignments remain clear");
     result = analyzeVerilog(
         "module probe(input CLK, input IN1, output OUT1, OUT2);\n"
         "child u0(.CLK(CLK), .IN1(IN1), .OUT1(OUT1));\n"

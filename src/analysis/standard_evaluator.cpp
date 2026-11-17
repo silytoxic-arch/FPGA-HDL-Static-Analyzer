@@ -3771,7 +3771,10 @@ void checkTopLevelVerilogGlueLogic(AnalysisResult& result,
     // AST_ASSIGN_LE(0x56). Every procedural assignment is reported. A
     // continuous AST_ASSIGN is reported only when its second child is not
     // AST_IDENTIFIER(0x13), so a direct wire-through (including an identifier
-    // select represented on that node) remains admitted.
+    // select represented on that node) remains admitted. Both report branches
+    // build the exact message 顶层<module>包含胶连逻辑<lhs>, use Warning and the
+    // assignment node's physical line, and write no column. Every gathered
+    // assignment independently reaches the result append.
     // ev_0a46121daec621b5ae294aa176f16861520f38e9ef553edcf3337f53012651e5
     const auto sameFileTop = [&](const auto& unit) {
         return unit.kind == parser::DesignUnitKind::VerilogModule && selectedTop(unit, options) &&
@@ -3796,6 +3799,30 @@ void checkTopLevelVerilogGlueLogic(AnalysisResult& result,
         auto moduleEnd = module + 2;
         while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
 
+        const auto assignmentTarget = [&](std::size_t begin, std::size_t assignment) {
+            auto cursor = assignment;
+            while (cursor > begin) {
+                if (tokens[cursor - 1].text == "]") {
+                    int depth = 1;
+                    --cursor;
+                    while (cursor > begin && depth > 0) {
+                        --cursor;
+                        if (tokens[cursor].text == "]") ++depth;
+                        else if (tokens[cursor].text == "[") --depth;
+                    }
+                    continue;
+                }
+                if (tokens[cursor - 1].text == "}") return std::string{};
+                if (tokens[cursor - 1].kind == parser::HdlTokenKind::Identifier)
+                    return tokens[cursor - 1].text;
+                --cursor;
+            }
+            return std::string{};
+        };
+        const auto nativeMessage = [&](std::string_view target) {
+            return "顶层" + unit.name + "包含胶连逻辑" + std::string(target);
+        };
+
         std::vector<bool> continuous(tokens.size(), false);
         for (auto index = module + 2; index < moduleEnd; ++index) {
             if (tokens[index].text != "assign") continue;
@@ -3813,9 +3840,35 @@ void checkTopLevelVerilogGlueLogic(AnalysisResult& result,
             }
             if (end == moduleEnd) continue;
             for (auto mark = index; mark <= end; ++mark) continuous[mark] = true;
-            std::size_t equal = end;
+            auto clauseBegin = index + 1;
             round = square = brace = 0;
-            for (auto cursor = index + 1; cursor < end; ++cursor) {
+            for (auto cursor = index + 1; cursor <= end; ++cursor) {
+                const bool clauseEnd = cursor == end ||
+                    (tokens[cursor].text == "," && round == 0 && square == 0 && brace == 0);
+                if (clauseEnd) {
+                    std::size_t equal = cursor;
+                    int lhsRound = 0, lhsSquare = 0, lhsBrace = 0;
+                    for (auto candidate = clauseBegin; candidate < cursor; ++candidate) {
+                        const auto& text = tokens[candidate].text;
+                        if (text == "(") ++lhsRound;
+                        else if (text == ")") --lhsRound;
+                        else if (text == "[") ++lhsSquare;
+                        else if (text == "]") --lhsSquare;
+                        else if (text == "{") ++lhsBrace;
+                        else if (text == "}") --lhsBrace;
+                        else if (lhsRound == 0 && lhsSquare == 0 && lhsBrace == 0 && text == "=") {
+                            equal = candidate;
+                            break;
+                        }
+                    }
+                    if (equal != cursor && !nativeDirectIdentifierRhs(tokens, equal + 1, cursor)) {
+                        const auto target = assignmentTarget(clauseBegin, equal);
+                        emit(result, "GJB10157.5.3.3", source,
+                             tokens[clauseBegin].line, 1, nativeMessage(target));
+                    }
+                    clauseBegin = cursor + 1;
+                }
+                if (cursor == end) break;
                 const auto& text = tokens[cursor].text;
                 if (text == "(") ++round;
                 else if (text == ")") --round;
@@ -3823,15 +3876,7 @@ void checkTopLevelVerilogGlueLogic(AnalysisResult& result,
                 else if (text == "]") --square;
                 else if (text == "{") ++brace;
                 else if (text == "}") --brace;
-                else if (round == 0 && square == 0 && brace == 0 && text == "=") {
-                    equal = cursor;
-                    break;
-                }
             }
-            if (equal != end && !nativeDirectIdentifierRhs(tokens, equal + 1, end))
-                emit(result, "GJB10157.5.3.3", source,
-                     tokens[index].line, tokens[index].column,
-                     "顶层模块连续赋值包含胶合逻辑表达式");
             index = end;
         }
 
@@ -3857,10 +3902,11 @@ void checkTopLevelVerilogGlueLogic(AnalysisResult& result,
                 if (!continuous[cursor] && localRound == 0 && square == 0 && brace == 0 &&
                     (text == "=" || text == "<=")) assignment = cursor;
             }
-            if (!declaration && assignment != tokens.size())
+            if (!declaration && assignment != tokens.size()) {
+                const auto target = assignmentTarget(segment, assignment);
                 emit(result, "GJB10157.5.3.3", source,
-                     tokens[assignment].line, tokens[assignment].column,
-                     "顶层模块包含过程赋值胶合逻辑");
+                     tokens[assignment].line, 1, nativeMessage(target));
+            }
             segment = index + 1;
         }
     }
@@ -16629,6 +16675,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.5.3.1") ||
                 (left.ruleId == "GJB10157.5.3.2" &&
                  right.ruleId == "GJB10157.5.3.2") ||
+                (left.ruleId == "GJB10157.5.3.3" &&
+                 right.ruleId == "GJB10157.5.3.3") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

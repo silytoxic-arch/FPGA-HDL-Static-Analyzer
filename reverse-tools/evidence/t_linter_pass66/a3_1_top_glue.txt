@@ -1,0 +1,60 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Analysis: offline Ghidra 12.1.4 static analysis; no target execution
+
+Rule: GJB10157_VLOG.5.3.3 / public A-3-1
+Constructor: 0x180021dc0
+Final vtable: 0x180eef570
+Run slot: FUN_1806fbb10 (0x1806fbb10)
+Module selector slot: FUN_1807238a0 (0x1807238a0)
+
+Final vtable bytes at 0x180eef570:
+
+    10 bb 6f 80 01 00 00 00  a0 38 72 80 01 00 00 00
+    20 70 69 80 01 00 00 00  e0 e7 03 80 01 00 00 00
+    00 d4 62 80 01 00 00 00  f0 36 54 80 01 00 00 00
+
+The first two entries resolve to FUN_1806fbb10 and FUN_1807238a0.
+The selector admits only AST_MODULE(2).
+
+Observed run predicate:
+
+1. Normalize each admitted module key and compare it with DAT_18135b808,
+   the configured top-module name.
+2. Recursively gather AST_ASSIGN(0x4d), AST_ASSIGN_EQ(0x55) and
+   AST_ASSIGN_LE(0x56).
+3. For AST_ASSIGN, inspect its second direct child and emit only when that
+   child's type is not AST_IDENTIFIER(0x13).
+4. For AST_ASSIGN_EQ and AST_ASSIGN_LE, emit unconditionally.
+5. Continue through every gathered node; there is no local first-match break
+   or diagnostic deduplication.
+
+Both report branches use the same message construction. The DLL byte strings
+are:
+
+    180f13930: b6 a5 b2 e3 00                         -> 顶层
+    180f13920: b0 fc ba ac bd ba c1 ac c2 df bc ad 00 -> 包含胶连逻辑
+    180ee83b0: be af b8 e6 00                         -> 警告
+
+The string helpers prove concatenation in this order:
+
+    "顶层" + normalized_module_name + "包含胶连逻辑" + normalized_lhs_name
+
+FUN_1804df040 strips the Yosys leading backslash delimiter from module and
+left-hand names before message construction. Both branches take file from the
+assignment node +0x1e0 and physical line from +0x210. No source column is
+written.
+
+Evidence IDs retained from the earlier REA pass:
+
+- run: ev_0a46121daec621b5ae294aa176f16861520f38e9ef553edcf3337f53012651e5
+- selector: ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
+
+Unknowns:
+
+- complete frontend lowering of casts, parentheses, generates and malformed
+  syntax;
+- task/function-contained assignment ownership after all transforms;
+- exotic escaped and hierarchical identifier normalization;
+- global ordering across design-map records.
+

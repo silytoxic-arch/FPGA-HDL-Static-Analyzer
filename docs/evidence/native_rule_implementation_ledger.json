@@ -3546,11 +3546,12 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 1 admits AST_MODULE(2). FUN_1806fbb10 compares the module name/path-derived key with the configured top name, recursively gathers AST_ASSIGN(0x4d), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), reports every blocking/nonblocking procedural assignment, and reports a continuous assignment only when its second child is not AST_IDENTIFIER(0x13). Packaged examples confirm that a direct identifier wire-through remains clear while a binary expression and an always assignment report. Product applies this predicate only to the unique explicitly configured top when supplied, otherwise to parser-established roots.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructor 0x180021dc0 installs final vtable 0x180eef570: selector FUN_1807238a0 admits only AST_MODULE(2), while FUN_1806fbb10 compares the normalized module key with the configured top, recursively gathers AST_ASSIGN(0x4d), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), reports every procedural assignment, and reports a continuous assignment only when its second child is not AST_IDENTIFIER(0x13). Every gathered node independently appends a Warning at node file/physical line with no column. GB18030 strings and concatenation helpers prove exact text 顶层<normalized-module>包含胶连逻辑<normalized-lhs>. Product preserves the top gate, bounded RHS-root predicate, dynamic text, line-only location, per-node multiplicity and comma-separated net-assignment grain.",
       "predicateEvidence": [
         "ev_0a46121daec621b5ae294aa176f16861520f38e9ef553edcf3337f53012651e5",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
+        "reverse-tools/evidence/t_linter_pass66/a3_1_top_glue.txt",
         "docs/evidence/native_verilog_top_glue_5_3_3_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -3560,7 +3561,9 @@
       "additionalTests": "tests/standard_accuracy_tests.cpp",
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.3.3.html",
-        "sha256": "6546379c321157b9d4c820e4c7153dfbca707653e693e690d683de8130fad9eb"
+        "sha256": "6546379c321157b9d4c820e4c7153dfbca707653e693e690d683de8130fad9eb",
+        "nativeFindings": "docs/evidence/native_verilog_top_glue_5_3_3_findings.md",
+        "release": "docs/v1_4_202_release.md"
       },
       "exampleChecks": [
         {
@@ -3574,7 +3577,7 @@
           "matched": true
         }
       ],
-      "limitations": "AST_IDENTIFIER behavior for all selects/casts/parentheses, multiple continuous assignments in one statement, generate lowering, task/function-contained assignment admission, macros and malformed-source recovery remain unresolved. Native ordinary-name backslash normalization and exact top existence validation are integrated; exotic escaped/$ identifiers remain bounded by the product lexer. Product admits direct identifiers and bounded identifier selects, reports definite expression roots and procedural assignments, and leaves no-finding results ManualReviewRequired. Full native equivalence is not claimed."
+      "limitations": "AST_IDENTIFIER behavior for all casts/parentheses, generate lowering, task/function-contained assignment admission, macros and malformed-source recovery remain unresolved. Native ordinary-name backslash normalization and exact top existence validation are integrated; exotic escaped/$ and hierarchical identifiers remain bounded by the product lexer. Product admits direct identifiers and bounded identifier selects, reports definite expression roots and procedural assignments, and leaves no-finding results ManualReviewRequired. Full native equivalence is not claimed."
     },
     {
       "publicRuleId": "A-3-2",

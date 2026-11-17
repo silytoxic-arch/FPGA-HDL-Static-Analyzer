@@ -558,9 +558,9 @@ const confirmed = {
     limitations: 'Only five of the twelve native flag meanings are named directly by packaged examples. Parser writer chains support the adjacent supply/tri family used by the product, but the exact one-to-one proprietary field names remain unknown. User-defined SystemVerilog types, interface/modport ports, macro-expanded aliases, malformed declarations and global diagnostic ordering remain unresolved. Explicit top selection is integrated and fails closed on missing or ambiguous names. No finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.5.3.3': {
-    predicate: 'Native slot 1 admits AST_MODULE(2). FUN_1806fbb10 compares the module name/path-derived key with the configured top name, recursively gathers AST_ASSIGN(0x4d), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), reports every blocking/nonblocking procedural assignment, and reports a continuous assignment only when its second child is not AST_IDENTIFIER(0x13). Packaged examples confirm that a direct identifier wire-through remains clear while a binary expression and an always assignment report. Product applies this predicate only to the unique explicitly configured top when supplied, otherwise to parser-established roots.',
-    evidence: ['ev_0a46121daec621b5ae294aa176f16861520f38e9ef553edcf3337f53012651e5', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'docs/evidence/native_verilog_top_glue_5_3_3_findings.md#recovered-predicate'],
-    limitations: 'AST_IDENTIFIER behavior for all selects/casts/parentheses, multiple continuous assignments in one statement, generate lowering, task/function-contained assignment admission, macros and malformed-source recovery remain unresolved. Native ordinary-name backslash normalization and exact top existence validation are integrated; exotic escaped/$ identifiers remain bounded by the product lexer. Product admits direct identifiers and bounded identifier selects, reports definite expression roots and procedural assignments, and leaves no-finding results ManualReviewRequired. Full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180021dc0 installs final vtable 0x180eef570: selector FUN_1807238a0 admits only AST_MODULE(2), while FUN_1806fbb10 compares the normalized module key with the configured top, recursively gathers AST_ASSIGN(0x4d), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), reports every procedural assignment, and reports a continuous assignment only when its second child is not AST_IDENTIFIER(0x13). Every gathered node independently appends a Warning at node file/physical line with no column. GB18030 strings and concatenation helpers prove exact text 顶层<normalized-module>包含胶连逻辑<normalized-lhs>. Product preserves the top gate, bounded RHS-root predicate, dynamic text, line-only location, per-node multiplicity and comma-separated net-assignment grain.',
+    evidence: ['ev_0a46121daec621b5ae294aa176f16861520f38e9ef553edcf3337f53012651e5', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'reverse-tools/evidence/t_linter_pass66/a3_1_top_glue.txt', 'docs/evidence/native_verilog_top_glue_5_3_3_findings.md#recovered-predicate'],
+    limitations: 'AST_IDENTIFIER behavior for all casts/parentheses, generate lowering, task/function-contained assignment admission, macros and malformed-source recovery remain unresolved. Native ordinary-name backslash normalization and exact top existence validation are integrated; exotic escaped/$ and hierarchical identifiers remain bounded by the product lexer. Product admits direct identifiers and bounded identifier selects, reports definite expression roots and procedural assignments, and leaves no-finding results ManualReviewRequired. Full native equivalence is not claimed.'
   },
   'GJB10157.5.3.4': {
     predicate: 'Native slot 2 admits AST_MODULE(2), AST_ASSIGN(0x4d), AST_CELL(0x4f), AST_INITIAL(0x53), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56). FUN_1805437e0 skips the configured top name and emits once for a remaining module only when it has both an AST_CELL and assignment/selected-initial logic. It excludes a two-child AST_ASSIGN with identifier LHS when an AST_WIRE child shares its source line, identifying a declaration initializer. Product checks parser-established non-top modules with at least one instance and definite nondeclaration assignment/initial logic.',
@@ -1066,6 +1066,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.5.2.7',
   'GJB10157.5.3.1',
   'GJB10157.5.3.2',
+  'GJB10157.5.3.3',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1396,6 +1397,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.5.3.2': {
         nativeFindings: 'docs/evidence/native_verilog_top_port_types_5_3_2_findings.md',
         release: 'docs/v1_4_201_release.md'
+      }, 'GJB10157.5.3.3': {
+        nativeFindings: 'docs/evidence/native_verilog_top_glue_5_3_3_findings.md',
+        release: 'docs/v1_4_202_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'
