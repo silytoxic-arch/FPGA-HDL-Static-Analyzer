@@ -1,0 +1,52 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Analysis: offline Ghidra 12.1.4 full-DLL static analysis and PE byte decoding; no target execution
+
+Rule: GJB10157_VLOG.5.3.2 / public R-3-2
+Constructor: 0x180021d30
+Vtable: 0x180eef3d8
+Run slot: FUN_180543030 (0x180543030)
+Module selector slot: FUN_1807238a0 (0x1807238a0)
+
+Observed selector: node.type == 2 (AST_MODULE).
+
+Observed run predicate:
+
+1. Resolve the configured top-module record.
+2. Iterate its contained AST_WIRE(6) records.
+3. Admit only records with input byte +0xa0 or output byte +0xa1 set.
+4. Emit when any of these twelve byte flags is nonzero:
+   +0xa7, +0xa8, +0x109, +0x29c, +0x29d, +0x29e, +0x29f,
+   +0x2a2, +0x2a3, +0x2a4, +0x2a5, +0x2a6.
+
+Parser token recognizers write the adjacent type flags independently.
+Packaged examples directly establish wand, wor, tri, integer and time. The
+product's bounded mapping also includes triand, trior, trireg, tri0, tri1,
+supply0 and supply1. Exact proprietary names of every flag remain unknown.
+
+Every admitted port independently reaches result append. There is no local
+break or diagnostic deduplication, so three rejected ports on one physical
+line produce three identical diagnostics.
+
+Message at VA 0x180eef420, exactly 49 bytes:
+
+    b6 a5 b2 e3 c4 a3 bf e9 b5 c4 ca e4 c8 eb ca e4
+    b3 f6 b6 cb bf da b1 d8 d0 eb d6 bb ca b9 d3 c3
+    72 65 67 d0 cd ba cd 77 69 72 65 d0 cd ca fd be dd
+
+GB18030: 顶层模块的输入输出端口必须只使用reg型和wire型数据
+Severity source at 0x180eda938: Warning\0
+
+The native record takes file from +0x1e0 and physical line from +0x210. It
+does not write a source column.
+
+Evidence IDs:
+- run: ev_5da57c31449ffea7cd8cad5c3aa007b65d121a2f6873052df4067356883c0a49
+- selector: ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
+
+Unknowns:
+- exact one-to-one proprietary field names for all twelve byte flags;
+- complete macro/include/generate AST construction and malformed recovery;
+- user-defined SystemVerilog types, aliases, interface/modport lowering;
+- global diagnostic ordering across design-map records.
+

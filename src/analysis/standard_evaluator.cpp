@@ -1968,9 +1968,10 @@ void checkTopLevelVerilogPortTypes(AnalysisResult& result,
     // its AST_MODULE(2) records, and considers only AST_WIRE(6) nodes carrying
     // an input or output direction byte (+0xa0/+0xa1). It reports a port when
     // any of twelve non-wire/non-reg type flags is set. The packaged ANSI and
-    // non-ANSI examples establish wand, wor, tri, integer and time; the other
-    // admitted Verilog net kinds below are the bounded source counterparts of
-    // the same native flag family. One diagnostic is emitted per port node.
+    // non-ANSI examples establish wand, wor, tri, integer and time; the parser
+    // writer chain also sets the adjacent supply/tri-family flags independently.
+    // Every admitted port node emits the same 49-byte GB18030 message as a
+    // Warning at the node's physical line; the native record has no column.
     // ev_5da57c31449ffea7cd8cad5c3aa007b65d121a2f6873052df4067356883c0a49
     // ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
     const std::set<std::string_view> rejectedTypes{
@@ -2037,19 +2038,19 @@ void checkTopLevelVerilogPortTypes(AnalysisResult& result,
             if (declared.empty()) continue;
             const auto firstName = std::ranges::min_element(
                 declared, {}, [](const auto& item) { return item.second; })->second;
-            std::string rejected;
+            bool rejected = false;
             for (auto index = direction + 1; index < firstName; ++index) {
                 if (rejectedTypes.contains(tokens[index].text)) {
-                    rejected = tokens[index].text;
+                    rejected = true;
                     break;
                 }
             }
-            if (rejected.empty()) continue;
+            if (!rejected) continue;
             for (const auto& [port, index] : declared) {
                 static_cast<void>(index);
                 emit(result, "GJB10157.5.3.2", source,
-                     port->location.line, port->location.column,
-                     "顶层端口 " + port->name + " 使用了非 wire/reg 类型：" + rejected);
+                     port->location.line, 1,
+                     "顶层模块的输入输出端口必须只使用reg型和wire型数据");
             }
             direction = limit == 0 ? direction : limit - 1;
         }
@@ -16626,6 +16627,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.5.2.17") ||
                 (left.ruleId == "GJB10157.5.3.1" &&
                  right.ruleId == "GJB10157.5.3.1") ||
+                (left.ruleId == "GJB10157.5.3.2" &&
+                 right.ruleId == "GJB10157.5.3.2") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

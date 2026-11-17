@@ -5829,6 +5829,21 @@ int main() {
         "always @(posedge CLK) C <= A; endmodule\n");
     check(count(result, "GJB10157.5.3.2") == 8,
           "attachment 5.3.2 reports every top-level wand, wor, tri, integer and time port");
+    check(std::ranges::all_of(result.violations | std::views::filter([](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.2";
+          }), [](const auto& item) {
+              return item.column == 1 && item.severity == analysis::Severity::Warning &&
+                     item.message == "顶层模块的输入输出端口必须只使用reg型和wire型数据";
+          }), "native top-port type rule preserves fixed Warning text and line-only location");
+    result = analyzeVerilog(
+        "module probe(input tri A, B, C, output wire Y); assign Y=A; endmodule\n");
+    check(count(result, "GJB10157.5.3.2") == 3 &&
+          std::ranges::all_of(result.violations | std::views::filter([](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.2";
+          }), [](const auto& item) {
+              return item.line == 1 && item.column == 1 &&
+                     item.message == "顶层模块的输入输出端口必须只使用reg型和wire型数据";
+          }), "native top-port type rule retains identical same-line per-port multiplicity");
     result = analyzeVerilog(
         "module probe(input CLK, input wire RST, input [3:0] A, input B,\n"
         "output reg C, output wire D, inout wire PAD); endmodule\n");
@@ -5839,6 +5854,10 @@ int main() {
     check(portTypeAssessment != result.standardAssessments.end() &&
           portTypeAssessment->state == analysis::StandardRuleState::ManualReviewRequired,
           "bounded top-level port type no finding is not certified compliance");
+    result = analyze(
+        "module probe(input logic A, output logic Y); assign Y=A; endmodule\n");
+    check(count(result, "GJB10157.5.3.2") == 0,
+          "SystemVerilog logic does not match any of the native twelve rejected flags");
     result = analyzeVerilog(
         "module probe(CLK,A,B,C,D,F); input CLK; input wand A; input tri B;\n"
         "output reg C; output integer D; output time F; endmodule\n");

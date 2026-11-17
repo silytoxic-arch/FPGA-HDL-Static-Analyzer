@@ -553,9 +553,9 @@ const confirmed = {
     limitations: 'Complete macro/include/generate AST construction, malformed recovery, frontend constant folding, every proprietary source form lowered to AST_PREFIX and global diagnostic ordering remain unknown. Product reports only recognized expression roots and keeps unsupported shapes unresolved; no alarm remains ManualReviewRequired and full proprietary frontend equivalence is not claimed.'
   },
   'GJB10157.5.3.2': {
-    predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180543030 resolves the configured top-module entry, iterates its contained AST_WIRE(6) records, requires at least one direction byte at +0xa0/+0xa1, and emits when any of twelve non-wire/non-reg type flags at +0xa7/+0xa8/+0x109/+0x29c..+0x29f/+0x2a2..+0x2a6 is set. Packaged ANSI and non-ANSI examples identify wand, wor, tri, integer and time as rejected while implicit wire, explicit wire and reg remain clear. Product applies the recovered top-level and direction gates and reports each parsed port carrying an evidenced non-wire/non-reg Verilog type.',
-    evidence: ['ev_5da57c31449ffea7cd8cad5c3aa007b65d121a2f6873052df4067356883c0a49', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'docs/evidence/native_verilog_top_port_types_5_3_2_findings.md#recovered-predicate'],
-    limitations: 'Only five of the twelve native flag meanings are named directly by packaged examples; the product maps the remaining bounded Verilog net-type family conservatively and does not claim exact proprietary flag names. User-defined SystemVerilog types, interface/modport ports, macro-expanded type aliases, malformed declarations and exact diagnostic text/order remain unresolved. Explicit top selection is integrated and fails closed on missing or ambiguous names. No finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180021d30 installs vtable 0x180eef3d8: selector FUN_1807238a0 admits only AST_MODULE(2), and FUN_180543030 resolves the configured top module, iterates AST_WIRE(6) records, requires input/output byte +0xa0/+0xa1, and emits when any of twelve flags +0xa7/+0xa8/+0x109/+0x29c..+0x29f/+0x2a2..+0x2a6 is set. Parser writer cross-references confirm independent adjacent type flags; packaged examples directly identify wand, wor, tri, integer and time. Every admitted port independently appends a Warning at its physical line with no column and the exact 49-byte GB18030 message 顶层模块的输入输出端口必须只使用reg型和wire型数据. Product preserves the top/direction gates, bounded twelve-type family, fixed message, line-only location and per-port multiplicity.',
+    evidence: ['ev_5da57c31449ffea7cd8cad5c3aa007b65d121a2f6873052df4067356883c0a49', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'reverse-tools/evidence/t_linter_pass65/r3_2_top_port_types.txt', 'docs/evidence/native_verilog_top_port_types_5_3_2_findings.md#recovered-predicate'],
+    limitations: 'Only five of the twelve native flag meanings are named directly by packaged examples. Parser writer chains support the adjacent supply/tri family used by the product, but the exact one-to-one proprietary field names remain unknown. User-defined SystemVerilog types, interface/modport ports, macro-expanded aliases, malformed declarations and global diagnostic ordering remain unresolved. Explicit top selection is integrated and fails closed on missing or ambiguous names. No finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.5.3.3': {
     predicate: 'Native slot 1 admits AST_MODULE(2). FUN_1806fbb10 compares the module name/path-derived key with the configured top name, recursively gathers AST_ASSIGN(0x4d), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), reports every blocking/nonblocking procedural assignment, and reports a continuous assignment only when its second child is not AST_IDENTIFIER(0x13). Packaged examples confirm that a direct identifier wire-through remains clear while a binary expression and an always assignment report. Product applies this predicate only to the unique explicitly configured top when supplied, otherwise to parser-established roots.',
@@ -1065,6 +1065,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.5.2.18',
   'GJB10157.5.2.7',
   'GJB10157.5.3.1',
+  'GJB10157.5.3.2',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1392,6 +1393,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.5.3.1': {
         nativeFindings: 'docs/evidence/native_verilog_port_actual_expression_5_3_1_findings.md',
         release: 'docs/v1_4_200_release.md'
+      }, 'GJB10157.5.3.2': {
+        nativeFindings: 'docs/evidence/native_verilog_top_port_types_5_3_2_findings.md',
+        release: 'docs/v1_4_201_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'
