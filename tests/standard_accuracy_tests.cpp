@@ -4901,11 +4901,43 @@ int main() {
     check(std::ranges::any_of(result.violations, [](const auto& item) {
         return item.ruleId == "GJB10157.5.2.13" &&
                item.severity == analysis::Severity::Error &&
-               item.line == 2 && item.column == 1 &&
+               item.line == 1 && item.column == 1 &&
                item.message ==
                    "时钟信号bad_clk命名应采用“clk_x”或者“Clk_X”,"
                    "其中“x”代表特定含义的时钟频率";
-    }), "native clock-name diagnostic preserves exact text, Error and line-only location");
+    }), "native clock-name diagnostic preserves exact text, Error and declaration line");
+    result = analyze(
+        "module probe(input data, output reg q);\n"
+        "reg bad_internal_clock;\n"
+        "always @(posedge bad_internal_clock) q <= data;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.5.2.13") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.2.13" &&
+                     item.line == 2 && item.column == 1 &&
+                     item.message.starts_with("时钟信号bad_internal_clock命名应采用");
+          }), "native clock-name lookup reports an internal wire-like declaration line");
+    result = analyze(
+        "module probe(output reg q);\n"
+        "always @(posedge implicit_bad_clock) q <= 1'b1;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.5.2.13") == 0,
+          "clock-name adapter does not invent an AST_WIRE lookup for an implicit net");
+    result = analyze(
+        "module first(input bad_clock, output reg q);\n"
+        "always @(posedge bad_clock) q <= 1'b1;\n"
+        "endmodule\n"
+        "module second;\n"
+        "reg bad_clock;\n"
+        "always @(negedge bad_clock) bad_clock <= 1'b0;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.5.2.13") == 2 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.2.13" && item.line == 1;
+          }) &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.2.13" && item.line == 5;
+          }), "native clock-name deduplication is scoped independently to each module");
     result = analyze(
         "module probe(input \\clk_100m , output reg q);\n"
         "always @(posedge \\clk_100m ) q <= 1'b1;\n"

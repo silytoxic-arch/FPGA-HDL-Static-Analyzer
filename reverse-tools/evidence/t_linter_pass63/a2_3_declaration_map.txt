@@ -1,0 +1,70 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Analysis: offline Ghidra decompilation; no target execution
+
+Rule: GJB10157_VLOG.5.2.13 / public A-2-3
+Constructor: 0x180021380
+Run: FUN_18052ebd0 (0x18052ebd0)
+Selector slot: FUN_1807238a0 (0x1807238a0)
+
+Observed root selector:
+
+    bool FUN_1807238a0(undefined8 unused, longlong node) {
+        return node != 0 && *(int *)(node + 4) == 2;
+    }
+
+The DLL AST-name table maps 2 to AST_MODULE and 6 to AST_WIRE.
+
+Observed recursive map producer (FUN_18062d430):
+
+    if (*(int *)(node + 4) == 6) {
+        copy(module_key, local_key);
+        FUN_18062b0a0(rule, local_key, node);
+    }
+    if (rule->slot1(rule, node))
+        FUN_18062ad80(rule, module_key, node);
+    recurse(children);
+
+Observed insertion path (FUN_18062b0a0):
+
+    outer = rule + 0x58;
+    inner_key = node + 9;       // AST_WIRE normalized name field
+    ... locate/insert outer[module_key][inner_key] ...
+    inner_record[8] = node;     // byte offset +0x40 stores AST_WIRE pointer
+
+Observed consumer path (FUN_18052ebd0):
+
+    outer = rule + 0x58;
+    ... resolve current relation's module and normalized signal name ...
+    ast = inner_record[8];
+    ... on regex failure ...
+    diagnostic.file = ast + 0x1e0;
+    diagnostic.line = *(uint32_t *)(ast + 0x210);
+
+Consequences supported by static evidence:
+
+1. A-2-3 is grouped under AST_MODULE roots.
+2. The relation name must resolve through the rule's AST_WIRE declaration map.
+3. The diagnostic file and physical line come from that AST_WIRE declaration,
+   not from the posedge/negedge occurrence.
+4. An implicit or source-adapter-unsupported net cannot be claimed to have
+   passed the native declaration-map lookup.
+
+Corroborating retained source files outside the repository:
+
+- a1_8/native_map_binding.txt
+  SHA256 fb8979084bf203022ba6ecf82582cecd1d8afb7f15ea3a5e626d35326596c904
+- a1_8/native_map_insertions.txt
+  SHA256 53df8ffbb6f5c3c5cd27c66e1104b260ec9dff07452a882fa194777c8f05e77e
+- a2_3_clock_name_entry.txt
+  SHA256 0961f483c7fde5d0a448b53bbdb7b72a6d5ff80cd168e6612e3e42aed56cb2c5
+
+Unknowns:
+
+- formal names and complete producers for relation categories 2/3;
+- complete macro/include/generate and malformed-source AST construction;
+- alias, derived-clock and hierarchy propagation before relation lookup;
+- proprietary normalization of non-ASCII and malformed escaped identifiers;
+- exact duplicate declaration overwrite/retention behavior outside the
+  observed insertion path.
+

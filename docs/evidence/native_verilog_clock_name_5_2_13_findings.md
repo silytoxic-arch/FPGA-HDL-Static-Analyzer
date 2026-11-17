@@ -25,26 +25,33 @@
 8. 二进制中的 GB18030 消息由前缀、规范化名称、后缀拼接：
 
    `时钟信号<name>命名应采用“clk_x”或者“Clk_X”,其中“x”代表特定含义的时钟频率`
+9. 虚表槽 `FUN_1807238a0` 仅接受类型 `2`，DLL 自身类型表将其映射为 `AST_MODULE`。
+10. 准备阶段 `FUN_18062d430` 递归遍历模块树，只对类型 `6`（`AST_WIRE`）调用 `FUN_18062b0a0`。后者以模块键和 `AST_WIRE` 名称建立规则对象 `+0x58` 的二级映射，并把该声明节点指针写入内层记录 `+0x40`。
+11. `FUN_18052ebd0` 按关系所属模块和规范化信号名查询同一映射，从内层记录 `+0x40` 取回声明节点；失败诊断的文件 `+0x1e0` 和物理行 `+0x210` 因此来自 `AST_WIRE` 声明，而不是 `posedge/negedge` 使用点。
 
 ## 产品接入
 
 - 保留两个正则的 ASCII、大小写和完整匹配语义。
 - 对解析到的 Verilog 时钟候选按模块、规范化名称去重，不再按边沿重复告警。
+- 只对可在当前活动预处理分支中解析到的端口、`wire`、`reg` 或 `logic` 声明执行规则；隐式网及不支持的声明形态不伪造原生映射命中。
 - Verilog 转义标识符由词法器移除前导反斜杠后再匹配和显示。
-- 诊断使用完整原生消息、`Error`、候选物理行和第 1 列。
-- 增加正例、反例、边界、同名双边沿和转义标识符测试。
+- 诊断使用完整原生消息、`Error`、声明物理行和第 1 列。
+- 增加正例、反例、边界、同名双边沿、转义标识符、内部声明、隐式网和跨模块作用域测试。
 
 ## 证据文件
 
 - `reverse-tools/evidence/a2_3_clock_name_entry.txt`，SHA-256 `0961f483c7fde5d0a448b53bbdb7b72a6d5ff80cd168e6612e3e42aed56cb2c5`
 - `reverse-tools/evidence/a2_3_clock_name_helpers.txt`，SHA-256 `a202ef1e1abc859fff5498becdc5b5c1765d24ec7a8276cb593b5b3645b6528b`
 - `reverse-tools/evidence/a2_3_clock_name_strings.txt`，SHA-256 `84d9e2cbab9041dc26fafa6c00d252da4889272062322b274dd2cb5c2723ed08`
+- `reverse-tools/evidence/t_linter_pass63/a2_3_declaration_map.txt`，SHA-256 `0d8076b4a673a533307931d600769f6ce590374a12147ccce832b44a19b8596b`
+- 外部原始反编译 `a1_8/native_map_binding.txt`，SHA-256 `fb8979084bf203022ba6ecf82582cecd1d8afb7f15ea3a5e626d35326596c904`
+- 外部原始反编译 `a1_8/native_map_insertions.txt`，SHA-256 `53df8ffbb6f5c3c5cd27c66e1104b260ec9dff07452a882fa194777c8f05e77e`
 
 ## 仍未知
 
 - 关系类别 `2/3` 的正式枚举名称及其完整生产条件。
 - 别名、派生时钟、跨层次传播与生成结构的全部进入条件。
 - 宏、包含文件、预处理生成候选和异常语法恢复的厂商行为。
-- 设计映射的完整键构造与候选遍历次序。
+- 重复声明在完整专有前端中的覆盖、保留与遍历次序。
 
 因此，无告警路径继续保持 `ManualReviewRequired`；本次不声明厂商完整算法等价。

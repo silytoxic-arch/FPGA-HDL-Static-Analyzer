@@ -14401,6 +14401,30 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
         }
     }
 
+    // Native GJB10157.5.2.13 slot 1 admits AST_MODULE(2).  Its recursive
+    // producer FUN_18062d430 inserts every AST_WIRE(6) into the rule object's
+    // module/name map, and FUN_18062b0a0 stores that declaration node at the
+    // map record's +0x40.  The run resolves an edge relation through this map
+    // before reading source/line from the stored declaration.  Keep the
+    // source adapter bounded to declarations admitted by the configured
+    // frontend branch; an implicit or unsupported net is not proof that the
+    // native lookup succeeds.
+    // ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
+    // docs/evidence/native_verilog_clock_name_5_2_13_findings.md
+    std::map<std::string, std::map<std::string, core::SourceLocation>>
+        verilogWireDeclarations;
+    if (!vhdl && preprocessed.issues.empty()) {
+        for (const auto& declaration :
+             VerilogNamingDeclarations(preprocessed.source, activeTokens).collect()) {
+            if (declaration.subject != VerilogNamingSubject::WireLike ||
+                declaration.moduleName.empty()) continue;
+            const auto& token = activeTokens[declaration.tokenIndex];
+            verilogWireDeclarations[declaration.moduleName].try_emplace(
+                declaration.normalizedName,
+                core::SourceLocation{source.path(), token.line, token.column, token.offset});
+        }
+    }
+
     std::vector<std::string> unitsInFile;
     std::size_t firstUnitLine = 0;
     for (const auto& unit : result.structure) {
@@ -14523,19 +14547,31 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             }
         }
         std::set<std::string> checkedVerilogClockNames;
+        const auto moduleDeclarations = !vhdl
+            ? verilogWireDeclarations.find(unit.name)
+            : verilogWireDeclarations.end();
         for (const auto& clock : unit.clocks) {
             const auto clockName = lower(clock.signal);
             if (vhdl && checkedVhdlClockNames.contains(clockName)) continue;
             // Native 5.2.13 admits relation categories 2/3, normalizes an
             // escaped name, and inserts that bytewise name into one set per
             // design record before evaluating it.  Consequently the same
-            // invalid signal observed on both edges reports only once.
-            // The recovered diagnostic carries the AST physical line but no
-            // column, so the source adapter uses column 1.
+            // invalid signal observed on both edges reports only once. The
+            // diagnostic source and physical line come from the resolved
+            // AST_WIRE declaration, not the edge occurrence; its record has
+            // no column, so the source adapter uses column 1.
             if (!vhdl && !checkedVerilogClockNames.insert(clock.signal).second) continue;
+            const core::SourceLocation* clockDeclaration = nullptr;
+            if (!vhdl && moduleDeclarations != verilogWireDeclarations.end()) {
+                const auto declaration = moduleDeclarations->second.find(clock.signal);
+                if (declaration != moduleDeclarations->second.end())
+                    clockDeclaration = &declaration->second;
+            }
+            if (!vhdl && clockDeclaration == nullptr) continue;
             if (vhdl ? !clockName.starts_with("clk_") : !nativeVerilogClockName(clock.signal)) {
                 emit(result, vhdl ? "GJB9765.4.5.e" : "GJB10157.5.2.13",
-                     source, clock.location.line, vhdl ? clock.location.column : 1,
+                     source, vhdl ? clock.location.line : clockDeclaration->line,
+                     vhdl ? clock.location.column : 1,
                      vhdl ? "时钟信号名称未以 clk_ 开始：" + clock.signal :
                          "时钟信号" + clock.signal +
                              "命名应采用“clk_x”或者“Clk_X”,其中“x”代表特定含义的时钟频率");
