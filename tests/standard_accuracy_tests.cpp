@@ -6293,6 +6293,11 @@ int main() {
     check(mixedEdgeLines == std::vector<std::size_t>{2, 3},
           "native 6.1.4 reports the two conflicting clock endpoints");
     result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q1,Q2); "
+        "always @(posedge CLK) Q1<=D; always @(negedge CLK) Q2<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.4") == 2,
+          "native 6.1.4 preserves two endpoint reports on one physical line");
+    result = analyzeVerilog(
         "module probe(input CLK,D, output reg Q1,Q2,Q3);\n"
         "always @(posedge CLK) Q1<=D; always @(posedge CLK) Q2<=D;\n"
         "always @(negedge CLK) Q3<=D; endmodule\n");
@@ -6313,6 +6318,18 @@ int main() {
         "assign gated_clk=CLK & EN; always @(posedge gated_clk) Q<=D; endmodule\n");
     check(count(result, "GJB10157.6.1.6") == 1,
           "attachment 6.1.6 reports a binary AND gated clock");
+    const auto gatedClockFinding = std::ranges::find_if(result.violations,
+        [](const auto& entry) { return entry.ruleId == "GJB10157.6.1.6"; });
+    check(gatedClockFinding != result.violations.end() &&
+          gatedClockFinding->line == 2 && gatedClockFinding->column == 1 &&
+          gatedClockFinding->message == "避免使用时钟门控.",
+          "6.1.6 restores native fixed text and line-only location");
+    result = analyzeVerilog(
+        "module probe(input CLK,EN,D, output reg Q1,Q2); wire g1,g2; "
+        "assign g1=CLK&EN; assign g2=CLK|EN; "
+        "always @(posedge g1) Q1<=D; always @(posedge g2) Q2<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.6") == 2,
+          "native 6.1.6 preserves per-assignment multiplicity on one physical line");
     result = analyzeVerilog(
         "module probe(input CLK1,CLK2,SEL,D, output reg Q1,Q2); wire xor_clk,mux_clk;\n"
         "assign xor_clk=CLK1 ^ SEL; assign mux_clk=SEL ? CLK1 : CLK2;\n"

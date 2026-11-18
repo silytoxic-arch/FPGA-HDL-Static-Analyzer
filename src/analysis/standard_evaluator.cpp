@@ -5526,14 +5526,18 @@ void checkMixedClockEdges(AnalysisResult& result, const core::SourceFile& source
 
 void checkGatedClocks(AnalysisResult& result, const core::SourceFile& source,
                       const std::vector<parser::HdlToken>& tokens) {
-    // Native slot 1 admits AST_MODULE(2). FUN_180726d40 gathers assignments
-    // beneath each module, resolves their targets against elaborated clock
-    // relations and searches RHS descendants for operator types
-    // {0x45,0x46,0x48,0x25,0x26,0x27,0x28}. These are the binary logical,
-    // conditional and binary bitwise families used to gate/select clocks; the
-    // unary inversion types are deliberately absent. The bounded source
-    // adapter therefore requires a parser-confirmed clock target and one of
-    // those binary/conditional operators in its assignment data expression.
+    // Constructor 0x180022300 registers GJB10157_VLOG.6.1.6, clears mode byte
+    // +0x158 and installs vtable 0x180ef0b30. Slot 1 FUN_1807238a0 admits only
+    // AST_MODULE(2). Main FUN_180726d40 gathers AST_ASSIGN(0x4d),
+    // AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), resolves their targets
+    // against elaborated clock relations, and searches RHS descendants for
+    // operator types {0x45,0x46,0x48,0x25,0x26,0x27,0x28}. These are the
+    // binary logical, conditional and binary bitwise families used to
+    // gate/select clocks; unary inversion is deliberately absent. Each
+    // matching assignment emits independently at its physical line without a
+    // column and mode zero selects exact text "避免使用时钟门控.". The bounded
+    // source adapter therefore requires a parser-confirmed clock target and
+    // one of those binary/conditional operators in its assignment expression.
     // ev_a2fc415c6f5559f25a99482ccaf2b2692e429fc9515d892fe65cb2ee06dde088
     // ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
     const std::set<std::string_view> gatingOperators{
@@ -5558,7 +5562,7 @@ void checkGatedClocks(AnalysisResult& result, const core::SourceFile& source,
         auto moduleEnd = module + 2;
         while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
 
-        std::set<std::pair<std::string, std::size_t>> reported;
+        std::set<std::size_t> reported;
         const auto reportAssignment = [&](std::size_t begin, std::size_t op,
                                           std::size_t rhsEnd) {
             const auto target = simpleAssignmentTarget(tokens, begin, op);
@@ -5571,9 +5575,9 @@ void checkGatedClocks(AnalysisResult& result, const core::SourceFile& source,
                 }
             }
             const auto& token = tokens[*target];
-            if (!gated || !reported.emplace(token.text, token.line).second) return;
-            emit(result, "GJB10157.6.1.6", source, token.line, token.column,
-                 "时钟信号 " + token.text + " 由逻辑运算或条件选择生成");
+            if (!gated || !reported.insert(begin).second) return;
+            emit(result, "GJB10157.6.1.6", source, token.line, 1,
+                 "避免使用时钟门控.");
         };
 
         auto segment = module + 2;
@@ -16941,6 +16945,10 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.5.3.5") ||
                 (left.ruleId == "GJB10157.6.1.2" &&
                  right.ruleId == "GJB10157.6.1.2") ||
+                (left.ruleId == "GJB10157.6.1.4" &&
+                 right.ruleId == "GJB10157.6.1.4") ||
+                (left.ruleId == "GJB10157.6.1.6" &&
+                 right.ruleId == "GJB10157.6.1.6") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

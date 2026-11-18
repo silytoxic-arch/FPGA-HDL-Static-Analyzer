@@ -593,9 +593,9 @@ const confirmed = {
     limitations: 'The constructor/vtable, graph builder path, endpoint expansion, two-bit conflict condition, two-endpoint multiplicity, exact message/severity and line-only report surface are recovered and integrated. Full synthesized graph topology, endpoint ordering, primitive/library inversion semantics, cross-module propagation, multi-bit nets, compound expressions, generate constructs, macros, exotic escaped-name normalization and global diagnostic ordering remain unresolved. Product uses the first source-representable endpoint of each effective polarity; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.6': {
-    predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180726d40 gathers assignments below the module, resolves assignment targets against elaborated clock relations, and searches the RHS for operator types {0x45,0x46,0x48,0x25,0x26,0x27,0x28}; the recovered family covers binary logical, conditional and binary bitwise clock gating/select operations while excluding unary inversion. Product requires a parser-confirmed clock target and one of &&, ||, ?:, &, |, ^, ^~ or ~^ in the assignment RHS.',
-    evidence: ['ev_a2fc415c6f5559f25a99482ccaf2b2692e429fc9515d892fe65cb2ee06dde088', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'docs/evidence/native_verilog_gated_clock_6_1_6_findings.md#recovered-predicate'],
-    limitations: 'Exact proprietary enum names for all seven operator values, elaborated clock-relation construction, nested source lowering, aliases, cross-module hierarchy, generated logic, macros, compound targets and native diagnostic multiplicity remain unresolved. Product admits bounded continuous and procedural assignments and intentionally excludes direct aliases, unary inversion and arithmetic; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180022300 first registers legacy key VLR-120002, then GJB10157_VLOG.6.1.6, clears mode byte +0x158 and installs final vtable 0x180ef0b30. Selector FUN_1807238a0 admits only AST_MODULE(2). Main FUN_180726d40 gathers AST_ASSIGN(0x4d), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), forms clock/name relation sets, and searches assignment RHS descendants with fixed sets {0x45,0x46,0x25,0x26} and {0x45,0x46,0x48,0x25,0x26,0x27,0x28}. The recovered values cover binary logical, conditional and binary bitwise clock gating/select operations and deliberately exclude unary inversion. Every matching assignment independently appends Warning at its assignment source/physical line with no column. Mode zero selects exact GB18030 text 避免使用时钟门控. while the unused alternate is 避免使用门控生成时钟. Product requires a parser-confirmed clock target, preserves per-assignment multiplicity and one of &&, ||, ?:, &, |, ^, ^~ or ~^ in the RHS.',
+    evidence: ['ev_a2fc415c6f5559f25a99482ccaf2b2692e429fc9515d892fe65cb2ee06dde088', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'reverse-tools/evidence/t_linter_pass73/a4_3_gated_clock.txt', 'docs/evidence/native_verilog_gated_clock_6_1_6_findings.md'],
+    limitations: 'The constructor, module selector, three assignment classes, operator sets, per-assignment report grain, exact mode-zero text/severity and line-only location are recovered and integrated. Exact producer semantics for both internal clock/name relation sets, full elaborated clock propagation, aliases, hierarchy, generated logic, macros, compound targets, unsupported expression lowering and global diagnostic ordering remain unresolved. Product admits the definite parser-confirmed clock-target subset and intentionally excludes direct aliases, unary inversion and arithmetic; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.7': {
     predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180555380 first requires the design record name to equal the shared setTopModule value DAT_18135b808, then builds, sorts and deduplicates 32-byte clock-relation records and emits immediately when the distinct record count is greater than one. When the direct count is at most one it calls FUN_1804ce730, builds a relation/port graph with helpers including FUN_1804c5a00, and can enter a second warning-construction path; this proves the later graph affects the result. Packaged examples prove that posedge and negedge uses of the same signal are one domain, while CLK and CLK3 are two. With an explicit top, product applies the same selected-module boundary before bounded direct and unary-inverted alias canonicalization.',
@@ -1072,6 +1072,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.6.1.2',
   'GJB10157.6.1.3',
   'GJB10157.6.1.4',
+  'GJB10157.6.1.6',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1423,6 +1424,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.6.1.4': {
         nativeFindings: 'docs/evidence/native_verilog_mixed_clock_edges_6_1_4_findings.md',
         release: 'docs/v1_4_208_release.md'
+      }, 'GJB10157.6.1.6': {
+        nativeFindings: 'docs/evidence/native_verilog_gated_clock_6_1_6_findings.md',
+        release: 'docs/v1_4_209_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'
