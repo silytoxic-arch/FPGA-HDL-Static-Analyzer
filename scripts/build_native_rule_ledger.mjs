@@ -578,9 +578,9 @@ const confirmed = {
     limitations: 'The constructor, vtable, connectivity-model path, exact message/severity/line-only report surface and packaged source-line boundary are recovered and integrated. Exact synthesized cell/port classes, alias/net propagation, clock primitive recognition beyond the source subset, cross-module hierarchy, generate/elaboration, multi-bit clock targets and global diagnostic ordering remain unresolved. Product reports the definite same-module process-to-process subset; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.2': {
-    predicate: 'Native filter admits AST_ALWAYS only when its first child is AST_POSEDGE(0x65) or AST_NEGEDGE(0x66). FUN_180729250 gathers elaborated clock relations, recursively collects AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), and reports when an identifier in assignment data matches a clock relation name. Product intersects parser-confirmed edge clocks with body-only reads from edge-triggered processes.',
-    evidence: ['ev_1be0b0252eccce0f64a73f9a4c64990cec83b41408076e27ea7a5a8c3db26f21', 'ev_370fe66f55ae6530e42c0fca58ceaab7cef4d4724a76601782814c548ed7bcf6', 'docs/evidence/native_verilog_clock_as_data_6_1_2_findings.md#recovered-predicate'],
-    limitations: 'Exact elaborated clock-relation production, alias propagation, cell/black-box port semantic classification, cross-module hierarchy, generated logic, macro expansion, multiple native reports per assignment and diagnostic location formatting remain unresolved. Product reports only definite clock reads inside edge-triggered process bodies; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180022120 installs vtable 0x180ef0540, rule key GJB10157_VLOG.6.1.2 and mode byte +0x158 = 0. Selector FUN_180730b90 admits only AST_ALWAYS(0x52) whose first child is AST_POSEDGE(0x65) or AST_NEGEDGE(0x66). FUN_180729250 gathers elaborated clock relations, recursively collects AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), and compares each assignment RHS root +0x48 name directly with each clock relation; it does not recurse through RHS descendants or conditions. Each match independently emits Warning at the RHS root file/physical line with no column and, for mode zero, exact text 时钟<normalized-name>驱动非时钟引脚. The packaged page marks only the direct assignment even though its prose also labels a black-box data port, establishing a native-documentation conflict. Product mirrors the direct RHS-root predicate and per-assignment multiplicity and deliberately does not guess cell port semantics.',
+    evidence: ['ev_1be0b0252eccce0f64a73f9a4c64990cec83b41408076e27ea7a5a8c3db26f21', 'ev_370fe66f55ae6530e42c0fca58ceaab7cef4d4724a76601782814c548ed7bcf6', 'reverse-tools/evidence/t_linter_pass70/r4_2_clock_as_data.txt', 'docs/evidence/native_verilog_clock_as_data_6_1_2_findings.md'],
+    limitations: 'The constructor mode, selector, assignment collection, direct RHS-root comparison, exact message/severity/line-only surface and per-assignment grain are recovered and integrated. Full clock-relation production, alias propagation, cross-module hierarchy, generate/macro lowering, selected-name normalization and global diagnostic ordering remain unresolved. Black-box data-port checking is documented but absent from the recovered native predicate and is recorded as a conflict rather than invented. No finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.3': {
     predicate: 'Native slot 1 admits AST_ASSIGN(0x4d) and AST_ALWAYS(0x52), but rejects an AST_ALWAYS containing AST_POSEDGE(0x65) or AST_NEGEDGE(0x66). Slot 0 gathers AST_ASSIGN_EQ/LE below admitted combinational processes and compares identifier targets with elaborated clock relations. A continuous assignment with a direct-identifier RHS is excluded. Product reports clocks driven by bounded nontrivial continuous expressions or combinational process assignments.',
@@ -1069,6 +1069,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.5.3.3',
   'GJB10157.5.3.5',
   'GJB10157.6.1.1',
+  'GJB10157.6.1.2',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1411,6 +1412,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.6.1.1': {
         nativeFindings: 'docs/evidence/native_verilog_register_output_clock_6_1_1_findings.md',
         release: 'docs/v1_4_205_release.md'
+      }, 'GJB10157.6.1.2': {
+        nativeFindings: 'docs/evidence/native_verilog_clock_as_data_6_1_2_findings.md',
+        release: 'docs/v1_4_206_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'

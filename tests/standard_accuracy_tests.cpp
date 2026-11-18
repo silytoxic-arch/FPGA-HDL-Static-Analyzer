@@ -6185,6 +6185,12 @@ int main() {
         "endmodule\n");
     check(count(result, "GJB10157.6.1.2") == 1,
           "attachment 6.1.2 reports a clock identifier used in sequential assignment data");
+    const auto clockDataViolation = std::ranges::find_if(result.violations,
+        [](const auto& entry) { return entry.ruleId == "GJB10157.6.1.2"; });
+    check(clockDataViolation != result.violations.end() &&
+          clockDataViolation->line == 2 && clockDataViolation->column == 1 &&
+          clockDataViolation->message == "时钟CLK驱动非时钟引脚.",
+          "6.1.2 restores the native direct-RHS line-only diagnostic surface");
     result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg [1:0] C1);\n"
         "always @(posedge CLK or posedge ARST) begin if(ARST) C1<=0; else begin C1[0]<=D; C1[1]<=C1[0]; end end\n"
@@ -6199,8 +6205,22 @@ int main() {
     result = analyzeVerilog(
         "module probe(input CLK,D, output reg Q);\n"
         "always @(posedge CLK) begin if (CLK) Q<=D; else Q<=0; end endmodule\n");
-    check(count(result, "GJB10157.6.1.2") == 1,
-          "6.1.2 also reports a clock used as a sequential data-path condition");
+    check(count(result, "GJB10157.6.1.2") == 0,
+          "native 6.1.2 does not recursively classify a condition read as assignment data");
+    result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q);\n"
+        "always @(posedge CLK) Q <= CLK & D; endmodule\n");
+    check(count(result, "GJB10157.6.1.2") == 0,
+          "native 6.1.2 compares only the assignment RHS root name, not compound descendants");
+    result = analyzeVerilog(
+        "module probe(input CLK, output Q); my_bb u(.clk(CLK),.datain(CLK),.q(Q)); endmodule\n");
+    check(count(result, "GJB10157.6.1.2") == 0,
+          "native 6.1.2 does not implement the packaged black-box data-port prose case");
+    result = analyzeVerilog(
+        "module probe(input CLK, output reg Q1,Q2);\n"
+        "always @(posedge CLK) begin Q1<=CLK; Q2<=CLK; end endmodule\n");
+    check(count(result, "GJB10157.6.1.2") == 2,
+          "native 6.1.2 preserves one report per matching direct-RHS assignment");
     result = analyzeVerilog(
         "module probe(input CLK,EN,D, output reg Q); wire gated_clk;\n"
         "assign gated_clk = CLK & EN; always @(posedge gated_clk) Q<=D; endmodule\n");

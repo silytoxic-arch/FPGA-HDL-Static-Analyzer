@@ -1,0 +1,20 @@
+T-Linter native recovery pass 70: GJB10157_VLOG.6.1.2 / public R-4-2
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+OBSERVED
+- Constructor 0x180022120 installs vtable 0x180ef0540, rule key GJB10157_VLOG.6.1.2 and sets object byte +0x158 to zero.
+- Selector 0x180730b90 admits AST_ALWAYS(0x52) only when its first child is AST_POSEDGE(0x65) or AST_NEGEDGE(0x66).
+- Main 0x180729250 gathers clock relations, recursively gathers AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), then reads each assignment RHS root +0x48 name for direct comparison with the clock-relation name.
+- The report location is the RHS root +0x1e0 source path and +0x210 physical line; no column is stored.
+- Mode zero message bytes decode as: 0x180ef0aa4 = 时钟; 0x180f16c08 = 驱动非时钟引脚.
+- Severity is ASCII Warning. Every matching assignment reaches the append path independently.
+- The alternate nonzero mode message is 避免将时钟<name>作为输入数据使用., but this rule constructor selects zero.
+- Packaged HTML has only one violation ordinal for the direct assignment although comments also label .datain(CLK), and the native main has no AST_CELL/port traversal.
+
+INFERENCE USED BY PRODUCT
+- Definite source subset: explicit always whose first event is an edge, direct identifier RHS matching a known edge-clock relation, one report per assignment.
+
+UNKNOWN / NOT CLAIMED
+- Complete elaborated clock-relation creation, aliases, hierarchy, generate/macro lowering, all selected-name normalization and global ordering.
+- Black-box port semantics are a documentation/native conflict and are not guessed.
+- Full proprietary frontend equivalence.

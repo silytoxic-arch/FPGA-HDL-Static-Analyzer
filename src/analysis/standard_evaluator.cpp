@@ -5056,13 +5056,19 @@ void checkAsyncResetConnectedToNonResetUse(
 }
 
 void checkClockUsedAsData(AnalysisResult& result,
-                          const core::SourceFile& source) {
+                          const core::SourceFile& source,
+                          const std::vector<parser::HdlToken>& tokens) {
     // Native GJB10157_VLOG_6_1_2 admits AST_ALWAYS only when its first child
     // is AST_POSEDGE(0x65) or AST_NEGEDGE(0x66). FUN_180729250 collects the
     // elaborated clock relations, recursively gathers AST_ASSIGN_EQ(0x55) and
     // AST_ASSIGN_LE(0x56) below those processes, and compares identifiers in
-    // assignment data with clock names. Parser reads are body-only, excluding
-    // sensitivity events. Cell-port semantics are not guessed from spelling.
+    // assignment data with clock names. The comparison reads the RHS root
+    // node's +0x48 name directly; it does not recursively search conditions or
+    // compound RHS expressions. Each matching assignment independently emits
+    // exact text "时钟<name>驱动非时钟引脚." at the RHS identifier's physical
+    // line, with no column. The packaged black-box connection is documented as
+    // a violation but is not selected by this native implementation; cell-port
+    // semantics therefore remain deliberately outside this adapter.
     // ev_1be0b0252eccce0f64a73f9a4c64990cec83b41408076e27ea7a5a8c3db26f21
     // ev_370fe66f55ae6530e42c0fca58ceaab7cef4d4724a76601782814c548ed7bcf6
     for (const auto& unit : result.structure) {
@@ -5072,15 +5078,88 @@ void checkClockUsedAsData(AnalysisResult& result,
         for (const auto& process : unit.sequentialProcesses)
             for (const auto& event : process.clockEvents)
                 clocks.insert(event.signal);
-        std::set<std::pair<std::string, std::size_t>> reported;
-        for (const auto& process : unit.sequentialProcesses) {
-            for (const auto& read : process.reads) {
-                if (!clocks.contains(read) ||
-                    !reported.emplace(read, process.location.line).second) continue;
-                emit(result, "GJB10157.6.1.2", source,
-                     process.location.line, process.location.column,
-                     "时钟信号 " + read + " 被用作时序过程的数据输入");
+        if (clocks.empty()) continue;
+
+        std::size_t module = tokens.size();
+        for (std::size_t index = 0; index + 1 < tokens.size(); ++index) {
+            if (tokens[index].text == "module" && tokens[index + 1].text == unit.name &&
+                tokens[index + 1].line == unit.location.line) {
+                module = index;
+                break;
             }
+        }
+        if (module == tokens.size()) continue;
+        auto moduleEnd = module + 2;
+        while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
+
+        const auto directRhsIdentifier = [&](std::size_t begin, std::size_t end)
+            -> std::optional<std::size_t> {
+            while (begin < end && tokens[begin].text == "(" &&
+                   closeParen(tokens, begin) + 1 == end) {
+                ++begin;
+                --end;
+            }
+            if (begin >= end || tokens[begin].kind != parser::HdlTokenKind::Identifier)
+                return std::nullopt;
+            auto cursor = begin + 1;
+            while (cursor < end && tokens[cursor].text == "[") {
+                int depth = 1;
+                for (++cursor; cursor < end && depth != 0; ++cursor) {
+                    if (tokens[cursor].text == "[") ++depth;
+                    else if (tokens[cursor].text == "]") --depth;
+                }
+                if (depth != 0) return std::nullopt;
+            }
+            return cursor == end ? std::optional<std::size_t>{begin} : std::nullopt;
+        };
+
+        for (auto index = module + 2; index < moduleEnd; ++index) {
+            if (tokens[index].text != "always" || index + 2 >= moduleEnd ||
+                tokens[index + 1].text != "@") continue;
+            auto firstEvent = index + 2;
+            auto body = moduleEnd;
+            if (tokens[firstEvent].text == "(") {
+                const auto close = closeParen(tokens, firstEvent);
+                if (close >= moduleEnd) continue;
+                ++firstEvent;
+                body = close + 1;
+            } else if (firstEvent + 1 < moduleEnd) {
+                body = firstEvent + 2;
+            }
+            if (firstEvent >= moduleEnd ||
+                (tokens[firstEvent].text != "posedge" &&
+                 tokens[firstEvent].text != "negedge")) continue;
+            const auto end = statementEnd(tokens, body);
+            if (end > moduleEnd) continue;
+
+            int round = 0;
+            for (auto op = body; op < end; ++op) {
+                if (tokens[op].text == "(") { ++round; continue; }
+                if (tokens[op].text == ")") { --round; continue; }
+                if (round != 0 ||
+                    (tokens[op].text != "=" && tokens[op].text != "<=")) continue;
+                if (!simpleAssignmentTarget(tokens, body, op)) continue;
+                auto rhsEnd = op + 1;
+                int rhsRound = 0, square = 0, brace = 0;
+                for (; rhsEnd < end; ++rhsEnd) {
+                    const auto& text = tokens[rhsEnd].text;
+                    if (text == "(") ++rhsRound;
+                    else if (text == ")") --rhsRound;
+                    else if (text == "[") ++square;
+                    else if (text == "]") --square;
+                    else if (text == "{") ++brace;
+                    else if (text == "}") --brace;
+                    else if (text == ";" && rhsRound == 0 && square == 0 && brace == 0)
+                        break;
+                }
+                const auto identifier = directRhsIdentifier(op + 1, rhsEnd);
+                if (identifier && clocks.contains(tokens[*identifier].text))
+                    emit(result, "GJB10157.6.1.2", source,
+                         tokens[*identifier].line, 1,
+                         "时钟" + tokens[*identifier].text + "驱动非时钟引脚.");
+                op = rhsEnd == end ? op : rhsEnd;
+            }
+            index = end == 0 ? index : end - 1;
         }
     }
 }
@@ -13661,7 +13740,7 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             checkCombinationalTristateEnable(result, source, activeTokens);
             checkInternalVerilogTristate(result, source, activeTokens);
             checkAsyncResetConnectedToNonResetUse(result, source, activeTokens);
-            checkClockUsedAsData(result, source);
+            checkClockUsedAsData(result, source, activeTokens);
             checkCombinationalOutputUsedAsClock(result, source, activeTokens);
             checkCombinationalOutputUsedAsAsyncReset(result, source, activeTokens);
             checkMixedClockEdges(result, source, activeTokens);
@@ -16839,6 +16918,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.5.3.4") ||
                 (left.ruleId == "GJB10157.5.3.5" &&
                  right.ruleId == "GJB10157.5.3.5") ||
+                (left.ruleId == "GJB10157.6.1.2" &&
+                 right.ruleId == "GJB10157.6.1.2") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&
