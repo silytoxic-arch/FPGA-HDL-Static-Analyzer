@@ -568,9 +568,9 @@ const confirmed = {
     limitations: 'The configured-top producer, ordinary-name Yosys backslash normalization, explicit initial_construct +0x2a9 producer, exact message/severity/location and per-module multiplicity are recovered and integrated. Exotic escaped/$ identifiers, declaration-initializer line normalization, generate/cell lowering, library/black-box elaboration, macros, duplicate modules and malformed-source recovery remain unresolved. Product uses resolved project hierarchy and bounded source assignments; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.5.3.5': {
-    predicate: 'Native slot 1 admits AST_ASSIGN(0x4d), AST_CELL(0x4f) and AST_ALWAYS(0x52). FUN_1807023a0 records module-output identifiers, expands scalar/bit/range targets, distinguishes edge-triggered process coverage, and groups adjacent uncovered output bits for reporting. Packaged examples confirm that direct and compound continuous assignments report, edge-triggered assignments remain clear, and a black-box cell output connection remains clear. Product reports bounded simple output targets driven by continuous assignments or combinational always processes.',
-    evidence: ['ev_b5c70dab5cd2580aad460545696268fa8567ca8e10b239ae5ce3c2254bb479a6', 'ev_774788b2878e063d47b80fc5bed9ebcbbcc8d340b766339c20b94cff92e7144d', 'docs/evidence/native_verilog_registered_outputs_5_3_5_findings.md#recovered-predicate'],
-    limitations: 'Exact native per-bit map merging, cell-port direction resolution, generate/elaboration behavior, compound/concatenated left-hand targets, declaration initializers, macro-expanded constructs, aliases and diagnostic range formatting remain unresolved. Product emits only definite simple source-level output drivers; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180021f70 installs vtables 0x180eef7a8/0x180eef7f0: slot 0 FUN_1807023a0 and selector FUN_180704420. The selector admits AST_ASSIGN(0x4d), AST_CELL(0x4f) and AST_ALWAYS(0x52). FUN_1804e66e0 admits an AST_ALWAYS only when none of its direct children is AST_POSEDGE(0x65) or AST_NEGEDGE(0x66). For every output assignment, the run recursively gathers RHS AST_IDENTIFIER(0x13) nodes and only creates a candidate when at least one resolved WIRE has parser-proven register byte +0xa2 clear. It expands scalar/constant-bit/constant-range targets, keys candidates by file, output name and assignment physical line, sorts bit indices and merges adjacent bits. Full declared-width coverage emits 未寄存的模块输出端口<name>; partial groups append [bit] or [high:low]. Severity is the GB18030 string 警告 and no column is written. Cell-driven outputs and direct registered-source transfers remain clear. Product mirrors this bounded source subset, uses column 1 for native line-only locations and preserves per-line bit-group multiplicity.',
+    evidence: ['ev_b5c70dab5cd2580aad460545696268fa8567ca8e10b239ae5ce3c2254bb479a6', 'ev_774788b2878e063d47b80fc5bed9ebcbbcc8d340b766339c20b94cff92e7144d', 'reverse-tools/evidence/t_linter_pass68/a3_3_registered_outputs.txt', 'docs/evidence/native_verilog_registered_outputs_5_3_5_findings.md#recovered-predicate'],
+    limitations: 'The no-edge process gate, non-register RHS identifier gate, register-byte meaning, exact message/severity/location and constant bit/range grouping are recovered and integrated. Cell port direction resolution, generate/elaboration behavior, compound/concatenated or dynamic left-hand targets, declaration initializers, macro expansion, aliases, unsupported expression lowering and global diagnostic ordering remain unresolved. Product treats explicit SystemVerilog logic declarations as variable/register sources in its bounded adapter; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.1': {
     predicate: 'Native FUN_180547580 initializes a synthesized connectivity model through FUN_180546030, FUN_18054b890 and FUN_18054be20; FUN_18054c850 walks register-cell connectivity and reports when a register output reaches a register clock input. The packaged example distinguishes a locally registered divide-by-two signal used as another process clock from an input clock and an instance-produced PLL clock. Product requires an edge-triggered process write and a same-module edge-triggered process using that exact signal as its primary clock.',
@@ -1067,6 +1067,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.5.3.1',
   'GJB10157.5.3.2',
   'GJB10157.5.3.3',
+  'GJB10157.5.3.5',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1403,6 +1404,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.5.3.4': {
         nativeFindings: 'docs/evidence/native_verilog_hierarchy_only_5_3_4_findings.md',
         release: 'docs/v1_4_203_release.md'
+      }, 'GJB10157.5.3.5': {
+        nativeFindings: 'docs/evidence/native_verilog_registered_outputs_5_3_5_findings.md',
+        release: 'docs/v1_4_204_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'

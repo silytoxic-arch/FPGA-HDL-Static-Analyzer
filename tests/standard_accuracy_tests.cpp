@@ -6086,6 +6086,13 @@ int main() {
         "my_bb u0(.OUT1(C5)); endmodule\n");
     check(count(result, "GJB10157.5.3.5") == 3,
           "attachment 5.3.5 reports continuous output drivers and exempts a cell-driven output");
+    check(std::ranges::all_of(result.violations, [](const auto& item) {
+              if (item.ruleId != "GJB10157.5.3.5") return true;
+              return item.severity == analysis::Severity::Warning && item.column == 1 &&
+                     (item.message == "未寄存的模块输出端口C1" ||
+                      item.message == "未寄存的模块输出端口C2" ||
+                      item.message == "未寄存的模块输出端口C3");
+          }), "5.3.5 uses the native fixed prefix, output name, Warning and line-only location");
     result = analyzeVerilog(
         "module probe(input CLK,D, output reg Q1,Q2, output Q3);\n"
         "always @(posedge CLK) begin Q1<=D; Q2<=Q1; end\n"
@@ -6102,6 +6109,38 @@ int main() {
         "always @* Q1 = D; always_comb begin Q2[0] = D; Q2[1] <= Q1; end endmodule\n");
     check(count(result, "GJB10157.5.3.5") == 2,
           "5.3.5 reports each combinationally driven output, coalescing multiple selected bits on one line");
+    check(std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.5" &&
+                     item.message == "未寄存的模块输出端口Q2[0]";
+          }), "5.3.5 excludes a selected bit driven only by a registered source");
+    result = analyzeVerilog(
+        "module probe(input CLK,D, output Q1,Q2); reg stage;\n"
+        "always @(posedge CLK) stage <= D; assign Q1 = stage; assign Q2 = stage & D; endmodule\n");
+    check(count(result, "GJB10157.5.3.5") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.5" &&
+                     item.message == "未寄存的模块输出端口Q2";
+          }), "5.3.5 permits a direct registered source but reports a mixed registered/input expression");
+    result = analyzeVerilog(
+        "module probe(input D, output [3:0] Q); assign Q[2:1] = {D,D}; endmodule\n");
+    check(count(result, "GJB10157.5.3.5") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.5" &&
+                     item.message == "未寄存的模块输出端口Q[2:1]";
+          }), "5.3.5 formats one partial contiguous output range in native high-to-low order");
+    result = analyzeVerilog(
+        "module probe(input D, output [3:0] Q); "
+        "assign Q[0]=D, Q[1]=D, Q[2]=D, Q[3]=D; endmodule\n");
+    check(count(result, "GJB10157.5.3.5") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.5.3.5" &&
+                     item.message == "未寄存的模块输出端口Q";
+          }), "5.3.5 merges same-line adjacent selected bits and omits a range for full-width coverage");
+    result = analyzeVerilog(
+        "module first(input D,output Q);assign Q=D;endmodule "
+        "module second(input D,output Q);assign Q=D;endmodule\n");
+    check(count(result, "GJB10157.5.3.5") == 2,
+          "5.3.5 retains identical same-line diagnostics produced by distinct module runs");
     result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q); reg clk_div2;\n"
         "always @(posedge ARST, posedge CLK) begin if(ARST) clk_div2<=0; else clk_div2<=~clk_div2; end\n"

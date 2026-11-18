@@ -4034,19 +4034,23 @@ void checkRegisteredVerilogModuleOutputs(AnalysisResult& result,
     // Native slot 1 admits AST_ASSIGN(0x4d), AST_CELL(0x4f) and AST_ALWAYS(0x52).
     // FUN_1807023a0 records output identifiers (direction byte +0xa1), expands
     // scalar/bit/range targets, and groups adjacent uncovered bit indices before
-    // reporting. Edge-triggered always assignments are the registered set;
-    // continuous/combinational drivers are candidates, while cell-driven output
-    // connections are deliberately not reported. Packaged examples prove that a
-    // direct input-to-output continuous assignment is still a violation.
+    // reporting. FUN_1804e66e0 returns true only when AST_ALWAYS has no direct
+    // AST_POSEDGE/AST_NEGEDGE child. A continuous/combinational assignment becomes
+    // a candidate only when its RHS contains an identifier whose resolved WIRE
+    // has the parser-proven register byte +0xa2 clear. A direct registered source,
+    // edge-triggered process and cell-driven output therefore remain clear.
+    // Full-width groups use the exact text "未寄存的模块输出端口<name>"; partial
+    // groups append [bit] or [high:low]. Native locations carry physical line but
+    // no column and severity text 警告.
     // ev_b5c70dab5cd2580aad460545696268fa8567ca8e10b239ae5ce3c2254bb479a6
     // ev_774788b2878e063d47b80fc5bed9ebcbbcc8d340b766339c20b94cff92e7144d
     for (const auto& unit : result.structure) {
         if (unit.kind != parser::DesignUnitKind::VerilogModule ||
             unit.location.file.lexically_normal() != source.path().lexically_normal()) continue;
-        std::set<std::string> outputs;
+        std::set<std::string> outputNames;
         for (const auto& port : unit.ports)
-            if (port.direction == parser::PortDirection::Output) outputs.insert(port.name);
-        if (outputs.empty()) continue;
+            if (port.direction == parser::PortDirection::Output) outputNames.insert(port.name);
+        if (outputNames.empty()) continue;
 
         std::size_t module = tokens.size();
         for (std::size_t i = 0; i + 1 < tokens.size(); ++i) {
@@ -4060,13 +4064,108 @@ void checkRegisteredVerilogModuleOutputs(AnalysisResult& result,
         auto moduleEnd = module + 2;
         while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
 
-        std::set<std::pair<std::string, std::size_t>> reported;
-        const auto report = [&](std::size_t target, std::string_view driver) {
-            const auto& token = tokens[target];
-            if (!outputs.contains(token.text) || !reported.emplace(token.text, token.line).second)
+        const auto decimal = [](std::string_view text) -> std::optional<int> {
+            int value = 0;
+            const auto [last, error] = std::from_chars(
+                text.data(), text.data() + text.size(), value);
+            if (error != std::errc{} || last != text.data() + text.size() || value < 0)
+                return std::nullopt;
+            return value;
+        };
+
+        std::map<std::string, std::pair<int, int>> outputBounds;
+        for (const auto& name : outputNames) outputBounds.emplace(name, std::pair{0, 0});
+        const std::set<std::string_view> directionWords{"input", "output", "inout"};
+        for (auto index = module + 2; index < moduleEnd; ++index) {
+            if (tokens[index].text != "output") continue;
+            auto limit = index + 1;
+            while (limit < moduleEnd && tokens[limit].text != ";" &&
+                   tokens[limit].text != ")" &&
+                   !directionWords.contains(tokens[limit].text)) ++limit;
+            std::pair<int, int> bounds{0, 0};
+            for (auto cursor = index + 1; cursor + 4 < limit; ++cursor) {
+                if (tokens[cursor].text != "[" || tokens[cursor + 2].text != ":" ||
+                    tokens[cursor + 4].text != "]") continue;
+                const auto left = decimal(tokens[cursor + 1].text);
+                const auto right = decimal(tokens[cursor + 3].text);
+                if (left && right) bounds = {*left, *right};
+                break;
+            }
+            for (auto cursor = index + 1; cursor < limit; ++cursor)
+                if (outputNames.contains(tokens[cursor].text))
+                    outputBounds[tokens[cursor].text] = bounds;
+        }
+
+        std::set<std::string> registers;
+        for (auto index = module + 2; index < moduleEnd; ++index) {
+            if (tokens[index].text != "reg" && tokens[index].text != "logic") continue;
+            int round = 0, square = 0, brace = 0;
+            bool initializer = false;
+            for (auto cursor = index + 1; cursor < moduleEnd; ++cursor) {
+                const auto& text = tokens[cursor].text;
+                if (text == "(") ++round;
+                else if (text == ")") {
+                    if (round == 0) break;
+                    --round;
+                } else if (text == "[") ++square;
+                else if (text == "]") --square;
+                else if (text == "{") ++brace;
+                else if (text == "}") --brace;
+                if (round == 0 && square == 0 && brace == 0) {
+                    if (text == ";" || directionWords.contains(text)) break;
+                    if (text == ",") { initializer = false; continue; }
+                    if (text == "=") { initializer = true; continue; }
+                }
+                if (!initializer && square == 0 &&
+                    tokens[cursor].kind == parser::HdlTokenKind::Identifier &&
+                    text != "signed" && text != "unsigned" && text != "wire")
+                    registers.insert(text);
+            }
+        }
+
+        const std::set<std::string_view> rhsKeywords{
+            "begin", "end", "if", "else", "case", "casez", "casex", "endcase",
+            "for", "while", "repeat", "forever", "posedge", "negedge", "or",
+            "assign", "always", "always_comb", "always_latch"
+        };
+        const auto hasNonRegisterRhs = [&](std::size_t begin, std::size_t end) {
+            for (auto cursor = begin; cursor < end; ++cursor) {
+                if (tokens[cursor].kind != parser::HdlTokenKind::Identifier ||
+                    rhsKeywords.contains(tokens[cursor].text)) continue;
+                if (!registers.contains(tokens[cursor].text)) return true;
+            }
+            return false;
+        };
+
+        std::map<std::pair<std::string, std::size_t>, std::set<int>> candidates;
+        const auto record = [&](std::size_t begin, std::size_t op, std::size_t rhsEnd) {
+            const auto target = simpleAssignmentTarget(tokens, begin, op);
+            if (!target || !outputNames.contains(tokens[*target].text) ||
+                !hasNonRegisterRhs(op + 1, rhsEnd)) return;
+            const auto& name = tokens[*target].text;
+            const auto [left, right] = outputBounds[name];
+            auto& bits = candidates[{name, tokens[op].line}];
+            if (*target + 1 < op && tokens[*target + 1].text == "[") {
+                if (*target + 3 < op && tokens[*target + 3].text == "]") {
+                    if (const auto bit = decimal(tokens[*target + 2].text))
+                        if (*bit >= std::min(left, right) && *bit <= std::max(left, right))
+                            bits.insert(*bit);
+                    return;
+                }
+                if (*target + 5 < op && tokens[*target + 3].text == ":" &&
+                    tokens[*target + 5].text == "]") {
+                    const auto high = decimal(tokens[*target + 2].text);
+                    const auto low = decimal(tokens[*target + 4].text);
+                    if (!high || !low) return;
+                    for (auto bit = std::min(*high, *low); bit <= std::max(*high, *low); ++bit)
+                        if (bit >= std::min(left, right) && bit <= std::max(left, right))
+                            bits.insert(bit);
+                    return;
+                }
                 return;
-            emit(result, "GJB10157.5.3.5", source, token.line, token.column,
-                 "模块输出 " + token.text + " 由" + std::string(driver) + "直接驱动，未经过寄存器");
+            }
+            for (auto bit = std::min(left, right); bit <= std::max(left, right); ++bit)
+                bits.insert(bit);
         };
 
         for (auto index = module + 2; index < moduleEnd; ++index) {
@@ -4083,23 +4182,34 @@ void checkRegisteredVerilogModuleOutputs(AnalysisResult& result,
                     else if (text == "}") --brace;
                     if (round == 0 && square == 0 && brace == 0 && text == ";") break;
                 }
-                std::size_t equal = end;
+                auto segment = index + 1;
                 round = square = brace = 0;
-                for (auto cursor = index + 1; cursor < end; ++cursor) {
-                    const auto& text = tokens[cursor].text;
+                for (auto cursor = index + 1; cursor <= end; ++cursor) {
+                    const auto text = cursor < end ? tokens[cursor].text : ";";
                     if (text == "(") ++round;
                     else if (text == ")") --round;
                     else if (text == "[") ++square;
                     else if (text == "]") --square;
                     else if (text == "{") ++brace;
                     else if (text == "}") --brace;
-                    else if (round == 0 && square == 0 && brace == 0 && text == "=") {
-                        equal = cursor;
-                        break;
+                    if (round != 0 || square != 0 || brace != 0 ||
+                        (text != "," && text != ";")) continue;
+                    auto equal = cursor;
+                    int localRound = 0, localSquare = 0, localBrace = 0;
+                    for (auto item = segment; item < cursor; ++item) {
+                        const auto& itemText = tokens[item].text;
+                        if (itemText == "(") ++localRound;
+                        else if (itemText == ")") --localRound;
+                        else if (itemText == "[") ++localSquare;
+                        else if (itemText == "]") --localSquare;
+                        else if (itemText == "{") ++localBrace;
+                        else if (itemText == "}") --localBrace;
+                        else if (localRound == 0 && localSquare == 0 && localBrace == 0 &&
+                                 itemText == "=") { equal = item; break; }
                     }
+                    if (equal != cursor) record(segment, equal, cursor);
+                    segment = cursor + 1;
                 }
-                if (const auto target = simpleAssignmentTarget(tokens, index + 1, equal))
-                    report(*target, "连续赋值");
                 index = end == moduleEnd ? index : end;
                 continue;
             }
@@ -4125,17 +4235,56 @@ void checkRegisteredVerilogModuleOutputs(AnalysisResult& result,
             if (end > moduleEnd) continue;
             if (!sequential) {
                 auto segment = body;
-                for (auto cursor = body; cursor < end; ++cursor) {
-                    if (tokens[cursor].text == ";") {
-                        segment = cursor + 1;
-                        continue;
+                for (auto cursor = body; cursor <= end; ++cursor) {
+                    if (cursor < end && tokens[cursor].text != ";") continue;
+                    auto op = cursor;
+                    int round = 0, square = 0, brace = 0;
+                    for (auto item = segment; item < cursor; ++item) {
+                        const auto& text = tokens[item].text;
+                        if (text == "(") ++round;
+                        else if (text == ")") --round;
+                        else if (text == "[") ++square;
+                        else if (text == "]") --square;
+                        else if (text == "{") ++brace;
+                        else if (text == "}") --brace;
+                        else if (round == 0 && square == 0 && brace == 0 &&
+                                 (text == "=" || text == "<=")) { op = item; break; }
                     }
-                    if (tokens[cursor].text != "=" && tokens[cursor].text != "<=") continue;
-                    if (const auto target = simpleAssignmentTarget(tokens, segment, cursor))
-                        report(*target, "组合过程");
+                    if (op != cursor) record(segment, op, cursor);
+                    segment = cursor + 1;
                 }
             }
             index = end == 0 ? index : end - 1;
+        }
+
+        for (const auto& [key, bits] : candidates) {
+            if (bits.empty()) continue;
+            const auto& [name, line] = key;
+            const auto [left, right] = outputBounds[name];
+            const auto declaredLow = std::min(left, right);
+            const auto declaredHigh = std::max(left, right);
+            const bool fullWidth = bits.size() == static_cast<std::size_t>(declaredHigh - declaredLow + 1) &&
+                                   *bits.begin() == declaredLow && *bits.rbegin() == declaredHigh;
+            if (fullWidth) {
+                emit(result, "GJB10157.5.3.5", source, line, 1,
+                     "未寄存的模块输出端口" + name);
+                continue;
+            }
+            auto first = bits.begin();
+            while (first != bits.end()) {
+                auto last = first;
+                auto next = std::next(last);
+                while (next != bits.end() && *next == *last + 1) {
+                    last = next;
+                    ++next;
+                }
+                auto message = "未寄存的模块输出端口" + name + "[";
+                if (first == last) message += std::to_string(*first);
+                else message += std::to_string(*last) + ":" + std::to_string(*first);
+                message += "]";
+                emit(result, "GJB10157.5.3.5", source, line, 1, std::move(message));
+                first = next;
+            }
         }
     }
 }
@@ -16683,6 +16832,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.5.3.3") ||
                 (left.ruleId == "GJB10157.5.3.4" &&
                  right.ruleId == "GJB10157.5.3.4") ||
+                (left.ruleId == "GJB10157.5.3.5" &&
+                 right.ruleId == "GJB10157.5.3.5") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

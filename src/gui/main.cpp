@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         application.installTranslator(&qtTranslator);
     }
     QApplication::setApplicationName("FPGA HDL Static Analyzer");
-    QApplication::setApplicationVersion("1.4.203");
+    QApplication::setApplicationVersion("1.4.204");
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/branding/app-icon.png")));
     fpga::gui::MainWindow window;
     window.show();

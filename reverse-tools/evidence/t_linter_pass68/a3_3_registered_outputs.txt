@@ -1,0 +1,33 @@
+T-Linter V3.1.4.25120520251205115359 static evidence, pass 68
+Target SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB10157_VLOG.5.3.5 (public A-3-3)
+
+Observation
+- Constructor: 0x180021f70.
+- Final vtables: 0x180eef7a8 and 0x180eef7f0.
+- Slot 0 is FUN_1807023a0; selector slot 1 is FUN_180704420.
+- FUN_180704420 admits AST_ASSIGN(0x4d), AST_CELL(0x4f), AST_ALWAYS(0x52).
+- FUN_1804e66e0 returns true for AST_ALWAYS only when no direct child has type
+  AST_POSEDGE(0x65) or AST_NEGEDGE(0x66).
+- FUN_1807023a0 recursively gathers RHS AST_IDENTIFIER(0x13). A candidate is
+  created only when at least one resolved declaration has byte +0xa2 clear.
+  Independent parser evidence establishes +0xa2 as the Verilog reg flag.
+- Candidate keys retain source file, output name and assignment physical line.
+  Constant scalar/bit/range targets are expanded to integer bit indices, sorted,
+  and adjacent indices are merged.
+- Bytes at 0x180f14590 decode as GB18030: 未寄存的模块输出端口
+- Complete declared-width coverage appends only the normalized output name.
+  Partial groups append [bit] or [high:low] using ASCII punctuation.
+- Severity bytes at 0x180ee83b0 decode as GB18030: 警告
+- Report records carry the candidate physical line and no column.
+
+Inference
+- Product column 1 is a source-adapter placeholder for native line-only output.
+- A direct transfer whose RHS identifiers are all declared reg objects is clear;
+  adding an input or ordinary wire identifier makes it a candidate.
+
+Unknown
+- Complete cell-direction resolution, generate/elaboration, macros, aliases,
+  compound/dynamic left-hand targets, malformed input and global report ordering
+  remain unverified. Static analysis does not establish runtime behavior or full
+  proprietary frontend equivalence.
