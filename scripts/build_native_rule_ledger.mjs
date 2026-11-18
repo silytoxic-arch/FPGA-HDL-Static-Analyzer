@@ -573,9 +573,9 @@ const confirmed = {
     limitations: 'The no-edge process gate, non-register RHS identifier gate, register-byte meaning, exact message/severity/location and constant bit/range grouping are recovered and integrated. Cell port direction resolution, generate/elaboration behavior, compound/concatenated or dynamic left-hand targets, declaration initializers, macro expansion, aliases, unsupported expression lowering and global diagnostic ordering remain unresolved. Product treats explicit SystemVerilog logic declarations as variable/register sources in its bounded adapter; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.1': {
-    predicate: 'Native FUN_180547580 initializes a synthesized connectivity model through FUN_180546030, FUN_18054b890 and FUN_18054be20; FUN_18054c850 walks register-cell connectivity and reports when a register output reaches a register clock input. The packaged example distinguishes a locally registered divide-by-two signal used as another process clock from an input clock and an instance-produced PLL clock. Product requires an edge-triggered process write and a same-module edge-triggered process using that exact signal as its primary clock.',
-    evidence: ['ev_928bda12810b138cd816ae975f012c3fe992313f57f51b26e6723f8dc285cafd', 'docs/evidence/native_verilog_register_output_clock_6_1_1_findings.md#recovered-predicate'],
-    limitations: 'Exact synthesized cell and port classification, alias/net propagation, clock primitive recognition, cross-module hierarchy, generate/elaboration, multi-bit clock targets and native diagnostic formatting remain unresolved. Product reports the definite same-module process-to-process source subset; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180022090 installs vtable 0x180ef03f8 and rule key GJB10157_VLOG.6.1.1. Native FUN_180547580 initializes a synthesized connectivity model through FUN_180546030, FUN_18054b890 and FUN_18054be20; FUN_18054c850 walks register-cell connectivity and reports when a register output reaches another register clock input. The report concatenates exact GB18030 fragments 禁止将寄存器的输出 + <object> + 直接连接到其他寄存器的时钟管脚, stores Warning, the source path and physical line, and no column. Packaged violation line 31 is the source register process while its consumer is line 40, and the correct example admits input and PLL-produced clocks. Product requires an edge-triggered process write and same-module primary-clock consumption, emits at the writer process line column 1, and deduplicates by source output.',
+    evidence: ['ev_928bda12810b138cd816ae975f012c3fe992313f57f51b26e6723f8dc285cafd', 'reverse-tools/evidence/t_linter_pass69/r4_1_register_clock.txt', 'docs/evidence/native_verilog_register_output_clock_6_1_1_findings.md'],
+    limitations: 'The constructor, vtable, connectivity-model path, exact message/severity/line-only report surface and packaged source-line boundary are recovered and integrated. Exact synthesized cell/port classes, alias/net propagation, clock primitive recognition beyond the source subset, cross-module hierarchy, generate/elaboration, multi-bit clock targets and global diagnostic ordering remain unresolved. Product reports the definite same-module process-to-process subset; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.2': {
     predicate: 'Native filter admits AST_ALWAYS only when its first child is AST_POSEDGE(0x65) or AST_NEGEDGE(0x66). FUN_180729250 gathers elaborated clock relations, recursively collects AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56), and reports when an identifier in assignment data matches a clock relation name. Product intersects parser-confirmed edge clocks with body-only reads from edge-triggered processes.',
@@ -1068,6 +1068,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.5.3.2',
   'GJB10157.5.3.3',
   'GJB10157.5.3.5',
+  'GJB10157.6.1.1',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1407,6 +1408,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.5.3.5': {
         nativeFindings: 'docs/evidence/native_verilog_registered_outputs_5_3_5_findings.md',
         release: 'docs/v1_4_204_release.md'
+      }, 'GJB10157.6.1.1': {
+        nativeFindings: 'docs/evidence/native_verilog_register_output_clock_6_1_1_findings.md',
+        release: 'docs/v1_4_205_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'

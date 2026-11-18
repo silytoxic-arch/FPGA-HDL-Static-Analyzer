@@ -1,0 +1,22 @@
+T-Linter native recovery pass 69: GJB10157_VLOG.6.1.1 / public R-4-1
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+OBSERVED
+- Constructor 0x180022090 installs vtable 0x180ef03f8 and rule key GJB10157_VLOG.6.1.1.
+- Main 0x180547580 calls model builder 0x180546030 and report walker 0x18054c850.
+- Helpers 0x18054b890 and 0x18054be20 populate the synthesized connectivity model.
+- At 0x18054c850, the report path obtains a dynamic object string via 0x18054dd50.
+- Message concatenation uses PE GB18030 bytes:
+  0x180ef04a8 = 禁止将寄存器的输出
+  0x180ef0488 = 直接连接到其他寄存器的时钟管脚
+- The report stores ASCII Warning, source path, a physical line parsed from source metadata, and no column.
+- Packaged HTML violations="31" points to the source always process; the consuming always is line 40.
+- Packaged correct code uses an input clock and a PLL instance output and has no violation.
+
+INFERENCE USED BY PRODUCT
+- A source-level definite subset is: same-module edge-triggered writer output used directly as another edge-triggered process primary clock.
+- Diagnostic grain is one source register output, located at its writer process line.
+
+UNKNOWN / NOT CLAIMED
+- Complete synthesized cell and clock-port classification, aliases, cross-module propagation, generate lowering, multi-bit targets, primitive library semantics and global ordering.
+- Full proprietary frontend equivalence.

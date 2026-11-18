@@ -4294,9 +4294,13 @@ void checkRegisterOutputUsedAsClock(AnalysisResult& result,
     // Native FUN_180547580 builds a synthesized connectivity model through
     // FUN_180546030/FUN_18054b890/FUN_18054be20, then FUN_18054c850 walks
     // register-cell connections and emits when a register output reaches a
-    // register clock input. The bounded source counterpart requires a signal
-    // written by an edge-triggered process to be the primary clock of another
-    // edge-triggered process. Instance/PLL outputs have no local process writer.
+    // register clock input. The native report is attached to the source
+    // register process, uses no column, and formats the message as
+    // "禁止将寄存器的输出<name>直接连接到其他寄存器的时钟管脚". The bounded source
+    // counterpart requires a signal written by an edge-triggered process to be
+    // the primary clock of another edge-triggered process. Instance/PLL outputs
+    // have no local process writer. One source output is reported once even if
+    // it clocks multiple downstream processes.
     // ev_928bda12810b138cd816ae975f012c3fe992313f57f51b26e6723f8dc285cafd
     for (const auto& unit : result.structure) {
         if (unit.kind != parser::DesignUnitKind::VerilogModule ||
@@ -4305,14 +4309,15 @@ void checkRegisterOutputUsedAsClock(AnalysisResult& result,
         for (const auto& process : unit.sequentialProcesses)
             for (const auto& signal : process.writes)
                 registerWriters.try_emplace(signal, &process);
-        std::set<std::pair<std::string, std::size_t>> reported;
+        std::set<std::string> reported;
         for (const auto& consumer : unit.sequentialProcesses) {
             const auto writer = registerWriters.find(consumer.clock);
             if (writer == registerWriters.end() ||
-                !reported.emplace(consumer.clock, consumer.location.line).second) continue;
+                !reported.insert(consumer.clock).second) continue;
             emit(result, "GJB10157.6.1.1", source,
-                 consumer.location.line, consumer.location.column,
-                 "寄存器输出 " + consumer.clock + " 被直接用作其他寄存器的时钟");
+                 writer->second->location.line, 1,
+                 "禁止将寄存器的输出" + consumer.clock +
+                 "直接连接到其他寄存器的时钟管脚");
         }
     }
 }

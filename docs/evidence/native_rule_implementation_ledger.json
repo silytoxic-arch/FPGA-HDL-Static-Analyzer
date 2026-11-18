@@ -3818,11 +3818,12 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native FUN_180547580 initializes a synthesized connectivity model through FUN_180546030, FUN_18054b890 and FUN_18054be20; FUN_18054c850 walks register-cell connectivity and reports when a register output reaches a register clock input. The packaged example distinguishes a locally registered divide-by-two signal used as another process clock from an input clock and an instance-produced PLL clock. Product requires an edge-triggered process write and a same-module edge-triggered process using that exact signal as its primary clock.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructor 0x180022090 installs vtable 0x180ef03f8 and rule key GJB10157_VLOG.6.1.1. Native FUN_180547580 initializes a synthesized connectivity model through FUN_180546030, FUN_18054b890 and FUN_18054be20; FUN_18054c850 walks register-cell connectivity and reports when a register output reaches another register clock input. The report concatenates exact GB18030 fragments 禁止将寄存器的输出 + <object> + 直接连接到其他寄存器的时钟管脚, stores Warning, the source path and physical line, and no column. Packaged violation line 31 is the source register process while its consumer is line 40, and the correct example admits input and PLL-produced clocks. Product requires an edge-triggered process write and same-module primary-clock consumption, emits at the writer process line column 1, and deduplicates by source output.",
       "predicateEvidence": [
         "ev_928bda12810b138cd816ae975f012c3fe992313f57f51b26e6723f8dc285cafd",
-        "docs/evidence/native_verilog_register_output_clock_6_1_1_findings.md#recovered-predicate"
+        "reverse-tools/evidence/t_linter_pass69/r4_1_register_clock.txt",
+        "docs/evidence/native_verilog_register_output_clock_6_1_1_findings.md"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -3831,7 +3832,9 @@
       "additionalTests": "tests/standard_accuracy_tests.cpp",
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.6.1.1.html",
-        "sha256": "78aedbfd958b4fbf992791107c5ec515a8f50afecaaf4b1dc26a6c5f50d7b774"
+        "sha256": "78aedbfd958b4fbf992791107c5ec515a8f50afecaaf4b1dc26a6c5f50d7b774",
+        "nativeFindings": "docs/evidence/native_verilog_register_output_clock_6_1_1_findings.md",
+        "release": "docs/v1_4_205_release.md"
       },
       "exampleChecks": [
         {
@@ -3845,7 +3848,7 @@
           "matched": true
         }
       ],
-      "limitations": "Exact synthesized cell and port classification, alias/net propagation, clock primitive recognition, cross-module hierarchy, generate/elaboration, multi-bit clock targets and native diagnostic formatting remain unresolved. Product reports the definite same-module process-to-process source subset; no finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The constructor, vtable, connectivity-model path, exact message/severity/line-only report surface and packaged source-line boundary are recovered and integrated. Exact synthesized cell/port classes, alias/net propagation, clock primitive recognition beyond the source subset, cross-module hierarchy, generate/elaboration, multi-bit clock targets and global diagnostic ordering remain unresolved. Product reports the definite same-module process-to-process subset; no finding remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "R-4-2",

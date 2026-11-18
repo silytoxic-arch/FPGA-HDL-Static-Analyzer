@@ -6148,6 +6148,20 @@ int main() {
         "endmodule\n");
     check(count(result, "GJB10157.6.1.1") == 1,
           "attachment 6.1.1 reports a register output used as another process clock");
+    const auto registerClockViolation = std::ranges::find_if(result.violations,
+        [](const auto& entry) { return entry.ruleId == "GJB10157.6.1.1"; });
+    check(registerClockViolation != result.violations.end() &&
+          registerClockViolation->line == 2 &&
+          registerClockViolation->column == 1 &&
+          registerClockViolation->message ==
+              "禁止将寄存器的输出clk_div2直接连接到其他寄存器的时钟管脚",
+          "6.1.1 uses the native source-register line, line-only location and exact message");
+    result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q1,Q2); reg divided;\n"
+        "always @(posedge CLK) divided<=~divided;\n"
+        "always @(posedge divided) Q1<=D; always @(negedge divided) Q2<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.1") == 1,
+          "6.1.1 reports one diagnostic per source register output across multiple consumers");
     result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q1,Q2); wire pll_clk;\n"
         "pll u0(.refclk(CLK),.outclk(pll_clk));\n"
