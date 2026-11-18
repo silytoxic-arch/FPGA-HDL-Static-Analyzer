@@ -6269,11 +6269,35 @@ int main() {
     result = analyzeVerilog(
         "module probe(input CLK,CLK2,D, output reg Q1,Q2,Q3,Q4,Q5,Q6); wire generated,inv;\n"
         "clock_bb u0(.CLKIN(CLK),.CLKOUT(generated)); assign inv=~CLK2;\n"
-        "always @(posedge CLK) Q1<=D; always @(negedge CLK) Q2<=D;\n"
-        "always @(posedge generated) Q3<=D; always @(negedge generated) Q4<=D;\n"
-        "always @(posedge CLK2) Q5<=D; always @(posedge inv) Q6<=D; endmodule\n");
-    check(count(result, "GJB10157.6.1.4") == 3,
-          "attachment 6.1.4 reports direct, primitive-output and inverted-alias mixed edges");
+        "always @(posedge CLK) Q1<=D;\n"
+        "always @(negedge CLK) Q2<=D;\n"
+        "always @(posedge generated) Q3<=D;\n"
+        "always @(negedge generated) Q4<=D;\n"
+        "always @(posedge CLK2) Q5<=D;\n"
+        "always @(posedge inv) Q6<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.4") == 6,
+          "native 6.1.4 reports both endpoints of direct, primitive-output and inverted-alias mixed edges");
+    result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK) Q1<=D;\n"
+        "always @(negedge CLK) Q2<=D; endmodule\n");
+    std::vector<std::size_t> mixedEdgeLines;
+    for (const auto& entry : result.violations) {
+        if (entry.ruleId != "GJB10157.6.1.4") continue;
+        mixedEdgeLines.push_back(entry.line);
+        check(entry.column == 1 &&
+              entry.message == "时钟CLK不能同时使用上升沿和下降沿",
+              "6.1.4 restores native text and line-only locations");
+    }
+    std::ranges::sort(mixedEdgeLines);
+    check(mixedEdgeLines == std::vector<std::size_t>{2, 3},
+          "native 6.1.4 reports the two conflicting clock endpoints");
+    result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q1,Q2,Q3);\n"
+        "always @(posedge CLK) Q1<=D; always @(posedge CLK) Q2<=D;\n"
+        "always @(negedge CLK) Q3<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.4") == 2,
+          "6.1.4 emits one retained endpoint per effective polarity");
     result = analyzeVerilog(
         "module probe(input CLK,D, output reg Q1,Q2); wire alias_clk; assign alias_clk=CLK;\n"
         "always @(posedge CLK) Q1<=D; always @(posedge alias_clk) Q2<=D; endmodule\n");

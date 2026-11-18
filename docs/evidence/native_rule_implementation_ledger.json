@@ -4012,11 +4012,12 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native FUN_18054f6c0 builds a synthesized connectivity model. FUN_180552630 walks related clock endpoints, accumulates two edge bits and reports when the mask reaches 3. The packaged cases show same-net rising/falling use, generated-clock output use, and a simple inverter whose posedge is treated as the source clock falling edge. Product canonicalizes bounded direct and inverted continuous aliases before comparing effective edges.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructor 0x180022270 registers rule key GJB10157_VLOG.6.1.4 and installs vtable 0x180ef0a40 whose slot 0 is FUN_18054f6c0. That entry builds a synthesized connectivity model through FUN_180545f70 and FUN_18054efc0, then FUN_180552630 expands related clock endpoints through FUN_18054fd70. Every admitted endpoint contributes bit 1 << FUN_1809b6870(endpoint+0x88,0); when the accumulated mask reaches 3, the immediately retained endpoint and current conflicting endpoint each independently append a Warning, then traversal of that component stops. Both reports use exact GB18030 text 时钟<normalized-name>不能同时使用上升沿和下降沿, endpoint source/physical line and no column. Packaged cases establish direct same-net edges, clock-generator output edges and unary inversion effective-edge propagation. Product preserves the two-endpoint diagnostic grain for bounded direct and inverted continuous aliases.",
       "predicateEvidence": [
         "ev_f71f67d1bdf1d3f4bb0d6437bf70ea0394d40debcbb7e9945b8639a38cb929d2",
-        "docs/evidence/native_verilog_mixed_clock_edges_6_1_4_findings.md#recovered-predicate"
+        "reverse-tools/evidence/t_linter_pass72/a4_1_mixed_clock_edges.txt",
+        "docs/evidence/native_verilog_mixed_clock_edges_6_1_4_findings.md"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -4025,7 +4026,9 @@
       "additionalTests": "tests/standard_accuracy_tests.cpp",
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.6.1.4.html",
-        "sha256": "d2fddaa0978faa6fad22b7cfad73d2d836340862c48a2a30704902622ad2f6f9"
+        "sha256": "d2fddaa0978faa6fad22b7cfad73d2d836340862c48a2a30704902622ad2f6f9",
+        "nativeFindings": "docs/evidence/native_verilog_mixed_clock_edges_6_1_4_findings.md",
+        "release": "docs/v1_4_208_release.md"
       },
       "exampleChecks": [
         {
@@ -4039,7 +4042,7 @@
           "matched": true
         }
       ],
-      "limitations": "Full synthesized graph traversal, primitive/library inversion semantics, cross-module propagation, multi-bit nets, compound expressions, generate constructs, macros and exact native reporting locations remain unresolved. Product follows only direct and unary-inverted source aliases; no finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The constructor/vtable, graph builder path, endpoint expansion, two-bit conflict condition, two-endpoint multiplicity, exact message/severity and line-only report surface are recovered and integrated. Full synthesized graph topology, endpoint ordering, primitive/library inversion semantics, cross-module propagation, multi-bit nets, compound expressions, generate constructs, macros, exotic escaped-name normalization and global diagnostic ordering remain unresolved. Product uses the first source-representable endpoint of each effective polarity; no finding remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "A-4-3",

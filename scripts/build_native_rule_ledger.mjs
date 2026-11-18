@@ -588,9 +588,9 @@ const confirmed = {
     limitations: 'The constructor, selector, continuous-RHS gate, assignment collection, target-name map multiplicity, exact message/severity and line-only report surface are recovered and integrated. Full elaborated clock-relation production, alias propagation, hierarchy, generate/macro lowering, compound or selected targets, exotic escaped-name normalization and global diagnostic ordering remain unresolved. Direct identifier aliases are excluded as observed; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.4': {
-    predicate: 'Native FUN_18054f6c0 builds a synthesized connectivity model. FUN_180552630 walks related clock endpoints, accumulates two edge bits and reports when the mask reaches 3. The packaged cases show same-net rising/falling use, generated-clock output use, and a simple inverter whose posedge is treated as the source clock falling edge. Product canonicalizes bounded direct and inverted continuous aliases before comparing effective edges.',
-    evidence: ['ev_f71f67d1bdf1d3f4bb0d6437bf70ea0394d40debcbb7e9945b8639a38cb929d2', 'docs/evidence/native_verilog_mixed_clock_edges_6_1_4_findings.md#recovered-predicate'],
-    limitations: 'Full synthesized graph traversal, primitive/library inversion semantics, cross-module propagation, multi-bit nets, compound expressions, generate constructs, macros and exact native reporting locations remain unresolved. Product follows only direct and unary-inverted source aliases; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180022270 registers rule key GJB10157_VLOG.6.1.4 and installs vtable 0x180ef0a40 whose slot 0 is FUN_18054f6c0. That entry builds a synthesized connectivity model through FUN_180545f70 and FUN_18054efc0, then FUN_180552630 expands related clock endpoints through FUN_18054fd70. Every admitted endpoint contributes bit 1 << FUN_1809b6870(endpoint+0x88,0); when the accumulated mask reaches 3, the immediately retained endpoint and current conflicting endpoint each independently append a Warning, then traversal of that component stops. Both reports use exact GB18030 text 时钟<normalized-name>不能同时使用上升沿和下降沿, endpoint source/physical line and no column. Packaged cases establish direct same-net edges, clock-generator output edges and unary inversion effective-edge propagation. Product preserves the two-endpoint diagnostic grain for bounded direct and inverted continuous aliases.',
+    evidence: ['ev_f71f67d1bdf1d3f4bb0d6437bf70ea0394d40debcbb7e9945b8639a38cb929d2', 'reverse-tools/evidence/t_linter_pass72/a4_1_mixed_clock_edges.txt', 'docs/evidence/native_verilog_mixed_clock_edges_6_1_4_findings.md'],
+    limitations: 'The constructor/vtable, graph builder path, endpoint expansion, two-bit conflict condition, two-endpoint multiplicity, exact message/severity and line-only report surface are recovered and integrated. Full synthesized graph topology, endpoint ordering, primitive/library inversion semantics, cross-module propagation, multi-bit nets, compound expressions, generate constructs, macros, exotic escaped-name normalization and global diagnostic ordering remain unresolved. Product uses the first source-representable endpoint of each effective polarity; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.6': {
     predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180726d40 gathers assignments below the module, resolves assignment targets against elaborated clock relations, and searches the RHS for operator types {0x45,0x46,0x48,0x25,0x26,0x27,0x28}; the recovered family covers binary logical, conditional and binary bitwise clock gating/select operations while excluding unary inversion. Product requires a parser-confirmed clock target and one of &&, ||, ?:, &, |, ^, ^~ or ~^ in the assignment RHS.',
@@ -1071,6 +1071,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.6.1.1',
   'GJB10157.6.1.2',
   'GJB10157.6.1.3',
+  'GJB10157.6.1.4',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1419,6 +1420,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.6.1.3': {
         nativeFindings: 'docs/evidence/native_verilog_combinational_clock_6_1_3_findings.md',
         release: 'docs/v1_4_207_release.md'
+      }, 'GJB10157.6.1.4': {
+        nativeFindings: 'docs/evidence/native_verilog_mixed_clock_edges_6_1_4_findings.md',
+        release: 'docs/v1_4_208_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
         release: 'docs/v1_4_13_release.md'

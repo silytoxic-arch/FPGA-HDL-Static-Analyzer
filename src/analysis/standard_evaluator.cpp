@@ -5440,11 +5440,17 @@ void checkCombinationalOutputUsedAsAsyncReset(
 
 void checkMixedClockEdges(AnalysisResult& result, const core::SourceFile& source,
                           const std::vector<parser::HdlToken>& tokens) {
-    // Native FUN_18054f6c0 builds a synthesized connectivity model. In
-    // FUN_180552630 each related clock endpoint contributes one of two edge
-    // bits; bitmask 3 reports a clock family used on both polarities. The
-    // packaged third case proves that a simple inverter is traversed and flips
-    // the effective edge. This bounded adapter follows direct/inverted aliases.
+    // Constructor 0x180022270 installs vtable 0x180ef0a40. Native
+    // FUN_18054f6c0 builds a synthesized connectivity model; in
+    // FUN_180552630 each admitted related clock endpoint contributes one of two
+    // edge bits. When the mask reaches 3, the immediately retained endpoint
+    // and the conflicting current endpoint each emit one Warning, then that
+    // component stops. Exact text is
+    // "时钟<name>不能同时使用上升沿和下降沿" and locations carry physical
+    // lines but no columns. The packaged third case proves that a simple
+    // inverter is traversed and flips the effective edge. This bounded source
+    // adapter follows direct/inverted aliases and emits the first
+    // source-representable endpoint of each effective polarity.
     // ev_f71f67d1bdf1d3f4bb0d6437bf70ea0394d40debcbb7e9945b8639a38cb929d2
     for (const auto& unit : result.structure) {
         if (unit.kind != parser::DesignUnitKind::VerilogModule ||
@@ -5493,16 +5499,27 @@ void checkMixedClockEdges(AnalysisResult& result, const core::SourceFile& source
             return std::pair{root, effectiveRising};
         };
 
-        std::map<std::string, unsigned> edgeMasks;
-        std::set<std::string> reported;
+        struct EdgeEndpoints {
+            std::optional<core::SourceLocation> rising;
+            std::optional<core::SourceLocation> falling;
+        };
+        std::map<std::string, EdgeEndpoints> endpoints;
         for (const auto& clock : unit.clocks) {
             const auto [root, rising] = canonical(clock.signal, clock.risingEdge);
-            auto& mask = edgeMasks[root];
-            mask |= rising ? 1U : 2U;
-            if (mask != 3U || !reported.insert(root).second) continue;
-            emit(result, "GJB10157.6.1.4", source,
-                 clock.location.line, clock.location.column,
-                 "同一时钟网络同时使用上升沿和下降沿：" + root);
+            auto& family = endpoints[root];
+            auto& endpoint = rising ? family.rising : family.falling;
+            if (!endpoint) endpoint = clock.location;
+        }
+        for (const auto& [root, family] : endpoints) {
+            if (!family.rising || !family.falling) continue;
+            std::array locations{*family.rising, *family.falling};
+            std::ranges::sort(locations, {}, [](const auto& location) {
+                return std::tuple{location.line, location.column};
+            });
+            const auto message = "时钟" + root + "不能同时使用上升沿和下降沿";
+            for (const auto& location : locations)
+                emit(result, "GJB10157.6.1.4", source,
+                     location.line, 1, message);
         }
     }
 }

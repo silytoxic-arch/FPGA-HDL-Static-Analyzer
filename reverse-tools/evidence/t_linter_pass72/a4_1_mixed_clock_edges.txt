@@ -1,0 +1,21 @@
+T-Linter native recovery pass 72: GJB10157_VLOG.6.1.4 / public A-4-1
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+OBSERVED
+- Constructor 0x180022270 registers GJB10157_VLOG.6.1.4 and installs vtable 0x180ef0a40; slot 0 is 0x18054f6c0.
+- Entry 0x18054f6c0 builds a synthesized connectivity model through 0x180545f70 and 0x18054efc0, calls 0x180552630, then destroys the model.
+- Main 0x180552630 normalizes module names, expands related endpoints through 0x18054fd70 and skips the edge comparison when fewer than two endpoints are present.
+- Each admitted endpoint contributes bit 1 << FUN_1809b6870(endpoint+0x88,0). The conflict branch is entered exactly when the accumulated mask becomes 3.
+- On mask 3, the previously retained endpoint and current endpoint independently reach the diagnostic append path, after which traversal of that component stops. Native diagnostic grain is two endpoint reports per discovered conflicting clock family.
+- Both reports use source and physical line parsed from the endpoint record. The column string is empty.
+- Both reports use severity Warning.
+- GB18030 0x180ef0aa4 decodes to 时钟 and 0x180ef0a88 to 不能同时使用上升沿和下降沿. Exact text is 时钟<normalized-name>不能同时使用上升沿和下降沿, without punctuation.
+- FUN_180553f80 performs bounded backslash-name normalization.
+- Packaged examples establish direct same-net opposite edges, generated-clock output opposite edges and effective-edge inversion through assign inv = ~CLK.
+
+INFERENCE USED BY PRODUCT
+- Definite same-module source subset: cycle-safe direct and unary-inverted continuous aliases, first source-representable endpoint of each effective polarity, two line-only reports per conflicting normalized family.
+
+UNKNOWN / NOT CLAIMED
+- Complete synthesized graph topology and endpoint order, library/primitive inversion attributes, cross-module propagation, multi-bit clocks, compound expressions, generate/macro lowering, exotic escaped names and global diagnostic ordering.
+- Full proprietary frontend equivalence.
