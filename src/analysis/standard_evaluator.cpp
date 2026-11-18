@@ -5168,11 +5168,15 @@ void checkCombinationalOutputUsedAsClock(
     AnalysisResult& result, const core::SourceFile& source,
     const std::vector<parser::HdlToken>& tokens) {
     // Native slot 1 admits AST_ASSIGN(0x4d) and AST_ALWAYS(0x52), but rejects
-    // an AST_ALWAYS containing AST_POSEDGE/AST_NEGEDGE children. Slot 0 then
+    // an AST_ALWAYS containing any AST_POSEDGE/AST_NEGEDGE child. Slot 0 then
     // gathers AST_ASSIGN_EQ/LE below admitted combinational processes and
     // compares their identifier targets with elaborated clock relations. For
     // continuous AST_ASSIGN, a direct-identifier RHS is excluded, so a plain
-    // clock alias is not classified as combinational logic.
+    // clock alias is not classified as combinational logic. Matched candidates
+    // enter a string-keyed tree by normalized target name; duplicate drivers
+    // of one clock name retain the first candidate and emit once. Native text
+    // is "禁止将组合逻辑的输出<name>作为时钟信号", severity is Warning, and the
+    // candidate carries a physical line but no column.
     // ev_a2c625015f0d0a597841603ab30ba60956e1da25c812a0993e3bd7b033990930
     // ev_728be2738a7301c4d1b1fcc211bbd2f86f712a45cdf20651ab93666ae09aebc3
     for (const auto& unit : result.structure) {
@@ -5194,14 +5198,14 @@ void checkCombinationalOutputUsedAsClock(
         auto moduleEnd = module + 2;
         while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
 
-        std::set<std::pair<std::string, std::size_t>> reported;
+        std::set<std::string> reported;
         const auto report = [&](std::size_t target, std::string_view driver) {
             const auto& token = tokens[target];
             if (!clocks.contains(token.text) ||
-                !reported.emplace(token.text, token.line).second) return;
-            emit(result, "GJB10157.6.1.3", source, token.line, token.column,
-                 "组合逻辑" + std::string(driver) + " " + token.text +
-                     " 被用作时钟");
+                !reported.insert(token.text).second) return;
+            (void)driver;
+            emit(result, "GJB10157.6.1.3", source, token.line, 1,
+                 "禁止将组合逻辑的输出" + token.text + "作为时钟信号");
         };
 
         for (auto index = module + 2; index < moduleEnd; ++index) {

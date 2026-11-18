@@ -6226,6 +6226,14 @@ int main() {
         "assign gated_clk = CLK & EN; always @(posedge gated_clk) Q<=D; endmodule\n");
     check(count(result, "GJB10157.6.1.3") == 1,
           "attachment 6.1.3 reports a combinational expression output used as a clock");
+    const auto combinationalClockViolation = std::ranges::find_if(result.violations,
+        [](const auto& entry) { return entry.ruleId == "GJB10157.6.1.3"; });
+    check(combinationalClockViolation != result.violations.end() &&
+          combinationalClockViolation->line == 2 &&
+          combinationalClockViolation->column == 1 &&
+          combinationalClockViolation->message ==
+              "禁止将组合逻辑的输出gated_clk作为时钟信号",
+          "6.1.3 restores native text, first candidate line and line-only location");
     result = analyzeVerilog(
         "module probe(input CLK,D, output reg Q); wire clock_alias;\n"
         "assign clock_alias = CLK; always @(posedge clock_alias) Q<=D; endmodule\n");
@@ -6241,6 +6249,18 @@ int main() {
         "always @* generated = CLK & EN; always @(posedge generated) Q<=D; endmodule\n");
     check(count(result, "GJB10157.6.1.3") == 1,
           "6.1.3 reports a combinational-process target used as a clock");
+    result = analyzeVerilog(
+        "module probe(input CLK,EN,D, output reg Q); wire generated;\n"
+        "assign generated=CLK&EN; assign generated=CLK|EN;\n"
+        "always @(posedge generated) Q<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.3") == 1,
+          "native 6.1.3 string-keyed candidates deduplicate multiple drivers of one clock name");
+    result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q1,Q2); wire inv_clk,arith_clk;\n"
+        "assign inv_clk=~CLK; assign arith_clk=CLK+1'b0;\n"
+        "always @(posedge inv_clk) Q1<=D; always @(posedge arith_clk) Q2<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.3") == 2,
+          "native 6.1.3 admits unary inversion and arithmetic expression clock drivers");
     result = analyzeVerilog(
         "module probe(input CLK,D, output reg Q); reg divided;\n"
         "always @(posedge CLK) divided<=~divided; always @(posedge divided) Q<=D; endmodule\n");

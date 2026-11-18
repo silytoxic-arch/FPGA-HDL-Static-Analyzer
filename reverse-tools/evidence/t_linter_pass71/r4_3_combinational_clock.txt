@@ -1,0 +1,21 @@
+T-Linter native recovery pass 71: GJB10157_VLOG.6.1.3 / public R-4-3
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+OBSERVED
+- Constructor 0x1800221e0 installs vtable 0x180edb800 and rule key GJB10157_VLOG.6.1.3.
+- Selector 0x18054ed80 admits AST_ASSIGN(0x4d). It admits AST_ALWAYS(0x52) only when none of its direct children is AST_POSEDGE(0x65) or AST_NEGEDGE(0x66); all other types are rejected.
+- Main 0x18054de80 recursively gathers AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56) below admitted processes.
+- A continuous AST_ASSIGN must have more than one child and its RHS root must not be AST_IDENTIFIER(0x13).
+- A candidate assignment must have AST_IDENTIFIER as its first child. Its normalized target name is compared with elaborated clock-relation names.
+- FUN_180242200 creates a string-keyed candidate node. FUN_1800d6580 inserts it into an RB tree and FUN_1800da640 discards a duplicate-key payload. The diagnostic grain is therefore one retained candidate per normalized target name.
+- The retained candidate supplies source path at +0x1e0 and physical line at +0x210; no column is stored.
+- Severity is ASCII Warning.
+- GB18030 strings 0x180ef0610 and 0x180ef0600 form exact text 禁止将组合逻辑的输出<name>作为时钟信号, without punctuation.
+- The packaged HTML violation ordinal is the combinational driver assignment line, not the later edge-consumer line.
+
+INFERENCE USED BY PRODUCT
+- Definite same-module source subset: known edge-clock target driven by a non-identifier continuous RHS or an assignment in a no-edge combinational process; one report per target name at the first driver line.
+
+UNKNOWN / NOT CLAIMED
+- Complete elaborated clock-relation production, aliases, hierarchy, generate/macro lowering, compound/selected targets, exotic escaped-name handling and global ordering.
+- Full proprietary frontend equivalence.
