@@ -3928,6 +3928,10 @@ void checkNonTopVerilogHierarchyLogic(AnalysisResult& result,
     // validates them against the parsed design and stores the canonical name
     // in DAT_18135b808, which the rule compares exactly. The unique recovered
     // +0x2a9 writer marks an ANTLR initial_construct frontend root.
+    // The recovered report path uses the fixed GB18030 text
+    // "除顶层模块外，上层模块建议仅包含子模块的例化.", Warning severity,
+    // the AST_MODULE physical line and no column.
+    // reverse-tools/evidence/t_linter_pass67/a3_2_hierarchy_only.txt
     // docs/evidence/native_verilog_hierarchy_only_5_3_4_findings.md
     const std::set<std::string_view> declarationWords{
         "parameter", "localparam", "wire", "reg", "logic", "integer", "int",
@@ -4000,8 +4004,8 @@ void checkNonTopVerilogHierarchyLogic(AnalysisResult& result,
         }
         if (hasLogic)
             emit(result, "GJB10157.5.3.4", source,
-                 unit.location.line, unit.location.column,
-                 "非顶层层次模块同时包含子模块例化和赋值逻辑：" + unit.name);
+                 unit.location.line, 1,
+                 "除顶层模块外，上层模块建议仅包含子模块的例化.");
     }
 }
 
@@ -16677,6 +16681,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.5.3.2") ||
                 (left.ruleId == "GJB10157.5.3.3" &&
                  right.ruleId == "GJB10157.5.3.3") ||
+                (left.ruleId == "GJB10157.5.3.4" &&
+                 right.ruleId == "GJB10157.5.3.4") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

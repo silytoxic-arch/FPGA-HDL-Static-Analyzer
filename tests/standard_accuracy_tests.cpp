@@ -5974,8 +5974,10 @@ int main() {
         const auto violation = std::ranges::find_if(hierarchyResult.violations,
             [](const auto& entry) { return entry.ruleId == "GJB10157.5.3.4"; });
         check(violation != hierarchyResult.violations.end() &&
-              violation->message.find("middle") != std::string::npos,
-              "5.3.4 identifies the mixed intermediate module rather than the functional leaf");
+              violation->message == "除顶层模块外，上层模块建议仅包含子模块的例化." &&
+              violation->severity == analysis::Severity::Warning &&
+              violation->line == 2 && violation->column == 1,
+              "5.3.4 preserves the native fixed message, Warning severity and module line-only location");
     }
     {
         analysis::AnalysisOptions hierarchyOptions;
@@ -6048,8 +6050,8 @@ int main() {
                   count(configured, "GJB10157.5.3.4") == 1,
               "configured native top selects one root and treats every other module as non-top");
         check(std::ranges::any_of(configured.violations, [](const auto& item) {
-                  return item.ruleId == "GJB10157.5.3.4" &&
-                         item.message.find("top_b") != std::string::npos;
+                  return item.ruleId == "GJB10157.5.3.4" && item.line == 3 &&
+                         item.message == "除顶层模块外，上层模块建议仅包含子模块的例化.";
               }), "configured top makes a second graph root eligible for non-top hierarchy checking");
 
         configuredTopOptions.topModule = "\\top_a";
@@ -6065,6 +6067,17 @@ int main() {
                   count(configured, "GJB10157.5.3.3") == 0 &&
                   count(configured, "GJB10157.5.3.4") == 0,
               "missing explicit top fails closed instead of guessing a graph root");
+    }
+    {
+        analysis::AnalysisOptions hierarchyOptions;
+        hierarchyOptions.standardId = "GJB10157-2021";
+        hierarchyOptions.topModule = "top";
+        const auto hierarchyResult = analysis::Analyzer(hierarchyOptions).analyzeSources({
+            {"same-line-hierarchy.v", core::HdlLanguage::Verilog,
+             "module leaf(input A,output Y);assign Y=A;endmodule module middle1(input A,output Y);leaf u1(A,Y);assign Y=A;endmodule module middle2(input A,output Y);leaf u2(A,Y);assign Y=A;endmodule module top(input A,output Y1,Y2);middle1 u1(A,Y1);middle2 u2(A,Y2);endmodule\n"}
+        });
+        check(count(hierarchyResult, "GJB10157.5.3.4") == 2,
+              "5.3.4 retains one identical same-line diagnostic for every violating module AST");
     }
     result = analyzeVerilog(
         "module probe(input CLK, input [7:0] A1,A2,B, output C1,C2,C3,C5);\n"

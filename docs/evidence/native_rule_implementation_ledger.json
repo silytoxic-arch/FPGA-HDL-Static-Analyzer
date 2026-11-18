@@ -3627,10 +3627,11 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native slot 2 admits AST_MODULE(2), AST_ASSIGN(0x4d), AST_CELL(0x4f), AST_INITIAL(0x53), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56). FUN_1805437e0 skips the configured top name and emits once for a remaining module only when it has both an AST_CELL and assignment/selected-initial logic. It excludes a two-child AST_ASSIGN with identifier LHS when an AST_WIRE child shares its source line, identifying a declaration initializer. Product checks parser-established non-top modules with at least one instance and definite nondeclaration assignment/initial logic.",
+      "predicate": "Constructor 0x180021ee0 installs final vtable 0x180eef660: slot 0 FUN_1805437e0 and selector FUN_180544170. The selector admits AST_MODULE(2), AST_ASSIGN(0x4d), AST_CELL(0x4f), AST_INITIAL(0x53), AST_ASSIGN_EQ(0x55) and AST_ASSIGN_LE(0x56). The run skips the configured top name and emits once for every remaining module only when it has both an AST_CELL and assignment/selected-initial logic. It excludes a two-child AST_ASSIGN with identifier LHS when an AST_WIRE child shares its source line, identifying a declaration initializer. The report uses fixed GB18030 text 除顶层模块外，上层模块建议仅包含子模块的例化., Warning, AST_MODULE file/physical line and no column. Product checks parser-established non-top modules with at least one instance and definite nondeclaration assignment/initial logic, emits at module line column 1, and preserves per-module multiplicity.",
       "predicateEvidence": [
         "ev_8e9b976ed5217b248bc57a745aa824ab32b5fba322e2cde9b3484662ebed14e7",
         "ev_78d795ebd176b417805c74b812e23800113bb8b71fba4363401690e27a9424da",
+        "reverse-tools/evidence/t_linter_pass67/a3_2_hierarchy_only.txt",
         "docs/evidence/native_verilog_hierarchy_only_5_3_4_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -3640,7 +3641,9 @@
       "additionalTests": "tests/standard_accuracy_tests.cpp",
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.3.4.html",
-        "sha256": "9d2b4c52341fc1095c5a474abf59b15444c74ddee85b1542e52a72bde0258613"
+        "sha256": "9d2b4c52341fc1095c5a474abf59b15444c74ddee85b1542e52a72bde0258613",
+        "nativeFindings": "docs/evidence/native_verilog_hierarchy_only_5_3_4_findings.md",
+        "release": "docs/v1_4_203_release.md"
       },
       "exampleChecks": [
         {
@@ -3654,7 +3657,7 @@
           "matched": true
         }
       ],
-      "limitations": "The configured-top producer, ordinary-name Yosys backslash normalization and explicit initial_construct +0x2a9 producer are recovered and integrated. Exotic escaped/$ identifiers, declaration-initializer line normalization, generate/cell lowering, library/black-box elaboration, macros, duplicate modules and malformed-source recovery remain unresolved. Product uses resolved project hierarchy and bounded source assignments; no finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The configured-top producer, ordinary-name Yosys backslash normalization, explicit initial_construct +0x2a9 producer, exact message/severity/location and per-module multiplicity are recovered and integrated. Exotic escaped/$ identifiers, declaration-initializer line normalization, generate/cell lowering, library/black-box elaboration, macros, duplicate modules and malformed-source recovery remain unresolved. Product uses resolved project hierarchy and bounded source assignments; no finding remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "A-3-3",

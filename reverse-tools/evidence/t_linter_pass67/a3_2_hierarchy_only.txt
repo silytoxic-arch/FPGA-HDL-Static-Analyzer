@@ -1,0 +1,26 @@
+T-Linter V3.1.4.25120520251205115359 static evidence, pass 67
+Target SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB10157_VLOG.5.3.4 (public A-3-2)
+
+Observation
+- Constructor: 0x180021ee0.
+- Final vtable: 0x180eef660.
+- Vtable bytes resolve slot 0 to 0x1805437e0 and slot 2 to 0x180544170.
+- Rule ID bytes at 0x180eef690 decode to GJB10157_VLOG.5.3.4.
+- Report bytes at 0x180eef6a8, length 0x2d, decode as GB18030:
+  除顶层模块外，上层模块建议仅包含子模块的例化.
+- Report severity is fixed ASCII Warning, length 7.
+- FUN_1805437e0 writes the AST_MODULE file and physical line; it does not write a column.
+- FUN_1805437e0 appends once for each non-top module whose hasCell and hasLogic flags are both set.
+- FUN_180544170 admits AST_MODULE(2), AST_ASSIGN(0x4d), AST_CELL(0x4f),
+  AST_INITIAL(0x53), AST_ASSIGN_EQ(0x55), AST_ASSIGN_LE(0x56).
+
+Inference
+- Product column 1 is a UI/source-adapter placeholder for a native line-only diagnostic.
+- Identical diagnostics from different module AST objects, including modules sharing one
+  physical source line, retain multiplicity.
+
+Unknown
+- Complete proprietary frontend lowering for generate/cell nodes, macros, malformed input,
+  duplicate modules, library binding and exotic escaped identifiers remains unverified.
+- This evidence does not establish full proprietary algorithm equivalence.
