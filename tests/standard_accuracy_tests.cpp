@@ -6415,6 +6415,40 @@ int main() {
         "always @(posedge CLK) if(RST) Q2<=0; else Q2<=D; endmodule\n");
     check(count(result, "GJB10157.6.2.2") == 1,
           "attachment 6.2.2 reports one reset used asynchronously and synchronously");
+    {
+        const auto finding = std::ranges::find_if(result.violations, [](const auto& violation) {
+            return violation.ruleId == "GJB10157.6.2.2";
+        });
+        check(finding != result.violations.end() &&
+                  finding->message == "RST同时作为了异步复位和同步复位" &&
+                  finding->line == 3 && finding->column == 1,
+              "6.2.2 restores native text and synchronous-condition line-only location");
+    }
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q,Q2,Q3);\n"
+        "always @(posedge RST or posedge CLK) if(RST) Q<=0; else Q<=D;\n"
+        "always @(posedge CLK) if(RST) Q2<=0; else Q2<=D;\n"
+        "always @(negedge CLK) if(RST) Q3<=0; else Q3<=D; endmodule\n");
+    check(count(result, "GJB10157.6.2.2") == 2,
+          "6.2.2 preserves one native finding per synchronous condition identifier");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q,Q2);\n"
+        "always @(posedge RST or posedge CLK) if(RST) Q<=0; else Q<=D;\n"
+        "always @(posedge CLK) if(RST&&RST) Q2<=0; else Q2<=D; endmodule\n");
+    check(count(result, "GJB10157.6.2.2") == 2,
+          "6.2.2 retains duplicate identifier AST findings on one physical line");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,A,D, output reg Q,Q2);\n"
+        "always @(posedge RST or posedge CLK) if(RST) Q<=0; else Q<=D;\n"
+        "always @(posedge CLK) if(A) begin if(RST) Q2<=0; else Q2<=D; end endmodule\n");
+    check(count(result, "GJB10157.6.2.2") == 0,
+          "6.2.2 examines only the first native reduce-bool condition in a process");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,A,D, output reg Q,Q2);\n"
+        "always @(posedge RST or posedge CLK) if(RST) Q<=0; else Q<=D;\n"
+        "always @(posedge CLK) begin while(A) Q2<=D; if(RST) Q2<=0; end endmodule\n");
+    check(count(result, "GJB10157.6.2.2") == 0,
+          "6.2.2 does not substitute a later if for an earlier loop condition");
     result = analyzeVerilog(
         "module probe(input CLK,RST,RST2,D, output reg Q1,Q2,Q3);\n"
         "always @(posedge RST or posedge CLK) if(RST) Q1<=0; else Q1<=D;\n"

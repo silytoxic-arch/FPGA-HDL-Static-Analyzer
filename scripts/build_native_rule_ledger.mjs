@@ -603,9 +603,9 @@ const confirmed = {
     limitations: 'The constructor, module selector, explicit-top filter, direct relation collection/name normalization, sort/unique threshold, one-report multiplicity, exact direct text/severity and module line-only location are recovered and integrated. Exact node/edge semantics and pair-name meanings of the confirmed second graph warning path, full hierarchy and clock-family normalization, primitive/library relations, generated clocks, macros, multi-bit nets and global diagnostic ordering remain unresolved. Without explicit top, product retains its legacy per-module bounded adapter because the proprietary launcher\'s automatic top selection is not recovered. A clean result remains ProjectContextRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.2.2': {
-    predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180557c70 constructs a de-duplicated vector of known asynchronous-reset names, gathers AST_ALWAYS(0x52), requires exactly one AST_POSEDGE/AST_NEGEDGE(0x65/0x66) descendant, then gathers AST_IDENTIFIER(0x13) below the first AST_REDUCE_BOOL(0x2d) condition and emits when a normalized identifier name is present in the asynchronous-reset vector. Product maps its per-unit synchronousObserved/asynchronousObserved reset intersection to this clause.',
-    evidence: ['ev_c1ad9263fef41a23ccdd650fc33ddf40e671bbada095d390d35e8fe5380e3cf1', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'docs/evidence/native_verilog_mixed_reset_mode_6_2_2_findings.md#recovered-predicate'],
-    limitations: 'The native producer and semantic flags behind the initial asynchronous-reset relation vector, identifier normalization helper, complex condition lowering, hierarchy, primitive/library ports, generated logic, macros and diagnostic multiplicity remain unresolved. Product recognizes bounded reset-like Verilog/VHDL timing controls and conditions; unsupported naming and complex forms remain unknown. No finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180022670 registers GJB10157_VLOG.6.2.2 and installs vtable 0x180ef1200 whose slot 0 is FUN_180557c70. Selector FUN_1807238a0 admits only AST_MODULE(2). The main builds a unique 32-byte normalized asynchronous-control name vector from relation records for which FUN_1804dee00 accepts type byte 0 or 1. For each AST_ALWAYS(0x52), it recursively gathers AST_POSEDGE/AST_NEGEDGE(0x65/0x66) and admits exactly one edge node, selects only the first AST_REDUCE_BOOL(0x2d), gathers every descendant AST_IDENTIFIER(0x13), and independently emits for every normalized name present in the asynchronous vector. FUN_18003e420 appends DAT_180ef1248 to the normalized identifier, producing exact GB18030 text <name>同时作为了异步复位和同步复位. The report is error at the matching identifier source/physical line with no column. Product mirrors the definite same-module source subset and preserves per-identifier multiplicity.',
+    evidence: ['ev_c1ad9263fef41a23ccdd650fc33ddf40e671bbada095d390d35e8fe5380e3cf1', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'reverse-tools/evidence/t_linter_pass76/r5_2_mixed_reset_mode.txt', 'docs/evidence/native_verilog_mixed_reset_mode_6_2_2_findings.md'],
+    limitations: 'The constructor, module selector, relation type-byte admission, unique normalized-name vector, exactly-one-edge filter, first-condition selection, per-identifier multiplicity, exact message/severity and line-only location are recovered and integrated. The complete relation producer, meanings of type bytes 0 and 1 beyond their observed admission, cross-module/hierarchy scoping, primitive/library reset endpoints, generated logic, macros, unsupported condition lowering, escaped-name normalization and global diagnostic ordering remain unresolved. Product implements the definite same-module first-if subset; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.2.1': {
     predicate: 'Constructor 0x1800224c0 first registers legacy key VLR-110026, then GJB10157_VLOG.6.2.1, and installs final vtable 0x180ef1068 whose slot 0 is FUN_1806e8d60. Selector FUN_1807238a0 admits only AST_MODULE(2). The main builds asynchronous reset/set relation-name sets, traverses AST_ALWAYS(0x52), AST_ASSIGN_EQ/LE(0x55/0x56), AST_CELL(0x4f) and AST_IDENTIFIER(0x13), and appends every known asynchronous-control identifier used in assignment data or cell actuals. Cell port metadata excludes reset/set endpoints. Every candidate identifier AST is reported independently at candidate source/physical line with no column. Constants 0x180f07a48 and 0x180f126e0 compose exact GB18030 text 异步复位/置位信号<normalized-name>连接到非复位/置位端口; DAT_180ee83b0 is Warning. Product checks bounded continuous/procedural assignment RHS uses plus named instance connections whose formal name is definitely not reset/set-like, preserving per-identifier multiplicity.',
@@ -1075,6 +1075,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.6.1.6',
   'GJB10157.6.1.7',
   'GJB10157.6.2.1',
+  'GJB10157.6.2.2',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1375,6 +1376,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.6.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_async_reset_nonreset_endpoint_6_2_1_findings.md',
         release: 'docs/v1_4_211_release.md'
+      }, 'GJB10157.6.2.2': {
+        nativeFindings: 'docs/evidence/native_verilog_mixed_reset_mode_6_2_2_findings.md',
+        release: 'docs/v1_4_212_release.md'
       }, 'GJB9765.4.9.h': {
         nativeFindings: 'docs/evidence/native_vhdl_clock_domains_4_9_h_findings.md',
         release: 'docs/v1_4_47_release.md'

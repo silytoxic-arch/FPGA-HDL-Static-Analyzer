@@ -70,12 +70,9 @@ constexpr std::array Mappings{
     DiagnosticMapping{"GJB10157-2021", "RTL-WRITE-ONLY-SIGNAL", "GJB10157.5.2.10"},
     DiagnosticMapping{"GJB10157-2021", "RTL-WRITE-ONLY-SIGNAL", "GJB10157.5.2.18"},
     DiagnosticMapping{"GJB10157-2021", "VL-DEFPARAM", "GJB10157.5.2.16"},
-    // Native FUN_180557c70 builds the known asynchronous-reset name set,
-    // visits AST_ALWAYS roots, requires exactly one edge event (0x65/0x66),
-    // and reports when an identifier under the reset-condition node (0x2d)
-    // intersects that set. The timing model's mixed-mode diagnostic is the
-    // bounded source-level counterpart.
-    // ev_c1ad9263fef41a23ccdd650fc33ddf40e671bbada095d390d35e8fe5380e3cf1
+    // Kept as the catalog's executable-detector registration. Standard
+    // translation below deliberately suppresses the generic aggregate; the
+    // native-shaped source adapter emits GJB10157.6.2.2 directly.
     DiagnosticMapping{"GJB10157-2021", "RTL-MIXED-RESET-MODE", "GJB10157.6.2.2"},
     DiagnosticMapping{"GJB10157-2021", "RTL-COMBINATIONAL-LOOP", "GJB10157.7.2.1"},
     // The packaged 7.2.1 example also marks a combinational process with
@@ -5048,6 +5045,92 @@ void checkAsyncResetConnectedToNonResetUse(
                 if (close >= moduleEnd) continue;
                 for (const auto reset : resetsInRange(formal + 2, close)) report(reset);
             }
+        }
+    }
+}
+
+void checkSynchronousUseOfAsynchronousReset(
+    AnalysisResult& result, const core::SourceFile& source,
+    const std::vector<parser::HdlToken>& tokens) {
+    // GJB10157_VLOG.6.2.2 constructor 0x180022670 installs vtable
+    // 0x180ef1200. Selector FUN_1807238a0 admits AST_MODULE(2). Main
+    // FUN_180557c70 builds a unique asynchronous-control name vector from
+    // relation records whose type byte is 0 or 1 (FUN_1804dee00), then visits
+    // AST_ALWAYS(0x52). It admits a process only when the recursive set of
+    // AST_POSEDGE/AST_NEGEDGE(0x65/0x66) has exactly one member, selects the
+    // first AST_REDUCE_BOOL(0x2d), and reports every matching
+    // AST_IDENTIFIER(0x13) below that condition. Every identifier is emitted
+    // independently at its physical line with no column. FUN_18003e420
+    // appends DAT_180ef1248, producing exact text
+    // "<name>同时作为了异步复位和同步复位" with severity "error".
+    // This adapter preserves that definite same-module source subset. The
+    // proprietary relation producer and cross-hierarchy normalization remain
+    // outside the recovered boundary.
+    // ev_c1ad9263fef41a23ccdd650fc33ddf40e671bbada095d390d35e8fe5380e3cf1
+    // ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
+    for (const auto& unit : result.structure) {
+        if (unit.kind != parser::DesignUnitKind::VerilogModule ||
+            unit.location.file.lexically_normal() != source.path().lexically_normal()) continue;
+        std::set<std::string> asynchronousControls;
+        for (const auto& reset : unit.resets)
+            if (reset.asynchronousObserved) asynchronousControls.insert(reset.signal);
+        if (asynchronousControls.empty()) continue;
+
+        std::size_t module = tokens.size();
+        for (std::size_t index = 0; index + 1 < tokens.size(); ++index) {
+            if (tokens[index].text == "module" && tokens[index + 1].text == unit.name &&
+                tokens[index + 1].line == unit.location.line) {
+                module = index;
+                break;
+            }
+        }
+        if (module == tokens.size()) continue;
+        auto moduleEnd = module + 2;
+        while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
+
+        for (auto process = module + 2; process < moduleEnd; ++process) {
+            if (tokens[process].text != "always" && tokens[process].text != "always_ff")
+                continue;
+            if (process + 2 >= moduleEnd || tokens[process + 1].text != "@" ||
+                tokens[process + 2].text != "(") continue;
+            const auto eventEnd = closeParen(tokens, process + 2);
+            if (eventEnd >= moduleEnd) continue;
+            const auto edgeCount = std::count_if(
+                tokens.begin() + static_cast<std::ptrdiff_t>(process + 3),
+                tokens.begin() + static_cast<std::ptrdiff_t>(eventEnd),
+                [](const auto& token) {
+                    return token.text == "posedge" || token.text == "negedge";
+                });
+            const auto bodyEnd = statementEnd(tokens, eventEnd + 1);
+            if (bodyEnd > moduleEnd || edgeCount != 1) {
+                process = bodyEnd > 0 && bodyEnd <= moduleEnd ? bodyEnd - 1 : process;
+                continue;
+            }
+
+            std::size_t firstConditionControl = bodyEnd;
+            for (auto token = eventEnd + 1; token + 1 < bodyEnd; ++token) {
+                const auto& word = tokens[token].text;
+                if ((word == "if" || word == "while" || word == "for") &&
+                    tokens[token + 1].text == "(") {
+                    firstConditionControl = token;
+                    break;
+                }
+            }
+            if (firstConditionControl != bodyEnd &&
+                tokens[firstConditionControl].text == "if") {
+                const auto conditionEnd = closeParen(tokens, firstConditionControl + 1);
+                if (conditionEnd < bodyEnd) {
+                    for (auto token = firstConditionControl + 2;
+                         token < conditionEnd; ++token) {
+                        if (tokens[token].kind != parser::HdlTokenKind::Identifier ||
+                            !asynchronousControls.contains(tokens[token].text)) continue;
+                        emit(result, "GJB10157.6.2.2", source, tokens[token].line, 1,
+                             tokens[token].text + "同时作为了异步复位和同步复位",
+                             tokens[token].text);
+                    }
+                }
+            }
+            process = bodyEnd == 0 ? process : bodyEnd - 1;
         }
     }
 }
@@ -13765,6 +13848,7 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             checkCombinationalTristateEnable(result, source, activeTokens);
             checkInternalVerilogTristate(result, source, activeTokens);
             checkAsyncResetConnectedToNonResetUse(result, source, activeTokens);
+            checkSynchronousUseOfAsynchronousReset(result, source, activeTokens);
             checkClockUsedAsData(result, source, activeTokens);
             checkCombinationalOutputUsedAsClock(result, source, activeTokens);
             checkCombinationalOutputUsedAsAsyncReset(result, source, activeTokens);
@@ -16825,6 +16909,7 @@ void applyStandardProfile(AnalysisResult& result,
         bool mapped = false;
         for (const auto& mapping : Mappings) {
             if (mapping.standardId != profile->id || mapping.analyzerRuleId != violation.ruleId) continue;
+            if (mapping.clauseId == "GJB10157.6.2.2") continue;
             // FUN_18052cd30 resolves exactly the AST_MODULE named by the
             // setTopModule global before collecting driven and loaded nets.
             // Keep the generic redundancy mapping for 5.2.18, but do not map
@@ -16951,6 +17036,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.6.1.6") ||
                 (left.ruleId == "GJB10157.6.2.1" &&
                  right.ruleId == "GJB10157.6.2.1") ||
+                (left.ruleId == "GJB10157.6.2.2" &&
+                 right.ruleId == "GJB10157.6.2.2") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

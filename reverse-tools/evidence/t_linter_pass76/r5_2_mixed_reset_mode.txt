@@ -1,0 +1,35 @@
+T-Linter.dll static evidence — pass 76 — public rule R-5-2
+Target SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Target was not executed.
+
+Constructor: 0x180022670
+Registered key: GJB10157_VLOG.6.2.2
+Final vtable: 0x180ef1200
+slot 0: FUN_180557c70
+slot 1: FUN_1807238a0; admits AST_MODULE(2)
+
+Observed relation-name producer boundary:
+  FUN_1804dee00 accepts a relation record iff its first byte is less than 2.
+  FUN_1804df040 normalizes the admitted name.
+  The 32-byte string vector is unique by normalized name.
+
+Observed consumer:
+  Gather AST_ALWAYS 0x52.
+  Gather recursive AST_POSEDGE 0x65 and AST_NEGEDGE 0x66 descendants.
+  Admit exactly one edge descendant.
+  Gather AST_REDUCE_BOOL 0x2d and select only the first result.
+  Gather every descendant AST_IDENTIFIER 0x13.
+  Emit independently for every normalized identifier found in the relation-name vector.
+
+Observed report surface:
+  FUN_18003e420 concatenates normalized identifier + DAT_180ef1248.
+  0x180ef1248 GB18030: 同时作为了异步复位和同步复位
+  Exact body: <normalized-name>同时作为了异步复位和同步复位
+  Severity literal: error
+  Source string: identifier +0x1e0
+  Physical line: identifier +0x210
+  No column field observed.
+
+Unknown:
+  Full meanings of relation type bytes 0/1; producer and hierarchy scoping; library endpoints;
+  macros/generate; unsupported condition lowering; escaped-name normalization; global ordering.
