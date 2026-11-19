@@ -598,9 +598,9 @@ const confirmed = {
     limitations: 'The constructor, module selector, three assignment classes, operator sets, per-assignment report grain, exact mode-zero text/severity and line-only location are recovered and integrated. Exact producer semantics for both internal clock/name relation sets, full elaborated clock propagation, aliases, hierarchy, generated logic, macros, compound targets, unsupported expression lowering and global diagnostic ordering remain unresolved. Product admits the definite parser-confirmed clock-target subset and intentionally excludes direct aliases, unary inversion and arithmetic; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.1.7': {
-    predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180555380 first requires the design record name to equal the shared setTopModule value DAT_18135b808, then builds, sorts and deduplicates 32-byte clock-relation records and emits immediately when the distinct record count is greater than one. When the direct count is at most one it calls FUN_1804ce730, builds a relation/port graph with helpers including FUN_1804c5a00, and can enter a second warning-construction path; this proves the later graph affects the result. Packaged examples prove that posedge and negedge uses of the same signal are one domain, while CLK and CLK3 are two. With an explicit top, product applies the same selected-module boundary before bounded direct and unary-inverted alias canonicalization.',
-    evidence: ['ev_c3a2ade2a32b69e0a081e0c5e0212f2276c281d75f59577e7dab31ab28b77f3d', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'reverse-tools/evidence/clock-domain-hierarchy/180555380.c', 'reverse-tools/evidence/clock-domain-hierarchy/1804ce730.c', 'docs/evidence/native_verilog_single_clock_domain_6_1_7_findings.md#recovered-predicate'],
-    limitations: 'The node and edge semantics of the confirmed second warning path, full clock-family and hierarchy normalization, primitive/library clock relations, generated clocks, macros, multi-bit nets and exact report location remain unresolved. Product reports a definite same-module second domain only; a clean result remains ProjectContextRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x180022420 registers GJB10157_VLOG.6.1.7, clears mode byte +0x158 and installs vtable 0x180ef0ea0. Selector FUN_1807238a0 admits only AST_MODULE(2). Main FUN_180555380 first requires the design record name to equal shared setTopModule DAT_18135b808, normalizes candidate names through FUN_180557180, sorts and deduplicates 32-byte direct clock-relation records, and emits exactly once then returns when the distinct count is greater than one. The direct report is Warning at the module source/physical line with no column; mode zero selects exact GB18030 text 建议仅使用一个时钟域, while the inactive alternate is 设计使用多个时钟. When direct count is at most one, FUN_1804ce730 builds a relation/port graph; its separate mode-zero report composes 建议仅使用一个时钟域:<name>;<name> at the same module line. Packaged examples prove posedge and negedge of one signal are one domain while CLK and CLK3 are two. Product exactly mirrors the definite same-module direct subset after cycle-safe direct/unary-inverted alias canonicalization and preserves the explicit top boundary.',
+    evidence: ['ev_c3a2ade2a32b69e0a081e0c5e0212f2276c281d75f59577e7dab31ab28b77f3d', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'reverse-tools/evidence/t_linter_pass74/a4_4_single_clock_domain.txt', 'docs/evidence/native_verilog_single_clock_domain_6_1_7_findings.md'],
+    limitations: 'The constructor, module selector, explicit-top filter, direct relation collection/name normalization, sort/unique threshold, one-report multiplicity, exact direct text/severity and module line-only location are recovered and integrated. Exact node/edge semantics and pair-name meanings of the confirmed second graph warning path, full hierarchy and clock-family normalization, primitive/library relations, generated clocks, macros, multi-bit nets and global diagnostic ordering remain unresolved. Without explicit top, product retains its legacy per-module bounded adapter because the proprietary launcher\'s automatic top selection is not recovered. A clean result remains ProjectContextRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.2.2': {
     predicate: 'Native slot 1 admits AST_MODULE(2). FUN_180557c70 constructs a de-duplicated vector of known asynchronous-reset names, gathers AST_ALWAYS(0x52), requires exactly one AST_POSEDGE/AST_NEGEDGE(0x65/0x66) descendant, then gathers AST_IDENTIFIER(0x13) below the first AST_REDUCE_BOOL(0x2d) condition and emits when a normalized identifier name is present in the asynchronous-reset vector. Product maps its per-unit synchronousObserved/asynchronousObserved reset intersection to this clause.',
@@ -1073,6 +1073,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.6.1.3',
   'GJB10157.6.1.4',
   'GJB10157.6.1.6',
+  'GJB10157.6.1.7',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1369,7 +1370,7 @@ const rules = native.rules.map(rule => {
         release: 'docs/v1_4_84_release.md'
       }, 'GJB10157.6.1.7': {
         nativeFindings: 'docs/evidence/native_verilog_single_clock_domain_6_1_7_findings.md',
-        release: 'docs/v1_4_47_release.md'
+        release: 'docs/v1_4_210_release.md'
       }, 'GJB9765.4.9.h': {
         nativeFindings: 'docs/evidence/native_vhdl_clock_domains_4_9_h_findings.md',
         release: 'docs/v1_4_47_release.md'

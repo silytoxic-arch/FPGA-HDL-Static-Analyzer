@@ -52,7 +52,7 @@
 | GJB10157-2021 | R-4-3 | error | 是 | 禁止将组合逻辑输出作为时钟信号 | Automated |
 | GJB10157-2021 | A-4-1 | warning | 否 | 避免同时使用时钟的上升沿和下降沿。 | Automated |
 | GJB10157-2021 | A-4-3 | warning | 是 | 避免使用门控时钟。 | Automated |
-| GJB10157-2021 | A-4-4 | warning | 否 | 建议仅使用一个时钟域。 6.2 复位 | ProjectContext |
+| GJB10157-2021 | A-4-4 | warning | 否 | 建议仅使用一个时钟域。 | ProjectContext |
 | GJB10157-2021 | A-5-5 | warning | 否 | 建议在同一个 always 语句中只使用同一个复位信号。 7 触发器、锁存器与缓冲器 7.1 触发器 | ManualReview |
 | GJB10157-2021 | R-5-1 | error | 是 | 禁止将异步的置位/复位信号连接到非置位/复位端。 | Automated |
 | GJB10157-2021 | R-5-2 | error | 是 | 禁止在同一条复位线路中同时使用异步复位和同步复位。 | Automated |

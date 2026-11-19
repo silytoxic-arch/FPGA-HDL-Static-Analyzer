@@ -41,7 +41,7 @@
     StandardRuleDetail{"GJB10157.6.1.3", "禁止将组合逻辑输出作为时钟信号", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.1.4", "避免同时使用时钟的上升沿和下降沿。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.1.6", "避免使用门控时钟。", StandardAssessmentMode::Automated},
-    StandardRuleDetail{"GJB10157.6.1.7", "建议仅使用一个时钟域。 6.2 复位", StandardAssessmentMode::ProjectContext},
+    StandardRuleDetail{"GJB10157.6.1.7", "建议仅使用一个时钟域。", StandardAssessmentMode::ProjectContext},
     StandardRuleDetail{"GJB10157.6.2.10", "建议在同一个 always 语句中只使用同一个复位信号。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.2.1", "禁止将异步的置位/复位信号连接到非置位/复位端。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.2.2", "禁止在同一条复位线路中同时使用异步复位和同步复位。", StandardAssessmentMode::Automated},

@@ -1,0 +1,20 @@
+T-Linter native recovery pass 74: GJB10157_VLOG.6.1.7 / public A-4-4
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+OBSERVED
+- Constructor 0x180022420 registers GJB10157_VLOG.6.1.7, clears object mode byte +0x158 and installs vtable 0x180ef0ea0.
+- Vtable slot 1 FUN_1807238a0 returns true only for AST_MODULE(2).
+- Main FUN_180555380 compares each design record name with shared setTopModule DAT_18135b808 before either analysis path.
+- The direct path collects marked clock-relation candidates, normalizes names through FUN_180557180, sorts 32-byte records with FUN_1803e22d0, removes adjacent duplicates through FUN_180554b30/FUN_1805570c0, and takes its report branch when distinct_count > 1.
+- That branch appends exactly one diagnostic and immediately returns. It uses the module AST source at +0x1e0 and physical line at +0x210, writes no column and uses severity Warning.
+- Constructor mode zero selects the 20-byte GB18030 string at 0x180ef0f00: 建议仅使用一个时钟域. Alternate nonzero mode selects the 16-byte string at 0x180ef0ee8: 设计使用多个时钟. Neither string has punctuation.
+- When direct count is at most one, FUN_1804ce730 builds a relation/port graph. Its separate report path composes mode-zero text from 0x180ef0f38 (建议仅使用一个时钟域:), one name, 0x180ef0f18 (;), and another name. It reports at the same module source/line and has no column.
+- Packaged HTML SHA256 1e7b62db61d12a932ecb1b76490bc75bdf139d04a57d0bdf925e488979cb94ff marks module declaration line 31 for the CLK/CLK3 violation. Its compliant case uses both edges of CLK.
+
+INFERENCE USED BY PRODUCT
+- Definite direct subset: cycle-safe direct and unary-inverted alias canonicalization of parser-confirmed clock signals, exactly one fixed line-only module diagnostic when more than one distinct root exists.
+- Explicit product top selection mirrors native setTopModule filtering. With no explicit top, retain bounded per-module analysis rather than inventing the proprietary launcher auto-top policy.
+
+UNKNOWN / NOT CLAIMED
+- Exact node/edge and pair-name semantics of the second relation/port graph report, full hierarchical clock-family normalization, primitive/library clock relations, generated clocks, macros, generate constructs, multi-bit nets and global diagnostic ordering.
+- Full proprietary frontend equivalence.

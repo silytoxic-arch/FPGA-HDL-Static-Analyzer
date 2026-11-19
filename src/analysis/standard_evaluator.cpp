@@ -5617,13 +5617,17 @@ void checkGatedClocks(AnalysisResult& result, const core::SourceFile& source,
 void checkMultipleClockDomains(AnalysisResult& result, const core::SourceFile& source,
                                const std::vector<parser::HdlToken>& tokens,
                                const AnalysisOptions& options) {
-    // Native slot 1 admits AST_MODULE(2). FUN_180555380 builds, sorts and
-    // deduplicates 32-byte clock-relation records and emits when the distinct
-    // record count is greater than one. Packaged controls prove that rising
-    // and falling use of the same signal remains one domain. The later graph
-    // pass normalizes relationships that are not fully recovered; this bounded
-    // adapter follows direct and unary-inverted aliases and otherwise reports
-    // the second distinct parser-confirmed clock signal in a module.
+    // Constructor 0x180022420 registers GJB10157_VLOG.6.1.7, clears mode byte
+    // +0x158 and installs vtable 0x180ef0ea0. Slot 1 FUN_1807238a0 admits only
+    // AST_MODULE(2). Main FUN_180555380 requires the setTopModule name, builds,
+    // sorts and deduplicates 32-byte clock-relation records, then emits one
+    // Warning when the distinct count exceeds one. Mode zero selects exact
+    // text "建议仅使用一个时钟域"; both direct and later relation-graph reports
+    // use the module source/physical line and no column. Packaged controls
+    // prove rising and falling uses of the same signal remain one domain. The
+    // later graph path is not fully recovered; this bounded direct adapter
+    // follows direct and unary-inverted aliases and reports only a definite
+    // second parser-confirmed clock root.
     // ev_c3a2ade2a32b69e0a081e0c5e0212f2276c281d75f59577e7dab31ab28b77f3d
     // ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
     for (const auto& unit : result.structure) {
@@ -5677,8 +5681,7 @@ void checkMultipleClockDomains(AnalysisResult& result, const core::SourceFile& s
             const auto domain = canonical(clock.signal);
             if (!domains.insert(domain).second || domains.size() == 1) continue;
             emit(result, "GJB10157.6.1.7", source,
-                 clock.location.line, clock.location.column,
-                 "模块 " + unit.name + " 使用多个时钟域，新增时钟：" + domain);
+                 unit.location.line, 1, "建议仅使用一个时钟域");
             break;
         }
     }

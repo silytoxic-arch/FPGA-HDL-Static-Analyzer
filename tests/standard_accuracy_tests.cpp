@@ -6358,6 +6358,21 @@ int main() {
         "always @(posedge CLK) Q1<=D; always @(negedge CLK3) Q2<=D; endmodule\n");
     check(count(result, "GJB10157.6.1.7") == 1,
           "attachment 6.1.7 reports a second distinct clock domain");
+    const auto multipleClockFinding = std::ranges::find_if(result.violations,
+        [](const auto& entry) { return entry.ruleId == "GJB10157.6.1.7"; });
+    check(multipleClockFinding != result.violations.end() &&
+          multipleClockFinding->line == 1 && multipleClockFinding->column == 1 &&
+          multipleClockFinding->message == "建议仅使用一个时钟域",
+          "6.1.7 restores native mode-zero text and module line-only location");
+    result = analyzeVerilog(
+        "\n\nmodule probe(input CLK1,CLK2,CLK3,D, output reg Q1,Q2,Q3);\n"
+        "always @(posedge CLK1) Q1<=D; always @(posedge CLK2) Q2<=D;\n"
+        "always @(posedge CLK3) Q3<=D; endmodule\n");
+    check(count(result, "GJB10157.6.1.7") == 1 &&
+          std::ranges::find_if(result.violations, [](const auto& entry) {
+              return entry.ruleId == "GJB10157.6.1.7";
+          })->line == 3,
+          "native 6.1.7 emits once at the module for more than two direct domains");
     result = analyzeVerilog(
         "module probe(input CLK,D, output reg Q1,Q2,Q3); wire alias_clk,inv_clk;\n"
         "assign alias_clk=CLK; assign inv_clk=~CLK;\n"

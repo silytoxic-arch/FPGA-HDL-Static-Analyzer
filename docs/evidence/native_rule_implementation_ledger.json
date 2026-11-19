@@ -4203,14 +4203,13 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 1 admits AST_MODULE(2). FUN_180555380 first requires the design record name to equal the shared setTopModule value DAT_18135b808, then builds, sorts and deduplicates 32-byte clock-relation records and emits immediately when the distinct record count is greater than one. When the direct count is at most one it calls FUN_1804ce730, builds a relation/port graph with helpers including FUN_1804c5a00, and can enter a second warning-construction path; this proves the later graph affects the result. Packaged examples prove that posedge and negedge uses of the same signal are one domain, while CLK and CLK3 are two. With an explicit top, product applies the same selected-module boundary before bounded direct and unary-inverted alias canonicalization.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructor 0x180022420 registers GJB10157_VLOG.6.1.7, clears mode byte +0x158 and installs vtable 0x180ef0ea0. Selector FUN_1807238a0 admits only AST_MODULE(2). Main FUN_180555380 first requires the design record name to equal shared setTopModule DAT_18135b808, normalizes candidate names through FUN_180557180, sorts and deduplicates 32-byte direct clock-relation records, and emits exactly once then returns when the distinct count is greater than one. The direct report is Warning at the module source/physical line with no column; mode zero selects exact GB18030 text 建议仅使用一个时钟域, while the inactive alternate is 设计使用多个时钟. When direct count is at most one, FUN_1804ce730 builds a relation/port graph; its separate mode-zero report composes 建议仅使用一个时钟域:<name>;<name> at the same module line. Packaged examples prove posedge and negedge of one signal are one domain while CLK and CLK3 are two. Product exactly mirrors the definite same-module direct subset after cycle-safe direct/unary-inverted alias canonicalization and preserves the explicit top boundary.",
       "predicateEvidence": [
         "ev_c3a2ade2a32b69e0a081e0c5e0212f2276c281d75f59577e7dab31ab28b77f3d",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
-        "reverse-tools/evidence/clock-domain-hierarchy/180555380.c",
-        "reverse-tools/evidence/clock-domain-hierarchy/1804ce730.c",
-        "docs/evidence/native_verilog_single_clock_domain_6_1_7_findings.md#recovered-predicate"
+        "reverse-tools/evidence/t_linter_pass74/a4_4_single_clock_domain.txt",
+        "docs/evidence/native_verilog_single_clock_domain_6_1_7_findings.md"
       ],
       "entryObservation": null,
       "implementationMode": "ProjectContext",
@@ -4221,7 +4220,7 @@
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.6.1.7.html",
         "sha256": "1e7b62db61d12a932ecb1b76490bc75bdf139d04a57d0bdf925e488979cb94ff",
         "nativeFindings": "docs/evidence/native_verilog_single_clock_domain_6_1_7_findings.md",
-        "release": "docs/v1_4_47_release.md"
+        "release": "docs/v1_4_210_release.md"
       },
       "exampleChecks": [
         {
@@ -4235,7 +4234,7 @@
           "matched": true
         }
       ],
-      "limitations": "The node and edge semantics of the confirmed second warning path, full clock-family and hierarchy normalization, primitive/library clock relations, generated clocks, macros, multi-bit nets and exact report location remain unresolved. Product reports a definite same-module second domain only; a clean result remains ProjectContextRequired and full native equivalence is not claimed."
+      "limitations": "The constructor, module selector, explicit-top filter, direct relation collection/name normalization, sort/unique threshold, one-report multiplicity, exact direct text/severity and module line-only location are recovered and integrated. Exact node/edge semantics and pair-name meanings of the confirmed second graph warning path, full hierarchy and clock-family normalization, primitive/library relations, generated clocks, macros, multi-bit nets and global diagnostic ordering remain unresolved. Without explicit top, product retains its legacy per-module bounded adapter because the proprietary launcher's automatic top selection is not recovered. A clean result remains ProjectContextRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "R-5-1",
