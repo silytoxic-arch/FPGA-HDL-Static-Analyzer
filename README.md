@@ -1,10 +1,10 @@
-# FPGA HDL Static Analyzer — V1.4.210
+# FPGA HDL Static Analyzer — V1.4.211
 
 [![Windows Build](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml/badge.svg)](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml)
 
 公开源码仓库使用 GitHub Actions 在 Windows Server 2022、Visual Studio 2022 和 Qt 6.8.3 环境中自动编译、运行全部测试并生成 Windows x64 ZIP。可在仓库的 **Actions → Windows Build** 页面手动触发，构建完成后从 `FPGA-HDL-Static-Analyzer-Windows-x64` 工件下载。
 
-V1.4.210 深化官方三段式规则 `A-4-4`：恢复顶层过滤、直接时钟域去重、单次报告、原生正文及模块行无列定位；未恢复的层次关系图继续要求工程上下文。详见 [本轮记录](docs/v1_4_210_release.md)。
+V1.4.211 深化官方三段式规则 `R-5-1`：恢复逐标识符报告、精确原生正文及物理行无列定位；未恢复的专有库端口语义继续要求人工复核。详见 [本轮记录](docs/v1_4_211_release.md)。
 
 V1.4.197 深化官方三段式规则 `R-2-3`：恢复逐模块组准入、七类声明候选、六类关键字表顺序、固定 Error、六类精确正文、声明行及原生无列定位。详见 [本轮记录](docs/v1_4_197_release.md)。
 

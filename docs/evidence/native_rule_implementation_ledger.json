@@ -4315,12 +4315,13 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native FUN_1806e8d60 builds asynchronous reset/set relation-name sets, traverses AST_ALWAYS(0x52), AST_ASSIGN_EQ/LE(0x55/0x56), AST_CELL(0x4f) and AST_IDENTIFIER(0x13), and collects known asynchronous-control identifiers used in assignment data or cell actuals. The cell branch consults port metadata to exclude reset/set endpoints. The embedded GBK suffix at 0x180f126e0 decodes to 连接到非复位/置位端口. Product checks bounded continuous/procedural assignment RHS uses plus named instance connections whose formal name is definitely not reset/set-like.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructor 0x1800224c0 first registers legacy key VLR-110026, then GJB10157_VLOG.6.2.1, and installs final vtable 0x180ef1068 whose slot 0 is FUN_1806e8d60. Selector FUN_1807238a0 admits only AST_MODULE(2). The main builds asynchronous reset/set relation-name sets, traverses AST_ALWAYS(0x52), AST_ASSIGN_EQ/LE(0x55/0x56), AST_CELL(0x4f) and AST_IDENTIFIER(0x13), and appends every known asynchronous-control identifier used in assignment data or cell actuals. Cell port metadata excludes reset/set endpoints. Every candidate identifier AST is reported independently at candidate source/physical line with no column. Constants 0x180f07a48 and 0x180f126e0 compose exact GB18030 text 异步复位/置位信号<normalized-name>连接到非复位/置位端口; DAT_180ee83b0 is Warning. Product checks bounded continuous/procedural assignment RHS uses plus named instance connections whose formal name is definitely not reset/set-like, preserving per-identifier multiplicity.",
       "predicateEvidence": [
         "ev_2be3a67f908304b85d468cb0368d9c237a2416337bc8bfe6a3136677de8e53e6",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
-        "docs/evidence/native_verilog_async_reset_nonreset_endpoint_6_2_1_findings.md#recovered-predicate"
+        "reverse-tools/evidence/t_linter_pass75/r5_1_async_reset_endpoint.txt",
+        "docs/evidence/native_verilog_async_reset_nonreset_endpoint_6_2_1_findings.md"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -4329,7 +4330,9 @@
       "additionalTests": "tests/standard_accuracy_tests.cpp",
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.6.2.1.html",
-        "sha256": "0a8a71654ab00904c7ea6d24baeaad178b6c1faf68d280935f887ff945a161a5"
+        "sha256": "0a8a71654ab00904c7ea6d24baeaad178b6c1faf68d280935f887ff945a161a5",
+        "nativeFindings": "docs/evidence/native_verilog_async_reset_nonreset_endpoint_6_2_1_findings.md",
+        "release": "docs/v1_4_211_release.md"
       },
       "exampleChecks": [
         {
@@ -4343,7 +4346,7 @@
           "matched": true
         }
       ],
-      "limitations": "The complete reset relation producer, proprietary library-port semantic metadata, positional/custom formal classification, hierarchy, macros, generate constructs, alias propagation, complex targets and diagnostic multiplicity remain unresolved. Product reports only definite same-module assignment-data uses and named non-reset/set-like formal connections. Unknown or positional endpoints remain ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The constructor, module selector, traversed AST classes, per-identifier candidate/report multiplicity, exact text/severity and line-only location are recovered and integrated. The complete reset relation producer, proprietary library-port semantic metadata, positional/custom formal classification, hierarchy, macros, generate constructs, alias propagation, complex targets, name normalization edge cases and global diagnostic ordering remain unresolved. Product reports only definite same-module assignment-data uses and named non-reset/set-like formal connections. Unknown or positional endpoints remain ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "R-5-2",

@@ -4914,8 +4914,10 @@ void checkAsyncResetConnectedToNonResetUse(
     // gathers AST_ALWAYS(0x52) assignments and AST_CELL(0x4f) connections,
     // then searches assignment data / cell actuals for AST_IDENTIFIER(0x13)
     // matches. Cell connection metadata is consulted to exclude reset/set
-    // ports. The embedded diagnostic suffix at 0x180f126e0 decodes as
-    // "连接到非复位/置位端口". This source adapter implements only definite
+    // ports. The embedded constants at 0x180f07a48 / 0x180f126e0 compose
+    // exact text "异步复位/置位信号<name>连接到非复位/置位端口". Every admitted
+    // identifier AST is appended and reported independently at its physical
+    // line with no column. This source adapter implements only definite
     // assignment-data uses and named non-reset/set formal connections.
     // ev_2be3a67f908304b85d468cb0368d9c237a2416337bc8bfe6a3136677de8e53e6
     // ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
@@ -4950,19 +4952,20 @@ void checkAsyncResetConnectedToNonResetUse(
         auto moduleEnd = module + 2;
         while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
 
-        std::set<std::tuple<std::string, std::size_t, std::size_t>> reported;
-        const auto report = [&](const parser::HdlToken& token, const std::string& reset,
-                                std::string detail) {
-            if (!reported.emplace(reset, token.line, token.column).second) return;
-            emit(result, "GJB10157.6.2.1", source, token.line, token.column,
-                 "异步复位/置位信号 " + reset + " " + std::move(detail));
+        std::set<std::size_t> reported;
+        const auto report = [&](std::size_t token) {
+            if (!reported.insert(token).second) return;
+            emit(result, "GJB10157.6.2.1", source, tokens[token].line, 1,
+                 "异步复位/置位信号" + tokens[token].text +
+                     "连接到非复位/置位端口");
         };
-        const auto resetInRange = [&](std::size_t begin, std::size_t end)
-            -> std::optional<std::size_t> {
+        const auto resetsInRange = [&](std::size_t begin, std::size_t end) {
+            std::vector<std::size_t> matches;
             for (auto index = begin; index < end; ++index)
                 if (tokens[index].kind == parser::HdlTokenKind::Identifier &&
-                    asynchronousResets.contains(tokens[index].text)) return index;
-            return std::nullopt;
+                    asynchronousResets.contains(tokens[index].text))
+                    matches.push_back(index);
+            return matches;
         };
 
         for (auto index = module + 2; index < moduleEnd; ++index) {
@@ -4995,9 +4998,8 @@ void checkAsyncResetConnectedToNonResetUse(
                 }
             }
             const auto target = simpleAssignmentTarget(tokens, index + 1, equal);
-            const auto reset = equal < end ? resetInRange(equal + 1, end) : std::nullopt;
-            if (target && reset && !asynchronousResets.contains(tokens[*target].text))
-                report(tokens[*reset], tokens[*reset].text, "被用于连续赋值逻辑的数据端");
+            if (target && equal < end && !asynchronousResets.contains(tokens[*target].text))
+                for (const auto reset : resetsInRange(equal + 1, end)) report(reset);
             index = end == moduleEnd ? index : end;
         }
 
@@ -5022,10 +5024,8 @@ void checkAsyncResetConnectedToNonResetUse(
                 const auto target = simpleAssignmentTarget(tokens, body, op);
                 auto rhsEnd = op + 1;
                 while (rhsEnd < end && tokens[rhsEnd].text != ";") ++rhsEnd;
-                const auto reset = resetInRange(op + 1, rhsEnd);
-                if (target && reset && !asynchronousResets.contains(tokens[*target].text))
-                    report(tokens[*reset], tokens[*reset].text,
-                           "被用于过程赋值的数据端 " + tokens[*target].text);
+                if (target && !asynchronousResets.contains(tokens[*target].text))
+                    for (const auto reset : resetsInRange(op + 1, rhsEnd)) report(reset);
                 op = rhsEnd == end ? op : rhsEnd;
             }
             index = end == 0 ? index : end - 1;
@@ -5046,10 +5046,7 @@ void checkAsyncResetConnectedToNonResetUse(
                     tokens[formal + 1].text != "(") continue;
                 const auto close = closeParen(tokens, formal + 1);
                 if (close >= moduleEnd) continue;
-                if (const auto reset = resetInRange(formal + 2, close))
-                    report(tokens[*reset], tokens[*reset].text,
-                           "连接到非复位/置位端口 " + instance.name + "." +
-                               connection.formal);
+                for (const auto reset : resetsInRange(formal + 2, close)) report(reset);
             }
         }
     }
@@ -16952,6 +16949,8 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.6.1.4") ||
                 (left.ruleId == "GJB10157.6.1.6" &&
                  right.ruleId == "GJB10157.6.1.6") ||
+                (left.ruleId == "GJB10157.6.2.1" &&
+                 right.ruleId == "GJB10157.6.2.1") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&

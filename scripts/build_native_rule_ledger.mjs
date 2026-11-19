@@ -608,9 +608,9 @@ const confirmed = {
     limitations: 'The native producer and semantic flags behind the initial asynchronous-reset relation vector, identifier normalization helper, complex condition lowering, hierarchy, primitive/library ports, generated logic, macros and diagnostic multiplicity remain unresolved. Product recognizes bounded reset-like Verilog/VHDL timing controls and conditions; unsupported naming and complex forms remain unknown. No finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.2.1': {
-    predicate: 'Native FUN_1806e8d60 builds asynchronous reset/set relation-name sets, traverses AST_ALWAYS(0x52), AST_ASSIGN_EQ/LE(0x55/0x56), AST_CELL(0x4f) and AST_IDENTIFIER(0x13), and collects known asynchronous-control identifiers used in assignment data or cell actuals. The cell branch consults port metadata to exclude reset/set endpoints. The embedded GBK suffix at 0x180f126e0 decodes to 连接到非复位/置位端口. Product checks bounded continuous/procedural assignment RHS uses plus named instance connections whose formal name is definitely not reset/set-like.',
-    evidence: ['ev_2be3a67f908304b85d468cb0368d9c237a2416337bc8bfe6a3136677de8e53e6', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'docs/evidence/native_verilog_async_reset_nonreset_endpoint_6_2_1_findings.md#recovered-predicate'],
-    limitations: 'The complete reset relation producer, proprietary library-port semantic metadata, positional/custom formal classification, hierarchy, macros, generate constructs, alias propagation, complex targets and diagnostic multiplicity remain unresolved. Product reports only definite same-module assignment-data uses and named non-reset/set-like formal connections. Unknown or positional endpoints remain ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Constructor 0x1800224c0 first registers legacy key VLR-110026, then GJB10157_VLOG.6.2.1, and installs final vtable 0x180ef1068 whose slot 0 is FUN_1806e8d60. Selector FUN_1807238a0 admits only AST_MODULE(2). The main builds asynchronous reset/set relation-name sets, traverses AST_ALWAYS(0x52), AST_ASSIGN_EQ/LE(0x55/0x56), AST_CELL(0x4f) and AST_IDENTIFIER(0x13), and appends every known asynchronous-control identifier used in assignment data or cell actuals. Cell port metadata excludes reset/set endpoints. Every candidate identifier AST is reported independently at candidate source/physical line with no column. Constants 0x180f07a48 and 0x180f126e0 compose exact GB18030 text 异步复位/置位信号<normalized-name>连接到非复位/置位端口; DAT_180ee83b0 is Warning. Product checks bounded continuous/procedural assignment RHS uses plus named instance connections whose formal name is definitely not reset/set-like, preserving per-identifier multiplicity.',
+    evidence: ['ev_2be3a67f908304b85d468cb0368d9c237a2416337bc8bfe6a3136677de8e53e6', 'ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b', 'reverse-tools/evidence/t_linter_pass75/r5_1_async_reset_endpoint.txt', 'docs/evidence/native_verilog_async_reset_nonreset_endpoint_6_2_1_findings.md'],
+    limitations: 'The constructor, module selector, traversed AST classes, per-identifier candidate/report multiplicity, exact text/severity and line-only location are recovered and integrated. The complete reset relation producer, proprietary library-port semantic metadata, positional/custom formal classification, hierarchy, macros, generate constructs, alias propagation, complex targets, name normalization edge cases and global diagnostic ordering remain unresolved. Product reports only definite same-module assignment-data uses and named non-reset/set-like formal connections. Unknown or positional endpoints remain ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.6.2.3': {
     predicate: 'GJB10157_VLOG_6_2_3 and GJB10157_VLOG_6_2_7 share native slot 0 FUN_180758410 and the AST_MODULE(2) filter FUN_1807238a0. The run gathers AST_ASSIGN(0x4d) and AST_ALWAYS(0x52), admits edge-free always assignments, and compares their targets with asynchronous-reset relations. A direct AST_IDENTIFIER(0x13) RHS and unary AST_LOGIC_NOT(0x47)/AST_BIT_NOT(0x24) with exactly one direct AST_IDENTIFIER child enter a next-source tree. After each pass FUN_18075a210 clears the current-name tree, FUN_180676aa0 excludes already visited names and FUN_180579cf0 inserts unseen sources; the loop repeats while the work set is non-empty. Every matching non-alias assignment independently enters diagnostic construction; the visited tree deduplicates source names, not driver nodes or physical lines. Product mirrors this transitive cycle-safe same-module walk, admits identifier selections and exact one-level !/~ identifier shapes, reports each reachable non-alias driver node, and visits a convergent upstream name once.',
@@ -1074,6 +1074,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.6.1.4',
   'GJB10157.6.1.6',
   'GJB10157.6.1.7',
+  'GJB10157.6.2.1',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',
@@ -1371,6 +1372,9 @@ const rules = native.rules.map(rule => {
       }, 'GJB10157.6.1.7': {
         nativeFindings: 'docs/evidence/native_verilog_single_clock_domain_6_1_7_findings.md',
         release: 'docs/v1_4_210_release.md'
+      }, 'GJB10157.6.2.1': {
+        nativeFindings: 'docs/evidence/native_verilog_async_reset_nonreset_endpoint_6_2_1_findings.md',
+        release: 'docs/v1_4_211_release.md'
       }, 'GJB9765.4.9.h': {
         nativeFindings: 'docs/evidence/native_vhdl_clock_domains_4_9_h_findings.md',
         release: 'docs/v1_4_47_release.md'

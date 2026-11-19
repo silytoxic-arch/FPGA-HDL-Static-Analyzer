@@ -6435,6 +6435,28 @@ int main() {
         "assign my_logic=RST&COND[0]; endmodule\n");
     check(count(result, "GJB10157.6.2.1") == 3,
           "attachment 6.2.1 reports reset use as register data, BB data and logic input");
+    {
+        const auto finding = std::ranges::find_if(result.violations, [](const auto& violation) {
+            return violation.ruleId == "GJB10157.6.2.1";
+        });
+        check(finding != result.violations.end() &&
+                  finding->message == "异步复位/置位信号RST连接到非复位/置位端口" &&
+                  finding->column == 1,
+              "6.2.1 restores exact native text and line-only location");
+    }
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q); wire X,Y;\n"
+        "always @(posedge RST or posedge CLK) if(RST) Q<=0; else Q<=D;\n"
+        "assign X=RST; assign Y=RST; endmodule\n");
+    check(count(result, "GJB10157.6.2.1") == 2,
+          "6.2.1 preserves one native finding per reset identifier AST on one line");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,RST2,D, output reg Q,Q2); wire X;\n"
+        "always @(posedge RST or posedge CLK) if(RST) Q<=0; else Q<=D;\n"
+        "always @(posedge RST2 or posedge CLK) if(RST2) Q2<=0; else Q2<=D;\n"
+        "assign X=RST|RST2; endmodule\n");
+    check(count(result, "GJB10157.6.2.1") == 2,
+          "6.2.1 reports every asynchronous control identifier in one data expression");
     result = analyzeVerilog(
         "module probe(input CLK,RST,A,B, input [1:0] COND, output reg C,D); wire my_logic;\n"
         "always @(posedge RST or posedge CLK) if(RST) C<=0; else C<=B;\n"

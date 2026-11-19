@@ -1,0 +1,35 @@
+T-Linter.dll static evidence — pass 75 — public rule R-5-1
+Target SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Target was not executed.
+
+Constructor: 0x1800224c0
+Registered keys: VLR-110026, GJB10157_VLOG.6.2.1
+Final vtable: 0x180ef1068
+slot 0: FUN_1806e8d60
+slot 1: FUN_1807238a0; admits AST_MODULE(2)
+
+Observed main-function node classes:
+  AST_ALWAYS 0x52
+  AST_ASSIGN_EQ 0x55
+  AST_ASSIGN_LE 0x56
+  AST_CELL 0x4f
+  AST_IDENTIFIER 0x13
+
+Observed report surface:
+  Each admitted identifier AST is appended to the candidate vector and consumed independently.
+  Candidate source string: candidate +0x1e0
+  Candidate physical line: candidate +0x200
+  No column field is written.
+  0x180f07a48 GB18030: 异步复位/置位信号
+  0x180f126e0 GB18030: 连接到非复位/置位端口
+  0x180ee83b0 GB18030: 警告
+  Exact composed body: 异步复位/置位信号<normalized-name>连接到非复位/置位端口
+
+Inference bounded by observations:
+  The initial relation sets denote asynchronous reset/set names.
+  Cell metadata distinguishes reset/set endpoints from non-reset/set endpoints.
+
+Unknown:
+  Complete relation producer and port metadata schema; positional/custom ports; hierarchy;
+  macros/generate; alias propagation; complex targets; normalization edges; global ordering.
+
