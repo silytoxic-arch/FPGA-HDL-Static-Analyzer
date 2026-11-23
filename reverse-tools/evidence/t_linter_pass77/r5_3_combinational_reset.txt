@@ -1,0 +1,76 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Method: offline Ghidra 12.1.4 static analysis; target was not executed
+
+OBSERVED CONSTRUCTORS
+
+0x180022700:
+  registers legacy key "VLR-110069"
+  stores zero at DAT_18134c928 = object 0x18134c7d0 + 0x158
+  installs Yosys::GJB10157_VLOG_6_2_3::vftable
+  registers "GJB10157_VLOG.6.2.3"
+
+0x180022840:
+  registers legacy key "VLR-110069"
+  stores zero at DAT_18134cc18 = object 0x18134cac0 + 0x158
+  installs Yosys::GJB10157_VLOG_6_2_7::vftable
+  registers "GJB10157_VLOG.6.2.7"
+
+Both final vtables dispatch slot 0 to FUN_180758410 and slot 1 to
+FUN_1807238a0. FUN_1807238a0 returns true exactly when AST kind at +4 is 2
+(AST_MODULE).
+
+OBSERVED REPORT BRANCH IN FUN_180758410
+
+  if (*(char *)(rule_object + 0x158) == 0) {
+      tmp1 = FUN_1800d37b0(prefix_0x180f10888, normalized_target);
+      tmp2 = FUN_1801380f0(tmp1, suffix_0x180f1ab50);
+      report.message = tmp2;
+  } else {
+      report.message = FUN_1800d37b0(0x180f07a18, normalized_target);
+  }
+  report.file = assignment_ast + 0x1e0;
+  report.line = *(uint32_t *)(assignment_ast + 0x210);
+  report.severity = 0x180ee83b0;
+  append_report(...);
+
+FUN_1800d37b0 first appends its C-string parameter and then appends the
+std::string parameter, proving prefix + normalized_target ordering.
+FUN_1801380f0 appends its C-string parameter to the existing string, proving
+the final suffix ordering.
+
+OBSERVED GB18030 CONSTANTS
+
+0x180f10888: d2 ec b2 bd b8 b4 ce bb 00
+  "异步复位"
+0x180f1ab50: d3 c9 d7 e9 ba cf c2 df bc ad c7 fd b6 af 00
+  "用组合逻辑驱动"
+0x180ee83b0: be af b8 e6 00
+  "警告"
+
+Therefore both constructed rules select the same exact diagnostic surface:
+  异步复位<normalized-target>用组合逻辑驱动
+  severity: Warning
+  location: assignment AST source path and physical line; no native column
+
+OBSERVED CORE PREDICATE
+
+FUN_180758410 gathers AST_ASSIGN(0x4d) and AST_ALWAYS(0x52). Edge-free always
+processes contribute AST_ASSIGN_EQ/LE(0x55/0x56). A direct
+AST_IDENTIFIER(0x13) RHS, or exact unary AST_LOGIC_NOT(0x47) / AST_BIT_NOT
+(0x24) with one direct AST_IDENTIFIER child, becomes an alias source. The
+function iterates a visited-name work list and independently constructs a
+report for every reachable non-alias assignment AST.
+
+INFERENCE USED BY PRODUCT
+
+The product maps the absent native column to column 1, consistently with the
+other recovered line-only rules. It preserves identical same-line reports for
+distinct assignment AST nodes because the native visited tree deduplicates
+relation names, not report-producing driver nodes.
+
+UNRESOLVED
+
+The complete asynchronous-reset relation producer, hierarchy and library
+primitive semantics, macro/generate lowering, compound targets, escaped-name
+normalization edge cases and global diagnostic ordering remain unknown.

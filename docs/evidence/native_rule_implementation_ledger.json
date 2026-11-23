@@ -4510,11 +4510,12 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "GJB10157_VLOG_6_2_3 and GJB10157_VLOG_6_2_7 share native slot 0 FUN_180758410 and the AST_MODULE(2) filter FUN_1807238a0. The run gathers AST_ASSIGN(0x4d) and AST_ALWAYS(0x52), admits edge-free always assignments, and compares their targets with asynchronous-reset relations. A direct AST_IDENTIFIER(0x13) RHS and unary AST_LOGIC_NOT(0x47)/AST_BIT_NOT(0x24) with exactly one direct AST_IDENTIFIER child enter a next-source tree. After each pass FUN_18075a210 clears the current-name tree, FUN_180676aa0 excludes already visited names and FUN_180579cf0 inserts unseen sources; the loop repeats while the work set is non-empty. Every matching non-alias assignment independently enters diagnostic construction; the visited tree deduplicates source names, not driver nodes or physical lines. Product mirrors this transitive cycle-safe same-module walk, admits identifier selections and exact one-level !/~ identifier shapes, reports each reachable non-alias driver node, and visits a convergent upstream name once.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructors 0x180022700 and 0x180022840 register GJB10157_VLOG.6.2.3 and .6.2.7, clear object+0x158, and share slot 0 FUN_180758410 plus AST_MODULE(2) selector FUN_1807238a0. The run gathers AST_ASSIGN(0x4d) and edge-free AST_ALWAYS(0x52) assignments and compares targets with asynchronous-reset relations. Direct AST_IDENTIFIER(0x13) RHS and unary AST_LOGIC_NOT(0x47)/AST_BIT_NOT(0x24) with exactly one direct identifier child enter a transitive visited-name work list; every reachable non-alias assignment independently reports. Mode zero composes exact GB18030 text 异步复位<normalized-target>用组合逻辑驱动 through FUN_1800d37b0/FUN_1801380f0. DAT_180ee83b0 is Warning, and the report copies the assignment source/physical line with no column. Product mirrors the bounded same-module traversal, diagnostic surface and multiplicity.",
       "predicateEvidence": [
         "ev_84ff04283d5bc45c830f2cd48b7030d46eb94114556b32aa556a0b8308ae6833",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
+        "reverse-tools/evidence/t_linter_pass77/r5_3_combinational_reset.txt",
         "docs/evidence/native_ast_not_types_0x24_0x47.txt",
         "docs/evidence/native_verilog_reset_alias_worklist_6_2_3_6_2_7.txt",
         "docs/evidence/native_verilog_combinational_reset_6_2_3_6_2_7_findings.md#recovered-predicate"
@@ -4540,7 +4541,7 @@
           "matched": true
         }
       ],
-      "limitations": "The initial asynchronous-reset relation graph, hierarchy, primitive/library reset pins, macros, generate constructs, compound targets, proprietary lowering of hierarchical identifiers and ordering across design roots remain unresolved. The exact 0x24/0x47 enum names, width classes, direct-child shape, transitive visited-name work-list and per-driver multiplicity are recovered. Product implements the bounded same-module traversal; unsupported forms remain unknown. A clean result remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The two constructors, common selector/core, mode byte, exact message/severity, assignment line-only location, 0x24/0x47 alias shapes, transitive visited-name work list and per-driver multiplicity are recovered and integrated. The initial asynchronous-reset relation graph, hierarchy, primitive/library reset pins, macros, generate constructs, compound targets, proprietary lowering of hierarchical identifiers and global diagnostic ordering remain unresolved. Product implements the definite same-module subset; unsupported forms remain unknown. A clean result remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "R-5-5",
@@ -4690,11 +4691,12 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "GJB10157_VLOG_6_2_7 and GJB10157_VLOG_6_2_3 share native slot 0 FUN_180758410 and the AST_MODULE(2) filter FUN_1807238a0. The run gathers AST_ASSIGN(0x4d) and AST_ALWAYS(0x52), admits edge-free always assignments, and compares their targets with asynchronous-reset relations. A direct AST_IDENTIFIER(0x13) RHS and unary AST_LOGIC_NOT(0x47)/AST_BIT_NOT(0x24) with exactly one direct AST_IDENTIFIER child enter a next-source tree. After each pass FUN_18075a210 clears the current-name tree, FUN_180676aa0 excludes already visited names and FUN_180579cf0 inserts unseen sources; the loop repeats while the work set is non-empty. Every matching non-alias assignment independently enters diagnostic construction; the visited tree deduplicates source names, not driver nodes or physical lines. Product mirrors this transitive cycle-safe same-module walk, admits identifier selections and exact one-level !/~ identifier shapes, reports each reachable non-alias driver node, and visits a convergent upstream name once.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructors 0x180022840 and 0x180022700 register GJB10157_VLOG.6.2.7 and .6.2.3, clear object+0x158, and share slot 0 FUN_180758410 plus AST_MODULE(2) selector FUN_1807238a0. The run gathers AST_ASSIGN(0x4d) and edge-free AST_ALWAYS(0x52) assignments and compares targets with asynchronous-reset relations. Direct AST_IDENTIFIER(0x13) RHS and unary AST_LOGIC_NOT(0x47)/AST_BIT_NOT(0x24) with exactly one direct identifier child enter a transitive visited-name work list; every reachable non-alias assignment independently reports. Mode zero composes exact GB18030 text 异步复位<normalized-target>用组合逻辑驱动 through FUN_1800d37b0/FUN_1801380f0. DAT_180ee83b0 is Warning, and the report copies the assignment source/physical line with no column. Product mirrors the bounded same-module traversal, diagnostic surface and multiplicity.",
       "predicateEvidence": [
         "ev_84ff04283d5bc45c830f2cd48b7030d46eb94114556b32aa556a0b8308ae6833",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
+        "reverse-tools/evidence/t_linter_pass77/r5_3_combinational_reset.txt",
         "docs/evidence/native_ast_not_types_0x24_0x47.txt",
         "docs/evidence/native_verilog_reset_alias_worklist_6_2_3_6_2_7.txt",
         "docs/evidence/native_verilog_combinational_reset_6_2_3_6_2_7_findings.md#recovered-predicate"
@@ -4720,7 +4722,7 @@
           "matched": true
         }
       ],
-      "limitations": "The initial asynchronous-reset relation graph, hierarchy, primitive/library reset pins, macros, generate constructs, compound targets, proprietary lowering of hierarchical identifiers and ordering across design roots remain unresolved. The exact 0x24/0x47 enum names, width classes, direct-child shape, transitive visited-name work-list and per-driver multiplicity are recovered. Product implements the bounded same-module traversal; unsupported forms remain unknown. A clean result remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The two constructors, common selector/core, mode byte, exact message/severity, assignment line-only location, 0x24/0x47 alias shapes, transitive visited-name work list and per-driver multiplicity are recovered and integrated. The initial asynchronous-reset relation graph, hierarchy, primitive/library reset pins, macros, generate constructs, compound targets, proprietary lowering of hierarchical identifiers and global diagnostic ordering remain unresolved. Product implements the definite same-module subset; unsupported forms remain unknown. A clean result remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "A-5-3",

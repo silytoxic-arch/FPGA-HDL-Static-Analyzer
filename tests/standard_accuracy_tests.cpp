@@ -6518,6 +6518,16 @@ int main() {
     check(count(result, "GJB10157.6.2.3") == 1 &&
           count(result, "GJB10157.6.2.7") == 1,
           "attachment 6.2.3 and 6.2.7 report a combinational asynchronous reset");
+    for (const auto clause : {std::string_view{"GJB10157.6.2.3"},
+                              std::string_view{"GJB10157.6.2.7"}}) {
+        const auto violation = std::ranges::find_if(result.violations,
+            [&](const auto& entry) { return entry.ruleId == clause; });
+        check(violation != result.violations.end() &&
+              violation->message == "异步复位my_comb_rst用组合逻辑驱动" &&
+              violation->severity == analysis::Severity::Warning &&
+              violation->line == 2 && violation->column == 1,
+              "R-5-3/A-5-2 preserve the shared native message, Warning and assignment line-only location");
+    }
     result = analyzeVerilog(
         "module probe(input CLK,A,B,D, output reg Q); reg ff_rst;\n"
         "always @(posedge CLK) ff_rst<=A&B;\n"

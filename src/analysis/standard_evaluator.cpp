@@ -5399,7 +5399,6 @@ void checkCombinationalOutputUsedAsAsyncReset(
         struct ResetDriver {
             std::size_t targetToken{};
             std::optional<std::string> aliasSource;
-            std::string_view description;
         };
         std::map<std::string, std::vector<ResetDriver>> drivers;
         // The native visited tree deduplicates relation names, not driver AST
@@ -5408,13 +5407,18 @@ void checkCombinationalOutputUsedAsAsyncReset(
         // share one physical line. Deduplicate only the source assignment
         // token in case multiple alias paths converge on it.
         std::set<std::size_t> reported;
-        const auto report = [&](std::size_t target, std::string_view driver) {
+        const auto report = [&](std::size_t target) {
             const auto& token = tokens[target];
             if (!reported.insert(target).second) return;
-            const auto message = "组合逻辑" + std::string(driver) + " " + token.text +
-                                 " 被用作异步复位或置位信号";
-            emit(result, "GJB10157.6.2.3", source, token.line, token.column, message);
-            emit(result, "GJB10157.6.2.7", source, token.line, token.column, message);
+            // Both constructors clear object+0x158, so FUN_180758410 takes
+            // the mode-zero branch. FUN_1800d37b0 prepends the GB18030
+            // literal at 0x180f10888 ("异步复位") to the normalized target
+            // name, then FUN_1801380f0 appends 0x180f1ab50
+            // ("用组合逻辑驱动"). DAT_180ee83b0 is "警告". The report copies
+            // the assignment AST source and physical line, but no column.
+            const auto message = "异步复位" + token.text + "用组合逻辑驱动";
+            emit(result, "GJB10157.6.2.3", source, token.line, 1, message);
+            emit(result, "GJB10157.6.2.7", source, token.line, 1, message);
         };
 
         for (auto index = module + 2; index < moduleEnd; ++index) {
@@ -5449,7 +5453,7 @@ void checkCombinationalOutputUsedAsAsyncReset(
                 const auto target = simpleAssignmentTarget(tokens, index + 1, equal);
                 if (target && equal < end) {
                     drivers[tokens[*target].text].push_back(
-                        {*target, nativeResetAliasSource(tokens, equal + 1, end), "输出"});
+                        {*target, nativeResetAliasSource(tokens, equal + 1, end)});
                 }
                 index = end == moduleEnd ? index : end;
                 continue;
@@ -5488,7 +5492,7 @@ void checkCombinationalOutputUsedAsAsyncReset(
                         // continuous assignments.  AST_ASSIGN_EQ/LE collected
                         // below an edge-free AST_ALWAYS remains reportable.
                         drivers[tokens[*target].text].push_back(
-                            {*target, std::nullopt, "过程输出"});
+                            {*target, std::nullopt});
                     }
                 }
             }
@@ -5512,7 +5516,7 @@ void checkCombinationalOutputUsedAsAsyncReset(
             if (found == drivers.end()) continue;
             for (const auto& driver : found->second) {
                 if (driver.aliasSource) pending.push_back(*driver.aliasSource);
-                else report(driver.targetToken, driver.description);
+                else report(driver.targetToken);
             }
         }
     }
@@ -17038,6 +17042,10 @@ void applyStandardProfile(AnalysisResult& result,
                  right.ruleId == "GJB10157.6.2.1") ||
                 (left.ruleId == "GJB10157.6.2.2" &&
                  right.ruleId == "GJB10157.6.2.2") ||
+                (left.ruleId == "GJB10157.6.2.3" &&
+                 right.ruleId == "GJB10157.6.2.3") ||
+                (left.ruleId == "GJB10157.6.2.7" &&
+                 right.ruleId == "GJB10157.6.2.7") ||
                 (left.ruleId == "GJB10157.9.2.9" &&
                  right.ruleId == "GJB10157.9.2.9") ||
                 (left.ruleId == "GJB9765.4.6.c" &&
