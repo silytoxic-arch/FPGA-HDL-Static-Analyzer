@@ -46,7 +46,7 @@
     StandardRuleDetail{"GJB10157.6.2.1", "禁止将异步的置位/复位信号连接到非置位/复位端。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.2.2", "禁止在同一条复位线路中同时使用异步复位和同步复位。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.2.3", "禁止使用有竞争冒险情况的组合逻辑输出作为复位信号。", StandardAssessmentMode::Automated},
-    StandardRuleDetail{"GJB10157.6.2.5", "非SRAM型FPGA，必须对寄存器进行上电初始化，赋固定值；明确配置为非 SRAM 后，对无歧义单边沿过程检查缺少上电赋值的直接寄存器，并支持显式配置 initial 接纳策略。复杂复位/默认分支、声明初始化和固定值解析仍需复核。", StandardAssessmentMode::Automated},
+    StandardRuleDetail{"GJB10157.6.2.5", "非SRAM型FPGA，必须对寄存器进行上电初始化，赋固定值；明确配置为非 SRAM 后，对无歧义单边沿过程检查缺少上电赋值的直接寄存器，并支持显式配置 initial 接纳策略。DLL 的 initial 分支只登记赋值目标而不校验 RHS；复杂复位/默认分支和声明初始化仍需复核。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.2.7", "避免在异步复位线路中插入逻辑操作运算。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.2.8", "避免使用内部生成信号作为寄存器的异步复位信号。", StandardAssessmentMode::Automated},
     StandardRuleDetail{"GJB10157.6.2.9", "避免同时使用异步置位和异步复位信号。", StandardAssessmentMode::Automated},

@@ -3,12 +3,16 @@
 #include "parser/design_parser.h"
 #include <map>
 #include <set>
+#include <utility>
 #include <vector>
 
 namespace fpga::analysis {
 
 // Bounded source counterpart of native 6.2.5's single-edge ALWAYS target
-// minus initialization set. Complex reset/default-case paths stay unresolved.
+// minus initialization set. FUN_18055ae60 keys assignment records by
+// normalized target name plus physical line; FUN_1805596f0 then tests the
+// target name against the initialization-name set. Complex reset/default-case
+// paths handled by FUN_180558ea0 stay unresolved.
 inline std::vector<std::size_t> uninitializedPowerOnRegisters(
     const std::vector<parser::HdlToken>& tokens, const PowerOnPolicy& policy) {
     std::vector<std::size_t> result;
@@ -20,7 +24,8 @@ inline std::vector<std::size_t> uninitializedPowerOnRegisters(
         while (end < tokens.size() && tokens[end].text != "endmodule") ++end;
         bool supported = end < tokens.size();
         std::set<std::string> initialTargets;
-        std::map<std::string, std::size_t> clockedTargets;
+        std::map<std::pair<std::string, std::size_t>, std::size_t> clockedTargets;
+        std::map<std::string, std::size_t> clockedOwners;
         const auto blockEnd = [&](std::size_t begin) {
             if (begin >= end) return tokens.size();
             if (tokens[begin].text != "begin") {
@@ -46,6 +51,7 @@ inline std::vector<std::size_t> uninitializedPowerOnRegisters(
                 if (word == "=") { supported = false; break; }
                 continue;
             }
+            const auto constructToken = at;
             const bool initial = word == "initial";
             auto body = at + 1;
             if (!initial) {
@@ -75,14 +81,20 @@ inline std::vector<std::size_t> uninitializedPowerOnRegisters(
                 }
                 if (cursor >= next) { supported = false; break; }
                 if (initial) initialTargets.insert(tokens[target].text);
-                else if (!clockedTargets.emplace(tokens[target].text, target).second)
-                    supported = false;
+                else {
+                    const auto [owner, inserted] =
+                        clockedOwners.emplace(tokens[target].text, constructToken);
+                    if (!inserted && owner->second != constructToken) supported = false;
+                    clockedTargets.emplace(
+                        std::pair{tokens[target].text, tokens[target].line}, target);
+                }
                 ++cursor;
             }
             at = next - 1;
         }
         if (supported) {
-            for (const auto& [name, token] : clockedTargets) {
+            for (const auto& [key, token] : clockedTargets) {
+                const auto& name = key.first;
                 // A present INITIAL with unknown acceptance cannot prove an
                 // omission. A configured false mirrors native selector != 1.
                 if (initialTargets.contains(name) && policy.acceptInitialBlocks.value_or(true)) continue;

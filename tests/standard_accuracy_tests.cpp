@@ -8673,6 +8673,13 @@ int main() {
     result = powerOn(powerRegister, analysis::FpgaTechnology::NonSram);
     check(count(result, "GJB10157.6.2.5") == 1,
           "6.2.5 reports an uninitialized direct register on explicit non-SRAM hardware");
+    const auto missingPowerOn = std::ranges::find_if(result.violations,
+        [](const auto& violation) { return violation.ruleId == "GJB10157.6.2.5"; });
+    check(missingPowerOn != result.violations.end() &&
+          missingPowerOn->message == "必须对寄存器qq进行上电初始化,赋固定值" &&
+          missingPowerOn->severity == analysis::Severity::Error &&
+          missingPowerOn->line == 1 && missingPowerOn->column == 1,
+          "R-5-5 preserves the native message, Error and assignment line-only location");
     result = powerOn(powerRegister, analysis::FpgaTechnology::Unspecified);
     check(count(result, "GJB10157.6.2.5") == 0,
           "6.2.5 does not invent the target FPGA technology");
@@ -8684,6 +8691,11 @@ int main() {
     result = powerOn(initializedRegister, analysis::FpgaTechnology::NonSram, true);
     check(count(result, "GJB10157.6.2.5") == 0,
           "6.2.5 accepts an initial target when its recovered acceptance switch is enabled");
+    result = powerOn("module ff(input clk,dd,output reg qq); "
+        "initial qq=dd; always @(posedge clk) qq<=dd; endmodule",
+        analysis::FpgaTechnology::NonSram, true);
+    check(count(result, "GJB10157.6.2.5") == 0,
+          "R-5-5 mirrors the native target-only INITIAL collector without inventing RHS validation");
     result = powerOn(initializedRegister, analysis::FpgaTechnology::NonSram, false);
     check(count(result, "GJB10157.6.2.5") == 1,
           "6.2.5 does not count initial assignments when the acceptance switch is disabled");
@@ -8695,6 +8707,21 @@ int main() {
         analysis::FpgaTechnology::NonSram, true);
     check(count(result, "GJB10157.6.2.5") == 1,
           "6.2.5 compares initialization per register rather than per module");
+    result = powerOn("module ff(input clk,dd,output reg qq);\n"
+        "always @(posedge clk) begin\nqq<=dd;\nqq<=~dd;\nend endmodule\n",
+        analysis::FpgaTechnology::NonSram, false);
+    check(count(result, "GJB10157.6.2.5") == 2,
+          "R-5-5 preserves one missing-initial report per target name and physical line");
+    result = powerOn("module ff(input clk,dd,output reg qq); "
+        "always @(posedge clk) begin qq<=dd; qq<=~dd; end endmodule",
+        analysis::FpgaTechnology::NonSram, false);
+    check(count(result, "GJB10157.6.2.5") == 1,
+          "R-5-5 collapses repeated assignments sharing the same target name and physical line");
+    result = powerOn("module ff(input c1,c2,dd,output reg qq); "
+        "always @(posedge c1) qq<=dd; always @(posedge c2) qq<=~dd; endmodule",
+        analysis::FpgaTechnology::NonSram, false);
+    check(count(result, "GJB10157.6.2.5") == 0,
+          "R-5-5 keeps cross-process multiple-driver ownership outside the bounded adapter");
     result = powerOn("module ff(input clk,rst,dd,output reg qq); "
         "always @(posedge clk) if(rst) qq<=1'b0; else qq<=dd; endmodule",
         analysis::FpgaTechnology::NonSram, false);

@@ -1,0 +1,81 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Method: offline Ghidra 12.1.4 static analysis; target was not executed
+
+OBSERVED ENTRY AND SELECTORS
+
+Constructor 0x180558d00 registers "GJB10157_VLOG.6.2.5", calls common
+constructor 0x18062a230 and installs Yosys::GJB10157_VLOG_6_2_5::vftable.
+The final vtable dispatches slot 0 to FUN_1805596f0, slot 1 to
+FUN_180697020 (constant false) and slot 2 to FUN_1807238a0 (AST_MODULE(2)).
+
+The common constructor initializes object members through +0x138 and from
++0x148 onward but does not initialize +0x140. Exported
+Yosys::CheckRule::setMaxStatesNum at 0x180628d30 looks up the registered rule
+by name and writes its integer parameter to object+0x140. Existing static
+runCheck.exe evidence proves GJB10157_VLOG_6_2_5_NUM maps an empty QString to
+0 and a nonempty QString to 1 before calling this setter. Product therefore
+continues to require an explicit policy and does not infer an object default.
+
+OBSERVED INITIALIZATION COLLECTION
+
+FUN_1805596f0 collects AST_INITIAL(0x53) only when object+0x140 equals 1 and
+passes every collected INITIAL root to FUN_18055ae60.
+
+FUN_18055ae60 recursively collects AST_ASSIGN_EQ/LE(0x55/0x56). For each
+assignment with a direct first AST_IDENTIFIER(0x13) child it normalizes only
+the target name, combines that name with target physical line +0x210, and
+inserts the record into a tree. It does not inspect or classify the RHS.
+
+Consequences observed from the native structure:
+  * any admitted INITIAL RHS is accepted once the target name is registered;
+  * distinct target-name + physical-line pairs remain distinct records;
+  * an identical target name repeated on the same physical line collapses;
+  * an INITIAL target name suppresses missing-initial reports for that name.
+
+OBSERVED SIMPLE REPORT BRANCH
+
+FUN_1805596f0 composes:
+  0x180ef14e8 + normalized target + 0x180ef14d0
+
+GB18030 constants:
+  0x180ef14e8: b1 d8 d0 eb b6 d4 bc c4 b4 e6 c6 f7 00
+    "必须对寄存器"
+  0x180ef14d0:
+    bd f8 d0 d0 c9 cf b5 e7 b3 f5 ca bc bb af 2c b8 b3 b9 cc b6 a8 d6 b5 00
+    "进行上电初始化,赋固定值"
+
+Exact diagnostic:
+  必须对寄存器<normalized-target>进行上电初始化,赋固定值
+Severity: lowercase "error"
+Location: module source path plus assignment-target physical line; no column
+
+OBSERVED COMPLEX DEFAULT/RESET BRANCH
+
+FUN_180558ea0 uses FUN_180560070 to find an AST_DEFAULT(0x5b) below
+AST_COND(0x58), recursively following same-line nested AST_CASE(0x57) inside
+AST_BLOCK(0x54). FUN_18055b1d0 gathers default-branch assignment targets and
+FUN_18055ae60 gathers assignments up to the default-node physical line.
+Missing names compose:
+  0x180ef1500 + normalized target + 0x180ef14f8
+  "寄存器<normalized-target>无初值"
+with lowercase "error" and the target physical line, no column.
+
+This branch's complete ownership, ordering and interaction with synthesized
+register candidates are not yet integrated into the bounded source adapter.
+
+OBSERVED EXCLUSION
+
+Candidates carrying the exact attribute name "\\gentb_constant" are skipped.
+The complete attribute producer and synthesized candidate graph remain
+unresolved.
+
+PRODUCT BOUNDARY
+
+The product integrates the definite straight-line single-edge source subset,
+the explicit initial-policy gate, target-only INITIAL collection, exact simple
+diagnostic surface and name+line report grain. Non-SRAM applicability remains
+explicit user project context, not a recovered vendor device classifier.
+Complex default/reset paths, declaration initialization, attributes, slices,
+multiple drivers outside the recovered subset, hierarchy, macros/generate and
+global diagnostic ordering remain ManualReviewRequired.

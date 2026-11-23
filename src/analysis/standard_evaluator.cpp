@@ -13695,8 +13695,12 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
         if (preprocessed.issues.empty()) {
             for (auto target : uninitializedPowerOnRegisters(activeTokens, options.powerOnPolicy)) {
                 const auto& token = activeTokens[target];
-                emit(result, "GJB10157.6.2.5", source, token.line, token.column,
-                     "非 SRAM 器件的寄存器缺少可接纳的上电初始化：" + token.text);
+                // FUN_1805596f0 composes DAT_180ef14e8 + normalized target +
+                // DAT_180ef14d0, yielding the exact GB18030 diagnostic below.
+                // Its report stores lowercase "error", the assignment-target
+                // physical line and no native column.
+                emit(result, "GJB10157.6.2.5", source, token.line, 1,
+                     "必须对寄存器" + token.text + "进行上电初始化,赋固定值");
             }
             for (const auto& feedback : VerilogGateFeedback(activeTokens).findings(false)) {
                 const auto& token = activeTokens[feedback.token];
