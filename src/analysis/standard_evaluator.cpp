@@ -4485,6 +4485,50 @@ void checkResetConditionEdgePolarity(
         return value;
     };
 
+    // Primary -> mintypmax -> expression transfers the existing AST pointer.
+    // One child is preserved; three children select the typical (middle) one.
+    const auto primaryRange = [&](std::size_t begin, std::size_t end) {
+        while (begin < end && tokens[begin].text == "(" &&
+               closeParen(tokens, begin) + 1 == end) {
+            ++begin;
+            --end;
+            int depth = 0;
+            int conditional = 0;
+            std::vector<std::size_t> separators;
+            for (auto at = begin; at < end; ++at) {
+                const auto& word = tokens[at].text;
+                if (word == "(" || word == "[" || word == "{") ++depth;
+                else if (word == ")" || word == "]" || word == "}") --depth;
+                else if (depth == 0 && word == "?") ++conditional;
+                else if (depth == 0 && word == ":") {
+                    if (conditional > 0) --conditional;
+                    else separators.push_back(at);
+                }
+            }
+            if (conditional != 0 || (!separators.empty() && separators.size() != 2))
+                return std::pair{end, end};
+            if (separators.size() == 2) {
+                begin = separators[0] + 1;
+                end = separators[1];
+            }
+        }
+        return std::pair{begin, end};
+    };
+    const auto identifierRange = [&](std::size_t begin, std::size_t end) {
+        if (begin == end || tokens[begin].kind != parser::HdlTokenKind::Identifier) return false;
+        auto at = begin + 1;
+        while (at < end && tokens[at].text == "[") {
+            const auto opening = at++;
+            int depth = 1;
+            for (; at < end && depth != 0; ++at) {
+                if (tokens[at].text == "[") ++depth;
+                else if (tokens[at].text == "]") --depth;
+            }
+            if (depth != 0 || at == opening + 2) return false;
+        }
+        return at == end;
+    };
+
     for (std::size_t index = 0; index + 3 < tokens.size(); ++index) {
         if (tokens[index].text != "always" || tokens[index + 1].text != "@" ||
             tokens[index + 2].text != "(") continue;
@@ -4493,9 +4537,19 @@ void checkResetConditionEdgePolarity(
 
         std::map<std::string, bool> edgePolarity;
         for (auto at = index + 3; at + 1 < sensitivityEnd; ++at) {
-            if ((tokens[at].text != "posedge" && tokens[at].text != "negedge") ||
-                tokens[at + 1].kind != parser::HdlTokenKind::Identifier) continue;
-            edgePolarity[tokens[at + 1].text] = tokens[at].text == "posedge";
+            if (tokens[at].text != "posedge" && tokens[at].text != "negedge") continue;
+            auto eventEnd = at + 1;
+            int depth = 0;
+            for (; eventEnd < sensitivityEnd; ++eventEnd) {
+                const auto& word = tokens[eventEnd].text;
+                if (depth == 0 && (word == "or" || word == ",")) break;
+                if (word == "(" || word == "[" || word == "{") ++depth;
+                else if (word == ")" || word == "]" || word == "}") --depth;
+            }
+            const auto [first, last] = primaryRange(at + 1, eventEnd);
+            if (identifierRange(first, last))
+                edgePolarity[tokens[first].text] = tokens[at].text == "posedge";
+            at = eventEnd;
         }
         if (edgePolarity.empty() || sensitivityEnd + 1 >= tokens.size()) continue;
         const auto bodyEnd = statementEnd(tokens, sensitivityEnd + 1);
@@ -4505,34 +4559,42 @@ void checkResetConditionEdgePolarity(
             if (tokens[at].text != "if" || tokens[at + 1].text != "(") continue;
             const auto conditionEnd = closeParen(tokens, at + 1);
             if (conditionEnd >= bodyEnd) continue;
-            auto first = at + 2;
-            auto last = conditionEnd;
-            while (first < last && tokens[first].text == "(" &&
-                   closeParen(tokens, first) + 1 == last) {
-                ++first;
-                --last;
-            }
+            const auto [first, last] = primaryRange(at + 2, conditionEnd);
+            if (first == last) continue;
 
             std::string signal;
             std::optional<std::uint32_t> conditionPolarity;
             auto diagnosticAt = first;
-            if (last == first + 1 &&
-                tokens[first].kind == parser::HdlTokenKind::Identifier) {
+            if (identifierRange(first, last)) {
                 signal = tokens[first].text;
                 conditionPolarity = true;
-            } else if (last == first + 2 &&
-                       tokens[first].text == "!" &&
-                       tokens[first + 1].kind == parser::HdlTokenKind::Identifier) {
-                signal = tokens[first + 1].text;
-                conditionPolarity = false;
-            } else if (last == first + 3 && tokens[first + 1].text == "==") {
-                if (tokens[first].kind == parser::HdlTokenKind::Identifier) {
-                    signal = tokens[first].text;
-                    conditionPolarity = constantValue(tokens[first + 2]);
-                    diagnosticAt = first + 2;
-                } else if (tokens[first + 2].kind == parser::HdlTokenKind::Identifier) {
-                    signal = tokens[first + 2].text;
-                    conditionPolarity = constantValue(tokens[first]);
+            } else if (tokens[first].text == "!") {
+                const auto [operand, operandEnd] = primaryRange(first + 1, last);
+                if (identifierRange(operand, operandEnd)) {
+                    signal = tokens[operand].text;
+                    conditionPolarity = false;
+                }
+            } else {
+                std::vector<std::size_t> equality;
+                int depth = 0;
+                for (auto token = first; token < last; ++token) {
+                    const auto& word = tokens[token].text;
+                    if (word == "(" || word == "[" || word == "{") ++depth;
+                    else if (word == ")" || word == "]" || word == "}") --depth;
+                    else if (depth == 0 && word == "==") equality.push_back(token);
+                }
+                if (equality.size() == 1) {
+                    const auto [left, leftEnd] = primaryRange(first, equality[0]);
+                    const auto [right, rightEnd] = primaryRange(equality[0] + 1, last);
+                    if (identifierRange(left, leftEnd) && rightEnd == right + 1) {
+                        signal = tokens[left].text;
+                        conditionPolarity = constantValue(tokens[right]);
+                        diagnosticAt = right;
+                    } else if (identifierRange(right, rightEnd) && leftEnd == left + 1) {
+                        signal = tokens[right].text;
+                        conditionPolarity = constantValue(tokens[left]);
+                        diagnosticAt = left;
+                    }
                 }
             }
             const auto edge = edgePolarity.find(signal);

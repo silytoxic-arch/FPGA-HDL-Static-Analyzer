@@ -1,0 +1,76 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1800b58f0 1800b58f0 FUN_1800b58f0 =====
+
+void FUN_1800b58f0(undefined8 param_1)
+
+{
+  FUN_1800681c0(param_1,0);
+  return;
+}
+
+
+
+===== 0x180096990 180096990 FUN_180096990 =====
+
+void FUN_180096990(undefined8 param_1)
+
+{
+  FUN_180066240(param_1,0);
+  return;
+}
+
+
+
+===== 0x1800bd970 1800bd970 FUN_1800bd970 =====
+
+void FUN_1800bd970(undefined8 param_1)
+
+{
+  FUN_180069a80(param_1,0);
+  return;
+}
+
+
+
+===== 0x1800af870 1800af870 FUN_1800af870 =====
+
+void FUN_1800af870(undefined8 param_1)
+
+{
+  FUN_180067980(param_1,0);
+  return;
+}
+
+
+
+===== 0x1800cab10 1800cab10 FUN_1800cab10 =====
+
+void FUN_1800cab10(undefined8 param_1)
+
+{
+  FUN_18006be80(param_1,0);
+  return;
+}
+
+
+
+===== 0x1800ba010 1800ba010 FUN_1800ba010 =====
+
+void FUN_1800ba010(undefined8 param_1)
+
+{
+  FUN_180069180(param_1,0);
+  return;
+}
+
+
+
+===== 0x1800ca540 1800ca540 FUN_1800ca540 =====
+
+void FUN_1800ca540(undefined8 param_1)
+
+{
+  FUN_18006bc40(param_1,0);
+  return;
+}

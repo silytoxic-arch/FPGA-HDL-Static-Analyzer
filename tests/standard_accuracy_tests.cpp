@@ -6799,6 +6799,63 @@ int main() {
         "endmodule\n");
     check(count(result, "GJB10157.7.1.3") == 0,
           "R-6-3 preserves known-one cache bits in unknown literals and does not guess unary folding");
+    // These compare the recovered AST shapes; vector selects retain their
+    // base identifier name in this native rule, independently of bit safety.
+    const std::pair<const char*, bool> resetPrimaryConditions[] = {
+        {"!(RST)", true}, {"!(((RST)))", true},
+        {"(RST) == (1'b0)", true}, {"((1'b0)) == (((RST)))", true},
+        {"((0 : RST : 1)) == (0)", true}, {"!((0 : RST : 1))", true},
+        {"(RST)==(1:0:1)", true}, {"((0 : (RST == 0) : 1))", true},
+        {"((1 : (RST == 1) : 0))", false}, {"((0 : RST : 1))", false},
+        {"(RST)==(0:1:0)", false}, {"!((1:0:0))", false},
+        {"!(RST == 1)", false}, {"RST == (EN ? 0 : 1)", false},
+        {"(RST && EN) == 0", false}, {"((1?0:1 : RST :0)) == 0", true},
+        {"((0 : (EN ? RST : EN) : 1))", false}, {"((RST ==0) && EN)", false},
+        {"((1 : !((RST)) : 0))", true}, {"((1:~RST:0))", false},
+        {"!RST[0]", true}, {"(RST[0]) == (0)", true}, {"(0)==(RST[1])", true}
+    };
+    for (const auto& [condition, expected] : resetPrimaryConditions) {
+        const auto primaryResult = analyzeVerilog(
+            std::string("module probe(input CLK,EN,D, input [1:0] RST, output reg Q);\n") +
+            "always @(posedge RST or posedge CLK) if(" + condition + ") Q<=0; else Q<=D;\n"
+            "endmodule\n");
+        const auto context = std::string("R-6-3 preserves native primary/typical expression: ") + condition;
+        check(count(primaryResult, "GJB10157.7.1.3") == (expected ? 1 : 0), context.c_str());
+    }
+    const std::pair<const char*, bool> resetEventExpressions[] = {
+        {"RST", true}, {"(RST)", true}, {"((RST))", true}, {"RST[0]", true},
+        {"(RST[0])", true}, {"(0:RST:1)", true}, {"RST & EN", false},
+        {"(RST & EN)", false}, {"RST | EN", false}, {"(RST ? EN : CLK)", false},
+        {"!RST", false}, {"{RST}", false}, {"RST[0] & EN", false}
+    };
+    for (const auto& [event, expected] : resetEventExpressions) {
+        const auto eventResult = analyzeVerilog(
+            std::string("module probe(input CLK,EN,D, input [1:0] RST, output reg Q);\n") +
+            "always @(posedge " + event + " or posedge CLK) if(!RST) Q<=0; else Q<=D;\n"
+            "endmodule\n");
+        const auto context = std::string("R-6-3 admits only native identifier event nodes: ") + event;
+        check(count(eventResult, "GJB10157.7.1.3") == (expected ? 1 : 0), context.c_str());
+    }
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q);\n"
+        "always @(posedge (RST) or posedge CLK) begin\n"
+        "if(\n"
+        " (RST) == (\n"
+        " 1'b0)) Q<=0;\n"
+        "if(\n"
+        " !\n"
+        " (RST)) Q<=0;\n"
+        "if((1:\n"
+        " !RST\n"
+        " :0)) Q<=0;\n"
+        "end\n"
+        "endmodule\n");
+    resetConditionLines.clear();
+    for (const auto& item : result.violations) {
+        if (item.ruleId == "GJB10157.7.1.3") resetConditionLines.push_back(item.line);
+    }
+    check(resetConditionLines == std::vector<std::size_t>{5, 7, 10},
+          "R-6-3 keeps underlying constant/unary source lines through primary wrappers");
     result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"

@@ -1,0 +1,64 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x18006dcb0 18006dcb0 FUN_18006dcb0 =====
+
+ulonglong * FUN_18006dcb0(longlong param_1,ulonglong *param_2)
+
+{
+  undefined8 *puVar1;
+  undefined8 *puVar2;
+  longlong lVar3;
+  undefined8 uVar4;
+  undefined8 *puVar5;
+  ulonglong uVar6;
+  ulonglong uVar7;
+  undefined8 local_res8;
+  ulonglong *local_res10;
+  
+  uVar6 = 0;
+  *param_2 = 0;
+  param_2[1] = 0;
+  param_2[2] = 0;
+  puVar5 = *(undefined8 **)(param_1 + 0x10);
+  uVar7 = (*(longlong *)(param_1 + 0x18) - (longlong)puVar5) + 7U >> 3;
+  if (*(undefined8 **)(param_1 + 0x18) < puVar5) {
+    uVar7 = uVar6;
+  }
+  local_res10 = param_2;
+  if (uVar7 != 0) {
+    do {
+      uVar4 = *puVar5;
+      lVar3 = __RTDynamicCast(uVar4,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                              &antlrcpptest::Verilog2005Parser::ExpressionContext::
+                               RTTI_Type_Descriptor,0);
+      if (lVar3 != 0) {
+        uVar4 = __RTDynamicCast(uVar4,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                                &antlrcpptest::Verilog2005Parser::ExpressionContext::
+                                 RTTI_Type_Descriptor,0);
+        puVar1 = (undefined8 *)param_2[1];
+        local_res8 = uVar4;
+        if ((&local_res8 < puVar1) && (puVar2 = (undefined8 *)*param_2, puVar2 <= &local_res8)) {
+          if (puVar1 == (undefined8 *)param_2[2]) {
+            FUN_180084990(param_2,1);
+          }
+          if ((undefined8 *)param_2[1] != (undefined8 *)0x0) {
+            *(undefined8 *)param_2[1] =
+                 *(undefined8 *)(*param_2 + ((longlong)&local_res8 - (longlong)puVar2 >> 3) * 8);
+          }
+        }
+        else {
+          if (puVar1 == (undefined8 *)param_2[2]) {
+            FUN_180084990(param_2);
+          }
+          if ((undefined8 *)param_2[1] != (undefined8 *)0x0) {
+            *(undefined8 *)param_2[1] = uVar4;
+          }
+        }
+        param_2[1] = param_2[1] + 8;
+      }
+      puVar5 = puVar5 + 1;
+      uVar6 = uVar6 + 1;
+    } while (uVar6 != uVar7);
+  }
+  return param_2;
+}
