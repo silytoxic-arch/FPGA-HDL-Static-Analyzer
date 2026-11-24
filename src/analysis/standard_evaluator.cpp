@@ -4688,9 +4688,11 @@ void checkFlipFlopAsyncResetCoverage(
             }
             for (const auto& [name, token] : processTargets) {
                 if (!coverage.contains(name) || coverage.at(name)) continue;
+                // Native single-edge report reads the process +0x200 start
+                // token line (FUN_1800dcc60 -> FUN_1808d8dc0) and no column.
                 emit(result, "GJB10157.7.1.2", source,
-                     tokens[token].line, tokens[token].column,
-                     "触发器 " + name + " 所在时序过程没有异步复位或置位");
+                     tokens[index].line, 1,
+                     "触发器" + name + "无异步复位或置位");
             }
             index = bodyEnd - 1;
             continue;

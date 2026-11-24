@@ -6733,7 +6733,8 @@ int main() {
     check(count(result, "GJB10157.7.1.2") == 1 &&
           std::ranges::any_of(result.violations, [](const auto& violation) {
               return violation.ruleId == "GJB10157.7.1.2" &&
-                     violation.message.find("Q3") != std::string::npos;
+                     violation.message == "触发器Q3无异步复位或置位" &&
+                     violation.severity == analysis::Severity::Error;
           }),
           "R-6-2 literal RHS coverage is sticky in either assignment order and process-local");
     result = analyzeVerilog(
@@ -6793,6 +6794,19 @@ int main() {
         "endmodule\n");
     check(count(result, "GJB10157.7.1.2") == 0,
           "R-6-2 constant coverage applies to all nested concat leaves and stays set");
+    result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q);\n"
+        "  always @(posedge CLK) begin\n"
+        "\n"
+        "    Q<=D;\n"
+        "  end endmodule\n");
+    check(std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message == "触发器Q无异步复位或置位" &&
+                     violation.line == 2 && violation.column == 1 &&
+                     violation.severity == analysis::Severity::Error;
+          }),
+          "R-6-2 single-edge diagnostics use the always start line, not the assignment line");
     result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q1,Q2,Q3);\n"
         "always @(posedge ARST or posedge CLK) begin : mixed\n"

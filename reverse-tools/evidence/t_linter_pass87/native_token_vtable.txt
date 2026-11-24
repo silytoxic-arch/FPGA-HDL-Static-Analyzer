@@ -1,0 +1,27 @@
+===== antlr4::CommonToken::vftable_meta_ptr @ 180f2c358 =====
+slot 0 (+0x0): 18100aef8 <no function>
+slot 1 (+0x8): 1807e8880 FUN_1807e8880
+slot 2 (+0x10): 1807e89c0 FUN_1807e89c0
+slot 3 (+0x18): 1807c3460 FUN_1807c3460
+slot 4 (+0x20): 1807c4b70 FUN_1807c4b70
+slot 5 (+0x28): 1807fad60 FUN_1807fad60
+slot 6 (+0x30): 1807e8990 FUN_1807e8990
+slot 7 (+0x38): 1807fe290 FUN_1807fe290
+slot 8 (+0x40): 1807f64a0 FUN_1807f64a0
+slot 9 (+0x48): 1807e89b0 FUN_1807e89b0
+slot 10 (+0x50): 1807facc0 FUN_1807facc0
+slot 11 (+0x58): 1807e89a0 FUN_1807e89a0
+
+===== antlr4::CommonToken::vftable @ 180f2c360 =====
+slot 0 (+0x0): 1807e8880 FUN_1807e8880
+slot 1 (+0x8): 1807e89c0 FUN_1807e89c0
+slot 2 (+0x10): 1807c3460 FUN_1807c3460
+slot 3 (+0x18): 1807c4b70 FUN_1807c4b70
+slot 4 (+0x20): 1807fad60 FUN_1807fad60
+slot 5 (+0x28): 1807e8990 FUN_1807e8990
+slot 6 (+0x30): 1807fe290 FUN_1807fe290
+slot 7 (+0x38): 1807f64a0 FUN_1807f64a0
+slot 8 (+0x40): 1807e89b0 FUN_1807e89b0
+slot 9 (+0x48): 1807facc0 FUN_1807facc0
+slot 10 (+0x50): 1807e89a0 FUN_1807e89a0
+slot 11 (+0x58): 1807e9300 FUN_1807e9300

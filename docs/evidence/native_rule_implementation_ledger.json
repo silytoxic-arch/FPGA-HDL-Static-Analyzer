@@ -389,7 +389,8 @@
         "docs/native_rule_recovery_pass83.md",
         "docs/native_rule_recovery_pass84.md",
         "docs/native_rule_recovery_pass85.md",
-        "docs/v1_4_219_release.md",
+        "docs/native_rule_recovery_pass86.md",
+        "docs/native_rule_recovery_pass87.md",
         "docs/evidence/native_verilog_flipflop_reset_coverage_7_1_1_7_1_2_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -413,7 +414,7 @@
           "matched": true
         }
       ],
-      "limitations": "Native FUN_180561f70 sets all target states true for identifier-free RHS or any parameter/localparam RHS name; each dynamic RHS identifier inserts only its first absent target with false and breaks. Existing true keys cannot be erased. Product mirrors this state for bounded single-edge always simple targets and identifier-leaf flat/nested concatenations, using upstream-supported reverse concat child order, process-local state and module-local names. Calls and condition comparisons are excluded from coverage inference. Selected lvalues, proprietary concat lowering, local shadowing, complete multi-edge branch ownership, netlist classification, source field +0x200 meaning, aliases, hierarchy, primitives, macros and global diagnostic ordering remain unresolved. Existing bounded multi-edge reset/data target comparison is retained separately. No finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "Native FUN_180561f70 sets all target states true for identifier-free RHS or any parameter/localparam RHS name; each dynamic RHS identifier inserts only its first absent target with false and breaks. Existing true keys cannot be erased. Product mirrors this state for bounded single-edge always simple targets and identifier-leaf flat/nested concatenations, using upstream-supported reverse concat child order, process-local state and module-local names. The single-edge native report is Error with exact text 触发器<name>无异步复位或置位 and process +0x200 start-token line without column; FUN_1800dcc60 and FUN_1808d8dc0 establish that producer chain. Calls and condition comparisons are excluded from coverage inference. Selected lvalues, proprietary concat lowering, local shadowing, complete multi-edge branch ownership/location, netlist classification, aliases, hierarchy, primitives, macros and global diagnostic ordering remain unresolved. Existing bounded multi-edge reset/data target comparison is retained separately. No finding remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "A-5-5",

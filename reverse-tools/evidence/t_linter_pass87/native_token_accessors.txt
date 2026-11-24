@@ -1,0 +1,19 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1807c4b70 1807c4b70 FUN_1807c4b70 =====
+
+undefined8 FUN_1807c4b70(longlong param_1)
+
+{
+  return *(undefined8 *)(param_1 + 0x30);
+}
+
+
+
+===== 0x1807fad60 1807fad60 FUN_1807fad60 =====
+
+undefined8 FUN_1807fad60(longlong param_1)
+
+{
+  return *(undefined8 *)(param_1 + 0x38);
+}
