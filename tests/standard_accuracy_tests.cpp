@@ -6766,7 +6766,14 @@ int main() {
         {"2'sb01", 1}, {"2'sb11", 0xffffffffU}, {"1'sb1", 0xffffffffU},
         {"8'shFF", 0xffffffffU}, {"8'HFF", 255}, {"33'h100000001", 1},
         {"33'h100000000", 0}, {"4294967297", 1}, {"4294967296", 0},
-        {"4'd17", 1}, {"'0", 0}, {"'1", 1}
+        {"4'd17", 1}, {"'0", 0}, {"'1", 1},
+        {"'x", 0}, {"'z", 0}, {"'X", 0}, {"'Z", 0},
+        {"4'bx001", 1}, {"4'b1x00", 8}, {"4'sb1x00", 0xfffffff8U},
+        {"4'sbx001", 1}, {"8'hx1", 1}, {"8'h1x", 16}, {"8'hX?", 0},
+        {"8'shFx", 0xfffffff0U}, {"8'shxf", 15}, {"12'shxf", 15},
+        {"4'hxF", 15}, {"4'shxF", 0xffffffffU}, {"8'o?1", 1}, {"8'o1?", 8},
+        {"8'bZZZZ0001", 1}, {"8'b0001ZZZZ", 16}, {"8'dx", 0}, {"8'dZ", 0},
+        {"'bx1", 1}, {"33'hx00000001", 1}
     };
     for (const auto& [literal, value] : resetLiteralValues) {
         for (const auto edgeValue : {0U, 1U}) {
@@ -6791,7 +6798,7 @@ int main() {
         "always @(posedge RST or posedge CLK) begin if(RST==4'bx001) Q1<=0; if(RST==-1) Q2<=0; end\n"
         "endmodule\n");
     check(count(result, "GJB10157.7.1.3") == 0,
-          "R-6-3 does not guess unresolved four-state conversion or unary-expression folding");
+          "R-6-3 preserves known-one cache bits in unknown literals and does not guess unary folding");
     result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"

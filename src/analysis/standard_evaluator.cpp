@@ -4417,8 +4417,8 @@ void checkResetConditionEdgePolarity(
     // ev_16b894aa8c8c4e639d06ec49e60914d47df3cf0a8dc74fe48f5c0a9f0c8c24a3
     // FUN_1808e3930 builds +0xbc from exactly the low 32 constant bits,
     // sign-extending a signed vector. R-6-3 compares that integer to 0/1.
-    // Keep four-state digits unresolved until their frontend conversion is
-    // recovered; a Boolean conversion would lose definite multi-bit failures.
+    // X/Z/? become states 2/3/4, so they do not set cache bits. This mirrors
+    // the native cache, not an HDL four-state evaluation or Boolean conversion.
     const auto constantValue = [](const parser::HdlToken& token)
         -> std::optional<std::uint32_t> {
         if (token.kind != parser::HdlTokenKind::Number) return std::nullopt;
@@ -4426,6 +4426,7 @@ void checkResetConditionEdgePolarity(
         text.erase(std::remove(text.begin(), text.end(), '_'), text.end());
         if (text == "'0") return 0;
         if (text == "'1") return 1;
+        if (text == "'x" || text == "'X" || text == "'z" || text == "'Z") return 0;
         const auto quote = text.find('\'');
         std::uint32_t width = 0;
         bool signedValue = false;
@@ -4454,11 +4455,21 @@ void checkResetConditionEdgePolarity(
             }
         }
         if (digits == text.size()) return std::nullopt;
+        const auto valueBegin = digits;
         std::uint32_t value = 0;
         for (; digits < text.size(); ++digits) {
             const auto digit = text[digits];
             unsigned number;
-            if (digit >= '0' && digit <= '9') number = digit - '0';
+            if (quote != std::string::npos &&
+                (digit == 'x' || digit == 'X' || digit == 'z' || digit == 'Z' || digit == '?')) {
+                // Decimal permits a single unknown marker; mixed decimal
+                // digits/markers take the native invalid-literal path.
+                if (base == 10) {
+                    if (text.size() == valueBegin + 1) return 0;
+                    return std::nullopt;
+                }
+                number = 0;
+            } else if (digit >= '0' && digit <= '9') number = digit - '0';
             else if (digit >= 'a' && digit <= 'f') number = digit - 'a' + 10;
             else if (digit >= 'A' && digit <= 'F') number = digit - 'A' + 10;
             else return std::nullopt;
