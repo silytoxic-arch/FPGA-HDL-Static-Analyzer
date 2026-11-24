@@ -4550,6 +4550,32 @@ void checkResetConditionEdgePolarity(
         if (rhsEnd != rhs + 1) return std::nullopt;
         return std::pair{first, rhs};
     };
+    using ResetAssignments = std::map<std::string, std::size_t>;
+    std::function<std::optional<ResetAssignments>(std::size_t, std::size_t)> branchAssignments;
+    branchAssignments = [&](std::size_t begin, std::size_t end)
+        -> std::optional<ResetAssignments> {
+        const auto [first, last] = statementRange(begin, end);
+        ResetAssignments assignments;
+        for (auto at = first; at < last;) {
+            if (tokens[at].text == ";") { ++at; continue; }
+            const auto memberEnd = statementEnd(tokens, at);
+            if (memberEnd <= at || memberEnd > last) return std::nullopt;
+            if (tokens[at].text == "begin") {
+                const auto nested = branchAssignments(at, memberEnd);
+                if (!nested) return std::nullopt;
+                for (const auto& [name, rhs] : *nested)
+                    if (!assignments.emplace(name, rhs).second) return std::nullopt;
+            } else {
+                const auto assignment = simpleAssignment(at, memberEnd);
+                if (!assignment ||
+                    !assignments.emplace(tokens[assignment->first].text, assignment->second).second)
+                    return std::nullopt;
+            }
+            at = memberEnd;
+        }
+        if (assignments.empty()) return std::nullopt;
+        return assignments;
+    };
     const VerilogConstantExpressions symbols(tokens);
 
     // runRulesPrepare snapshots modules after proc_arst. The native rule
@@ -4654,15 +4680,24 @@ void checkResetConditionEdgePolarity(
                     thenEnd >= rootEnd || tokens[thenEnd].text != "else") {
                     catalogClosed = false; continue;
                 }
-                const auto thenAssignment = simpleAssignment(conditionEnd + 1, thenEnd);
-                const auto elseAssignment = simpleAssignment(thenEnd + 1, rootEnd);
-                if (!thenAssignment || !elseAssignment ||
-                    tokens[thenAssignment->first].text != tokens[elseAssignment->first].text ||
-                    !scalar(tokens[thenAssignment->first].text) ||
-                    !((constantValue(tokens[thenAssignment->second]) &&
-                       symbols.isDeclaredRuntimeIdentifier(elseAssignment->second)) ||
-                      (constantValue(tokens[elseAssignment->second]) &&
-                       symbols.isDeclaredRuntimeIdentifier(thenAssignment->second)))) {
+                const auto thenAssignments = branchAssignments(conditionEnd + 1, thenEnd);
+                const auto elseAssignments = branchAssignments(thenEnd + 1, rootEnd);
+                bool assignmentsKnown = thenAssignments && elseAssignments &&
+                    thenAssignments->size() == elseAssignments->size();
+                if (assignmentsKnown) {
+                    for (const auto& [target, rhs] : *thenAssignments) {
+                        const auto other = elseAssignments->find(target);
+                        if (!scalar(target) || other == elseAssignments->end() ||
+                            !((constantValue(tokens[rhs]) &&
+                               symbols.isDeclaredRuntimeIdentifier(other->second)) ||
+                              (constantValue(tokens[other->second]) &&
+                               symbols.isDeclaredRuntimeIdentifier(rhs)))) {
+                            assignmentsKnown = false;
+                            break;
+                        }
+                    }
+                }
+                if (!assignmentsKnown) {
                     catalogClosed = false; continue;
                 }
                 if (events.contains(tokens[condition].text)) resetNames.insert(tokens[condition].text);

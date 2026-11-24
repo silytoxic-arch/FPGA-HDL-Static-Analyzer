@@ -6933,6 +6933,50 @@ int main() {
     check(count(result, "GJB10157.7.1.3") == 0,
           "R-6-3 does not create a reset name from an unrelated scalar input root condition");
     result = analyzeVerilog(
+        "module probe(input CLK,RST,D1,D2, output reg Q1,Q2,Q3);\n"
+        "always @(posedge CLK or posedge RST) begin\n"
+        " if(RST) begin Q1<=0; Q2<=0; end\n"
+        " else begin Q2<=D2; Q1<=D1; end\n"
+        "end\n"
+        "always @(posedge CLK) if(!CLK) Q3<=0; else Q3<=D1;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 closes multi-register reset branches by target name independently of assignment order");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D1,D2, output reg Q1,Q2,Q3,Q4);\n"
+        "always @(posedge CLK or negedge RST) begin\n"
+        " if(!RST) begin Q1<=0; begin Q2<=0; end end\n"
+        " else begin ; Q2<=D2; Q1<=D1; end\n"
+        "end\n"
+        "always @(posedge CLK) if(!CLK) Q3<=0; else Q3<=D1;\n"
+        "always @(posedge RST) if(!RST) Q4<=0; else Q4<=D2;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 7;
+          }), "R-6-3 retains reset names through nested assignment blocks and empty statements");
+    result = analyzeVerilog(
+        "module probe(input CLK,R1,R2,D, output reg A,B,C,E,F,G);\n"
+        "always @(posedge CLK or posedge R1) if(R1) begin A<=0;B<=0;end else begin A<=D;B<=D;end\n"
+        "always @(posedge CLK or negedge R2) if(~R2) begin C<=0;E<=0;end else begin E<=D;C<=D;end\n"
+        "always @(posedge CLK) if(!CLK) F<=0; else F<=D;\n"
+        "always @(posedge R2) if(!R2) G<=0; else G<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 5;
+          }), "R-6-3 unions multi-register high/low reset roots while excluding their shared clock");
+    for (const auto& resetBranch : {
+             "if(RST) begin Q1<=0;Q1<=0;end else begin Q1<=D;Q2<=D;end",
+             "if(RST) begin Q1<=0;Q2<=0;end else begin Q1<=D;end"}) {
+        result = analyzeVerilog(
+            std::string("module probe(input CLK,RST,D, output reg Q1,Q2,Q3);\n") +
+            "always @(posedge CLK or posedge RST) " + resetBranch + "\n" +
+            "always @(posedge CLK) if(!CLK) Q3<=0; else Q3<=D;\nendmodule\n");
+        check(count(result, "GJB10157.7.1.3") == 1,
+              "R-6-3 does not publish a partial reset catalog with duplicate or missing targets");
+    }
+    result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"
         "endmodule\n");
