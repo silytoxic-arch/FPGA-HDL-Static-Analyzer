@@ -1,0 +1,72 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Method: offline Ghidra 12.1.4 static analysis; target was not executed
+
+OBSERVED CONSTRUCTOR
+
+FUN_180022900 registers legacy key "VLR-110051", installs
+Yosys::GJB10157_VLOG_6_2_8::vftable, registers
+"GJB10157_VLOG.6.2.8", and clears DAT_18134cd78. The latter is rule object
+0x18134cc20 + 0x158, so the default report branch is selected.
+
+OBSERVED SELECTOR
+
+Final vtable slot 1 is FUN_180564050, which delegates to FUN_1804e6df0.
+FUN_1804e6df0 rejects every root except AST_ALWAYS(0x52), then scans the
+root's immediate child vector and accepts if any child kind is
+AST_POSEDGE/AST_NEGEDGE(0x65/0x66).
+
+OBSERVED CORE PREDICATE AND MULTIPLICITY
+
+FUN_1806f8890 builds a vector of admitted relation records, recursively gathers
+AST_ASSIGN_EQ and AST_ASSIGN_LE (0x55 and 0x56) from each admitted process, and
+compares every gathered assignment target name with every asynchronous-reset
+relation name. The report construction is inside the assignment-node loop and
+has no target-name report deduplication. Therefore every matching assignment
+node independently produces a report. The initial relation producer and any
+duplicate-relation behavior remain unresolved.
+
+OBSERVED DEFAULT DIAGNOSTIC
+
+The object+0x158 zero branch performs:
+
+  FUN_1800d37b0(0x180f10888, normalized_target)
+  FUN_1801380f0(previous, 0x180f13728)
+
+GB18030 constants:
+
+  0x180f10888: d2 ec b2 bd b8 b4 ce bb 00
+    "异步复位"
+  0x180f13728: d3 c9 ca b1 d0 f2 c2 df bc ad c7 fd b6 af 00
+    "由时序逻辑驱动"
+  0x180ee83b0: be af b8 e6 00
+    "警告"
+
+Exact default surface:
+
+  异步复位<normalized-target>由时序逻辑驱动
+  severity: Warning
+  location: matching assignment AST source path and physical line; no native
+            column
+
+The alternate object+0x158 branch starts with the adjacent constant
+"避免使用内部生成异步复位", but the constructor clears this mode. It is
+retained as an observation and is not selected by the product.
+
+INFERENCE USED BY PRODUCT
+
+The product maps the absent native column to column 1, consistently with other
+recovered line-only rules. It compares parser-confirmed same-module
+asynchronous-control names with simple assignment targets in edge-triggered
+always/always_ff bodies and preserves one result per matching assignment node.
+Operators inside parenthesized expressions are excluded so Verilog <=
+comparisons are not mistaken for AST_ASSIGN_LE.
+
+UNRESOLVED
+
+The complete asynchronous-reset relation producer and relation multiplicity,
+the packaged prose's latch path (not admitted by the recovered selector),
+synthesized latch/register classification, hierarchy and library primitives,
+macros/generate, aliases, compound targets, escaped-name normalization and
+global diagnostic ordering remain unknown. A clean product result therefore
+remains ManualReviewRequired and full native equivalence is not claimed.

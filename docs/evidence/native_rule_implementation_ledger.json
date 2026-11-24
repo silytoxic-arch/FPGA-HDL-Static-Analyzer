@@ -4804,11 +4804,12 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 1 FUN_180564050 delegates to FUN_1804e6df0, which admits only AST_ALWAYS(0x52) roots with an immediate AST_POSEDGE/AST_NEGEDGE(0x65/0x66) child. FUN_1806f8890 recursively gathers AST_ASSIGN_EQ/LE(0x55/0x56) below admitted edge-triggered processes and emits when an assignment target name matches an asynchronous-reset relation. Product intersects parser-confirmed asynchronous reset/set names with same-module edge-triggered process writes.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Constructor 0x180022900 registers GJB10157_VLOG.6.2.8, clears object+0x158 and installs slot 0 FUN_1806f8890 plus slot 1 FUN_180564050. The selector delegates to FUN_1804e6df0, which admits only AST_ALWAYS(0x52) roots having an immediate AST_POSEDGE/AST_NEGEDGE(0x65/0x66) child. FUN_1806f8890 recursively gathers every AST_ASSIGN_EQ/LE(0x55/0x56) below an admitted process and emits for each assignment node whose normalized target exactly matches an asynchronous-reset relation. Default mode composes exact GB18030 text 异步复位<normalized-target>由时序逻辑驱动; severity is Warning and location is the assignment source path plus physical line with no native column. Product mirrors that bounded same-module predicate, surface and per-assignment multiplicity.",
       "predicateEvidence": [
         "ev_5134c94e891c153e7d80bced19ef594689c4eac2a62a449ed9797b5ba29af105",
         "ev_16b894aa8c8c4e639d06ec49e60914d47df3cf0a8dc74fe48f5c0a9f0c8c24a3",
+        "reverse-tools/evidence/t_linter_pass79/a5_3_internal_reset.txt",
         "docs/evidence/native_verilog_internal_sequential_reset_6_2_8_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -4832,7 +4833,7 @@
           "matched": true
         }
       ],
-      "limitations": "The complete asynchronous-reset relation producer, the packaged description's latch path, synthesized latch/register classification, hierarchy, library cells, macros, generate constructs, aliases, compound assignment targets and exact diagnostic location/multiplicity remain unresolved. Product implements only the proven same-module edge-triggered writer intersection. No finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The constructor mode, selector, assignment-node match, exact default message, Warning severity, assignment line-only location and per-assignment multiplicity are recovered and integrated. The complete asynchronous-reset relation producer and relation multiplicity, packaged prose about a latch path not admitted by this selector, synthesized latch/register classification, hierarchy, library cells, macros, generate constructs, aliases, compound assignment targets, escaped-name normalization and global diagnostic ordering remain unresolved. Product implements the definite same-module subset; unsupported forms remain unknown. A clean result remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "A-5-4",

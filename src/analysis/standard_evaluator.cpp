@@ -4320,35 +4320,83 @@ void checkRegisterOutputUsedAsClock(AnalysisResult& result,
 }
 
 void checkSequentiallyGeneratedAsyncReset(AnalysisResult& result,
-                                          const core::SourceFile& source) {
+                                          const core::SourceFile& source,
+                                          const std::vector<parser::HdlToken>& tokens) {
     // Native slot 1 wrapper FUN_180564050 delegates to FUN_1804e6df0. The
     // latter admits only AST_ALWAYS(0x52) nodes having an immediate
     // AST_POSEDGE/AST_NEGEDGE(0x65/0x66) child. FUN_1806f8890 recursively
     // gathers AST_ASSIGN_EQ/LE(0x55/0x56) below those admitted processes and
-    // emits when an assignment target name matches an asynchronous-reset
-    // relation. This is the register-generated branch of 6.2.8; the packaged
-    // combinational-reset control is deliberately outside this predicate.
+    // emits once for every matching assignment node when its normalized target
+    // name matches an asynchronous-reset relation. The native report is Warning,
+    // uses the assignment file and physical line without a column, and formats
+    // the default-mode message as "异步复位<name>由时序逻辑驱动". This is the
+    // register-generated branch of 6.2.8; the packaged combinational-reset
+    // control is deliberately outside this predicate.
     // ev_5134c94e891c153e7d80bced19ef594689c4eac2a62a449ed9797b5ba29af105
     // ev_16b894aa8c8c4e639d06ec49e60914d47df3cf0a8dc74fe48f5c0a9f0c8c24a3
-    for (const auto& unit : result.structure) {
-        if (unit.kind != parser::DesignUnitKind::VerilogModule ||
-            unit.location.file.lexically_normal() != source.path().lexically_normal()) continue;
-        std::set<std::string> asynchronousResets;
-        for (const auto& reset : unit.resets)
-            if (reset.asynchronousObserved) asynchronousResets.insert(reset.signal);
-        if (asynchronousResets.empty()) continue;
-
-        std::set<std::string> reported;
-        for (const auto& process : unit.sequentialProcesses) {
-            for (const auto& written : process.writes) {
-                if (!asynchronousResets.contains(written) || !reported.insert(written).second)
-                    continue;
-                emit(result, "GJB10157.6.2.8", source,
-                     process.location.line, process.location.column,
-                     "时钟沿过程生成的内部信号 " + written +
-                         " 被用作异步复位或置位信号");
-            }
+    for (std::size_t module = 0; module + 1 < tokens.size(); ++module) {
+        if (tokens[module].text != "module" ||
+            tokens[module + 1].kind != parser::HdlTokenKind::Identifier) continue;
+        auto moduleEnd = module + 2;
+        while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule")
+            ++moduleEnd;
+        const auto unit = std::ranges::find_if(result.structure, [&](const auto& candidate) {
+            return candidate.kind == parser::DesignUnitKind::VerilogModule &&
+                   candidate.location.file.lexically_normal() == source.path().lexically_normal() &&
+                   candidate.name == tokens[module + 1].text &&
+                   candidate.location.line == tokens[module + 1].line;
+        });
+        if (unit == result.structure.end()) {
+            module = moduleEnd;
+            continue;
         }
+        std::set<std::string> asynchronousResets;
+        for (const auto& reset : unit->resets)
+            if (reset.asynchronousObserved) asynchronousResets.insert(reset.signal);
+        if (asynchronousResets.empty()) {
+            module = moduleEnd;
+            continue;
+        }
+
+        for (auto process = module + 2; process + 3 < moduleEnd; ++process) {
+            if ((tokens[process].text != "always" && tokens[process].text != "always_ff") ||
+                tokens[process + 1].text != "@" || tokens[process + 2].text != "(") continue;
+            const auto sensitivityEnd = closeParen(tokens, process + 2);
+            if (sensitivityEnd >= moduleEnd || sensitivityEnd + 1 >= moduleEnd) continue;
+            const bool edgeTriggered = std::ranges::any_of(
+                tokens.begin() + static_cast<std::ptrdiff_t>(process + 3),
+                tokens.begin() + static_cast<std::ptrdiff_t>(sensitivityEnd),
+                [](const auto& token) {
+                    return token.text == "posedge" || token.text == "negedge";
+                });
+            if (!edgeTriggered) continue;
+            const auto bodyBegin = sensitivityEnd + 1;
+            const auto bodyEnd = statementEnd(tokens, bodyBegin);
+            if (bodyEnd <= bodyBegin || bodyEnd > moduleEnd) continue;
+            auto segment = bodyBegin;
+            int parentheses = 0;
+            for (auto at = bodyBegin; at < bodyEnd; ++at) {
+                if (tokens[at].text == "(") ++parentheses;
+                else if (tokens[at].text == ")" && parentheses > 0) --parentheses;
+                if (tokens[at].text == ";") {
+                    segment = at + 1;
+                    continue;
+                }
+                if (parentheses != 0 ||
+                    (tokens[at].text != "=" && tokens[at].text != "<=")) continue;
+                // Native target normalization for selected/compound lvalues has
+                // not been recovered; keep those paths review-required.
+                if (at > segment && tokens[at - 1].text == "]") continue;
+                const auto target = simpleAssignmentTarget(tokens, segment, at);
+                if (!target || !asynchronousResets.contains(tokens[*target].text)) continue;
+                const auto& written = tokens[*target];
+                emit(result, "GJB10157.6.2.8", source,
+                     written.line, 1,
+                     "异步复位" + written.text + "由时序逻辑驱动", written.text);
+            }
+            process = bodyEnd > process ? bodyEnd - 1 : process;
+        }
+        module = moduleEnd;
     }
 }
 
@@ -13849,7 +13897,7 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             checkNonTopVerilogHierarchyLogic(result, source, activeTokens, options);
             checkRegisteredVerilogModuleOutputs(result, source, activeTokens);
             checkRegisterOutputUsedAsClock(result, source);
-            checkSequentiallyGeneratedAsyncReset(result, source);
+            checkSequentiallyGeneratedAsyncReset(result, source, activeTokens);
             checkFlipFlopAsyncResetCoverage(result, source, activeTokens);
             checkResetConditionEdgePolarity(result, source, activeTokens);
             checkLatchMixedWithCombinationalLogic(result, source, activeTokens);

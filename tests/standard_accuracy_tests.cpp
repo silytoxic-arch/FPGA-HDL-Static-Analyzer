@@ -6638,11 +6638,43 @@ int main() {
           "6.2.3 and 6.2.7 report a combinational procedural reset driver");
     result = analyzeVerilog(
         "module probe(input CLK,A,D, output reg Q); reg my_ff_rst;\n"
-        "always @(posedge CLK) my_ff_rst<=A;\n"
+        "always @(posedge CLK) begin\n"
+        "  my_ff_rst<=A;\n"
+        "end\n"
         "always @(posedge my_ff_rst or posedge CLK) if(my_ff_rst) Q<=0; else Q<=D;\n"
         "endmodule\n");
-    check(count(result, "GJB10157.6.2.8") == 1,
-          "attachment 6.2.8 reports an edge-triggered internally generated reset");
+    const auto sequentialResetFinding = std::ranges::find_if(
+        result.violations, [](const auto& violation) {
+            return violation.ruleId == "GJB10157.6.2.8";
+        });
+    check(count(result, "GJB10157.6.2.8") == 1 &&
+          sequentialResetFinding != result.violations.end() &&
+          sequentialResetFinding->message == "异步复位my_ff_rst由时序逻辑驱动" &&
+          sequentialResetFinding->severity == analysis::Severity::Warning &&
+          sequentialResetFinding->line == 3 && sequentialResetFinding->column == 1 &&
+          sequentialResetFinding->signal == std::optional<std::string>{"my_ff_rst"},
+          "A-5-3 reproduces the native message, Warning and assignment line-only location");
+    result = analyzeVerilog(
+        "module probe(input CLK,A,B,D, output reg Q); reg my_ff_rst;\n"
+        "always @(posedge CLK) begin\n"
+        "  my_ff_rst<=A;\n"
+        "  my_ff_rst=B;\n"
+        "end\n"
+        "always @(posedge my_ff_rst or posedge CLK) if(my_ff_rst) Q<=0; else Q<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.6.2.8") == 2 &&
+          std::ranges::count_if(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.6.2.8" &&
+                     (violation.line == 3 || violation.line == 4) && violation.column == 1;
+          }) == 2,
+          "A-5-3 preserves one native report per matching blocking/nonblocking assignment node");
+    result = analyzeVerilog(
+        "module probe(input CLK,A,D, output reg Q); reg my_ff_rst;\n"
+        "always @(posedge CLK) if(my_ff_rst<=A) Q<=D;\n"
+        "always @(posedge my_ff_rst or posedge CLK) if(my_ff_rst) Q<=0; else Q<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.6.2.8") == 0,
+          "A-5-3 does not mistake a less-than-or-equal condition for AST_ASSIGN_LE");
     result = analyzeVerilog(
         "module probe(input CLK,A,B,D, output reg Q); wire my_comb_rst;\n"
         "assign my_comb_rst=A&B;\n"
