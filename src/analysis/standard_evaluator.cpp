@@ -4615,6 +4615,57 @@ void checkResetConditionEdgePolarity(
             const auto found = signalWidths.find(signal);
             return found != signalWidths.end() && found->second == 1;
         };
+        const auto oneBitLiteral = [&](std::size_t at) {
+            if (!constantValue(tokens[at])) return false;
+            auto text = tokens[at].text;
+            text.erase(std::remove(text.begin(), text.end(), '_'), text.end());
+            const auto quote = text.find('\'');
+            if (quote == std::string::npos || quote == 0) return false;
+            unsigned width = 0;
+            for (std::size_t digit = 0; digit < quote; ++digit) {
+                if (text[digit] < '0' || text[digit] > '9') return false;
+                width = width * 10U + static_cast<unsigned>(text[digit] - '0');
+                if (width > 1) return false;
+            }
+            return width == 1;
+        };
+        // Native root matching includes $eq/$eqx/$ne/$nex with a constant
+        // port and a recursively matched one-bit port. This recovers the
+        // unique scalar origin only; it does not extend diagnostic IF shapes.
+        std::function<std::optional<std::size_t>(std::size_t, std::size_t)> resetRoot;
+        resetRoot = [&](std::size_t begin, std::size_t finish)
+            -> std::optional<std::size_t> {
+            const auto [first, last] = primaryRange(begin, finish);
+            if (first >= last) return std::nullopt;
+            if (last == first + 1 &&
+                tokens[first].kind == parser::HdlTokenKind::Identifier &&
+                scalar(tokens[first].text) && symbols.isDeclaredRuntimeIdentifier(first))
+                return first;
+            int depth = 0;
+            std::optional<std::size_t> comparison;
+            for (auto at = first; at < last; ++at) {
+                const auto& word = tokens[at].text;
+                if (word == "(" || word == "[" || word == "{") ++depth;
+                else if (word == ")" || word == "]" || word == "}") --depth;
+                else if (depth == 0 &&
+                         (word == "==" || word == "!=" || word == "===" || word == "!==")) {
+                    if (comparison) return std::nullopt;
+                    comparison = at;
+                }
+            }
+            if (comparison) {
+                const auto [left, leftEnd] = primaryRange(first, *comparison);
+                const auto [right, rightEnd] = primaryRange(*comparison + 1, last);
+                if (leftEnd == left + 1 && oneBitLiteral(left))
+                    return resetRoot(right, rightEnd);
+                if (rightEnd == right + 1 && oneBitLiteral(right))
+                    return resetRoot(left, leftEnd);
+                return std::nullopt;
+            }
+            if (tokens[first].text == "!" || tokens[first].text == "~")
+                return resetRoot(first + 1, last);
+            return std::nullopt;
+        };
         bool catalogClosed = knownLeaf;
         std::set<std::string> resetNames;
         // Alias-producing declarations and elaboration can change the netlist
@@ -4672,15 +4723,9 @@ void checkResetConditionEdgePolarity(
                     catalogClosed = false; continue;
                 }
                 const auto conditionEnd = closeParen(tokens, root + 1);
-                auto [condition, conditionLast] = primaryRange(root + 2, conditionEnd);
-                if (condition < conditionLast &&
-                    (tokens[condition].text == "!" || tokens[condition].text == "~"))
-                    std::tie(condition, conditionLast) = primaryRange(condition + 1, conditionLast);
+                const auto condition = resetRoot(root + 2, conditionEnd);
                 const auto thenEnd = statementEnd(tokens, conditionEnd + 1);
-                if (conditionLast != condition + 1 ||
-                    tokens[condition].kind != parser::HdlTokenKind::Identifier ||
-                    !scalar(tokens[condition].text) || !symbols.isDeclaredRuntimeIdentifier(condition) ||
-                    thenEnd >= rootEnd || tokens[thenEnd].text != "else") {
+                if (!condition || thenEnd >= rootEnd || tokens[thenEnd].text != "else") {
                     catalogClosed = false; continue;
                 }
                 const auto thenAssignments = branchAssignments(conditionEnd + 1, thenEnd);
@@ -4711,7 +4756,7 @@ void checkResetConditionEdgePolarity(
                 if (!assignmentsKnown) {
                     catalogClosed = false; continue;
                 }
-                if (events.contains(tokens[condition].text)) resetNames.insert(tokens[condition].text);
+                if (events.contains(tokens[*condition].text)) resetNames.insert(tokens[*condition].text);
             }
             process = eventEnd;
         }

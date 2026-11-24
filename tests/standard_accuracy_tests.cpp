@@ -6,6 +6,8 @@
 #include <iostream>
 #include <ranges>
 #include <string>
+#include <tuple>
+#include <vector>
 
 // Regressions derived from the attachment's published HTML positive/negative
 // examples, plus metamorphic comment, line-break and assignment controls.
@@ -6985,6 +6987,53 @@ int main() {
           std::ranges::any_of(result.violations, [](const auto& item) {
               return item.ruleId == "GJB10157.7.1.3" && item.line == 6;
           }), "R-6-3 retains the scalar reset name across mixed-width vector target pairs");
+    for (const auto& [condition, edge, findings] :
+         std::vector<std::tuple<std::string, std::string, int>>{
+             {"RST == 1'b1", "posedge", 1},
+             {"RST == 1'b0", "negedge", 1},
+             {"1'b1 == RST", "posedge", 1},
+             {"1'b0 == RST", "negedge", 1},
+             {"RST != 1'b0", "posedge", 1},
+             {"1'b1 != RST", "negedge", 1},
+             {"RST === 1'b1", "posedge", 1},
+             {"1'b0 === RST", "negedge", 1},
+             {"RST !== 1'b0", "posedge", 1},
+             {"1'b1 !== RST", "negedge", 1},
+             {"!(RST == 1'b0)", "posedge", 1},
+             {"~(1'b0 !== RST)", "posedge", 1},
+             {"(RST == 1'b1) == 1'b1", "posedge", 1},
+             {"!!RST", "posedge", 1},
+             {"!~RST", "posedge", 1},
+             {"RST == 1'h1", "posedge", 1},
+             {"RST == 1'o1", "posedge", 1},
+             {"RST == 1'd1", "posedge", 1},
+             {"RST == 1'sb1", "posedge", 2},
+             {"RST == 1'bx", "negedge", 1},
+             {"RST === 1'bz", "negedge", 1},
+             {"RST !== 1'b?", "posedge", 1}}) {
+        result = analyzeVerilog(
+            std::string("module probe(input CLK,RST,D, output reg Q,X,Y);\n") +
+            "always @(posedge CLK or " + edge + " RST) if(" + condition +
+            ") Q<=0; else Q<=D;\n" +
+            "always @(posedge CLK) if(!CLK) X<=0; else X<=D;\n" +
+            "always @(posedge RST) if(!RST) Y<=0; else Y<=D;\nendmodule\n");
+        check(count(result, "GJB10157.7.1.3") == findings &&
+              std::ranges::none_of(result.violations, [](const auto& item) {
+                  return item.ruleId == "GJB10157.7.1.3" && item.line == 3;
+              }) && std::ranges::any_of(result.violations, [](const auto& item) {
+                  return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
+              }), "R-6-3 admits one-bit comparison reset roots without extending diagnostic condition shapes");
+    }
+    for (const auto& condition : {"RST == 1", "RST == 2'b01", "RST == D", "RST == K"}) {
+        result = analyzeVerilog(
+            std::string("module probe(input CLK,RST,D, output reg Q,X); localparam K=1'b1;\n") +
+            "always @(posedge CLK or posedge RST) if(" + condition +
+            ") Q<=0; else Q<=D;\n" +
+            "always @(posedge CLK) if(!CLK) X<=0; else X<=D;\nendmodule\n");
+        check(std::ranges::any_of(result.violations, [](const auto& item) {
+                  return item.ruleId == "GJB10157.7.1.3" && item.line == 3;
+              }), "R-6-3 keeps unproven comparison widths and nonliteral operands outside the closed catalog");
+    }
     for (const auto& dataWidth : {"[W-1:0]", "[3:0]"}) {
         result = analyzeVerilog(
             std::string("module probe #(parameter W=8)(input CLK,RST, input ") + dataWidth +
