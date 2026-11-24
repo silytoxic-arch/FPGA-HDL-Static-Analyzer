@@ -623,9 +623,9 @@ const confirmed = {
     limitations: 'Compound Boolean reset conditions, inequality and case-equality forms, aliases, macro-expanded events, generated logic, hierarchy, native diagnostic multiplicity and exact frontend lowering remain unresolved. Product reports only definite polarity contradictions for direct identifiers, !/~ identifiers and == with a one-bit 0/1 literal; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.7.1.1': {
-    predicate: 'Native FUN_18055e770 traverses synthesized relation records, gathers AST_ALWAYS(0x52) and POSEDGE/NEGEDGE(0x65/0x66) descendants, correlates event relations with individual register records, and reaches FUN_18055e020 for mixed reset coverage findings. The packaged example identifies a data-branch assignment target absent from the reset branch while another target in the same always is reset. Product compares bounded simple reset-branch and data-branch target sets.',
-    evidence: ['ev_34073b3f9020270ea752c6de0e419d56d4a95fc558a0ca1cb938eb6a6d76db53', 'docs/evidence/native_verilog_flipflop_reset_coverage_7_1_1_7_1_2_findings.md#recovered-predicate'],
-    limitations: 'The complete synthesized relation model, FUN_18055e020 diagnostic construction, bit-level target coverage, aliases, hierarchy, generated logic, macros, complex reset conditions, multiple reset branches and native diagnostic multiplicity remain unresolved. Product admits only a leading simple reset IF/ELSE with simple assignment targets; no finding remains ManualReviewRequired and full native equivalence is not claimed.'
+    predicate: 'Registration wrapper 0x180022a50 constructs GJB10157_VLOG.7.1.1; vtable slot 0 is FUN_18055e770 and slot 2 admits AST_MODULE(2). The main traverses synthesized relations, AST_ALWAYS(0x52) and AST_POSEDGE/NEGEDGE(0x65/0x66), then FUN_18055e020 locates each IF-lowered AST_CASE(0x57) final AST_DEFAULT through FUN_180560070. FUN_18055fd10 maps direct-identifier AST_ASSIGN_EQ/LE(0x55/0x56) targets below that final default, while FUN_18055f9a0 maps targets whose physical line is less than or equal to the default line. Every final-default target absent from the preceding map independently emits fixed Error, exact text always语句中混合使用有复位和无复位的触发器：触发器“<name>”未进行复位, module/design source path and the missing assignment physical line with no native column. An empty preceding map still reports every later-line default target; a same-line default assignment is already present because of the <= cutoff. Product mirrors this bounded final-ELSE comparison, line cutoff and per-target surface.',
+    evidence: ['ev_34073b3f9020270ea752c6de0e419d56d4a95fc558a0ca1cb938eb6a6d76db53', 'reverse-tools/evidence/t_linter_pass81/r6_1_async_if_assignment_coverage.txt', 'docs/evidence/native_verilog_flipflop_reset_coverage_7_1_1_7_1_2_findings.md#recovered-predicate'],
+    limitations: 'The complete synthesized relation producer, bit/range target normalization, aliases, hierarchy, primitives, generated logic, macros, compound reset conditions, malformed/proprietary AST lowering and global diagnostic ordering remain unresolved. Product uses explicit edge events plus a leading simple reset IF as the bounded relation proxy, follows source IF/ELSE-IF to its final ELSE, and handles simple assignment targets. Unsupported forms remain unknown, no finding remains ManualReviewRequired and full native equivalence is not claimed.'
   },
   'GJB10157.7.1.2': {
     predicate: 'Native FUN_180560210 consumes synthesized relation records and AST_ALWAYS(0x52), gathers AST_ASSIGN_EQ/LE(0x55/0x56), and calls FUN_180561f70 to normalize identifier targets and record Boolean reset-coverage state. Its packaged example reports both a target missing from an asynchronous reset branch and a target in a single-clock-edge process with no asynchronous control. Product implements those two bounded source-level outcomes.',
@@ -1081,6 +1081,7 @@ const integratedSourceAdapters = new Set([
   'GJB10157.6.2.3',
   'GJB10157.6.2.5',
   'GJB10157.6.2.7',
+  'GJB10157.7.1.1',
   'GJB10157.12.1',
   'GJB10157.10.1',
   'GJB10157.10.2',

@@ -4495,15 +4495,18 @@ void checkFlipFlopAsyncResetCoverage(
     const std::vector<parser::HdlToken>& tokens) {
     // GJB10157_VLOG.7.1.1 FUN_18055e770 and GJB10157_VLOG.7.1.2
     // FUN_180560210 both consume synthesized relation records and AST_ALWAYS
-    // (0x52) nodes. The former follows POSEDGE/NEGEDGE (0x65/0x66) relations
-    // back to individual register records before reporting mixed reset
-    // coverage. The latter additionally gathers ASSIGN_EQ/LE (0x55/0x56)
-    // targets; FUN_180561f70 records identifier targets and a Boolean coverage
-    // flag. The packaged examples establish the two source-level outcomes:
-    // a target written only outside the reset branch violates both rules, and
-    // every target in a single-clock-edge process violates 7.1.2.
-    // This adapter is intentionally limited to simple edge identifiers and a
-    // leading reset IF/ELSE with simple assignment targets.
+    // (0x52) nodes. For 7.1.1, FUN_18055e020 finds the final AST_DEFAULT branch
+    // of an IF/ELSE chain, builds one normalized assignment-target map from
+    // that branch and another from assignments at or before the default line,
+    // then emits once for every default-branch target absent from the earlier
+    // map. Empty earlier maps therefore report every default target. Native
+    // output is fixed Error, uses the default-branch assignment line with no
+    // column, and composes
+    // "always语句中混合使用有复位和无复位的触发器：触发器“<name>”未进行复位".
+    // 7.1.2 additionally gathers ASSIGN_EQ/LE (0x55/0x56) targets;
+    // FUN_180561f70 records identifier targets and a Boolean coverage flag.
+    // This adapter retains simple event identifiers and a leading reset IF,
+    // while 7.1.1 now mirrors final-default comparison and per-target grain.
     // ev_34073b3f9020270ea752c6de0e419d56d4a95fc558a0ca1cb938eb6a6d76db53
     // ev_a506aeee1095bbd38ec023f42e6be00489019077d677fb81e1dfed6c1e051cb2
     const auto constantBit = [](const parser::HdlToken& token) -> std::optional<bool> {
@@ -4634,13 +4637,59 @@ void checkFlipFlopAsyncResetCoverage(
         const auto dataTargets = targets(dataBegin, dataEnd);
         for (const auto& [name, token] : dataTargets) {
             if (resetTargets.contains(name)) continue;
-            if (!resetTargets.empty())
-                emit(result, "GJB10157.7.1.1", source,
-                     tokens[token].line, tokens[token].column,
-                     "同一时序过程中混合了已复位和未复位触发器，未复位目标：" + name);
             emit(result, "GJB10157.7.1.2", source,
                  tokens[token].line, tokens[token].column,
                  "触发器 " + name + " 未在异步复位或置位分支中赋初值");
+        }
+
+        // FUN_180560070 follows the same-line nested CASE representation of an
+        // else-if chain until its final AST_DEFAULT. At source level, walk the
+        // equivalent chain: every branch preceding the final else contributes
+        // to the earlier-target map, and the final else is the compared map.
+        std::map<std::string, std::size_t> earlierTargets;
+        auto chainIf = resetIf;
+        bool hasFinalDefault = false;
+        std::size_t finalDefaultLine = 0;
+        std::map<std::string, std::size_t> defaultTargets;
+        while (chainIf + 2 < bodyEnd && tokens[chainIf].text == "if" &&
+               tokens[chainIf + 1].text == "(") {
+            const auto chainConditionEnd = closeParen(tokens, chainIf + 1);
+            if (chainConditionEnd >= bodyEnd) break;
+            const auto branchBegin = chainConditionEnd + 1;
+            const auto branchEnd = statementEnd(tokens, branchBegin);
+            if (branchEnd > bodyEnd) break;
+            for (const auto& [name, token] : targets(branchBegin, branchEnd))
+                earlierTargets.try_emplace(name, token);
+            if (branchEnd >= bodyEnd || tokens[branchEnd].text != "else" ||
+                branchEnd + 1 >= bodyEnd) break;
+            const auto next = branchEnd + 1;
+            if (tokens[next].text == "if") {
+                chainIf = next;
+                continue;
+            }
+            const auto finalEnd = statementEnd(tokens, next);
+            if (finalEnd > bodyEnd) break;
+            defaultTargets = targets(next, finalEnd);
+            // FUN_18055f9a0 walks the complete IF tree and retains assignments
+            // whose physical line is <= the AST_DEFAULT line. Preserve the
+            // observable same-line cutoff by treating source `else` as the
+            // bounded default-line proxy.
+            finalDefaultLine = tokens[branchEnd].line;
+            for (const auto& [name, token] : defaultTargets) {
+                if (tokens[token].line <= finalDefaultLine)
+                    earlierTargets.try_emplace(name, token);
+            }
+            hasFinalDefault = true;
+            break;
+        }
+        if (hasFinalDefault) {
+            for (const auto& [name, token] : defaultTargets) {
+                if (earlierTargets.contains(name)) continue;
+                emit(result, "GJB10157.7.1.1", source,
+                     tokens[token].line, 1,
+                     "always语句中混合使用有复位和无复位的触发器：触发器“" +
+                         name + "”未进行复位");
+            }
         }
         index = bodyEnd - 1;
     }

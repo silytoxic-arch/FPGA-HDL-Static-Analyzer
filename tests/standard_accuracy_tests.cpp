@@ -6728,10 +6728,21 @@ int main() {
     result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q1,Q2,Q3);\n"
         "always @(posedge ARST or posedge CLK) begin : mixed\n"
-        "if(ARST) Q1<=1'b0; else begin Q1<=D; Q2<=Q1; end end\n"
+        "if(ARST) Q1<=1'b0;\n"
+        "else begin\n"
+        "Q1<=D; Q2<=Q1; end end\n"
         "always @(posedge CLK) Q3<=Q2; endmodule\n");
-    check(count(result, "GJB10157.7.1.1") == 1,
-          "attachment 7.1.1 reports the unreset target mixed with a reset target");
+    const auto mixedCoverageFinding = std::ranges::find_if(
+        result.violations, [](const auto& violation) {
+            return violation.ruleId == "GJB10157.7.1.1";
+        });
+    check(count(result, "GJB10157.7.1.1") == 1 &&
+          mixedCoverageFinding != result.violations.end() &&
+          mixedCoverageFinding->message ==
+              "always语句中混合使用有复位和无复位的触发器：触发器“Q2”未进行复位" &&
+          mixedCoverageFinding->severity == analysis::Severity::Error &&
+          mixedCoverageFinding->line == 5 && mixedCoverageFinding->column == 1,
+          "R-6-1 reproduces the native per-target text, Error and assignment line-only location");
     check(count(result, "GJB10157.7.1.2") == 2,
           "attachment 7.1.2 reports a missing reset-branch target and a no-reset process target");
     result = analyzeVerilog(
@@ -6758,6 +6769,40 @@ int main() {
     check(count(result, "GJB10157.7.1.1") == 0 &&
           count(result, "GJB10157.7.1.2") == 0,
           "7.1.1 and 7.1.2 leave compound reset guards outside the bounded predicate");
+    result = analyzeVerilog(
+        "module probe(input CLK,ARST,ASET,D, output reg Q1,Q2,Q3);\n"
+        "always @(posedge ARST or posedge ASET or posedge CLK) begin\n"
+        "if(ARST) Q1<=0; else if(ASET) Q2<=1;\n"
+        "else begin\n"
+        "Q1<=D; Q2<=Q1; Q3<=Q2; end end endmodule\n");
+    check(count(result, "GJB10157.7.1.1") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.1" && violation.line == 5 &&
+                     violation.column == 1 &&
+                     violation.message.ends_with("触发器“Q3”未进行复位");
+          }),
+          "R-6-1 compares the final default branch with every preceding else-if branch");
+    result = analyzeVerilog(
+        "module probe(input CLK,ARST,D, output reg Q1,Q2);\n"
+        "always @(posedge ARST or posedge CLK) begin\n"
+        "if(ARST) begin end\n"
+        "else begin\n"
+        "Q1<=D; Q2<=Q1; end end endmodule\n");
+    check(count(result, "GJB10157.7.1.1") == 2,
+          "R-6-1 reports every final-default target when preceding reset branches are empty");
+    result = analyzeVerilog(
+        "module probe(input CLK,ARST,D, output reg Q1,Q2);\n"
+        "always @(posedge ARST or posedge CLK) begin\n"
+        "if(ARST) Q1<=0; else Q2<=D; end endmodule\n");
+    check(count(result, "GJB10157.7.1.1") == 0,
+          "R-6-1 preserves the native <= default-line cutoff for same-line else assignments");
+    result = analyzeVerilog(
+        "module probe(input CLK,ARST,COND,D, output reg E,G);\n"
+        "always @(posedge ARST or posedge CLK) begin\n"
+        "if(ARST) begin E<=0; G<=0; end\n"
+        "else if(COND) E<=D; else begin E<=~D; G<=D; end end endmodule\n");
+    check(count(result, "GJB10157.7.1.1") == 0,
+          "R-6-1 retains complete reset coverage across a nested synchronous data condition");
     result = analyzeVerilog(
         "module probe(input A,B,X, output reg C,D); always @(A,B,X) begin\n"
         "if(X) C=A; else C=C; D=B|A; end endmodule\n");

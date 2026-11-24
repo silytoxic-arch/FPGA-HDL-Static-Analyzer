@@ -1,0 +1,76 @@
+T-Linter V3.1.4 / GJB10157_VLOG.7.1.1 / R-6-1
+Static recovery pass 81 (target was not executed)
+
+Target identity
+- T-Linter.dll SHA-256:
+  60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+- Static registration wrapper: 0x180022a50
+- Class constructor: FUN_18055ddb0 at 0x18055ddb0
+- Main: FUN_18055e770 at 0x18055e770
+- Coverage/report helper: FUN_18055e020 at 0x18055e020
+- Assignment collectors: FUN_18055fd10 and FUN_18055f9a0
+- Default finder: FUN_180560070
+- Vtable: 0x180ef1ae0
+
+Source artifacts
+- /private/tmp/tlinter-r61-pass81-main.txt
+  SHA-256 608e05a8da30202b19ebda48b0b43c233be8c2d8f7f6263e4709159281849fdd
+- /private/tmp/tlinter-r61-pass81-helpers.txt
+  SHA-256 f27e22c6c3c508cd18aca6d49bb299c3b118a33c597f0eb2c99949b589e24e69
+- /private/tmp/tlinter-r61-pass81-strings.txt
+  SHA-256 4e75dd2da9c3399156b83e6c3aea6331625be22178789c715a3a0623cd63349d
+- /private/tmp/tlinter-r61-pass81-entry.txt
+  SHA-256 7a13d419bb53024688aeb050bbae4dd028e79ea8d638071bc79f734804705c55
+- /private/tmp/tlinter-r61-pass81-vtable-bytes.txt
+  SHA-256 bda2b855c87bd8c8e2b8424995f1d221edbecead3ddc6c875d6ab0d00cc48e8e
+- examples_html/GJB10157_VLOG.7.1.1.html
+  SHA-256 9146d0df95dbdb80dec355a1968637d8133fe68f643bfde5d4365df8fd9d1ceb
+
+Observed native facts
+1. The constructor registers GJB10157_VLOG.7.1.1. Vtable slot 0 is
+   FUN_18055e770; slot 2 is FUN_1807238a0, which admits AST_MODULE(2).
+2. The main traverses synthesized relation records, gathers AST_ALWAYS(0x52),
+   recursively gathers AST_POSEDGE/AST_NEGEDGE(0x65/0x66), and calls
+   FUN_18055e020 when an event identifier is associated with the process line.
+3. FUN_18055e020 gathers IF-lowered AST_CASE(0x57) nodes and calls
+   FUN_180560070 to locate their final AST_DEFAULT branch. That helper follows
+   same-line nested AST_CASE nodes used for an else-if chain.
+4. FUN_18055fd10 recursively gathers AST_ASSIGN_EQ/LE(0x55/0x56) below the
+   final default branch. Only assignments with a direct first
+   AST_IDENTIFIER(0x13) child enter the normalized target map.
+5. FUN_18055f9a0 gathers the same assignment types under the full IF tree but
+   admits only assignment nodes whose physical line is at or before the final
+   default node line. This forms the preceding-branch target map.
+6. FUN_18055e020 iterates every final-default target. Each target absent from
+   the preceding map independently constructs a report. There is no nonempty
+   preceding-map gate, so an empty reset branch reports every default target.
+7. Native severity is the fixed lowercase string "error".
+8. Exact GB18030 diagnostic composition:
+   prefix: always语句中混合使用有复位和无复位的触发器：触发器“
+   suffix: ”未进行复位
+   The normalized missing target name is inserted between them.
+9. The report source path is copied from the current module/design record. The
+   physical line is copied from the missing default-branch assignment record;
+   no native column is supplied.
+
+Product mapping (bounded inference, not a native observation)
+- An explicit always sensitivity list with a matching leading reset IF is the
+  product-side proxy for the unrecovered synthesized relation producer.
+- Source IF/ELSE-IF branches before the final ELSE populate the preceding map;
+  the final ELSE populates the compared map. The source ELSE physical line is
+  the bounded proxy for the native AST_DEFAULT line; final-branch assignments
+  on that same line also enter the preceding map, reproducing the native <=
+  line cutoff.
+- Each distinct simple missing target emits exact Error text at its first
+  default-branch assignment physical line and product column 1.
+- Empty preceding branches now report every later-line default target. Multiple
+  preceding branches, same-line cutoff, and nested synchronous data conditions
+  have regression coverage.
+
+Unresolved
+- Complete synthesized relation production, bit/range target normalization,
+  alias and hierarchy propagation, primitives, macros, generate constructs,
+  malformed/proprietary AST lowering and global diagnostic ordering remain
+  unknown.
+- Unsupported forms remain ManualReviewRequired. Full proprietary frontend
+  equivalence remains 0/209.
