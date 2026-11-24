@@ -4588,6 +4588,7 @@ void checkResetConditionEdgePolarity(
     // Publish names only when every multi-edge process is recovered below.
     // Otherwise absence from a partial set cannot exclude a native candidate.
     std::map<std::size_t, std::set<std::string>> resetNameCatalogs;
+    std::map<std::size_t, std::set<std::string>> nonScalarEventNames;
     for (std::size_t module = 0; module < tokens.size(); ++module) {
         if (tokens[module].text != "module") continue;
         auto end = module + 1;
@@ -4685,6 +4686,13 @@ void checkResetConditionEdgePolarity(
                     if (tokens[declaration].text == "=") catalogClosed = false;
                 }
             }
+        }
+        // Level-reset roots are one bit. Formatting a slice of a wider wire
+        // includes its range, while this rule looks up the AST base name.
+        // Keep this necessary name filter separate from catalog completeness.
+        if (catalogClosed) {
+            for (const auto& [signal, width] : signalWidths)
+                if (width > 1) nonScalarEventNames[module].insert(signal);
         }
         bool multiEdge = false;
         for (auto process = module + 1; process + 3 < end; ++process) {
@@ -4790,6 +4798,12 @@ void checkResetConditionEdgePolarity(
             if (identifierRange(first, last))
                 edgePolarity[tokens[first].text] = tokens[at].text == "posedge";
             at = eventEnd;
+        }
+        if (const auto wide = nonScalarEventNames.find(resetCatalogOwner[index]);
+            wide != nonScalarEventNames.end()) {
+            std::erase_if(edgePolarity, [&](const auto& event) {
+                return wide->second.contains(event.first);
+            });
         }
         if (const auto catalog = resetNameCatalogs.find(resetCatalogOwner[index]);
             catalog != resetNameCatalogs.end()) {

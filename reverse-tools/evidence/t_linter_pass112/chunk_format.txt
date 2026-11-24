@@ -1,0 +1,81 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1800459c0 1800459c0 FUN_1800459c0 =====
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+void FUN_1800459c0(undefined8 param_1,longlong *param_2,undefined1 param_3)
+
+{
+  int iVar1;
+  longlong lVar2;
+  code *pcVar3;
+  undefined8 uVar4;
+  ulonglong uVar5;
+  undefined1 auStack_78 [32];
+  int local_58;
+  undefined8 local_48;
+  undefined4 local_40;
+  undefined4 uStack_3c;
+  undefined1 local_38 [16];
+  ulonglong local_28;
+  ulonglong local_20;
+
+  local_48 = 0xfffffffffffffffe;
+  local_20 = DAT_18131ef10 ^ (ulonglong)auStack_78;
+  lVar2 = *param_2;
+  if (lVar2 == 0) {
+    FUN_18003eaf0(local_38,param_2 + 1);
+    local_40 = 0;
+    local_58 = CONCAT31(local_58._1_3_,param_3);
+    FUN_1800418b0(param_1,&local_40,(int)param_2[4],*(undefined4 *)((longlong)param_2 + 0x24));
+    FUN_1800400b0(local_38);
+  }
+  else {
+    iVar1 = (int)param_2[4];
+    if ((iVar1 == *(int *)(lVar2 + 0x4c)) && (*(int *)((longlong)param_2 + 0x24) == 0)) {
+      if ((ulonglong)(DAT_18137dd40 - DAT_18137dd38 >> 3) <=
+          (ulonglong)(longlong)*(int *)(lVar2 + 0x48)) {
+        std::_Xout_of_range("invalid vector<T> subscript");
+        pcVar3 = (code *)swi(3);
+        (*pcVar3)();
+        return;
+      }
+      uVar4 = FUN_1809ca4f0(&local_40,&DAT_180de4808,
+                            *(undefined8 *)(DAT_18137dd38 + (longlong)*(int *)(lVar2 + 0x48) * 8));
+      FUN_18003de50(param_1,uVar4);
+    }
+    else {
+      uVar5 = (ulonglong)*(int *)(lVar2 + 0x48);
+      if (iVar1 == 1) {
+        if ((ulonglong)(DAT_18137dd40 - DAT_18137dd38 >> 3) <= uVar5) {
+          std::_Xout_of_range("invalid vector<T> subscript");
+          pcVar3 = (code *)swi(3);
+          (*pcVar3)();
+          return;
+        }
+        uVar4 = FUN_1809ca4f0(&local_40,"%s [%d]",*(undefined8 *)(DAT_18137dd38 + uVar5 * 8),
+                              *(undefined4 *)((longlong)param_2 + 0x24));
+        FUN_18003de50(param_1,uVar4);
+      }
+      else {
+        if ((ulonglong)(DAT_18137dd40 - DAT_18137dd38 >> 3) <= uVar5) {
+          std::_Xout_of_range("invalid vector<T> subscript");
+          pcVar3 = (code *)swi(3);
+          (*pcVar3)();
+          return;
+        }
+        local_58 = *(int *)((longlong)param_2 + 0x24);
+        uVar4 = FUN_1809ca4f0(&local_40,"%s [%d:%d]",*(undefined8 *)(DAT_18137dd38 + uVar5 * 8),
+                              iVar1 + -1 + local_58);
+        FUN_18003de50(param_1,uVar4);
+      }
+    }
+    if (0xf < local_28) {
+      FUN_1800409e0(&local_40,CONCAT44(uStack_3c,local_40),local_28 + 1);
+    }
+  }
+  return;
+}
+
+

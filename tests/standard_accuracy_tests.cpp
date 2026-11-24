@@ -6801,8 +6801,9 @@ int main() {
         "endmodule\n");
     check(count(result, "GJB10157.7.1.3") == 0,
           "R-6-3 preserves known-one cache bits in unknown literals and does not guess unary folding");
-    // These compare the recovered AST shapes; vector selects retain their
-    // base identifier name in this native rule, independently of bit safety.
+    // Establish an admitted reset name in a separate multi-edge process.
+    // The condition under test is in a single-edge process, so its shape
+    // does not have to establish its own asynchronous-reset catalog entry.
     const std::pair<const char*, bool> resetPrimaryConditions[] = {
         {"!(RST)", true}, {"!(((RST)))", true},
         {"(RST) == (1'b0)", true}, {"((1'b0)) == (((RST)))", true},
@@ -6813,13 +6814,13 @@ int main() {
         {"!(RST == 1)", false}, {"RST == (EN ? 0 : 1)", false},
         {"(RST && EN) == 0", false}, {"((1?0:1 : RST :0)) == 0", true},
         {"((0 : (EN ? RST : EN) : 1))", false}, {"((RST ==0) && EN)", false},
-        {"((1 : !((RST)) : 0))", true}, {"((1:~RST:0))", false},
-        {"!RST[0]", true}, {"(RST[0]) == (0)", true}, {"(0)==(RST[1])", true}
+        {"((1 : !((RST)) : 0))", true}, {"((1:~RST:0))", false}
     };
     for (const auto& [condition, expected] : resetPrimaryConditions) {
         const auto primaryResult = analyzeVerilog(
-            std::string("module probe(input CLK,EN,D, input [1:0] RST, output reg Q);\n") +
-            "always @(posedge RST or posedge CLK) if(" + condition + ") Q<=0; else Q<=D;\n"
+            std::string("module probe(input CLK,EN,D,RST, output reg Q,PRIME);\n") +
+            "always @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n" +
+            "always @(posedge RST) if(" + condition + ") Q<=0; else Q<=D;\n"
             "endmodule\n");
         const auto context = std::string("R-6-3 preserves native primary/typical expression: ") + condition;
         check(count(primaryResult, "GJB10157.7.1.3") == (expected ? 1 : 0), context.c_str());
@@ -6832,12 +6833,38 @@ int main() {
     };
     for (const auto& [event, expected] : resetEventExpressions) {
         const auto eventResult = analyzeVerilog(
-            std::string("module probe(input CLK,EN,D, input [1:0] RST, output reg Q);\n") +
-            "always @(posedge " + event + " or posedge CLK) if(!RST) Q<=0; else Q<=D;\n"
+            std::string("module probe(input CLK,EN,D, input [0:0] RST, output reg Q,PRIME);\n") +
+            "always @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n" +
+            "always @(posedge " + event + ") if(!RST) Q<=0; else Q<=D;\n"
             "endmodule\n");
         const auto context = std::string("R-6-3 admits only native identifier event nodes: ") + event;
         check(count(eventResult, "GJB10157.7.1.3") == (expected ? 1 : 0), context.c_str());
     }
+    for (const auto& event : {"RST", "RST[0]", "RST[1]", "RST[1:0]"}) {
+        for (const auto& condition : {"!RST", "!RST[0]", "RST[0]==0", "0==RST[1]"}) {
+            result = analyzeVerilog(
+                std::string("module probe(input CLK,D, input [1:0] RST, output reg Q,PRIME);\n") +
+                "always @(posedge CLK or posedge RST[0]) if(RST[0]) PRIME<=0; else PRIME<=D;\n" +
+                "always @(posedge " + event + ") if(" + condition + ") Q<=0; else Q<=D;\n" +
+                "endmodule\n");
+            check(count(result, "GJB10157.7.1.3") == 0 &&
+                  std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+                      return item.clauseId == "GJB10157.7.1.3" &&
+                             item.state == analysis::StandardRuleState::ManualReviewRequired;
+                  }),
+                  "R-6-3 does not confuse formatted vector slice reset names with AST base names");
+        }
+    }
+    result = analyzeVerilog(
+        "module probe(input CLK,D,RST, input [1:0] BUS_RST, output reg Q,P,X);\n"
+        "always @(posedge CLK or posedge RST) if(RST) P<=0; else P<=D;\n"
+        "always @(posedge CLK or posedge BUS_RST[0]) if(BUS_RST[0]) Q<=0; else Q<=D;\n"
+        "always @(posedge RST) if(!RST) X<=0; else X<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
+          }), "R-6-3 vector-name filtering preserves an independent scalar reset diagnostic");
     result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q);\n"
         "always @(posedge (RST) or posedge CLK) begin\n"
