@@ -6725,6 +6725,40 @@ int main() {
         "endmodule\n");
     check(count(result, "GJB10157.7.1.3") == 2,
           "R-6-3 retains independent contradictory IFs on the same physical line");
+    check(std::ranges::all_of(result.violations, [](const auto& item) {
+              return item.ruleId != "GJB10157.7.1.3" || item.column == 1;
+          }), "R-6-3 maps the native line-only report to product column one");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2,Q3,Q4);\n"
+        "always @(posedge RST or posedge CLK) begin\n"
+        "  if (\n"
+        "    RST ==\n"
+        "    1'b0) Q1<=0;\n"
+        "end\n"
+        "always @(posedge RST or posedge CLK) begin\n"
+        "  if (\n"
+        "    1'b0 ==\n"
+        "    RST) Q2<=0;\n"
+        "end\n"
+        "always @(negedge RST or posedge CLK) begin\n"
+        "  if (\n"
+        "    RST) Q3<=0;\n"
+        "end\n"
+        "always @(posedge RST or posedge CLK) begin\n"
+        "  if (\n"
+        "    !\n"
+        "    RST) Q4<=0;\n"
+        "end\n"
+        "endmodule\n");
+    std::vector<std::size_t> resetConditionLines;
+    for (const auto& item : result.violations) {
+        if (item.ruleId == "GJB10157.7.1.3") {
+            resetConditionLines.push_back(item.line);
+            check(item.column == 1, "R-6-3 multiline report has no invented native column");
+        }
+    }
+    check(resetConditionLines == std::vector<std::size_t>{5, 9, 14, 18},
+          "R-6-3 locates equality constants, plain identifier and logical NOT on their own lines");
     result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"

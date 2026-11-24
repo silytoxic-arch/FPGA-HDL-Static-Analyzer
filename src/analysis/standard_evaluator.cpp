@@ -4459,6 +4459,7 @@ void checkResetConditionEdgePolarity(
 
             std::string signal;
             std::optional<bool> conditionPolarity;
+            auto diagnosticAt = first;
             if (last == first + 1 &&
                 tokens[first].kind == parser::HdlTokenKind::Identifier) {
                 signal = tokens[first].text;
@@ -4472,6 +4473,7 @@ void checkResetConditionEdgePolarity(
                 if (tokens[first].kind == parser::HdlTokenKind::Identifier) {
                     signal = tokens[first].text;
                     conditionPolarity = constantBit(tokens[first + 2]);
+                    diagnosticAt = first + 2;
                 } else if (tokens[first + 2].kind == parser::HdlTokenKind::Identifier) {
                     signal = tokens[first + 2].text;
                     conditionPolarity = constantBit(tokens[first]);
@@ -4480,8 +4482,11 @@ void checkResetConditionEdgePolarity(
             const auto edge = edgePolarity.find(signal);
             if (!conditionPolarity || edge == edgePolarity.end() ||
                 *conditionPolarity == edge->second) continue;
-            emit(result, "GJB10157.7.1.3", source, tokens[at].line,
-                 tokens[at].column,
+            // Native equality branches copy the constant child's +0x210;
+            // direct/unary branches copy the condition node's +0x210.
+            // The native report has no column field.
+            emit(result, "GJB10157.7.1.3", source, tokens[diagnosticAt].line,
+                 1,
                  "复位信号的触发条件与进入条件必须一致.");
             result.violations.back().severity = Severity::Warning;
         }
