@@ -6808,6 +6808,48 @@ int main() {
           }),
           "R-6-2 single-edge diagnostics use the always start line, not the assignment line");
     result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2,Q3);\n"
+        "always @(posedge CLK or posedge RST) begin\n"
+        "if(RST) Q1<=0;\n"
+        "else begin Q1<=D; Q2<=1; Q3<=D; end end endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 2 &&
+          std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message == "触发器Q3无初值" &&
+                     violation.line == 3 && violation.column == 1 &&
+                     violation.severity == analysis::Severity::Error;
+          }),
+          "R-6-2 multi-edge state includes constant data assignments and reports at candidate IF");
+    result = analyzeVerilog(
+        "module probe #(parameter P=1)(input CLK,RST,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK or posedge RST) begin\n"
+        "if(RST) Q1<=0; else begin Q1<=D; Q2<=P+D; end end\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 0,
+          "R-6-2 multi-edge candidates share native any-parameter RHS state semantics");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,EN,D, output reg Q1,Q2,Q3,Q4);\n"
+        "always @(posedge CLK or posedge RST) begin\n"
+        "if(RST) Q1<=0; else Q2<=D;\n"
+        "if(EN) Q2<=0;\n"
+        "if(EN) Q3<=D;\n"
+        "begin : extra if(EN) Q4<=D; end\n"
+        "end endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 5 &&
+          std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message == "触发器Q2无初值" && violation.line == 3;
+          }),
+          "R-6-2 direct candidates occur twice and an extra-block candidate once with independent maps");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,EN,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK or posedge RST) begin\n"
+        "if(RST) Q1<=0; else Q1<=D;\n"
+        "begin begin if(EN) Q2<=D; end end\n"
+        "end endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 0,
+          "R-6-2 candidate collector stops beyond two block ancestors");
+    result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q1,Q2,Q3);\n"
         "always @(posedge ARST or posedge CLK) begin : mixed\n"
         "if(ARST) Q1<=1'b0;\n"
@@ -6825,7 +6867,7 @@ int main() {
           mixedCoverageFinding->severity == analysis::Severity::Error &&
           mixedCoverageFinding->line == 5 && mixedCoverageFinding->column == 1,
           "R-6-1 reproduces the native per-target text, Error and assignment line-only location");
-    check(count(result, "GJB10157.7.1.2") == 2,
+    check(count(result, "GJB10157.7.1.2") == 3,
           "attachment 7.1.2 reports a missing reset-branch target and a no-reset process target");
     result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q1,Q2,Q3);\n"

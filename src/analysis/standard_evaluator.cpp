@@ -4589,7 +4589,8 @@ void checkFlipFlopAsyncResetCoverage(
         const auto bodyEnd = statementEnd(tokens, bodyStart);
         if (bodyEnd <= bodyStart || bodyEnd > tokens.size()) continue;
 
-        if (edges.size() == 1) {
+        const auto checkNativeCoverage = [&](std::size_t bodyStart, std::size_t bodyEnd,
+                                              bool singleEdge) {
             // Native FUN_180561f70 writes true for a target with an
             // identifier-free RHS. Dynamic RHS inserts false only if the key
             // is absent, so later dynamic assignments cannot erase true.
@@ -4691,9 +4692,12 @@ void checkFlipFlopAsyncResetCoverage(
                 // Native single-edge report reads the process +0x200 start
                 // token line (FUN_1800dcc60 -> FUN_1808d8dc0) and no column.
                 emit(result, "GJB10157.7.1.2", source,
-                     tokens[index].line, 1,
-                     "触发器" + name + "无异步复位或置位");
+                     singleEdge ? tokens[index].line : tokens[bodyStart].line, 1,
+                     "触发器" + name + (singleEdge ? "无异步复位或置位" : "无初值"));
             }
+        };
+        if (edges.size() == 1) {
+            checkNativeCoverage(bodyStart, bodyEnd, true);
             index = bodyEnd - 1;
             continue;
         }
@@ -4733,14 +4737,34 @@ void checkFlipFlopAsyncResetCoverage(
             index = bodyEnd - 1;
             continue;
         }
-        const auto resetTargets = targets(resetBegin, resetEnd);
-        const auto dataTargets = targets(dataBegin, dataEnd);
-        for (const auto& [name, token] : dataTargets) {
-            if (resetTargets.contains(name)) continue;
-            emit(result, "GJB10157.7.1.2", source,
-                 tokens[token].line, tokens[token].column,
-                 "触发器 " + name + " 未在异步复位或置位分支中赋初值");
-        }
+        // FUN_1804f33d0 admits AST_CASE roots under ALWAYS->BLOCK and
+        // ALWAYS->BLOCK->BLOCK. Each root gets its own state map; never
+        // descend through an admitted IF/CASE to create overlapping roots.
+        std::function<void(std::size_t, std::size_t, unsigned, unsigned)> checkCandidates =
+            [&](std::size_t begin, std::size_t end, unsigned blocks, unsigned maxBlocks) {
+                if (begin >= end) return;
+                if (tokens[begin].text == "begin") {
+                    if (blocks >= maxBlocks) return;
+                    auto child = begin + 1;
+                    if (child + 1 < end && tokens[child].text == ":" &&
+                        tokens[child + 1].kind == parser::HdlTokenKind::Identifier) child += 2;
+                    while (child < end && tokens[child].text != "end") {
+                        const auto next = statementEnd(tokens, child);
+                        if (next <= child || next > end) break;
+                        checkCandidates(child, next, blocks + 1, maxBlocks);
+                        child = next;
+                    }
+                    return;
+                }
+                const auto& kind = tokens[begin].text;
+                if (kind == "if" || kind == "case" || kind == "casex" || kind == "casez")
+                    checkNativeCoverage(begin, end, false);
+            };
+        // The native output vector appends without deduplication: the first
+        // pass permits two block ancestors, the second permits one. Direct
+        // candidates therefore appear in both passes, preserving reports.
+        checkCandidates(bodyStart, bodyEnd, 0, 2);
+        checkCandidates(bodyStart, bodyEnd, 0, 1);
 
         // FUN_180560070 follows the same-line nested CASE representation of an
         // else-if chain until its final AST_DEFAULT. At source level, walk the
@@ -17233,7 +17257,9 @@ void applyStandardProfile(AnalysisResult& result,
         [](const auto& left, const auto& right) {
             // These native rules emit once per admitted AST object/pair. Their
             // byte-for-byte identical diagnostics therefore carry multiplicity.
-            if ((left.ruleId == "GJB10157.5.1.4" &&
+            if ((left.ruleId == "GJB10157.7.1.2" &&
+                 right.ruleId == "GJB10157.7.1.2") ||
+                (left.ruleId == "GJB10157.5.1.4" &&
                  right.ruleId == "GJB10157.5.1.4") ||
                 (left.ruleId == "GJB10157.5.1.7" &&
                  right.ruleId == "GJB10157.5.1.7") ||
