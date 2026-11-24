@@ -6726,6 +6726,40 @@ int main() {
           resetPolarityAssessment->state == analysis::StandardRuleState::ManualReviewRequired,
           "bounded 7.1.3 no finding remains manual review rather than certified compliance");
     result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q1,Q2,Q3);\n"
+        "always @(posedge CLK) begin Q1<=0; Q1<=D; end\n"
+        "always @(posedge CLK) begin Q2<=D; Q2<=1; end\n"
+        "always @(posedge CLK) Q3<=D; endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message.find("Q3") != std::string::npos;
+          }),
+          "R-6-2 literal RHS coverage is sticky in either assignment order and process-local");
+    result = analyzeVerilog(
+        "module probe #(parameter P=1)(input CLK,D, output reg Q1,Q2,Q3,Q4);\n"
+        "localparam L=0;\n"
+        "always @(posedge CLK) begin Q1<=P+D; Q2<=D+L; Q3<=1+2; Q4<=D; end\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message.find("Q4") != std::string::npos;
+          }),
+          "R-6-2 follows native any-parameter RHS and identifier-free expression state updates");
+    result = analyzeVerilog(
+        "module first #(parameter P=1)(input CLK,D, output reg Q);\n"
+        "always @(posedge CLK) Q<=P; endmodule\n"
+        "module second(input CLK,P, output reg Q);\n"
+        "always @(posedge CLK) Q<=P; endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 1,
+          "R-6-2 parameter names remain local to their owning module");
+    result = analyzeVerilog(
+        "module probe #(parameter P=1)(input CLK,D, output reg Q);\n"
+        "always @(posedge CLK) if(Q<=P) Q<=D; endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 1,
+          "R-6-2 comparison conditions do not initialize assignment targets");
+    result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q1,Q2,Q3);\n"
         "always @(posedge ARST or posedge CLK) begin : mixed\n"
         "if(ARST) Q1<=1'b0;\n"

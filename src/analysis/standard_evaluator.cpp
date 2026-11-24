@@ -4590,10 +4590,67 @@ void checkFlipFlopAsyncResetCoverage(
         if (bodyEnd <= bodyStart || bodyEnd > tokens.size()) continue;
 
         if (edges.size() == 1) {
-            for (const auto& [name, token] : targets(bodyStart, bodyEnd))
+            // Native FUN_180561f70 writes true for a target with an
+            // identifier-free RHS. Dynamic RHS inserts false only if the key
+            // is absent, so later dynamic assignments cannot erase true.
+            // A parameter/localparam identifier anywhere in the RHS also
+            // writes true, even when other RHS names are dynamic.
+            const auto processTargets = targets(bodyStart, bodyEnd);
+            std::size_t moduleBegin = index;
+            while (moduleBegin > 0 && tokens[moduleBegin].text != "module") --moduleBegin;
+            auto moduleEnd = index;
+            while (moduleEnd < tokens.size() && tokens[moduleEnd].text != "endmodule") ++moduleEnd;
+            std::set<std::string> parameterNames;
+            for (auto declaration = moduleBegin; declaration < moduleEnd; ++declaration) {
+                if (tokens[declaration].text != "parameter" &&
+                    tokens[declaration].text != "localparam") continue;
+                auto segment = declaration + 1;
+                int depth = 0;
+                for (auto cursor = segment; cursor < moduleEnd; ++cursor) {
+                    const auto& text = tokens[cursor].text;
+                    if (depth == 0 && text == "=") {
+                        if (cursor > segment &&
+                            tokens[cursor - 1].kind == parser::HdlTokenKind::Identifier)
+                            parameterNames.insert(tokens[cursor - 1].text);
+                    }
+                    if (depth == 0 && (text == ";" || text == ")")) break;
+                    if (depth == 0 && text == ",") segment = cursor + 1;
+                    if (text == "(" || text == "[" || text == "{") ++depth;
+                    else if (text == ")" || text == "]" || text == "}") --depth;
+                }
+            }
+            std::set<std::string> literalInitialized;
+            int conditionDepth = 0;
+            for (auto op = bodyStart; op + 2 < bodyEnd; ++op) {
+                if (tokens[op].text == "(") ++conditionDepth;
+                else if (tokens[op].text == ")") --conditionDepth;
+                if (conditionDepth != 0) continue;
+                if (tokens[op].text != "=" && tokens[op].text != "<=") continue;
+                auto rhsEnd = op + 1;
+                while (rhsEnd < bodyEnd && tokens[rhsEnd].text != ";") ++rhsEnd;
+                if (rhsEnd == bodyEnd) continue;
+                bool hasIdentifier = false, hasParameter = false, supported = true;
+                for (auto rhs = op + 1; rhs < rhsEnd; ++rhs) {
+                    const auto& token = tokens[rhs];
+                    if (token.kind == parser::HdlTokenKind::Identifier) {
+                        hasIdentifier = true;
+                        hasParameter |= parameterNames.contains(token.text);
+                        if (rhs + 1 < rhsEnd && tokens[rhs + 1].text == "(") supported = false;
+                    }
+                    if (token.text.starts_with("$") || token.text == ";" ||
+                        token.text == "begin" || token.text == "end") supported = false;
+                }
+                if (!supported || (hasIdentifier && !hasParameter)) continue;
+                const auto target = simpleAssignmentTarget(tokens, bodyStart, op);
+                if (target && processTargets.contains(tokens[*target].text))
+                    literalInitialized.insert(tokens[*target].text);
+            }
+            for (const auto& [name, token] : processTargets) {
+                if (literalInitialized.contains(name)) continue;
                 emit(result, "GJB10157.7.1.2", source,
                      tokens[token].line, tokens[token].column,
                      "触发器 " + name + " 所在时序过程没有异步复位或置位");
+            }
             index = bodyEnd - 1;
             continue;
         }

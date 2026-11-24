@@ -385,6 +385,9 @@
       "predicate": "Native FUN_180560210 consumes synthesized relation records and AST_ALWAYS(0x52), gathers AST_ASSIGN_EQ/LE(0x55/0x56), and calls FUN_180561f70 to normalize identifier targets and record Boolean reset-coverage state. Its packaged example reports both a target missing from an asynchronous reset branch and a target in a single-clock-edge process with no asynchronous control. Product implements those two bounded source-level outcomes.",
       "predicateEvidence": [
         "ev_a506aeee1095bbd38ec023f42e6be00489019077d677fb81e1dfed6c1e051cb2",
+        "docs/native_rule_recovery_pass82.md",
+        "docs/native_rule_recovery_pass83.md",
+        "docs/native_rule_recovery_pass84.md",
         "docs/evidence/native_verilog_flipflop_reset_coverage_7_1_1_7_1_2_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -408,7 +411,7 @@
           "matched": true
         }
       ],
-      "limitations": "The complete netlist/register classification, relation-name normalization, bit-level target coverage, aliases, hierarchy, primitive/library registers, initialization constructs, multiple/compound reset branches, macros and native diagnostic multiplicity remain unresolved. Product handles simple single-edge always targets and leading simple asynchronous reset IF/ELSE target differences; no finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "Native FUN_180561f70 sets target state true for identifier-free RHS or any RHS identifier present in the module parameter/localparam vector. Dynamic RHS only inserts absent false keys and cannot erase true. Product now mirrors this sticky state for bounded single-edge always simple targets, with process-local state and module-local names, excluding calls and condition comparisons. Concatenated targets, local shadowing, complete multi-edge branch ownership, netlist/register classification, source field +0x200 meaning, aliases, hierarchy, primitives, macros and diagnostic multiplicity remain unresolved. Existing bounded multi-edge reset/data target comparison is retained separately. No finding remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "A-5-5",
