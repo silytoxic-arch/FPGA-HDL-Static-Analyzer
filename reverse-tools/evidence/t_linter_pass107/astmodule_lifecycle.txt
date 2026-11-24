@@ -1,0 +1,61 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1808d9490 1808d9490 FUN_1808d9490 =====
+
+void FUN_1808d9490(undefined8 *param_1)
+
+{
+  undefined8 *puVar1;
+  void *pvVar2;
+  undefined1 local_res18 [8];
+  undefined8 uVar3;
+
+  uVar3 = 0xfffffffffffffffe;
+  *param_1 = Yosys::AST::AstModule::vftable;
+  pvVar2 = (void *)param_1[0x5b];
+  if (pvVar2 != (void *)0x0) {
+    FUN_1808d9570(pvVar2);
+    free(pvVar2);
+  }
+  pvVar2 = (void *)param_1[0x5c];
+  if (pvVar2 != (void *)0x0) {
+    FUN_1808d9570(pvVar2);
+    free(pvVar2);
+  }
+  puVar1 = param_1 + 0x61;
+  FUN_1801a1220(puVar1,local_res18,*(undefined8 *)*puVar1,(undefined8 *)*puVar1,uVar3);
+  free((void *)*puVar1);
+  puVar1 = param_1 + 0x5f;
+  FUN_1801a1220(puVar1,local_res18,*(undefined8 *)*puVar1,(undefined8 *)*puVar1);
+  free((void *)*puVar1);
+  FUN_1809988e0(param_1);
+  return;
+}
+
+
+
+===== 0x1808d8d30 1808d8d30 FUN_1808d8d30 =====
+
+undefined8 * FUN_1808d8d30(undefined8 *param_1)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+
+  FUN_180996140();
+  *param_1 = Yosys::AST::AstModule::vftable;
+  *(undefined1 *)((longlong)param_1 + 0x2f3) = 0;
+  puVar1 = param_1 + 0x5f;
+  *puVar1 = 0;
+  param_1[0x60] = 0;
+  uVar2 = FUN_18019d200(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0x61;
+  *puVar1 = 0;
+  param_1[0x62] = 0;
+  uVar2 = FUN_18019d200(puVar1);
+  *puVar1 = uVar2;
+  return param_1;
+}
+
+

@@ -1,0 +1,53 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+180006349 180003960 FUN_180003960 :: LEA RCX,[RBP + 0x2f30]
+1801da87d 1801d9fc0 FUN_1801d9fc0 :: MOVZX EAX,byte ptr [RBP + 0x2f3]
+1801da957 1801d9fc0 FUN_1801d9fc0 :: MOVZX EAX,byte ptr [RBP + 0x2f3]
+180242f42 180242db0 FUN_180242db0 :: CMP byte ptr [RBX + 0x2f3],0x0
+180242f4f 180242db0 FUN_180242db0 :: CMP byte ptr [RBX + 0x2f3],0x0
+180538311 180535e60 FUN_180535e60 :: LEA RCX,[RBP + 0x2f30]
+1805d2b56 1805d2930 FUN_1805d2930 :: CMP byte ptr [RAX + 0x2f3],0x0
+180610dc2 180610ad0 FUN_180610ad0 :: CMP byte ptr [RAX + 0x2f3],CL
+180615b7a 180615b20 FUN_180615b20 :: CMP byte ptr [RDI + 0x2f3],0x0
+1806182e6 180618030 FUN_180618030 :: CMP byte ptr [RAX + 0x2f3],0x0
+18061f8b9 18061f360 FUN_18061f360 :: CMP byte ptr [RDI + 0x2f3],0x0
+1806266b7 1806260e0 runRulesPhase2Prepare :: CMP byte ptr [RAX + 0x2f3],0x0
+180626bfc 180626820 runRulesPhase3Prepare :: CMP byte ptr [R14 + 0x2f3],0x0
+1806270fc 180626d20 runRulesPhase4Prepare :: CMP byte ptr [R14 + 0x2f3],0x0
+180627ce9 180627340 runRulesPrepare :: CMP byte ptr [RDI + 0x2f3],0x0
+180628089 180627340 runRulesPrepare :: CMP byte ptr [RAX + 0x2f3],0x0
+18062827a 180627340 runRulesPrepare :: CMP byte ptr [RBX + 0x2f3],0x0
+18062843a 180627340 runRulesPrepare :: CMP byte ptr [RBX + 0x2f3],0x0
+18062862b 180627340 runRulesPrepare :: CMP byte ptr [RBX + 0x2f3],0x0
+1806287eb 180627340 runRulesPrepare :: CMP byte ptr [RBX + 0x2f3],0x0
+180629729 180629590 setTopFile :: CMP byte ptr [R13 + 0x2f3],AL
+18062998b 1806298c0 setTopModule :: CMP byte ptr [R14 + 0x2f3],0x0
+18062d17d 18062cf50 FUN_18062cf50 :: CMP byte ptr [RDI + 0x2f3],0x0
+180645d5a 1806457e0 FUN_1806457e0 :: CMP byte ptr [R13 + 0x2f3],0x1
+18066f0ca 18066e7e0 FUN_18066e7e0 :: CMP byte ptr [RDI + 0x2f3],R11B
+18066f208 18066e7e0 FUN_18066e7e0 :: CMP byte ptr [RDI + 0x2f3],BL
+18066f9f8 18066e7e0 FUN_18066e7e0 :: CMP byte ptr [RAX + 0x2f3],0x0
+18066fac0 18066e7e0 FUN_18066e7e0 :: CMP byte ptr [RAX + 0x2f3],0x0
+18069107f 180690420 FUN_180690420 :: CMP byte ptr [RAX + 0x2f3],CL
+180692eb2 180692be0 FUN_180692be0 :: CMP byte ptr [RAX + 0x2f3],CL
+1807382af 180737650 FUN_180737650 :: CMP byte ptr [RAX + 0x2f3],CL
+18073a0e2 180739e10 FUN_180739e10 :: CMP byte ptr [RAX + 0x2f3],CL
+18074de4c 18074dd60 FUN_18074dd60 :: CMP byte ptr [RBX + 0x2f3],0x0
+180750b7f 180750ab0 FUN_180750ab0 :: CMP byte ptr [R14 + 0x2f3],0x0
+180784bc6 1807849b0 FUN_1807849b0 :: CMP byte ptr [RAX + 0x2f3],0x0
+180789be2 180789680 FUN_180789680 :: CMP byte ptr [RAX + 0x2f3],BL
+1808d8d60 1808d8d30 FUN_1808d8d30 :: MOV byte ptr [RDI + 0x2f3],0x0
+1808db96e 1808db820 FUN_1808db820 :: MOVZX EAX,byte ptr [RDI + 0x2f3]
+1808db975 1808db820 FUN_1808db820 :: MOV byte ptr [RBX + 0x2f3],AL
+1808dc3f8 1808dbd60 FUN_1808dbd60 :: CMP byte ptr [RAX + 0x2f3],R8B
+1808dcb67 1808dca30 FUN_1808dca30 :: CMP byte ptr [R14 + 0x2f3],R8B
+1808dcea9 1808dcc60 FUN_1808dcc60 :: CMP byte ptr [RDI + 0x2f3],0x0
+1808dddbb 1808dcc60 FUN_1808dcc60 :: CMP byte ptr [RDI + 0x2f3],BL
+1808e28d6 1808e1d10 FUN_1808e1d10 :: MOVZX EAX,byte ptr [RDI + 0x2f3]
+1808e8287 1808e81d0 FUN_1808e81d0 :: MOV byte ptr [RSI + 0x2f3],0x1
+1808e97aa 1808e94b0 FUN_1808e94b0 :: MOVZX EAX,byte ptr [R14 + 0x2f3]
+180adce1e 180adcdb0 FUN_180adcdb0 :: CMP byte ptr [RDI + 0x2f3],0x0
+180bca2e4 180bca2e4 Unwind@180bca2e4 :: LEA RCX,[RDX + 0x2f30]
+180bd0504 180bd0504 Unwind@180bd0504 :: LEA RCX,[RDX + 0x2f30]
+180c17cf1 180c17cf1 Unwind@180c17cf1 :: LEA RCX,[RDX + 0x2f38]
+180c9e45a 180c9e45a Unwind@180c9e45a :: LEA RCX,[RDX + 0x2f30]
+180d8da36 180d8da36 Unwind@180d8da36 :: LEA RCX,[RDX + 0x2f38]

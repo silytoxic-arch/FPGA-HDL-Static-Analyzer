@@ -6966,6 +6966,34 @@ int main() {
           std::ranges::any_of(result.violations, [](const auto& item) {
               return item.ruleId == "GJB10157.7.1.3" && item.line == 5;
           }), "R-6-3 unions multi-register high/low reset roots while excluding their shared clock");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST, input [7:0] D, output reg [7:0] Q, output reg X);\n"
+        "always @(posedge CLK or posedge RST) if(RST) Q<=8'h00; else Q<=D;\n"
+        "always @(posedge CLK) if(!CLK) X<=0; else X<=1;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 admits a fixed-width vector reset target without treating the clock as reset");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST, input [15:0] D, output reg X);\n"
+        "reg [15:0] Q; reg [0:7] Q2; reg [0:7] D2;\n"
+        "always @(posedge CLK or negedge RST) begin\n"
+        " if(!RST) begin Q<=16'h0000;Q2<=8'hff;end else begin Q2<=D2;Q<=D;end end\n"
+        "always @(posedge CLK) if(!CLK) X<=0; else X<=1;\n"
+        "always @(posedge RST) if(!RST) Q<=0; else Q<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 6;
+          }), "R-6-3 retains the scalar reset name across mixed-width vector target pairs");
+    for (const auto& dataWidth : {"[W-1:0]", "[3:0]"}) {
+        result = analyzeVerilog(
+            std::string("module probe #(parameter W=8)(input CLK,RST, input ") + dataWidth +
+            " D, output reg [7:0] Q, output reg X);\n" +
+            "always @(posedge CLK or posedge RST) if(RST) Q<=0; else Q<=D;\n" +
+            "always @(posedge CLK) if(!CLK) X<=0; else X<=1;\nendmodule\n");
+        check(count(result, "GJB10157.7.1.3") == 1,
+              "R-6-3 keeps unknown or resized runtime vector data outside the closed catalog");
+    }
     for (const auto& resetBranch : {
              "if(RST) begin Q1<=0;Q1<=0;end else begin Q1<=D;Q2<=D;end",
              "if(RST) begin Q1<=0;Q2<=0;end else begin Q1<=D;end"}) {

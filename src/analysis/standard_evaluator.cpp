@@ -51,7 +51,7 @@
 #endif
 
 namespace fpga::analysis {
-static std::set<std::string> nativeResetScalarNames(
+static std::map<std::string, std::size_t> nativeResetSignalWidths(
     const parser::DesignUnitInfo& unit, const core::SourceFile& source,
     const std::vector<parser::HdlToken>& tokens);
 namespace {
@@ -4609,9 +4609,12 @@ void checkResetConditionEdgePolarity(
                 }
             }
         }
-        const auto scalarNames = moduleInfo ? nativeResetScalarNames(*moduleInfo, source, tokens)
-                                          : std::set<std::string>{};
-        const auto scalar = [&](const std::string& signal) { return scalarNames.contains(signal); };
+        const auto signalWidths = moduleInfo ? nativeResetSignalWidths(*moduleInfo, source, tokens)
+                                            : std::map<std::string, std::size_t>{};
+        const auto scalar = [&](const std::string& signal) {
+            const auto found = signalWidths.find(signal);
+            return found != signalWidths.end() && found->second == 1;
+        };
         bool catalogClosed = knownLeaf;
         std::set<std::string> resetNames;
         // Alias-producing declarations and elaboration can change the netlist
@@ -4687,11 +4690,19 @@ void checkResetConditionEdgePolarity(
                 if (assignmentsKnown) {
                     for (const auto& [target, rhs] : *thenAssignments) {
                         const auto other = elseAssignments->find(target);
-                        if (!scalar(target) || other == elseAssignments->end() ||
+                        const auto targetWidth = signalWidths.find(target);
+                        const auto runtimeData = [&](std::size_t at) {
+                            if (!symbols.isDeclaredRuntimeIdentifier(at)) return false;
+                            const auto dataWidth = signalWidths.find(tokens[at].text);
+                            return dataWidth != signalWidths.end() &&
+                                targetWidth != signalWidths.end() &&
+                                dataWidth->second == targetWidth->second;
+                        };
+                        if (targetWidth == signalWidths.end() || other == elseAssignments->end() ||
                             !((constantValue(tokens[rhs]) &&
-                               symbols.isDeclaredRuntimeIdentifier(other->second)) ||
+                               runtimeData(other->second)) ||
                               (constantValue(tokens[other->second]) &&
-                               symbols.isDeclaredRuntimeIdentifier(rhs)))) {
+                               runtimeData(rhs)))) {
                             assignmentsKnown = false;
                             break;
                         }
@@ -15793,15 +15804,15 @@ std::optional<FixedVerilogModuleWidthModel> fixedVerilogModuleWidthModel(
     return model;
 }
 
-std::set<std::string> nativeResetScalarNames(
+std::map<std::string, std::size_t> nativeResetSignalWidths(
     const parser::DesignUnitInfo& unit, const core::SourceFile& source,
     const std::vector<parser::HdlToken>& tokens) {
-    std::set<std::string> names;
+    std::map<std::string, std::size_t> widths;
     if (const auto model = fixedVerilogModuleWidthModel(unit, source, tokens)) {
         for (const auto& [name, width] : model->signalWidths)
-            if (width && *width == 1) names.insert(name);
+            if (width && *width > 0) widths.emplace(name, *width);
     }
-    return names;
+    return widths;
 }
 
 std::optional<std::size_t> fixedBoundedExpressionWidth(
