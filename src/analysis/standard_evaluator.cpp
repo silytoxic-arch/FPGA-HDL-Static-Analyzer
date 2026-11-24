@@ -34,6 +34,7 @@
 #include <array>
 #include <charconv>
 #include <cctype>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <map>
@@ -4414,19 +4415,63 @@ void checkResetConditionEdgePolarity(
     // shapes; compound Boolean conditions remain review-required.
     // ev_5227f8580d7594cfd1ce8c4870778518f68bfc4c2bd6d9667b892eb70eb9cacb
     // ev_16b894aa8c8c4e639d06ec49e60914d47df3cf0a8dc74fe48f5c0a9f0c8c24a3
-    const auto constantBit = [](const parser::HdlToken& token) -> std::optional<bool> {
+    // FUN_1808e3930 builds +0xbc from exactly the low 32 constant bits,
+    // sign-extending a signed vector. R-6-3 compares that integer to 0/1.
+    // Keep four-state digits unresolved until their frontend conversion is
+    // recovered; a Boolean conversion would lose definite multi-bit failures.
+    const auto constantValue = [](const parser::HdlToken& token)
+        -> std::optional<std::uint32_t> {
         if (token.kind != parser::HdlTokenKind::Number) return std::nullopt;
-        auto text = lower(token.text);
+        auto text = token.text;
         text.erase(std::remove(text.begin(), text.end(), '_'), text.end());
-        static const std::set<std::string> zeros{
-            "0", "1'b0", "1'd0", "1'h0", "1'o0"
-        };
-        static const std::set<std::string> ones{
-            "1", "1'b1", "1'd1", "1'h1", "1'o1"
-        };
-        if (zeros.contains(text)) return false;
-        if (ones.contains(text)) return true;
-        return std::nullopt;
+        if (text == "'0") return 0;
+        if (text == "'1") return 1;
+        const auto quote = text.find('\'');
+        std::uint32_t width = 0;
+        bool signedValue = false;
+        unsigned base = 10;
+        std::size_t digits = 0;
+        if (quote != std::string::npos) {
+            for (std::size_t at = 0; at < quote; ++at) {
+                if (text[at] < '0' || text[at] > '9' ||
+                    width > (0x7fffffffU - (text[at] - '0')) / 10U)
+                    return std::nullopt;
+                width = width * 10U + static_cast<unsigned>(text[at] - '0');
+            }
+            if (quote != 0 && width == 0) return std::nullopt;
+            digits = quote + 1;
+            if (digits < text.size() && text[digits] == 's') {
+                signedValue = true;
+                ++digits;
+            }
+            if (digits >= text.size()) return std::nullopt;
+            switch (text[digits++]) {
+            case 'b': case 'B': base = 2; break;
+            case 'o': case 'O': base = 8; break;
+            case 'd': case 'D': base = 10; break;
+            case 'h': case 'H': base = 16; break;
+            default: return std::nullopt;
+            }
+        }
+        if (digits == text.size()) return std::nullopt;
+        std::uint32_t value = 0;
+        for (; digits < text.size(); ++digits) {
+            const auto digit = text[digits];
+            unsigned number;
+            if (digit >= '0' && digit <= '9') number = digit - '0';
+            else if (digit >= 'a' && digit <= 'f') number = digit - 'a' + 10;
+            else if (digit >= 'A' && digit <= 'F') number = digit - 'A' + 10;
+            else return std::nullopt;
+            if (number >= base) return std::nullopt;
+            value = value * base + number;
+        }
+        if (width != 0 && width < 32) {
+            const auto mask = (std::uint32_t{1} << width) - 1U;
+            value &= mask;
+            if (signedValue && (value & (std::uint32_t{1} << (width - 1U))))
+                value |= ~mask;
+        }
+        return value;
     };
 
     for (std::size_t index = 0; index + 3 < tokens.size(); ++index) {
@@ -4458,7 +4503,7 @@ void checkResetConditionEdgePolarity(
             }
 
             std::string signal;
-            std::optional<bool> conditionPolarity;
+            std::optional<std::uint32_t> conditionPolarity;
             auto diagnosticAt = first;
             if (last == first + 1 &&
                 tokens[first].kind == parser::HdlTokenKind::Identifier) {
@@ -4472,11 +4517,11 @@ void checkResetConditionEdgePolarity(
             } else if (last == first + 3 && tokens[first + 1].text == "==") {
                 if (tokens[first].kind == parser::HdlTokenKind::Identifier) {
                     signal = tokens[first].text;
-                    conditionPolarity = constantBit(tokens[first + 2]);
+                    conditionPolarity = constantValue(tokens[first + 2]);
                     diagnosticAt = first + 2;
                 } else if (tokens[first + 2].kind == parser::HdlTokenKind::Identifier) {
                     signal = tokens[first + 2].text;
-                    conditionPolarity = constantBit(tokens[first]);
+                    conditionPolarity = constantValue(tokens[first]);
                 }
             }
             const auto edge = edgePolarity.find(signal);

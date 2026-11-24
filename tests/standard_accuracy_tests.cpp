@@ -6759,6 +6759,39 @@ int main() {
     }
     check(resetConditionLines == std::vector<std::size_t>{5, 9, 14, 18},
           "R-6-3 locates equality constants, plain identifier and logical NOT on their own lines");
+    const std::pair<const char*, unsigned> resetLiteralValues[] = {
+        {"0", 0}, {"1", 1}, {"2", 2}, {"255", 255},
+        {"'b10", 2}, {"'d2", 2}, {"'h2", 2}, {"'o2", 2},
+        {"8'b00000001", 1}, {"8'd0", 0}, {"1'b10", 0}, {"1'b11", 1},
+        {"2'sb01", 1}, {"2'sb11", 0xffffffffU}, {"1'sb1", 0xffffffffU},
+        {"8'shFF", 0xffffffffU}, {"8'HFF", 255}, {"33'h100000001", 1},
+        {"33'h100000000", 0}, {"4294967297", 1}, {"4294967296", 0},
+        {"4'd17", 1}, {"'0", 0}, {"'1", 1}
+    };
+    for (const auto& [literal, value] : resetLiteralValues) {
+        for (const auto edgeValue : {0U, 1U}) {
+            for (const auto reversed : {false, true}) {
+                const std::string condition = reversed
+                    ? std::string(literal) + " == RST" : std::string("RST == ") + literal;
+                const auto literalResult = analyzeVerilog(
+                    std::string("module probe(input CLK,RST,D, output reg Q);\n") +
+                    "always @(" + (edgeValue ? "posedge" : "negedge") +
+                    " RST or posedge CLK) if(" + condition + ") Q<=0; else Q<=D;\n"
+                    "endmodule\n");
+                const auto context =
+                    "R-6-3 compares native low32 integer, width truncation and sign extension: " +
+                    condition + (edgeValue ? " posedge" : " negedge");
+                check(count(literalResult, "GJB10157.7.1.3") == (value != edgeValue ? 1 : 0),
+                      context.c_str());
+            }
+        }
+    }
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
+        "always @(posedge RST or posedge CLK) begin if(RST==4'bx001) Q1<=0; if(RST==-1) Q2<=0; end\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 does not guess unresolved four-state conversion or unary-expression folding");
     result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"

@@ -1,0 +1,79 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1800d2860 1800d2860 FUN_1800d2860 =====
+
+void FUN_1800d2860(longlong *param_1,ulonglong param_2,undefined1 *param_3)
+
+{
+  undefined1 *puVar1;
+  undefined1 *puVar2;
+  code *pcVar3;
+  longlong lVar4;
+  ulonglong uVar5;
+  undefined1 *puVar6;
+  ulonglong uVar7;
+  
+  puVar6 = (undefined1 *)param_1[1];
+  puVar2 = (undefined1 *)*param_1;
+  uVar7 = (longlong)puVar6 - (longlong)puVar2;
+  if (param_2 < uVar7) {
+    param_1[1] = (longlong)(puVar2 + param_2);
+  }
+  else if (uVar7 < param_2) {
+    if ((param_3 < puVar6) && (puVar2 <= param_3)) {
+      puVar1 = puVar2 + (param_2 - (longlong)puVar6);
+      if ((undefined1 *)(param_1[2] - (longlong)puVar6) < puVar1) {
+        if (puVar2 + (-1 - (longlong)puVar6) < puVar1) {
+          std::_Xlength_error("vector<T> too long");
+          pcVar3 = (code *)swi(3);
+          (*pcVar3)();
+          return;
+        }
+        uVar5 = param_1[2] - (longlong)puVar2;
+        if (-(uVar5 >> 1) - 1 < uVar5) {
+          puVar6 = (undefined1 *)0x0;
+        }
+        else {
+          puVar6 = (undefined1 *)(uVar5 + (uVar5 >> 1));
+        }
+        if (puVar6 < puVar1 + uVar7) {
+          puVar6 = puVar1 + uVar7;
+        }
+        FUN_1800d11f0(param_1,puVar6);
+      }
+      param_3 = param_3 + (*param_1 - (longlong)puVar2);
+    }
+    else {
+      puVar1 = puVar2 + (param_2 - (longlong)puVar6);
+      if ((undefined1 *)(param_1[2] - (longlong)puVar6) < puVar1) {
+        if (puVar2 + (-1 - (longlong)puVar6) < puVar1) {
+          std::_Xlength_error("vector<T> too long");
+          pcVar3 = (code *)swi(3);
+          (*pcVar3)();
+          return;
+        }
+        uVar5 = param_1[2] - (longlong)puVar2;
+        if (-(uVar5 >> 1) - 1 < uVar5) {
+          puVar6 = (undefined1 *)0x0;
+        }
+        else {
+          puVar6 = (undefined1 *)(uVar5 + (uVar5 >> 1));
+        }
+        if (puVar6 < puVar1 + uVar7) {
+          puVar6 = puVar1 + uVar7;
+        }
+        FUN_1800d11f0(param_1,puVar6);
+      }
+    }
+    puVar6 = (undefined1 *)param_1[1];
+    lVar4 = (*param_1 - (longlong)puVar6) + param_2;
+    while( true ) {
+      if (lVar4 == 0) break;
+      *puVar6 = *param_3;
+      lVar4 = lVar4 + -1;
+      puVar6 = puVar6 + 1;
+    }
+    param_1[1] = *param_1 + param_2;
+  }
+  return;
+}

@@ -1,0 +1,494 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1800d1e40 1800d1e40 FUN_1800d1e40 =====
+
+/* WARNING: Removing unreachable block (ram,0x0001800d24cb) */
+
+void FUN_1800d1e40(ulonglong *param_1,char *param_2,int param_3,int param_4,char param_5,
+                  char param_6)
+
+{
+  int iVar1;
+  char cVar2;
+  code *pcVar3;
+  undefined4 uVar4;
+  longlong lVar5;
+  bool *pbVar6;
+  bool *pbVar7;
+  int iVar8;
+  bool *pbVar9;
+  bool *_Dst;
+  byte bVar10;
+  bool bVar11;
+  uint uVar12;
+  bool *pbVar14;
+  undefined8 *puVar15;
+  ulonglong uVar16;
+  bool local_res10 [8];
+  int local_res18;
+  int local_res20;
+  uint local_68;
+  bool *local_60;
+  bool *local_50;
+  bool *pbStack_48;
+  bool *local_40;
+  bool *pbVar13;
+  
+  local_res20 = param_4;
+  local_res18 = param_3;
+  local_50 = (bool *)0x0;
+  pbStack_48 = (bool *)0x0;
+  pbVar14 = (bool *)0x0;
+  local_60 = (bool *)0x0;
+  local_40 = (bool *)0x0;
+  _Dst = (bool *)0x0;
+  cVar2 = *param_2;
+  pbVar9 = (bool *)0x0;
+  pbVar7 = pbVar14;
+  pbVar6 = pbStack_48;
+  while (pbStack_48 = pbVar9, cVar2 != '\0') {
+    if ((byte)(cVar2 - 0x30U) < 10) {
+      bVar10 = cVar2 - 0x30;
+      local_res10[0] = (bool)bVar10;
+      if ((pbStack_48 <= local_res10) || (local_res10 < _Dst)) {
+        if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+          if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+            pbStack_48 = pbVar6;
+            std::_Xlength_error("vector<T> too long");
+            pcVar3 = (code *)swi(3);
+            (*pcVar3)();
+            return;
+          }
+LAB_1800d1f71:
+          bVar10 = local_res10[0];
+          uVar16 = (longlong)pbVar7 - (longlong)_Dst;
+          pbVar7 = (bool *)((uVar16 >> 1) + uVar16);
+          if (-(uVar16 >> 1) - 1 < uVar16) {
+            pbVar7 = pbVar14;
+          }
+          if (pbVar7 < pbStack_48 + (1 - (longlong)_Dst)) {
+            pbVar7 = pbStack_48 + (1 - (longlong)_Dst);
+          }
+          pbStack_48 = pbVar6;
+          FUN_1800d1110(&local_50,pbVar7);
+          local_60 = local_40;
+          _Dst = local_50;
+          pbVar7 = local_40;
+        }
+LAB_1800d1fb2:
+        if (pbStack_48 != (bool *)0x0) {
+          *pbStack_48 = (bool)bVar10;
+        }
+        goto LAB_1800d2380;
+      }
+      pbVar9 = local_res10 + -(longlong)_Dst;
+      if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+        if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+          pbStack_48 = pbVar6;
+          std::_Xlength_error("vector<T> too long");
+          pcVar3 = (code *)swi(3);
+          (*pcVar3)();
+          return;
+        }
+LAB_1800d1ef8:
+        uVar16 = (longlong)pbVar7 - (longlong)_Dst;
+        pbVar7 = (bool *)((uVar16 >> 1) + uVar16);
+        if (-(uVar16 >> 1) - 1 < uVar16) {
+          pbVar7 = pbVar14;
+        }
+        if (pbVar7 < pbStack_48 + (1 - (longlong)_Dst)) {
+          pbVar7 = pbStack_48 + (1 - (longlong)_Dst);
+        }
+        pbStack_48 = pbVar6;
+        FUN_1800d1110(&local_50,pbVar7);
+        local_60 = local_40;
+        _Dst = local_50;
+        pbVar7 = local_40;
+      }
+LAB_1800d1f39:
+      if (pbStack_48 != (bool *)0x0) {
+        bVar11 = _Dst[(longlong)pbVar9];
+LAB_1800d1f46:
+        *pbStack_48 = bVar11;
+      }
+LAB_1800d2380:
+      pbVar9 = pbStack_48 + 1;
+      pbVar6 = pbStack_48 + 1;
+    }
+    else {
+      if ((byte)(cVar2 + 0x9fU) < 6) {
+        bVar10 = cVar2 + 0xa9;
+        local_res10[0] = (bool)bVar10;
+        if ((pbStack_48 <= local_res10) || (local_res10 < _Dst)) {
+          if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+            if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+              pbStack_48 = pbVar6;
+              std::_Xlength_error("vector<T> too long");
+              pcVar3 = (code *)swi(3);
+              (*pcVar3)();
+              return;
+            }
+            goto LAB_1800d1f71;
+          }
+          goto LAB_1800d1fb2;
+        }
+        pbVar9 = local_res10 + -(longlong)_Dst;
+        if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+          if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+            pbStack_48 = pbVar6;
+            std::_Xlength_error("vector<T> too long");
+            pcVar3 = (code *)swi(3);
+            (*pcVar3)();
+            return;
+          }
+          goto LAB_1800d1ef8;
+        }
+        goto LAB_1800d1f39;
+      }
+      if ((byte)(cVar2 + 0xbfU) < 6) {
+        bVar10 = cVar2 - 0x37;
+        local_res10[0] = (bool)bVar10;
+        if ((pbStack_48 <= local_res10) || (local_res10 < _Dst)) {
+          if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+            if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+              pbStack_48 = pbVar6;
+              std::_Xlength_error("vector<T> too long");
+              pcVar3 = (code *)swi(3);
+              (*pcVar3)();
+              return;
+            }
+            goto LAB_1800d1f71;
+          }
+          goto LAB_1800d1fb2;
+        }
+        pbVar9 = local_res10 + -(longlong)_Dst;
+        if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+          if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+            pbStack_48 = pbVar6;
+            std::_Xlength_error("vector<T> too long");
+            pcVar3 = (code *)swi(3);
+            (*pcVar3)();
+            return;
+          }
+          goto LAB_1800d1ef8;
+        }
+        goto LAB_1800d1f39;
+      }
+      if ((cVar2 + 0xa8U & 0xdf) == 0) {
+        local_res10[0] = true;
+        if ((local_res10 < pbStack_48) && (_Dst <= local_res10)) {
+          pbVar9 = local_res10 + -(longlong)_Dst;
+          if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+            if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+              pbStack_48 = pbVar6;
+              std::_Xlength_error("vector<T> too long");
+              pcVar3 = (code *)swi(3);
+              (*pcVar3)();
+              return;
+            }
+            goto LAB_1800d1ef8;
+          }
+          goto LAB_1800d1f39;
+        }
+        if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+          if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+            pbStack_48 = pbVar6;
+            std::_Xlength_error("vector<T> too long");
+            pcVar3 = (code *)swi(3);
+            (*pcVar3)();
+            return;
+          }
+          uVar16 = (longlong)pbVar7 - (longlong)_Dst;
+          pbVar7 = (bool *)((uVar16 >> 1) + uVar16);
+          if (-(uVar16 >> 1) - 1 < uVar16) {
+            pbVar7 = pbVar14;
+          }
+          if (pbVar7 < pbStack_48 + (1 - (longlong)_Dst)) {
+            pbVar7 = pbStack_48 + (1 - (longlong)_Dst);
+          }
+          pbStack_48 = pbVar6;
+          FUN_1800d1110(&local_50,pbVar7);
+          local_60 = local_40;
+          _Dst = local_50;
+          pbVar7 = local_40;
+        }
+        if (pbStack_48 != (bool *)0x0) {
+          *pbStack_48 = true;
+        }
+        goto LAB_1800d2380;
+      }
+      if ((cVar2 + 0xa6U & 0xdf) == 0) {
+        local_res10[0] = true;
+        if ((local_res10 < pbStack_48) && (_Dst <= local_res10)) {
+          pbVar9 = local_res10 + -(longlong)_Dst;
+          if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+            if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+              pbStack_48 = pbVar6;
+              std::_Xlength_error("vector<T> too long");
+              pcVar3 = (code *)swi(3);
+              (*pcVar3)();
+              return;
+            }
+LAB_1800d2138:
+            uVar16 = (longlong)pbVar7 - (longlong)_Dst;
+            pbVar7 = (bool *)((uVar16 >> 1) + uVar16);
+            if (-(uVar16 >> 1) - 1 < uVar16) {
+              pbVar7 = pbVar14;
+            }
+            if (pbVar7 < pbStack_48 + (1 - (longlong)_Dst)) {
+              pbVar7 = pbStack_48 + (1 - (longlong)_Dst);
+            }
+            pbStack_48 = pbVar6;
+            FUN_1800d1110(&local_50,pbVar7);
+            local_60 = local_40;
+            _Dst = local_50;
+            pbVar7 = local_40;
+          }
+LAB_1800d2179:
+          if (pbStack_48 == (bool *)0x0) goto LAB_1800d2380;
+          bVar11 = _Dst[(longlong)pbVar9];
+          goto LAB_1800d1f46;
+        }
+        if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+          if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+            pbStack_48 = pbVar6;
+            std::_Xlength_error("vector<T> too long");
+            pcVar3 = (code *)swi(3);
+            (*pcVar3)();
+            return;
+          }
+          uVar16 = (longlong)pbVar7 - (longlong)_Dst;
+          pbVar7 = (bool *)((uVar16 >> 1) + uVar16);
+          if (-(uVar16 >> 1) - 1 < uVar16) {
+            pbVar7 = pbVar14;
+          }
+          if (pbVar7 < pbStack_48 + (1 - (longlong)_Dst)) {
+            pbVar7 = pbStack_48 + (1 - (longlong)_Dst);
+          }
+          pbStack_48 = pbVar6;
+          FUN_1800d1110(&local_50,pbVar7);
+          local_60 = local_40;
+          _Dst = local_50;
+          pbVar7 = local_40;
+        }
+        if (pbStack_48 != (bool *)0x0) {
+          *pbStack_48 = true;
+        }
+        goto LAB_1800d2380;
+      }
+      pbVar9 = pbStack_48;
+      if (cVar2 == '?') {
+        local_res10[0] = true;
+        if ((local_res10 < pbStack_48) && (_Dst <= local_res10)) {
+          pbVar9 = local_res10 + -(longlong)_Dst;
+          if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+            if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+              pbStack_48 = pbVar6;
+              std::_Xlength_error("vector<T> too long");
+              pcVar3 = (code *)swi(3);
+              (*pcVar3)();
+              return;
+            }
+            goto LAB_1800d2138;
+          }
+          goto LAB_1800d2179;
+        }
+        if ((pbStack_48 == pbVar7) && (pbVar7 == pbStack_48)) {
+          if ((longlong)_Dst - (longlong)pbStack_48 == 1) {
+            pbStack_48 = pbVar6;
+            std::_Xlength_error("vector<T> too long");
+            pcVar3 = (code *)swi(3);
+            (*pcVar3)();
+            return;
+          }
+          uVar16 = (longlong)pbVar7 - (longlong)_Dst;
+          pbVar7 = (bool *)((uVar16 >> 1) + uVar16);
+          if (-(uVar16 >> 1) - 1 < uVar16) {
+            pbVar7 = pbVar14;
+          }
+          if (pbVar7 < pbStack_48 + (1 - (longlong)_Dst)) {
+            pbVar7 = pbStack_48 + (1 - (longlong)_Dst);
+          }
+          pbStack_48 = pbVar6;
+          FUN_1800d1110(&local_50,pbVar7);
+          local_60 = local_40;
+          _Dst = local_50;
+          pbVar7 = local_40;
+        }
+        if (pbStack_48 != (bool *)0x0) {
+          *pbStack_48 = true;
+        }
+        goto LAB_1800d2380;
+      }
+    }
+    pbStack_48 = pbVar6;
+    param_2 = param_2 + 1;
+    pbVar6 = pbStack_48;
+    cVar2 = *param_2;
+  }
+  if ((local_res20 == 10) && ((int)pbStack_48 - (int)_Dst == 1)) {
+    if (0xef < *_Dst) {
+      local_res20 = 2;
+    }
+  }
+  param_1[1] = *param_1;
+  pbVar9 = pbStack_48;
+  if (local_res20 == 10) {
+    while (pbStack_48 = pbVar6, _Dst != pbVar9) {
+      uVar12 = 0;
+      if (pbVar9 != _Dst) {
+        pbVar6 = _Dst;
+        pbVar13 = pbVar14;
+        do {
+          if (9 < *pbVar6) {
+            uVar4 = (*DAT_18137cbb0)();
+                    /* WARNING: Subroutine does not return */
+            FUN_180972760(&DAT_18137ccc8,uVar4,"Invalid use of [a-fxz?] in decimal constant.\n");
+          }
+          bVar11 = (bool)((char)pbVar13 * '\n' + *pbVar6);
+          *pbVar6 = bVar11;
+          uVar12 = bVar11 & 0x80000001;
+          pbVar13 = (bool *)(ulonglong)uVar12;
+          *pbVar6 = (bool)(*pbVar6 >> 1);
+          pbVar6 = pbVar6 + 1;
+        } while ((ulonglong)((longlong)pbVar6 - (longlong)_Dst) <
+                 (ulonglong)((longlong)pbVar9 - (longlong)_Dst));
+      }
+      while ((_Dst != pbVar9 && (*_Dst == false))) {
+        memmove(_Dst,_Dst + 1,(longlong)pbVar9 - (longlong)(_Dst + 1));
+        pbVar9 = pbVar9 + -1;
+        pbStack_48 = pbVar9;
+      }
+      local_res10[0] = uVar12 != 0;
+      pbVar6 = (bool *)param_1[1];
+      if ((local_res10 < pbVar6) && (pbVar13 = (bool *)*param_1, pbVar13 <= local_res10)) {
+        if (pbVar6 == (bool *)param_1[2]) {
+          FUN_1800d12d0(param_1,1);
+        }
+        if ((undefined1 *)param_1[1] != (undefined1 *)0x0) {
+          *(undefined1 *)param_1[1] = local_res10[*param_1 - (longlong)pbVar13];
+        }
+      }
+      else {
+        if (pbVar6 == (bool *)param_1[2]) {
+          FUN_1800d12d0(param_1,1);
+        }
+        if (param_1[1] != 0) {
+          *(bool *)param_1[1] = uVar12 != 0;
+        }
+      }
+      param_1[1] = param_1[1] + 1;
+      pbVar6 = pbStack_48;
+    }
+  }
+  else {
+    iVar1 = local_res20 + -1;
+    local_68 = 0;
+    iVar8 = iVar1;
+    if (iVar1 != 0) {
+      do {
+        if (iVar8 == -1) break;
+        pbVar14 = (bool *)(ulonglong)((int)pbVar14 + 1);
+        iVar8 = iVar8 >> 1;
+      } while (iVar8 != 0);
+      local_68 = (uint)pbVar14;
+    }
+    bVar11 = pbStack_48 != _Dst;
+    pbStack_48 = pbVar6;
+    if (bVar11) {
+      do {
+        pbVar9 = pbVar9 + -1;
+        if ((iVar1 < (int)(uint)*pbVar9) && (*pbVar9 < 0xf0)) {
+          uVar4 = (*DAT_18137cbb0)();
+                    /* WARNING: Subroutine does not return */
+          FUN_180972760(&DAT_18137ccc8,uVar4,"Digit larger than %d used in in base-%d constant.\n",
+                        iVar1,local_res20);
+        }
+        if (0 < (int)pbVar14) {
+          uVar12 = 1;
+          do {
+            bVar11 = *pbVar9;
+            if (bVar11 == true) {
+              local_res10[0] = (bool)2;
+              if (param_5 == 'x') {
+                local_res10[0] = (bool)4;
+              }
+            }
+            else if (bVar11 == true) {
+              local_res10[0] = (bool)(((param_5 + 0x88U & 0xfd) == 0) + 3);
+            }
+            else if (bVar11 == true) {
+              local_res10[0] = true;
+            }
+            else {
+              local_res10[0] = ((byte)uVar12 & bVar11) != 0;
+            }
+            FUN_1800d27d0(param_1,local_res10);
+            uVar12 = uVar12 << 1 | (uint)((int)uVar12 < 0);
+            pbVar14 = pbVar14 + -1;
+          } while (pbVar14 != (bool *)0x0);
+          pbVar14 = (bool *)(ulonglong)local_68;
+          _Dst = local_50;
+          pbVar7 = local_60;
+        }
+      } while (pbVar9 != _Dst);
+    }
+  }
+  iVar1 = local_res18;
+  iVar8 = (int)param_1[1] - (int)*param_1;
+  if (*param_1 == param_1[1]) {
+    local_res10[0] = false;
+  }
+  else {
+    local_res10[0] = *(bool *)(param_1[1] - 1);
+  }
+  if (local_res18 < 0) {
+    if (iVar8 < 0x20) {
+      bVar10 = 0;
+      if (1 < local_res10[0]) {
+        bVar10 = local_res10[0];
+      }
+      local_res10[0] = (bool)bVar10;
+      FUN_1800d2860(param_1,0x20,local_res10);
+    }
+    FUN_1800400b0(&local_50);
+  }
+  else {
+    if ((param_6 != '\0') && (local_res18 < iVar8)) {
+      uVar4 = (*DAT_18137cbb0)();
+                    /* WARNING: Subroutine does not return */
+      FUN_180972760(&DAT_18137ccc8,uVar4,
+                    "Unsized constant must have width of 1 bit, but have %d bits!\n",iVar8);
+    }
+    iVar8 = iVar8 + -1;
+    if (-1 < iVar8) {
+      lVar5 = (longlong)iVar8;
+      do {
+        if (*(char *)(lVar5 + *param_1) == '\x01') break;
+        iVar8 = iVar8 + -1;
+        lVar5 = lVar5 + -1;
+      } while (-1 < lVar5);
+    }
+    if (local_res10[0] < 2) {
+      iVar8 = iVar8 + 1;
+      local_res10[0] = false;
+    }
+    else {
+      iVar8 = iVar8 + 2;
+    }
+    FUN_1800d2860(param_1,(longlong)local_res18,local_res10);
+    if (iVar1 < iVar8) {
+      puVar15 = &DAT_18137ccc8;
+      if (0xf < DAT_18137cce0) {
+        puVar15 = DAT_18137ccc8;
+      }
+      uVar4 = (*DAT_18137cbb0)();
+      FUN_1809733f0("Literal has a width of %d bit, but value requires %d bit. (%s:%d)\n",iVar1,
+                    iVar8,puVar15,uVar4);
+    }
+    if (_Dst != (bool *)0x0) {
+      FUN_1800409e0(&local_50,_Dst,(longlong)pbVar7 - (longlong)_Dst);
+    }
+  }
+  return;
+}

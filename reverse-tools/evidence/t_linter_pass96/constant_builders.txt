@@ -1,0 +1,58 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1808e3930 1808e3930 FUN_1808e3930 =====
+
+longlong FUN_1808e3930(undefined8 param_1,char param_2,undefined1 param_3)
+
+{
+  longlong *plVar1;
+  char cVar2;
+  void *pvVar3;
+  longlong lVar4;
+  ulonglong uVar5;
+  undefined8 uVar6;
+  
+  uVar6 = 0xfffffffffffffffe;
+  pvVar3 = operator_new(0x2c8);
+  if (pvVar3 == (void *)0x0) {
+    lVar4 = 0;
+  }
+  else {
+    lVar4 = FUN_1808d8dc0(pvVar3,0x10,0,0,0,0,uVar6);
+  }
+  *(char *)(lVar4 + 0xa4) = param_2;
+  plVar1 = (longlong *)(lVar4 + 0x88);
+  FUN_1801a6350(plVar1,param_1);
+  uVar5 = 0;
+  do {
+    if (uVar5 < (ulonglong)(*(longlong *)(lVar4 + 0x90) - *plVar1)) {
+      cVar2 = *(char *)(uVar5 + *plVar1);
+LAB_1808e39dc:
+      *(uint *)(lVar4 + 0xbc) =
+           *(uint *)(lVar4 + 0xbc) | (uint)(cVar2 == '\x01') << ((byte)uVar5 & 0x1f);
+    }
+    else if ((param_2 != '\0') && (*plVar1 != *(longlong *)(lVar4 + 0x90))) {
+      cVar2 = *(char *)(*(longlong *)(lVar4 + 0x90) + -1);
+      goto LAB_1808e39dc;
+    }
+    uVar5 = uVar5 + 1;
+    if (0x1f < uVar5) {
+      *(undefined1 *)(lVar4 + 0xa9) = 1;
+      *(int *)(lVar4 + 0xb4) = (*(int *)(lVar4 + 0x90) - *(int *)plVar1) + -1;
+      *(undefined4 *)(lVar4 + 0xb8) = 0;
+      *(undefined1 *)(lVar4 + 0xac) = param_3;
+      return lVar4;
+    }
+  } while( true );
+}
+
+
+
+===== 0x1808e3a30 1808e3a30 FUN_1808e3a30 =====
+
+void FUN_1808e3a30(undefined8 param_1,undefined8 param_2)
+
+{
+  FUN_1808e3930(param_1,param_2,0);
+  return;
+}
