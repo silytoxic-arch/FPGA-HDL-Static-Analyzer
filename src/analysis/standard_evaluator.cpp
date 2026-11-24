@@ -4595,7 +4595,7 @@ void checkFlipFlopAsyncResetCoverage(
             // is absent, so later dynamic assignments cannot erase true.
             // A parameter/localparam identifier anywhere in the RHS also
             // writes true, even when other RHS names are dynamic.
-            const auto processTargets = targets(bodyStart, bodyEnd);
+            auto processTargets = targets(bodyStart, bodyEnd);
             std::size_t moduleBegin = index;
             while (moduleBegin > 0 && tokens[moduleBegin].text != "module") --moduleBegin;
             auto moduleEnd = index;
@@ -4619,7 +4619,7 @@ void checkFlipFlopAsyncResetCoverage(
                     else if (text == ")" || text == "]" || text == "}") --depth;
                 }
             }
-            std::set<std::string> literalInitialized;
+            std::map<std::string, bool> coverage;
             int conditionDepth = 0;
             for (auto op = bodyStart; op + 2 < bodyEnd; ++op) {
                 if (tokens[op].text == "(") ++conditionDepth;
@@ -4640,13 +4640,54 @@ void checkFlipFlopAsyncResetCoverage(
                     if (token.text.starts_with("$") || token.text == ";" ||
                         token.text == "begin" || token.text == "end") supported = false;
                 }
-                if (!supported || (hasIdentifier && !hasParameter)) continue;
-                const auto target = simpleAssignmentTarget(tokens, bodyStart, op);
-                if (target && processTargets.contains(tokens[*target].text))
-                    literalInitialized.insert(tokens[*target].text);
+                std::vector<std::size_t> assignmentTargets;
+                if (const auto target = simpleAssignmentTarget(tokens, bodyStart, op)) {
+                    if (processTargets.contains(tokens[*target].text)) assignmentTargets.push_back(*target);
+                } else if (op > bodyStart && tokens[op - 1].text == "}") {
+                    // Native recursive collection visits reverse-ordered
+                    // AST_CONCAT children, including nested concat roots.
+                    auto cursor = op;
+                    std::function<bool(unsigned)> collectLvalue = [&](unsigned depth) {
+                        if (cursor <= bodyStart || depth > 64) return false;
+                        --cursor;
+                        if (tokens[cursor].kind == parser::HdlTokenKind::Identifier) {
+                            assignmentTargets.push_back(cursor);
+                            return true;
+                        }
+                        if (tokens[cursor].text != "}") return false;
+                        if (!collectLvalue(depth + 1)) return false;
+                        while (cursor > bodyStart && tokens[cursor - 1].text == ",") {
+                            --cursor;
+                            if (!collectLvalue(depth + 1)) return false;
+                        }
+                        if (cursor <= bodyStart || tokens[cursor - 1].text != "{") return false;
+                        --cursor;
+                        return true;
+                    };
+                    if (!collectLvalue(0)) assignmentTargets.clear();
+                    for (const auto target : assignmentTargets)
+                        processTargets.try_emplace(tokens[target].text, target);
+                }
+                if (assignmentTargets.empty()) continue;
+                if (!supported) {
+                    for (const auto target : assignmentTargets)
+                        coverage.try_emplace(tokens[target].text, false);
+                } else if (!hasIdentifier || hasParameter) {
+                    for (const auto target : assignmentTargets) coverage[tokens[target].text] = true;
+                } else {
+                    // Each non-parameter RHS identifier inserts only the first
+                    // absent target, then breaks. Do not eagerly seed every
+                    // concat target: absent keys do not produce native reports.
+                    for (auto rhs = op + 1; rhs < rhsEnd; ++rhs) {
+                        if (tokens[rhs].kind != parser::HdlTokenKind::Identifier) continue;
+                        for (const auto target : assignmentTargets) {
+                            if (coverage.try_emplace(tokens[target].text, false).second) break;
+                        }
+                    }
+                }
             }
             for (const auto& [name, token] : processTargets) {
-                if (literalInitialized.contains(name)) continue;
+                if (!coverage.contains(name) || coverage.at(name)) continue;
                 emit(result, "GJB10157.7.1.2", source,
                      tokens[token].line, tokens[token].column,
                      "触发器 " + name + " 所在时序过程没有异步复位或置位");

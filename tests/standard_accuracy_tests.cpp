@@ -6760,6 +6760,40 @@ int main() {
     check(count(result, "GJB10157.7.1.2") == 1,
           "R-6-2 comparison conditions do not initialize assignment targets");
     result = analyzeVerilog(
+        "module probe(input CLK,A,B, output reg Q1,Q2,Q3,Q4,Q5,Q6);\n"
+        "always @(posedge CLK) {Q1,Q2}<=A;\n"
+        "always @(posedge CLK) {Q3,Q4}<=A+B;\n"
+        "always @(posedge CLK) {Q5,Q6}<=0; endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 3 &&
+          std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message.find("Q2") != std::string::npos;
+          }) && !std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message.find("Q1") != std::string::npos;
+          }),
+          "R-6-2 concat targets use reverse order and one absent insertion per RHS identifier");
+    result = analyzeVerilog(
+        "module probe(input CLK,A, output reg Q1,Q2);\n"
+        "always @(posedge CLK) begin {Q1,Q2}<=A; {Q1,Q2}<=A; end endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 2,
+          "R-6-2 repeated dynamic concat assignments progressively insert missing target keys");
+    result = analyzeVerilog(
+        "module probe(input CLK,A,B, output reg Q1,Q2,Q3);\n"
+        "always @(posedge CLK) {Q1,{Q2,Q3}}<=A+B; endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 2 &&
+          !std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.7.1.2" &&
+                     violation.message.find("Q1") != std::string::npos;
+          }),
+          "R-6-2 recursive concat collection preserves right-to-left leaf order");
+    result = analyzeVerilog(
+        "module probe(input CLK,A, output reg Q1,Q2,Q3);\n"
+        "always @(posedge CLK) begin {Q1,{Q2,Q3}}<=0; {Q1,{Q2,Q3}}<=A; end\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.2") == 0,
+          "R-6-2 constant coverage applies to all nested concat leaves and stays set");
+    result = analyzeVerilog(
         "module probe(input CLK,ARST,D, output reg Q1,Q2,Q3);\n"
         "always @(posedge ARST or posedge CLK) begin : mixed\n"
         "if(ARST) Q1<=1'b0;\n"
