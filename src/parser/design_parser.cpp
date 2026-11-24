@@ -763,6 +763,10 @@ std::vector<DesignUnitInfo> parseVerilog(const core::SourceFile& source,
                 instance = *afterParameters;
             }
             if (instance + 1 >= end || !isIdentifier(tokens[instance])) continue;
+            const auto& instanceToken = tokens[instance];
+            const bool escapedInstance = instanceToken.offset < source.content().size() &&
+                source.content()[instanceToken.offset] == '\\';
+            if (!escapedInstance && verilogKeyword(instanceToken.text)) continue;
             std::size_t connection = instance + 1;
             if (connection < end && tokens[connection].text == "[") {
                 int bracketDepth = 0;

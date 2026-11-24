@@ -1,0 +1,55 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1802800e0 1802800e0 FUN_1802800e0 =====
+
+int * FUN_1802800e0(undefined8 param_1,int *param_2)
+
+{
+  int *piVar1;
+  int iVar2;
+  
+  if (*(int *)(*(longlong *)((longlong)ThreadLocalStoragePointer + (ulonglong)_tls_index * 8) +
+              0x10c) < DAT_18133dc34) {
+    FUN_180bc5cc8(&DAT_18133dc34);
+    if (DAT_18133dc34 == -1) {
+      DAT_18133dc30 = FUN_180131e40(&DAT_180e865e9);
+      atexit((_func_5014 *)&LAB_180daa0a0);
+      FUN_180bc5c68(&DAT_18133dc34);
+    }
+  }
+  iVar2 = DAT_18133dc30;
+  if (DAT_18133dc30 != 0) {
+    piVar1 = (int *)(DAT_18137dd08 + (longlong)DAT_18133dc30 * 4);
+    *piVar1 = *piVar1 + 1;
+  }
+  *param_2 = iVar2;
+  return param_2;
+}
+
+
+
+===== 0x1802803a0 1802803a0 FUN_1802803a0 =====
+
+int * FUN_1802803a0(undefined8 param_1,int *param_2)
+
+{
+  int *piVar1;
+  int iVar2;
+  
+  if (*(int *)(*(longlong *)((longlong)ThreadLocalStoragePointer + (ulonglong)_tls_index * 8) +
+              0x10c) < DAT_18133dc3c) {
+    FUN_180bc5cc8(&DAT_18133dc3c);
+    if (DAT_18133dc3c == -1) {
+      DAT_18133dc38 = FUN_180131e40(&DAT_180e865f1);
+      atexit((_func_5014 *)&LAB_180daa160);
+      FUN_180bc5c68(&DAT_18133dc3c);
+    }
+  }
+  iVar2 = DAT_18133dc38;
+  if (DAT_18133dc38 != 0) {
+    piVar1 = (int *)(DAT_18137dd08 + (longlong)DAT_18133dc38 * 4);
+    *piVar1 = *piVar1 + 1;
+  }
+  *param_2 = iVar2;
+  return param_2;
+}

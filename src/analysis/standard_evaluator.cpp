@@ -51,6 +51,9 @@
 #endif
 
 namespace fpga::analysis {
+static std::set<std::string> nativeResetScalarNames(
+    const parser::DesignUnitInfo& unit, const core::SourceFile& source,
+    const std::vector<parser::HdlToken>& tokens);
 namespace {
 
 struct DiagnosticMapping {
@@ -4528,6 +4531,26 @@ void checkResetConditionEdgePolarity(
         }
         return at == end;
     };
+    const auto statementRange = [&](std::size_t begin, std::size_t end) {
+        while (begin < end && tokens[begin].text == "begin" &&
+               tokens[end - 1].text == "end" && statementEnd(tokens, begin) == end) {
+            ++begin;
+            --end;
+            if (begin + 1 < end && tokens[begin].text == ":") begin += 2;
+        }
+        return std::pair{begin, end};
+    };
+    const auto simpleAssignment = [&](std::size_t begin, std::size_t end)
+        -> std::optional<std::pair<std::size_t, std::size_t>> {
+        const auto [first, last] = statementRange(begin, end);
+        if (last < first + 4 || tokens[first].kind != parser::HdlTokenKind::Identifier ||
+            (tokens[first + 1].text != "=" && tokens[first + 1].text != "<=") ||
+            tokens[last - 1].text != ";") return std::nullopt;
+        const auto [rhs, rhsEnd] = primaryRange(first + 2, last - 1);
+        if (rhsEnd != rhs + 1) return std::nullopt;
+        return std::pair{first, rhs};
+    };
+    const VerilogConstantExpressions symbols(tokens);
 
     // runRulesPrepare snapshots modules after proc_arst. The native rule
     // accepts only level-sensitive reset syncs (type < 2); proc_arst keeps a
@@ -4535,6 +4558,10 @@ void checkResetConditionEdgePolarity(
     // no multi-edge process cannot establish that reset catalog in this path.
     // This is a necessary gate, not recovery of the full synthesized catalog.
     std::vector<bool> resetCatalogPossible(tokens.size(), true);
+    std::vector<std::size_t> resetCatalogOwner(tokens.size(), tokens.size());
+    // Publish names only when every multi-edge process is recovered below.
+    // Otherwise absence from a partial set cannot exclude a native candidate.
+    std::map<std::size_t, std::set<std::string>> resetNameCatalogs;
     for (std::size_t module = 0; module < tokens.size(); ++module) {
         if (tokens[module].text != "module") continue;
         auto end = module + 1;
@@ -4543,6 +4570,7 @@ void checkResetConditionEdgePolarity(
         auto name = module + 1;
         if (tokens[name].text == "automatic" || tokens[name].text == "static") ++name;
         bool knownLeaf = false;
+        const parser::DesignUnitInfo* moduleInfo = nullptr;
         if (name < end) {
             for (const auto& unit : result.structure) {
                 if (unit.kind == parser::DesignUnitKind::VerilogModule &&
@@ -4550,12 +4578,36 @@ void checkResetConditionEdgePolarity(
                     unit.location.file.lexically_normal() == source.path().lexically_normal() &&
                     unit.location.line >= tokens[module].line && unit.location.line <= tokens[end].line) {
                     knownLeaf = unit.instances.empty();
+                    moduleInfo = &unit;
                     break;
                 }
             }
         }
+        const auto scalarNames = moduleInfo ? nativeResetScalarNames(*moduleInfo, source, tokens)
+                                          : std::set<std::string>{};
+        const auto scalar = [&](const std::string& signal) { return scalarNames.contains(signal); };
+        bool catalogClosed = knownLeaf;
+        std::set<std::string> resetNames;
+        // Alias-producing declarations and elaboration can change the netlist
+        // names. Do not publish a closed catalog for those unresolved forms.
+        for (auto at = module + 1; at < end; ++at) {
+            const auto& word = tokens[at].text;
+            if (word == "assign" || word == "generate" || word == "genvar" ||
+                word == "function" || word == "task" || word == "alias" || word == "bind" ||
+                word == "integer" || word == "int" || word == "shortint" || word == "longint" ||
+                word == "byte" || word == "time" || word == "real" || word == "shortreal" ||
+                word == "realtime" || word == "struct" || word == "union" || word == "typedef" ||
+                word == "enum" || word == "type")
+                catalogClosed = false;
+            if (word == "wire" || word == "reg" || word == "logic" || word == "bit") {
+                for (auto declaration = at + 1; declaration < end &&
+                     tokens[declaration].text != ";"; ++declaration) {
+                    if (tokens[declaration].text == "=") catalogClosed = false;
+                }
+            }
+        }
         bool multiEdge = false;
-        for (auto process = module + 1; process + 3 < end && !multiEdge; ++process) {
+        for (auto process = module + 1; process + 3 < end; ++process) {
             if ((tokens[process].text != "always" && tokens[process].text != "always_ff") ||
                 tokens[process + 1].text != "@" || tokens[process + 2].text != "(") continue;
             const auto eventEnd = closeParen(tokens, process + 2);
@@ -4564,9 +4616,61 @@ void checkResetConditionEdgePolarity(
             for (auto at = process + 3; at < eventEnd; ++at) {
                 if (tokens[at].text == "posedge" || tokens[at].text == "negedge") ++edges;
             }
-            multiEdge = edges > 1;
+            if (edges > 1) {
+                multiEdge = true;
+                if (tokens[process].text != "always") catalogClosed = false;
+                std::set<std::string> events;
+                for (auto at = process + 3; at < eventEnd; ++at) {
+                    if (tokens[at].text != "posedge" && tokens[at].text != "negedge") continue;
+                    auto eventLast = at + 1;
+                    int depth = 0;
+                    for (; eventLast < eventEnd; ++eventLast) {
+                        const auto& word = tokens[eventLast].text;
+                        if (depth == 0 && (word == "or" || word == ",")) break;
+                        if (word == "(" || word == "[" || word == "{") ++depth;
+                        else if (word == ")" || word == "]" || word == "}") --depth;
+                    }
+                    const auto [first, last] = primaryRange(at + 1, eventLast);
+                    if (last == first + 1 && tokens[first].kind == parser::HdlTokenKind::Identifier &&
+                        scalar(tokens[first].text)) events.insert(tokens[first].text);
+                    at = eventLast;
+                }
+                const auto bodyEnd = statementEnd(tokens, eventEnd + 1);
+                if (events.size() != edges || bodyEnd > end) { catalogClosed = false; continue; }
+                const auto [root, rootEnd] = statementRange(eventEnd + 1, bodyEnd);
+                if (root + 2 >= rootEnd || tokens[root].text != "if" ||
+                    tokens[root + 1].text != "(" || statementEnd(tokens, root) != rootEnd) {
+                    catalogClosed = false; continue;
+                }
+                const auto conditionEnd = closeParen(tokens, root + 1);
+                auto [condition, conditionLast] = primaryRange(root + 2, conditionEnd);
+                if (condition < conditionLast &&
+                    (tokens[condition].text == "!" || tokens[condition].text == "~"))
+                    std::tie(condition, conditionLast) = primaryRange(condition + 1, conditionLast);
+                const auto thenEnd = statementEnd(tokens, conditionEnd + 1);
+                if (conditionLast != condition + 1 ||
+                    tokens[condition].kind != parser::HdlTokenKind::Identifier ||
+                    !scalar(tokens[condition].text) || !symbols.isDeclaredRuntimeIdentifier(condition) ||
+                    thenEnd >= rootEnd || tokens[thenEnd].text != "else") {
+                    catalogClosed = false; continue;
+                }
+                const auto thenAssignment = simpleAssignment(conditionEnd + 1, thenEnd);
+                const auto elseAssignment = simpleAssignment(thenEnd + 1, rootEnd);
+                if (!thenAssignment || !elseAssignment ||
+                    tokens[thenAssignment->first].text != tokens[elseAssignment->first].text ||
+                    !scalar(tokens[thenAssignment->first].text) ||
+                    !((constantValue(tokens[thenAssignment->second]) &&
+                       symbols.isDeclaredRuntimeIdentifier(elseAssignment->second)) ||
+                      (constantValue(tokens[elseAssignment->second]) &&
+                       symbols.isDeclaredRuntimeIdentifier(thenAssignment->second)))) {
+                    catalogClosed = false; continue;
+                }
+                if (events.contains(tokens[condition].text)) resetNames.insert(tokens[condition].text);
+            }
             process = eventEnd;
         }
+        for (auto at = module; at <= end; ++at) resetCatalogOwner[at] = module;
+        if (catalogClosed) resetNameCatalogs.emplace(module, std::move(resetNames));
         if (knownLeaf && !multiEdge) {
             for (auto at = module; at <= end; ++at) resetCatalogPossible[at] = false;
         }
@@ -4595,6 +4699,12 @@ void checkResetConditionEdgePolarity(
             if (identifierRange(first, last))
                 edgePolarity[tokens[first].text] = tokens[at].text == "posedge";
             at = eventEnd;
+        }
+        if (const auto catalog = resetNameCatalogs.find(resetCatalogOwner[index]);
+            catalog != resetNameCatalogs.end()) {
+            std::erase_if(edgePolarity, [&](const auto& event) {
+                return !catalog->second.contains(event.first);
+            });
         }
         if (edgePolarity.empty() || sensitivityEnd + 1 >= tokens.size()) continue;
         const auto bodyEnd = statementEnd(tokens, sensitivityEnd + 1);
@@ -15646,6 +15756,17 @@ std::optional<FixedVerilogModuleWidthModel> fixedVerilogModuleWidthModel(
         i = finish;
     }
     return model;
+}
+
+std::set<std::string> nativeResetScalarNames(
+    const parser::DesignUnitInfo& unit, const core::SourceFile& source,
+    const std::vector<parser::HdlToken>& tokens) {
+    std::set<std::string> names;
+    if (const auto model = fixedVerilogModuleWidthModel(unit, source, tokens)) {
+        for (const auto& [name, width] : model->signalWidths)
+            if (width && *width == 1) names.insert(name);
+    }
+    return names;
 }
 
 std::optional<std::size_t> fixedBoundedExpressionWidth(

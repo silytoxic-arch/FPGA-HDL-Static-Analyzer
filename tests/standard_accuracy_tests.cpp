@@ -6890,6 +6890,50 @@ int main() {
           "R-6-3 allows a known reset name in another single-edge process of the same module");
     result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK or posedge RST) if(RST) Q1<=0; else Q1<=D;\n"
+        "always @(posedge CLK) if(!CLK) Q2<=0; else Q2<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 filters a clock name absent from the recovered module reset catalog");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK) if(!CLK) Q2<=0; else Q2<=D;\n"
+        "always @(posedge CLK or posedge RST) begin : reset_logic\n"
+        " if(!(RST)) begin Q1<=0; end else begin Q1<=D; end\n"
+        "end endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
+          }), "R-6-3 resolves the complete simple module before scanning source-order conditions");
+    check(result.structure.size() == 1 && result.structure.front().instances.empty(),
+          "a named procedural block followed by IF does not create a fake module instance");
+    const auto escapedInstanceUnits = parser::parseDesignUnits(
+        {"escaped_instance.v", core::HdlLanguage::Verilog,
+         "module leaf(input A); endmodule\n"
+         "module top(input A); leaf \\if (.A(A)); endmodule\n"});
+    check(escapedInstanceUnits.size() == 2 && escapedInstanceUnits[1].instances.size() == 1 &&
+          escapedInstanceUnits[1].instances.front().target == "leaf",
+          "an escaped keyword remains a legal instance identifier");
+    result = analyzeVerilog(
+        "module probe(input CLK,R1,R2,D, output reg Q1,Q2,Q3,Q4);\n"
+        "always @(posedge CLK or posedge R1) if(R1) Q1<=0; else Q1<=D;\n"
+        "always @(posedge CLK or posedge R2) if(R2) Q2<=0; else Q2<=D;\n"
+        "always @(posedge CLK) if(!CLK) Q3<=0; else Q3<=D;\n"
+        "always @(posedge R2) if(!R2) Q4<=0; else Q4<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 5;
+          }), "R-6-3 unions reset names from independent processes without admitting the clock");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,EN,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK or posedge RST) if(EN) Q1<=0; else Q1<=D;\n"
+        "always @(posedge RST) if(!RST) Q2<=0; else Q2<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 does not create a reset name from an unrelated scalar input root condition");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"
         "endmodule\n");
     check(count(result, "GJB10157.7.1.3") == 0,

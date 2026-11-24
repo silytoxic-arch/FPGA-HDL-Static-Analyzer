@@ -1,0 +1,11 @@
+Full retained reference dump SHA256: 068616b5e70b866caa1c8fe49120367d184e02e3c4abb63074e1f25deca94296
+Selection: headings and references in initializer FUN_1809ca7f0; other callers omitted.
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+===== 18137e0a4 =====
+1809cc6ba DATA 1809ca7f0 FUN_1809ca7f0 :: LEA RCX,[0x18137e0a4]
+===== 18137ddf8 =====
+1809ca836 READ 1809ca7f0 FUN_1809ca7f0 :: MOVSXD RCX,dword ptr [0x18137ddf8]
+1809ca86d WRITE 1809ca7f0 FUN_1809ca7f0 :: MOV dword ptr [0x18137ddf8],EBX
+===== 18137e07c =====
+1809cb53d READ 1809ca7f0 FUN_1809ca7f0 :: MOVSXD RCX,dword ptr [0x18137e07c]
+1809cb574 WRITE 1809ca7f0 FUN_1809ca7f0 :: MOV dword ptr [0x18137e07c],EBX
