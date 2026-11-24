@@ -1,0 +1,27 @@
+===== Yosys::RTLIL::Module::vftable_meta_ptr @ 180f952a8 =====
+slot 0 (+0x0): 18100e380 <no function>
+slot 1 (+0x8): 1809a5600 FUN_1809a5600
+slot 2 (+0x10): 1809b93d0 FUN_1809b93d0
+slot 3 (+0x18): 1809b9450 FUN_1809b9450
+slot 4 (+0x20): 1809b9180 FUN_1809b9180
+slot 5 (+0x28): 1809b90c0 FUN_1809b90c0
+slot 6 (+0x30): 1809ba520 FUN_1809ba520
+slot 7 (+0x38): 180697020 FUN_180697020
+slot 8 (+0x40): 1809c4070 FUN_1809c4070
+slot 9 (+0x48): 1800e7160 _guard_check_icall
+slot 10 (+0x50): 1800e7160 _guard_check_icall
+slot 11 (+0x58): 1809bd080 FUN_1809bd080
+
+===== Yosys::RTLIL::Module::vftable @ 180f952b0 =====
+slot 0 (+0x0): 1809a5600 FUN_1809a5600
+slot 1 (+0x8): 1809b93d0 FUN_1809b93d0
+slot 2 (+0x10): 1809b9450 FUN_1809b9450
+slot 3 (+0x18): 1809b9180 FUN_1809b9180
+slot 4 (+0x20): 1809b90c0 FUN_1809b90c0
+slot 5 (+0x28): 1809ba520 FUN_1809ba520
+slot 6 (+0x30): 180697020 FUN_180697020
+slot 7 (+0x38): 1809c4070 FUN_1809c4070
+slot 8 (+0x40): 1800e7160 _guard_check_icall
+slot 9 (+0x48): 1800e7160 _guard_check_icall
+slot 10 (+0x50): 1809bd080 FUN_1809bd080
+slot 11 (+0x58): 1809b7fd0 FUN_1809b7fd0

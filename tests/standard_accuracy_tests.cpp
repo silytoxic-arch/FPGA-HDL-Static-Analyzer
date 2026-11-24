@@ -6857,6 +6857,38 @@ int main() {
     check(resetConditionLines == std::vector<std::size_t>{5, 7, 10},
           "R-6-3 keeps underlying constant/unary source lines through primary wrappers");
     result = analyzeVerilog(
+        "module probe(input CLK,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK) if(!CLK) Q1<=0; else Q1<=D;\n"
+        "always @(negedge CLK) if(CLK==1) Q2<=0; else Q2<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 does not invent a module reset catalog from separate single-edge processes");
+    result = analyzeVerilog(
+        "module plain(input CLK,D, output reg Q);\n"
+        "always @(posedge CLK) if(!CLK) Q<=0; else Q<=D; endmodule\n"
+        "module reset_design(input CLK,RST,D, output reg Q);\n"
+        "always @(posedge CLK or posedge RST) if(!RST) Q<=0; else Q<=D; endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
+          }), "R-6-3 keeps module catalog admission local in source order");
+    result = analyzeVerilog(
+        "module reset_design(input CLK,RST,D, output reg Q);\n"
+        "always @(posedge CLK or posedge RST) if(!RST) Q<=0; else Q<=D; endmodule\n"
+        "module plain(input CLK,D, output reg Q);\n"
+        "always @(posedge CLK) if(!CLK) Q<=0; else Q<=D; endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 2;
+          }), "R-6-3 does not leak a preceding module reset catalog into the next module");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
+        "always @(posedge CLK or posedge RST) if(RST) Q1<=0; else Q1<=D;\n"
+        "always @(posedge RST) if(!RST) Q2<=0; else Q2<=D;\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1,
+          "R-6-3 allows a known reset name in another single-edge process of the same module");
+    result = analyzeVerilog(
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"
         "endmodule\n");

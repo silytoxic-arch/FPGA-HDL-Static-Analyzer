@@ -4529,7 +4529,52 @@ void checkResetConditionEdgePolarity(
         return at == end;
     };
 
+    // runRulesPrepare snapshots modules after proc_arst. The native rule
+    // accepts only level-sensitive reset syncs (type < 2); proc_arst keeps a
+    // sole edge sync in its edge-trigger branch. A complete leaf module with
+    // no multi-edge process cannot establish that reset catalog in this path.
+    // This is a necessary gate, not recovery of the full synthesized catalog.
+    std::vector<bool> resetCatalogPossible(tokens.size(), true);
+    for (std::size_t module = 0; module < tokens.size(); ++module) {
+        if (tokens[module].text != "module") continue;
+        auto end = module + 1;
+        while (end < tokens.size() && tokens[end].text != "endmodule") ++end;
+        if (end == tokens.size()) continue;
+        auto name = module + 1;
+        if (tokens[name].text == "automatic" || tokens[name].text == "static") ++name;
+        bool knownLeaf = false;
+        if (name < end) {
+            for (const auto& unit : result.structure) {
+                if (unit.kind == parser::DesignUnitKind::VerilogModule &&
+                    unit.name == tokens[name].text &&
+                    unit.location.file.lexically_normal() == source.path().lexically_normal() &&
+                    unit.location.line >= tokens[module].line && unit.location.line <= tokens[end].line) {
+                    knownLeaf = unit.instances.empty();
+                    break;
+                }
+            }
+        }
+        bool multiEdge = false;
+        for (auto process = module + 1; process + 3 < end && !multiEdge; ++process) {
+            if ((tokens[process].text != "always" && tokens[process].text != "always_ff") ||
+                tokens[process + 1].text != "@" || tokens[process + 2].text != "(") continue;
+            const auto eventEnd = closeParen(tokens, process + 2);
+            if (eventEnd >= end) continue;
+            std::size_t edges = 0;
+            for (auto at = process + 3; at < eventEnd; ++at) {
+                if (tokens[at].text == "posedge" || tokens[at].text == "negedge") ++edges;
+            }
+            multiEdge = edges > 1;
+            process = eventEnd;
+        }
+        if (knownLeaf && !multiEdge) {
+            for (auto at = module; at <= end; ++at) resetCatalogPossible[at] = false;
+        }
+        module = end;
+    }
+
     for (std::size_t index = 0; index + 3 < tokens.size(); ++index) {
+        if (!resetCatalogPossible[index]) continue;
         if (tokens[index].text != "always" || tokens[index + 1].text != "@" ||
             tokens[index + 2].text != "(") continue;
         const auto sensitivityEnd = closeParen(tokens, index + 2);

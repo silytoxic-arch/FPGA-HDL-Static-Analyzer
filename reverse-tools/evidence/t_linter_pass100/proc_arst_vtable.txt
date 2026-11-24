@@ -1,0 +1,27 @@
+===== _anon_2456E72B::ProcArstPass::vftable_meta_ptr @ 180e95760 =====
+slot 0 (+0x0): 180fef4d0 <no function>
+slot 1 (+0x8): 180280580 FUN_180280580
+slot 2 (+0x10): 18028caf0 FUN_18028caf0
+slot 3 (+0x18): 1800e7160 _guard_check_icall
+slot 4 (+0x20): 180288920 FUN_180288920
+slot 5 (+0x28): 1809882c0 FUN_1809882c0
+slot 6 (+0x30): 1800e7160 _guard_check_icall
+slot 7 (+0x38): 1800e7160 _guard_check_icall
+slot 8 (+0x40): 6120746365746564 <no function>
+slot 9 (+0x48): 6e6f7268636e7973 <no function>
+slot 10 (+0x50): 657365722073756f <no function>
+slot 11 (+0x58): 00007374 <no function>
+
+===== _anon_2456E72B::ProcArstPass::vftable @ 180e95768 =====
+slot 0 (+0x0): 180280580 FUN_180280580
+slot 1 (+0x8): 18028caf0 FUN_18028caf0
+slot 2 (+0x10): 1800e7160 _guard_check_icall
+slot 3 (+0x18): 180288920 FUN_180288920
+slot 4 (+0x20): 1809882c0 FUN_1809882c0
+slot 5 (+0x28): 1800e7160 _guard_check_icall
+slot 6 (+0x30): 1800e7160 _guard_check_icall
+slot 7 (+0x38): 6120746365746564 <no function>
+slot 8 (+0x40): 6e6f7268636e7973 <no function>
+slot 9 (+0x48): 657365722073756f <no function>
+slot 10 (+0x50): 00007374 <no function>
+slot 11 (+0x58): 636f727020202020 <no function>
