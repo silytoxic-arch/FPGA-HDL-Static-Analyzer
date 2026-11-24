@@ -4445,7 +4445,6 @@ void checkResetConditionEdgePolarity(
         const auto bodyEnd = statementEnd(tokens, sensitivityEnd + 1);
         if (bodyEnd <= sensitivityEnd + 1 || bodyEnd > tokens.size()) continue;
 
-        std::set<std::pair<std::string, std::size_t>> reported;
         for (auto at = sensitivityEnd + 1; at + 2 < bodyEnd; ++at) {
             if (tokens[at].text != "if" || tokens[at + 1].text != "(") continue;
             const auto conditionEnd = closeParen(tokens, at + 1);
@@ -4465,7 +4464,7 @@ void checkResetConditionEdgePolarity(
                 signal = tokens[first].text;
                 conditionPolarity = true;
             } else if (last == first + 2 &&
-                       (tokens[first].text == "!" || tokens[first].text == "~") &&
+                       tokens[first].text == "!" &&
                        tokens[first + 1].kind == parser::HdlTokenKind::Identifier) {
                 signal = tokens[first + 1].text;
                 conditionPolarity = false;
@@ -4480,11 +4479,11 @@ void checkResetConditionEdgePolarity(
             }
             const auto edge = edgePolarity.find(signal);
             if (!conditionPolarity || edge == edgePolarity.end() ||
-                *conditionPolarity == edge->second ||
-                !reported.emplace(signal, tokens[at].line).second) continue;
+                *conditionPolarity == edge->second) continue;
             emit(result, "GJB10157.7.1.3", source, tokens[at].line,
                  tokens[at].column,
-                 "复位/置位信号 " + signal + " 的触发边沿与进入条件有效电平不一致");
+                 "复位信号的触发条件与进入条件必须一致.");
+            result.violations.back().severity = Severity::Warning;
         }
         index = bodyEnd == 0 ? index : bodyEnd - 1;
     }
@@ -17257,7 +17256,9 @@ void applyStandardProfile(AnalysisResult& result,
         [](const auto& left, const auto& right) {
             // These native rules emit once per admitted AST object/pair. Their
             // byte-for-byte identical diagnostics therefore carry multiplicity.
-            if ((left.ruleId == "GJB10157.7.1.2" &&
+            if ((left.ruleId == "GJB10157.7.1.3" &&
+                 right.ruleId == "GJB10157.7.1.3") ||
+                (left.ruleId == "GJB10157.7.1.2" &&
                  right.ruleId == "GJB10157.7.1.2") ||
                 (left.ruleId == "GJB10157.5.1.4" &&
                  right.ruleId == "GJB10157.5.1.4") ||

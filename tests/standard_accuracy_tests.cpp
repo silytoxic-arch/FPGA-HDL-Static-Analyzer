@@ -6714,6 +6714,23 @@ int main() {
         "endmodule\n");
     check(count(result, "GJB10157.7.1.3") == 2,
           "7.1.3 compares plain and unary-negated conditions with event polarity");
+    check(std::ranges::all_of(result.violations, [](const auto& item) {
+              return item.ruleId != "GJB10157.7.1.3" ||
+                  (item.severity == analysis::Severity::Warning &&
+                   item.message == "复位信号的触发条件与进入条件必须一致.");
+          }), "R-6-3 retains the native fixed Warning text");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
+        "always @(posedge RST or posedge CLK) begin if(!RST) Q1<=0; if(!RST) Q2<=0; end\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 2,
+          "R-6-3 retains independent contradictory IFs on the same physical line");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
+        "always @(posedge RST or posedge CLK) begin if(~RST) Q1<=0; if(RST != 1'b1) Q2<=0; end\n"
+        "endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 does not conflate bitwise NOT or inequality with native logical NOT");
     result = analyzeVerilog(
         "module probe(input CLK,RST,EN,D, output reg Q);\n"
         "always @(posedge RST or posedge CLK) begin if(RST && EN) Q<=0; else Q<=D; end\n"
