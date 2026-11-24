@@ -1,0 +1,61 @@
+T-Linter V3.1.4 / GJB10157_VLOG.6.2.9 / A-5-4
+Static recovery pass 80 (target was not executed)
+
+Target identity
+- T-Linter.dll SHA-256:
+  60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+- Constructor: 0x1800229c0
+- Main: FUN_18055c5a0 at 0x18055c5a0
+- Helper: FUN_18055bdb0 at 0x18055bdb0
+- AST_MODULE selector: FUN_1807238a0
+
+Source artifacts
+- /private/tmp/tlinter-a54-pass80-functions.txt
+  SHA-256 199781e7f5e236fa2c8e80cda4d2f84fe12c417901dbdfc6562bb9d86f2aee93
+- /private/tmp/tlinter-a54-pass80-strings.txt
+  SHA-256 37ae14d0ba564a75afd34bc7c6d6b87e101706c1ca3c9701d33aeaeeda6de525
+- examples_html/GJB10157_VLOG.6.2.9.html
+  SHA-256 1cbfd21f9014b6f20ab979b4392b629e4f707f5ccc19d1bab88fb2f83a25d54c
+
+Observed native facts
+1. The main routine associates reset-relation records with AST_ALWAYS(0x52).
+2. It continues only when the process-line relation count is greater than one.
+3. The helper recursively gathers AST_REDUCE_BOOL(0x2d) and
+   AST_IDENTIFIER(0x13); matching reset-relation identifier occurrences must
+   be greater than one.
+4. It walks AST_COND(0x58) branches and direct AST_ASSIGN_EQ/LE(0x55/0x56).
+   The RHS must be a direct AST_CONSTANT(0x10).
+5. It reads the constant uint field at +0xbc. A value below two is appended as
+   itself. A value greater than or equal to two appends both zero and one.
+6. Nested AST_CASE traversal recurses with the helper mode cleared.
+7. The main routine counts vector entries equal to zero and one and reports
+   only when both counts are nonzero.
+8. Native severity is the fixed lowercase string "error".
+9. Exact GB18030 diagnostic (DAT_180ef19b8, length 0x2c):
+   always中同时使用了异步复位信号和异步置位信号
+10. The report copies the module/root source path and the qualifying AST_CASE
+    physical line. No native column is supplied.
+11. The inner case traversal breaks after constructing the report, supporting
+    at most one diagnostic per qualifying process.
+
+Product mapping (bounded inference, not a native observation)
+- Explicit-edge always/always_ff sensitivity events are the product-side proxy
+  for the unrecovered reset-relation producer.
+- At least two matching event-identifier occurrences and one remaining event
+  are required. The remaining event is a bounded clock proxy.
+- Each source IF/ELSE tree is evaluated independently; constants from sibling
+  IF roots are not combined.
+- Direct numeric assignment RHS values are classified as 0, 1, or >=2. The
+  >=2 class contributes both zero and one exactly as observed above.
+- The first qualifying IF root emits Error, exact native text, physical line,
+  and product column 1; then that process stops.
+
+Unresolved / conflict
+- The proprietary reset-relation producer, relation multiplicity, complete AST
+  lowering, aliases, hierarchy, primitives, macros and generate are unknown.
+- The packaged HTML prose calls both "multiple sets" and "multiple resets"
+  violations. That conflicts with the recovered binary predicate, which
+  requires both zero and one in the same traversed conditional tree. The
+  product follows the recovered code and records this documentation conflict.
+- No clean result is certified compliant; unsupported forms remain
+  ManualReviewRequired. Full proprietary frontend equivalence remains 0/209.

@@ -5826,36 +5826,52 @@ void checkMixedAsynchronousSetReset(AnalysisResult& result,
     // roots. Helper FUN_18055bdb0 first requires more than one reset-condition
     // identifier, then collects direct constant assignment values below the
     // reset branches. The run emits only when that vector contains both 0 and
-    // 1, distinguishing mixed asynchronous reset/set from multiple controls
-    // that all perform the same action.
+    // 1. A constant integer greater than one contributes both values. The
+    // native report is fixed lowercase error, uses the qualifying AST_CASE
+    // physical line with no column, and has the exact text
+    // "always中同时使用了异步复位信号和异步置位信号".
     // ev_e5a7198b83488ab2b8c8e7ad94ad24067db34cd14cf9acdb3a38fff2dd192715
-    const auto closing = [&](std::size_t start, std::string_view open,
-                             std::string_view close, std::size_t limit) {
-        int depth = 0;
-        for (auto at = start; at < limit; ++at) {
-            if (tokens[at].text == open) ++depth;
-            else if (tokens[at].text == close && --depth == 0) return at;
-        }
-        return limit;
-    };
-    const auto constantBit = [](std::string text) -> std::optional<unsigned> {
+    const auto constantClass = [](std::string text) -> std::optional<unsigned> {
         text = lower(std::move(text));
         text.erase(std::remove(text.begin(), text.end(), '_'), text.end());
-        static const std::set<std::string> zeros{
-            "0", "1'b0", "1'd0", "1'h0", "1'o0"
-        };
-        static const std::set<std::string> ones{
-            "1", "1'b1", "1'd1", "1'h1", "1'o1"
-        };
-        if (zeros.contains(text)) return 0U;
-        if (ones.contains(text)) return 1U;
-        return std::nullopt;
+        if (text == "'0") return 0U;
+        if (text == "'1") return 1U;
+        auto digits = std::string_view{text};
+        unsigned base = 10;
+        if (const auto quote = text.find('\''); quote != std::string::npos) {
+            auto at = quote + 1;
+            if (at < text.size() && text[at] == 's') ++at;
+            if (at >= text.size()) return std::nullopt;
+            switch (text[at++]) {
+            case 'b': base = 2; break;
+            case 'o': base = 8; break;
+            case 'd': base = 10; break;
+            case 'h': base = 16; break;
+            default: return std::nullopt;
+            }
+            digits = std::string_view{text}.substr(at);
+        }
+        if (digits.empty()) return std::nullopt;
+        unsigned value = 0;
+        for (const char digit : digits) {
+            unsigned decoded = 0;
+            if (digit >= '0' && digit <= '9') decoded = static_cast<unsigned>(digit - '0');
+            else if (digit >= 'a' && digit <= 'f')
+                decoded = 10U + static_cast<unsigned>(digit - 'a');
+            else return std::nullopt;
+            if (decoded >= base) return std::nullopt;
+            if (value > 1U || decoded > 1U) return 2U;
+            value = value * base + decoded;
+            if (value > 1U) return 2U;
+        }
+        return value;
     };
 
     for (std::size_t index = 0; index + 2 < tokens.size(); ++index) {
-        if (tokens[index].text != "always" || tokens[index + 1].text != "@" ||
+        if ((tokens[index].text != "always" && tokens[index].text != "always_ff") ||
+            tokens[index + 1].text != "@" ||
             tokens[index + 2].text != "(") continue;
-        const auto sensitivityEnd = closing(index + 2, "(", ")", tokens.size());
+        const auto sensitivityEnd = closeParen(tokens, index + 2);
         if (sensitivityEnd == tokens.size()) continue;
         std::set<std::string> events;
         for (auto at = index + 3; at + 1 < sensitivityEnd; ++at) {
@@ -5863,53 +5879,65 @@ void checkMixedAsynchronousSetReset(AnalysisResult& result,
                 tokens[at + 1].kind == parser::HdlTokenKind::Identifier)
                 events.insert(tokens[at + 1].text);
         }
-        if (events.size() < 3 || sensitivityEnd + 1 >= tokens.size() ||
-            tokens[sensitivityEnd + 1].text != "begin") continue;
-        const auto bodyEnd = closing(sensitivityEnd + 1, "begin", "end", tokens.size());
-        if (bodyEnd == tokens.size()) continue;
+        if (events.size() < 3 || sensitivityEnd + 1 >= tokens.size()) continue;
+        const auto bodyBegin = sensitivityEnd + 1;
+        const auto bodyEnd = statementEnd(tokens, bodyBegin);
+        if (bodyEnd <= bodyBegin || bodyEnd > tokens.size()) continue;
 
-        std::set<std::string> guardedEvents;
-        std::set<unsigned> resetValues;
-        for (auto at = sensitivityEnd + 2; at < bodyEnd; ++at) {
-            if (tokens[at].text != "if" || at + 1 >= bodyEnd ||
-                tokens[at + 1].text != "(") continue;
-            const auto conditionEnd = closing(at + 1, "(", ")", bodyEnd);
-            if (conditionEnd == bodyEnd) break;
+        bool reported = false;
+        for (auto root = bodyBegin; root < bodyEnd && !reported; ++root) {
+            if (tokens[root].text != "if" || root + 1 >= bodyEnd ||
+                tokens[root + 1].text != "(") continue;
+            const auto treeEnd = statementEnd(tokens, root);
+            if (treeEnd <= root || treeEnd > bodyEnd) continue;
+
+            std::size_t matchingEventOccurrences = 0;
             std::set<std::string> conditionEvents;
-            for (auto condition = at + 2; condition < conditionEnd; ++condition) {
-                if (tokens[condition].kind == parser::HdlTokenKind::Identifier &&
-                    events.contains(tokens[condition].text))
+            std::vector<std::pair<std::size_t, std::size_t>> conditions;
+            for (auto nested = root; nested < treeEnd; ++nested) {
+                if (tokens[nested].text != "if" || nested + 1 >= treeEnd ||
+                    tokens[nested + 1].text != "(") continue;
+                const auto conditionEnd = closeParen(tokens, nested + 1);
+                if (conditionEnd >= treeEnd) break;
+                conditions.emplace_back(nested + 1, conditionEnd);
+                for (auto condition = nested + 2; condition < conditionEnd; ++condition) {
+                    if (tokens[condition].kind != parser::HdlTokenKind::Identifier ||
+                        !events.contains(tokens[condition].text)) continue;
+                    ++matchingEventOccurrences;
                     conditionEvents.insert(tokens[condition].text);
+                }
+                nested = conditionEnd;
             }
-            if (conditionEvents.empty()) {
-                at = conditionEnd;
+            if (matchingEventOccurrences <= 1 || conditionEvents.size() >= events.size()) {
+                root = treeEnd - 1;
                 continue;
             }
-            guardedEvents.insert(conditionEvents.begin(), conditionEvents.end());
 
-            auto branchBegin = conditionEnd + 1;
-            auto branchEnd = branchBegin;
-            if (branchBegin < bodyEnd && tokens[branchBegin].text == "begin") {
-                branchEnd = closing(branchBegin, "begin", "end", bodyEnd);
-                if (branchEnd == bodyEnd) break;
-                ++branchBegin;
-            } else {
-                while (branchEnd < bodyEnd && tokens[branchEnd].text != ";") ++branchEnd;
+            bool hasZero = false;
+            bool hasOne = false;
+            const auto inCondition = [&](std::size_t token) {
+                return std::ranges::any_of(conditions, [&](const auto& range) {
+                    return range.first <= token && token <= range.second;
+                });
+            };
+            for (auto token = root; token + 2 < treeEnd; ++token) {
+                if ((tokens[token].text != "=" && tokens[token].text != "<=") ||
+                    inCondition(token) || tokens[token + 1].kind != parser::HdlTokenKind::Number ||
+                    tokens[token + 2].text != ";") continue;
+                const auto value = constantClass(tokens[token + 1].text);
+                if (!value) continue;
+                hasZero = hasZero || *value == 0U || *value > 1U;
+                hasOne = hasOne || *value == 1U || *value > 1U;
             }
-            for (auto token = branchBegin; token + 1 < branchEnd; ++token) {
-                if (tokens[token].text != "<=" && tokens[token].text != "=") continue;
-                if (const auto value = constantBit(tokens[token + 1].text))
-                    resetValues.insert(*value);
+            if (hasZero && hasOne) {
+                emit(result, "GJB10157.6.2.9", source,
+                     tokens[root].line, 1,
+                     "always中同时使用了异步复位信号和异步置位信号");
+                reported = true;
             }
-            at = conditionEnd;
+            root = treeEnd - 1;
         }
-        if (guardedEvents.size() > 1 && guardedEvents.size() < events.size() &&
-            resetValues.contains(0U) && resetValues.contains(1U)) {
-            emit(result, "GJB10157.6.2.9", source,
-                 tokens[index].line, tokens[index].column,
-                 "同一时序过程同时包含异步置位和异步复位动作");
-        }
-        index = bodyEnd;
+        index = bodyEnd - 1;
     }
 }
 

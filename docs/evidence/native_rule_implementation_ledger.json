@@ -4882,10 +4882,11 @@
           ]
         }
       ],
-      "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 1 admits AST_MODULE(2). FUN_18055c5a0 associates reset-relation records with AST_ALWAYS(0x52) roots and calls FUN_18055bdb0 on nested conditional structures. The helper requires more than one reset-condition identifier, gathers direct AST_ASSIGN_EQ/LE(0x55/0x56) RHS AST_CONSTANT(0x10) values, and the run emits only when the resulting vector contains both value 0 and value 1. Product checks bounded multi-edge Verilog processes for more than one guarded asynchronous control whose reset branches directly assign both bit values.",
+      "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
+      "predicate": "Native slot 1 admits AST_MODULE(2). FUN_18055c5a0 associates reset-relation records with AST_ALWAYS(0x52) roots and calls FUN_18055bdb0 on nested conditional structures. The helper requires more than one matching reset-condition identifier occurrence, gathers direct AST_ASSIGN_EQ/LE(0x55/0x56) RHS AST_CONSTANT(0x10) values, preserves values below two, and appends both zero and one for a value greater than or equal to two. The run emits only when the vector contains both zero and one. It emits fixed lowercase error, exact text always中同时使用了异步复位信号和异步置位信号, module/root source path and the qualifying AST_CASE physical line with no native column, then breaks the inner traversal. Product mirrors this bounded predicate per source IF/ELSE tree and stops after the first qualifying root per process.",
       "predicateEvidence": [
         "ev_e5a7198b83488ab2b8c8e7ad94ad24067db34cd14cf9acdb3a38fff2dd192715",
+        "reverse-tools/evidence/t_linter_pass80/a5_4_mixed_async_set_reset.txt",
         "docs/evidence/native_verilog_mixed_async_set_reset_6_2_9_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -4909,7 +4910,7 @@
           "matched": true
         }
       ],
-      "limitations": "The reset-relation tree construction, FUN_18055bdb0 handling of constants wider than one bit, nested AST block/case lowering, aliases, hierarchy, library primitives, macros, generate constructs and native diagnostic multiplicity remain unresolved. Product admits only explicit parenthesized edge lists and direct 0/1 reset-branch assignments; unsupported forms remain unknown. No finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The complete reset-relation producer and relation multiplicity, arbitrary proprietary AST lowering, aliases, hierarchy, library primitives, macros, generate constructs and global diagnostic ordering remain unresolved. Product uses explicit parenthesized edge events and a remaining event as bounded relation/clock proxies. Packaged prose classifying multiple-set-only and multiple-reset-only cases conflicts with the recovered binary predicate; product follows the recovered code. Unsupported forms remain unknown, no finding remains ManualReviewRequired and full native equivalence is not claimed."
     },
     {
       "publicRuleId": "R-6-1",

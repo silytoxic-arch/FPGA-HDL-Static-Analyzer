@@ -6849,8 +6849,17 @@ int main() {
         "module probe(input CLK,ARST1,ARST2,D, output reg Q);\n"
         "always @(posedge ARST1 or posedge ARST2 or posedge CLK) begin\n"
         "if(ARST1) Q<=1'b0; else if(ARST2) Q<=1'b1; else Q<=D; end endmodule\n");
-    check(count(result, "GJB10157.6.2.9") == 1,
-          "attachment 6.2.9 reports mixed asynchronous reset and set actions");
+    const auto mixedSetResetFinding = std::ranges::find_if(
+        result.violations, [](const auto& violation) {
+            return violation.ruleId == "GJB10157.6.2.9";
+        });
+    check(count(result, "GJB10157.6.2.9") == 1 &&
+          mixedSetResetFinding != result.violations.end() &&
+          mixedSetResetFinding->message ==
+              "always中同时使用了异步复位信号和异步置位信号" &&
+          mixedSetResetFinding->severity == analysis::Severity::Error &&
+          mixedSetResetFinding->line == 3 && mixedSetResetFinding->column == 1,
+          "A-5-4 reproduces the native message, Error and qualifying IF line-only location");
     result = analyzeVerilog(
         "module probe(input CLK,ARST1,ARST2,D, output reg Q1,Q2);\n"
         "always @(posedge ARST1 or posedge ARST2 or posedge CLK) begin\n"
@@ -6859,10 +6868,37 @@ int main() {
         "if(ARST1||ARST2) Q2<=1'b1; else Q2<=D; end endmodule\n");
     check(count(result, "GJB10157.6.2.9") == 0,
           "6.2.9 permits multiple asynchronous controls performing only one action type");
+    result = analyzeVerilog(
+        "module probe(input CLK,ARST1,ARST2,D, output reg Q1,Q2);\n"
+        "always @(posedge ARST1 or posedge ARST2 or posedge CLK) begin\n"
+        "if(ARST1) Q1<=1'b0;\n"
+        "if(ARST2) Q2<=1'b1;\n"
+        "end endmodule\n");
+    check(count(result, "GJB10157.6.2.9") == 0,
+          "A-5-4 does not merge constants from independent sibling IF trees");
+    result = analyzeVerilog(
+        "module probe(input CLK,ARST1,ARST2,D, output reg [1:0] Q);\n"
+        "always @(posedge ARST1 or posedge ARST2 or posedge CLK) begin\n"
+        "if(ARST1||ARST2) Q<=2'b10; else Q<=D; end endmodule\n");
+    check(count(result, "GJB10157.6.2.9") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& violation) {
+              return violation.ruleId == "GJB10157.6.2.9" && violation.line == 3 &&
+                     violation.column == 1 && violation.severity == analysis::Severity::Error;
+          }),
+          "A-5-4 mirrors the native integer >=2 branch by contributing both 0 and 1");
     const auto mixedSetResetAssessment = std::ranges::find_if(result.standardAssessments,
         [](const auto& entry) { return entry.clauseId == "GJB10157.6.2.9"; });
     check(mixedSetResetAssessment != result.standardAssessments.end() &&
-          mixedSetResetAssessment->state == analysis::StandardRuleState::ManualReviewRequired,
+          mixedSetResetAssessment->state == analysis::StandardRuleState::Violated,
+          "A-5-4 reports the recovered wide-constant violation state");
+    result = analyzeVerilog(
+        "module probe(input CLK,ARST1,ARST2,D, output reg Q);\n"
+        "always @(posedge ARST1 or posedge ARST2 or posedge CLK) begin\n"
+        "if(ARST1||ARST2) Q<=1'b0; else Q<=D; end endmodule\n");
+    const auto cleanMixedSetResetAssessment = std::ranges::find_if(result.standardAssessments,
+        [](const auto& entry) { return entry.clauseId == "GJB10157.6.2.9"; });
+    check(cleanMixedSetResetAssessment != result.standardAssessments.end() &&
+          cleanMixedSetResetAssessment->state == analysis::StandardRuleState::ManualReviewRequired,
           "bounded 6.2.9 no finding is not certified compliance");
     result = analyzeVerilog(
         "module probe(\n"

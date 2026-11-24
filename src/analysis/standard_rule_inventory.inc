@@ -49,7 +49,7 @@
     StandardRuleEntry{"GJB10157-2021", "GJB10157.6.2.5", Severity::Error, true},
     StandardRuleEntry{"GJB10157-2021", "GJB10157.6.2.7", Severity::Warning, false},
     StandardRuleEntry{"GJB10157-2021", "GJB10157.6.2.8", Severity::Warning, false},
-    StandardRuleEntry{"GJB10157-2021", "GJB10157.6.2.9", Severity::Warning, false},
+    StandardRuleEntry{"GJB10157-2021", "GJB10157.6.2.9", Severity::Error, false},
     StandardRuleEntry{"GJB10157-2021", "GJB10157.7.1.1", Severity::Error, true},
     StandardRuleEntry{"GJB10157-2021", "GJB10157.7.1.2", Severity::Error, true},
     StandardRuleEntry{"GJB10157-2021", "GJB10157.7.1.3", Severity::Error, true},
