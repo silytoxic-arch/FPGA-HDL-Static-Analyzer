@@ -1,0 +1,671 @@
+{
+  "scope": "Independent HDL semantics, not proprietary runtime equivalence",
+  "oracle": "Icarus Verilog version 13.0 (stable) (v13_0)",
+  "flags": [
+    "-g2012",
+    "-gstrict-expr-width"
+  ],
+  "scopeNote": "Checks natural width and bits; signed cache has separate C++ assertions. Two native wide-decimal boundaries are recorded separately.",
+  "total": 47,
+  "matched": 45,
+  "checks": [
+    {
+      "declaration": "",
+      "expression": "1+2*3",
+      "model": [
+        32,
+        7
+      ],
+      "iverilog": [
+        32,
+        7
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'hf+4'h1",
+      "model": [
+        4,
+        0
+      ],
+      "iverilog": [
+        4,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "(4'hf+4'h1)+8'h0",
+      "model": [
+        8,
+        16
+      ],
+      "iverilog": [
+        8,
+        16
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "(4'shf+4'sh0)+8'h0",
+      "model": [
+        8,
+        15
+      ],
+      "iverilog": [
+        8,
+        15
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'shf+4'sh0",
+      "model": [
+        4,
+        15
+      ],
+      "iverilog": [
+        4,
+        15
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "-4'sd1",
+      "model": [
+        4,
+        15
+      ],
+      "iverilog": [
+        4,
+        15
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "~4'h0",
+      "model": [
+        4,
+        15
+      ],
+      "iverilog": [
+        4,
+        15
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "!0",
+      "model": [
+        1,
+        1
+      ],
+      "iverilog": [
+        1,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "&4'hf",
+      "model": [
+        1,
+        1
+      ],
+      "iverilog": [
+        1,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "~&4'hf",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "|4'h0",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "^4'h7",
+      "model": [
+        1,
+        1
+      ],
+      "iverilog": [
+        1,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "~^4'h7",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'sh8>>>1",
+      "model": [
+        4,
+        12
+      ],
+      "iverilog": [
+        4,
+        12
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'h8>>>1",
+      "model": [
+        4,
+        4
+      ],
+      "iverilog": [
+        4,
+        4
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'sh8>>1",
+      "model": [
+        4,
+        4
+      ],
+      "iverilog": [
+        4,
+        4
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "(4'sh8>>>1)+8'h0",
+      "model": [
+        8,
+        4
+      ],
+      "iverilog": [
+        8,
+        4
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'shf<8'h1",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'shf<4'sh1",
+      "model": [
+        1,
+        1
+      ],
+      "iverilog": [
+        1,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "64'hffffffffffffffff+64'h1",
+      "model": [
+        64,
+        0
+      ],
+      "iverilog": [
+        64,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "64'sh8000000000000000 / -64'sd1",
+      "model": [
+        64,
+        9223372036854775808
+      ],
+      "iverilog": [
+        64,
+        9223372036854775808
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "8'shff/8'sd2",
+      "model": [
+        8,
+        0
+      ],
+      "iverilog": [
+        8,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "8'shfb%8'sd2",
+      "model": [
+        8,
+        255
+      ],
+      "iverilog": [
+        8,
+        255
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "8'h80<<8",
+      "model": [
+        8,
+        0
+      ],
+      "iverilog": [
+        8,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "8'sh80>>>8",
+      "model": [
+        8,
+        255
+      ],
+      "iverilog": [
+        8,
+        255
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "8'h1<<64'hffffffffffffffff",
+      "model": [
+        8,
+        0
+      ],
+      "iverilog": [
+        8,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "2147483648+0",
+      "model": [
+        33,
+        2147483648
+      ],
+      "iverilog": [
+        32,
+        2147483648
+      ],
+      "matched": false,
+      "knownNativeDecimalBoundary": true
+    },
+    {
+      "declaration": "",
+      "expression": "4294967295+1",
+      "model": [
+        33,
+        4294967296
+      ],
+      "iverilog": [
+        32,
+        0
+      ],
+      "matched": false,
+      "knownNativeDecimalBoundary": true
+    },
+    {
+      "declaration": "",
+      "expression": "4'hf==4'hf",
+      "model": [
+        1,
+        1
+      ],
+      "iverilog": [
+        1,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'hf!=4'hf",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'shf==8'shff",
+      "model": [
+        1,
+        1
+      ],
+      "iverilog": [
+        1,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'shf==8'hff",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "4'hf ^~ 4'h0",
+      "model": [
+        4,
+        0
+      ],
+      "iverilog": [
+        4,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "0||8'hff",
+      "model": [
+        1,
+        1
+      ],
+      "iverilog": [
+        1,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "0&&8'hff",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "",
+      "expression": "8'h0 + -1",
+      "model": [
+        32,
+        4294967295
+      ],
+      "iverilog": [
+        32,
+        4294967295
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam [7:0] P=4'shf;",
+      "expression": "P",
+      "model": [
+        8,
+        255
+      ],
+      "iverilog": [
+        8,
+        255
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam signed [3:0] P=4'hf;",
+      "expression": "P",
+      "model": [
+        4,
+        15
+      ],
+      "iverilog": [
+        4,
+        15
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam [7:0] P=4'hf+4'h1;",
+      "expression": "P",
+      "model": [
+        8,
+        16
+      ],
+      "iverilog": [
+        8,
+        16
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam P=4'hf+4'h1;",
+      "expression": "P",
+      "model": [
+        4,
+        0
+      ],
+      "iverilog": [
+        4,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam P=4'hf+4'h1;",
+      "expression": "P+8'h0",
+      "model": [
+        8,
+        0
+      ],
+      "iverilog": [
+        8,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam P=0,Q=P+1;",
+      "expression": "Q",
+      "model": [
+        32,
+        1
+      ],
+      "iverilog": [
+        32,
+        1
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam integer P=-1;",
+      "expression": "P",
+      "model": [
+        32,
+        4294967295
+      ],
+      "iverilog": [
+        32,
+        4294967295
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam bit P=2;",
+      "expression": "P",
+      "model": [
+        1,
+        0
+      ],
+      "iverilog": [
+        1,
+        0
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam signed P=4'hf;",
+      "expression": "P",
+      "model": [
+        4,
+        15
+      ],
+      "iverilog": [
+        4,
+        15
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam [0:7] P=-1;",
+      "expression": "P",
+      "model": [
+        8,
+        255
+      ],
+      "iverilog": [
+        8,
+        255
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    },
+    {
+      "declaration": "localparam [-1:-8] P=-1;",
+      "expression": "P",
+      "model": [
+        8,
+        255
+      ],
+      "iverilog": [
+        8,
+        255
+      ],
+      "matched": true,
+      "knownNativeDecimalBoundary": false
+    }
+  ]
+}

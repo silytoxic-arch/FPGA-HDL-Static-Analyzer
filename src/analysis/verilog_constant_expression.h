@@ -96,6 +96,27 @@ public:
         }
     }
 
+    struct LocalParameter {
+        std::size_t declaration;
+        std::size_t begin;
+        std::size_t end;
+    };
+    // Value folding may use immutable localparams. An overridable parameter's
+    // default is deliberately not a proof of its elaborated value.
+    [[nodiscard]] std::optional<LocalParameter> localParameter(std::size_t index) const {
+        const auto initializer = parameterInitializer(index);
+        if (!initializer) return std::nullopt;
+        const auto scope = tokenScopes_[initializer->first];
+        for (auto at = initializer->first; at > 0;) {
+            --at;
+            if (tokenScopes_[at] != scope || tokens_[at].text == ";") break;
+            if (tokens_[at].text == "parameter") return std::nullopt;
+            if (tokens_[at].text == "localparam")
+                return LocalParameter{at, initializer->first, initializer->second};
+        }
+        return std::nullopt;
+    }
+
 private:
     struct Binding {
         bool parameter{false};

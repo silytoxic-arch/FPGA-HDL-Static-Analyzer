@@ -6,6 +6,7 @@
 #include "parser/preprocessor.h"
 #include "parser/semantic_analyzer.h"
 #include "analysis/verilog_constant_expression.h"
+#include "analysis/native_verilog_integer.h"
 #include "analysis/verilog_function_checks.h"
 #include "analysis/unknown_arithmetic.h"
 #include "analysis/verilog_unknown_relation.h"
@@ -4582,6 +4583,7 @@ void checkResetConditionEdgePolarity(
         return assignments;
     };
     const VerilogConstantExpressions symbols(tokens);
+    detail::NativeVerilogInteger integerFold(tokens, symbols);
     std::vector<ResetValueRange> activeInitializers;
     std::function<bool(std::size_t, std::size_t, unsigned)> constantResetValue;
     constantResetValue = [&](std::size_t begin, std::size_t end, unsigned depth) {
@@ -4853,7 +4855,7 @@ void checkResetConditionEdgePolarity(
                 else if (word == ")" || word == "]" || word == "}") --depth;
             }
             const auto [first, last] = primaryRange(at + 1, eventEnd);
-            if (identifierRange(first, last))
+            if (identifierRange(first, last) && !constantResetValue(first, last, 0))
                 edgePolarity[tokens[first].text] = tokens[at].text == "posedge";
             at = eventEnd;
         }
@@ -4904,15 +4906,28 @@ void checkResetConditionEdgePolarity(
                 if (equality.size() == 1) {
                     const auto [left, leftEnd] = primaryRange(first, equality[0]);
                     const auto [right, rightEnd] = primaryRange(equality[0] + 1, last);
-                    if (identifierRange(left, leftEnd) && rightEnd == right + 1) {
-                        signal = tokens[left].text;
-                        conditionPolarity = constantValue(tokens[right]);
-                        diagnosticAt = right;
-                    } else if (identifierRange(right, rightEnd) && leftEnd == left + 1) {
-                        signal = tokens[right].text;
-                        conditionPolarity = constantValue(tokens[left]);
-                        diagnosticAt = left;
-                    }
+                    const auto cacheExpression = [&](std::size_t begin, std::size_t end)
+                        -> std::optional<std::pair<std::uint32_t, std::size_t>> {
+                        if (end == begin + 1) {
+                            if (const auto cached = constantValue(tokens[begin]))
+                                return std::pair{*cached, begin};
+                        }
+                        if (const auto value = integerFold.evaluate(begin, end))
+                            return std::pair{value->cache(), value->source};
+                        return std::nullopt;
+                    };
+                    const auto compare = [&](std::size_t name, std::size_t nameEnd,
+                                             std::size_t value, std::size_t valueEnd) {
+                        if (!identifierRange(name, nameEnd)) return false;
+                        const auto cached = cacheExpression(value, valueEnd);
+                        if (!cached) return false;
+                        signal = tokens[name].text;
+                        conditionPolarity = cached->first;
+                        diagnosticAt = cached->second;
+                        return true;
+                    };
+                    if (!compare(left, leftEnd, right, rightEnd))
+                        compare(right, rightEnd, left, leftEnd);
                 }
             }
             const auto edge = edgePolarity.find(signal);

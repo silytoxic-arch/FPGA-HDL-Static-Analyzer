@@ -6799,8 +6799,55 @@ int main() {
         "module probe(input CLK,RST,D, output reg Q1,Q2);\n"
         "always @(posedge RST or posedge CLK) begin if(RST==4'bx001) Q1<=0; if(RST==-1) Q2<=0; end\n"
         "endmodule\n");
-    check(count(result, "GJB10157.7.1.3") == 0,
-          "R-6-3 preserves known-one cache bits in unknown literals and does not guess unary folding");
+    check(count(result, "GJB10157.7.1.3") == 1,
+          "R-6-3 preserves raw unknown literal cache and folds negative integer operands");
+    struct ResetFoldCase { const char* declaration; const char* expression; unsigned cache; };
+    const ResetFoldCase resetFoldCases[] = {
+        {"", "1-1", 0}, {"", "4'hf+4'h1", 0},
+        {"", "(4'hf+4'h1)+8'h0", 16}, {"", "-4'sd1", 0xffffffffU},
+        {"", "4'shf<4'sh1", 1}, {"", "4'shf<8'h1", 0},
+        {"", "8'sh80>>>8", 0xffffffffU}, {"", "4294967295+1", 0},
+        {"localparam [7:0] P=4'hf+4'h1;", "P", 16},
+        {"localparam P=4'hf+4'h1;", "P", 0},
+        {"localparam signed [3:0] P=4'hf;", "P", 0xffffffffU},
+        {"localparam P=0,K=P+1;", "K", 1}
+    };
+    for (const auto& test : resetFoldCases) {
+        for (const auto edge : {0U, 1U}) {
+            for (const bool reversed : {false, true}) {
+                const std::string condition = reversed ? std::string(test.expression) + " == RST"
+                    : std::string("RST == ") + test.expression;
+                const auto foldedResult = analyzeVerilog(
+                    std::string("module probe(input CLK,RST,D,output reg PRIME,Q);\n") +
+                    test.declaration + "\n" +
+                    "always @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n" +
+                    "always @(" + (edge ? "posedge" : "negedge") + " RST) if(" + condition +
+                    ") Q<=0; else Q<=D;\nendmodule\n");
+                const auto context = std::string("R-6-3 simplified integer cache: ") + condition;
+                check(count(foldedResult, "GJB10157.7.1.3") == (test.cache != edge ? 1 : 0),
+                      context.c_str());
+            }
+        }
+    }
+    for (const auto* declaration : {"parameter P=0;", "parameter K=0;localparam P=K;",
+             "localparam P=1'bx+1;", "localparam P=1/0;", "localparam P=65'h1+0;"}) {
+        result = analyzeVerilog(std::string("module probe(input CLK,RST,D,output reg PRIME,Q);\n") +
+            declaration + "\nalways @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
+            "always @(posedge RST) if(RST==P) Q<=0; else Q<=D;\nendmodule\n");
+        check(count(result, "GJB10157.7.1.3") == 0,
+              "R-6-3 does not invent a cache for overridable or unsupported expressions");
+    }
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D,output reg PRIME,Q1,Q2);\n"
+        "localparam P=0;\n"
+        "always @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
+        "always @(posedge RST) if(RST==\nP) Q1<=0;\n"
+        "always @(posedge RST) if(RST==\n-\n1) Q2<=0;\nendmodule\n");
+    resetConditionLines.clear();
+    for (const auto& item : result.violations)
+        if (item.ruleId == "GJB10157.7.1.3") resetConditionLines.push_back(item.line);
+    check(resetConditionLines == std::vector<std::size_t>{5, 7},
+          "R-6-3 locates folded localparam use and unary source, not the declaration");
     // Establish an admitted reset name in a separate multi-edge process.
     // The condition under test is in a single-edge process, so its shape
     // does not have to establish its own asynchronous-reset catalog entry.
