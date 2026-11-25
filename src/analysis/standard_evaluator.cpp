@@ -4590,6 +4590,9 @@ void checkResetConditionEdgePolarity(
         if (depth >= 256) return false;
         const auto [first, last] = primaryRange(begin, end);
         if (first >= last) return false;
+        // A recovered immutable value also proves constant reset data, including
+        // supported concatenations; overridable bindings retain grammar checks.
+        if (integerFold.evaluate(first, last)) return true;
         bool operand = true;
         for (auto at = first; at < last;) {
             const auto& word = tokens[at].text;

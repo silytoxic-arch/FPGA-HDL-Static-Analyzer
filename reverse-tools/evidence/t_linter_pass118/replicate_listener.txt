@@ -1,0 +1,129 @@
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+Context 180e1d018 slot 128 -> 1800a1290
+
+void FUN_1800a1290(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+  
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Verilog2005ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x0001800a12cf. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0x1358))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e3dd90 + 1358 -> 1800e7160
+
+void _guard_check_icall(void)
+
+{
+  return;
+}
+
+
+Context 180e1d018 slot 136 -> 1800a9800
+
+void FUN_1800a9800(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+  
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Verilog2005ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x0001800a983f. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0x1360))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e3dd90 + 1360 -> 1801137c0
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+void FUN_1801137c0(longlong param_1,longlong *param_2)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  int iVar3;
+  longlong *plVar4;
+  longlong *plVar5;
+  longlong *plVar6;
+  longlong *plVar7;
+  longlong *plVar8;
+  longlong lVar9;
+  undefined8 uVar10;
+  undefined8 uVar11;
+  void *pvVar12;
+  undefined1 auStack_98 [32];
+  undefined8 local_78;
+  undefined8 local_70;
+  undefined8 local_68;
+  int iStack_60;
+  int iStack_5c;
+  undefined8 local_58;
+  undefined1 local_50;
+  undefined7 uStack_4f;
+  undefined8 local_40;
+  ulonglong local_38;
+  ulonglong local_30;
+  
+  local_58 = 0xfffffffffffffffe;
+  local_30 = DAT_18131ef10 ^ (ulonglong)auStack_98;
+  plVar4 = (longlong *)(**(code **)(*param_2 + 0xb0))(param_2);
+  plVar5 = (longlong *)(**(code **)(*param_2 + 0xb0))(param_2);
+  plVar6 = (longlong *)(**(code **)(*param_2 + 0xb0))(param_2);
+  plVar7 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  plVar8 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  lVar9 = (**(code **)(*plVar5 + 8))(plVar5,&local_50);
+  uVar10 = *(undefined8 *)(lVar9 + 0x10);
+  iVar1 = (**(code **)(*plVar4 + 0x20))(plVar4);
+  iVar1 = (int)uVar10 + 1 + iVar1;
+  uVar2 = (**(code **)(*plVar6 + 0x18))(plVar6);
+  iVar3 = (**(code **)(*plVar7 + 0x20))(plVar7);
+  iVar3 = iVar3 + 1;
+  DAT_18133c1e8 = (**(code **)(*plVar8 + 0x18))(plVar8);
+  local_68 = (void *)CONCAT44(uVar2,DAT_18133c1e8);
+  uRam000000018133c1ec = uVar2;
+  iRam000000018133c1f0 = iVar3;
+  iRam000000018133c1f4 = iVar1;
+  iStack_60 = iVar3;
+  iStack_5c = iVar1;
+  if (0xf < local_38) {
+    FUN_1800409e0(&local_50,CONCAT71(uStack_4f,local_50),local_38 + 1);
+  }
+  local_38 = 0xf;
+  lVar9 = 0;
+  local_40 = 0;
+  local_50 = 0;
+  uVar10 = FUN_180097910(param_2);
+  uVar11 = FUN_180096990(param_2);
+  pvVar12 = operator_new(0x2c8);
+  local_68 = pvVar12;
+  if (pvVar12 != (void *)0x0) {
+    uVar11 = (**(code **)(*(longlong *)(param_1 + 0x100) + 8))(param_1 + 0x100,uVar11);
+    uVar10 = (**(code **)(*(longlong *)(param_1 + 0x100) + 8))(param_1 + 0x100,uVar10);
+    local_70 = 0;
+    local_78 = 0;
+    lVar9 = FUN_1808d8dc0(pvVar12,0x23,uVar10,uVar11);
+  }
+  plVar4 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  uVar2 = (**(code **)(*plVar4 + 0x18))(plVar4);
+  *(undefined4 *)(lVar9 + 0x210) = uVar2;
+  (**(code **)(*(longlong *)(param_1 + 0x100) + 0x10))((longlong *)(param_1 + 0x100),param_2,lVar9);
+  return;
+}
+

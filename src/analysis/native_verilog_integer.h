@@ -217,6 +217,45 @@ private:
         struct Parser {
             NativeVerilogInteger& owner;
             std::size_t at, end;
+            Ptr concatenation(std::size_t source, unsigned depth) {
+                if (depth >= 256) return {};
+                auto first = expression(0, depth + 1);
+                if (!first || at >= end) return {};
+                unsigned repeat = 1;
+                const bool replication = owner.tokens_[at].text == "{";
+                if (replication) {
+                    const auto count = owner.fold(first, 0, std::nullopt, depth + 1);
+                    if (!count || count->negative() || count->bits == 0 || count->bits > 64) return {};
+                    repeat = static_cast<unsigned>(count->bits);
+                    ++at;
+                    first = expression(0, depth + 1);
+                    if (!first) return {};
+                }
+                Value value{0, 0, false, source};
+                while (true) {
+                    // Concatenation operands are self-determined. Never pass
+                    // the surrounding arithmetic width into their operations.
+                    const auto part = owner.fold(first, 0, std::nullopt, depth + 1);
+                    if (!part || part->width > 64 - value.width) return {};
+                    value.bits = part->width == 64 ? part->bits
+                        : (value.bits << part->width) | part->bits;
+                    value.width += part->width;
+                    if (at >= end) return {};
+                    if (owner.tokens_[at].text != ",") break;
+                    ++at;
+                    first = expression(0, depth + 1);
+                    if (!first) return {};
+                }
+                if (owner.tokens_[at++].text != "}") return {};
+                if (replication && (at >= end || owner.tokens_[at++].text != "}")) return {};
+                if (value.width == 0 || repeat > 64 / value.width) return {};
+                const auto chunk = value.bits;
+                const auto chunkWidth = value.width;
+                for (unsigned index = 1; index < repeat; ++index)
+                    value.bits = (value.bits << chunkWidth) | chunk;
+                value.width *= repeat;
+                return literal(value);
+            }
             Ptr expression(int minimum, unsigned depth) {
                 if (depth >= 256 || at >= end) return {};
                 auto op = owner.operation(at, end);
@@ -231,6 +270,9 @@ private:
                     const bool boolean = booleanUnary(op.text);
                     lhs = std::make_shared<Node>(Node{op.text, {}, operand, {},
                         boolean ? 1U : operand->width, !boolean && operand->sign, source});
+                } else if (op.text == "{") {
+                    ++at; lhs = concatenation(source, depth + 1);
+                    if (!lhs) return {};
                 } else if (op.text == "(") {
                     ++at; lhs = expression(0, depth + 1);
                     if (!lhs || at >= end || owner.tokens_[at++].text != ")") return {};

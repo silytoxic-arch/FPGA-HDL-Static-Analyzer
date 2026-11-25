@@ -1,0 +1,194 @@
+Source: /private/tmp/tlinter-r63-pass105-frontend-lowering.txt; SHA256: 6bd09b183cf566599a64d28c94cd0abba082f083ea7c9f391b293f3a84c7661d
+
+===== Source lines 1621..1670 =====
+  case 0x22:
+    FUN_180996fc0(local_23a8);
+    puVar24 = *(undefined8 **)((longlong)param_1 + 8);
+    if (puVar24 != *(undefined8 **)((longlong)param_1 + 0x10)) {
+      do {
+        uVar26 = FUN_1808f6f80(*puVar24,local_1368,0xffffffff,0);
+        FUN_1809b6350(local_23a8,uVar26);
+        FUN_18003f330(local_1368);
+        puVar24 = puVar24 + 1;
+      } while (puVar24 != *(undefined8 **)((longlong)param_1 + 0x10));
+    }
+    if (local_23a8[0] < (int)local_2d80[0]) {
+      FUN_1809ba570(local_23a8,local_2d80[0],0);
+    }
+    FUN_1801d8630(local_2d18,local_23a8);
+    local_2d88 = 1;
+    FUN_18003f330(local_23a8);
+    goto LAB_1808fdcdd;
+  case 0x23:
+    FUN_1808f6f80(**(undefined8 **)((longlong)param_1 + 8),local_2080,0xffffffff,0);
+    FUN_1808f6f80(*(undefined8 *)(*(longlong *)((longlong)param_1 + 8) + 8),local_15c8,0xffffffff,0)
+    ;
+    cVar3 = FUN_1809bcb00(local_2080);
+    if (cVar3 == '\0') {
+                    /* WARNING: Subroutine does not return */
+      FUN_180972760((longlong)param_1 + 0x1e0,*(undefined4 *)((longlong)param_1 + 0x200),
+                    "Left operand of replicate expression is not constant!\n");
+    }
+    uVar30 = FUN_1809b68d0(local_2080,0);
+    uVar28 = (ulonglong)uVar30;
+    FUN_180996fc0(local_23e0);
+    if (0 < (int)uVar30) {
+      do {
+        FUN_1809b6350(local_23e0,local_15c8);
+        uVar28 = uVar28 - 1;
+      } while (uVar28 != 0);
+    }
+    if (local_23e0[0] < (int)local_2d80[0]) {
+      FUN_1809ba570(local_23e0,local_2d80[0],0);
+    }
+    *(undefined1 *)((longlong)param_1 + 0xa4) = 0;
+    FUN_1801d8630(local_2d18,local_23e0);
+    local_2d88 = 1;
+    FUN_18003f330(local_23e0);
+    FUN_18003f330(local_15c8);
+    FUN_18003f330(local_2080);
+    goto LAB_1808fdcdd;
+  case 0x24:
+    uVar26 = FUN_1808ef840(local_2d98,(longlong)&local_2a78 + 4);
+    FUN_1801ea9b0(&local_2d84,uVar26);
+
+===== Source lines 12286..12365 =====
+  case 0x22:
+    cVar3 = FUN_180372c00(local_2848);
+    cVar3 = cVar3 == '\0';
+    local_2870 = (code *)CONCAT44(local_2870._4_4_,(uint)(byte)cVar3);
+    FUN_180721770(pcVar20,&local_2830);
+    uVar12 = FUN_180372c20(pcVar20,auStack_2570);
+    cVar4 = FUN_1801ead70(&local_2830,uVar12);
+    if (cVar4 != '\0') {
+      do {
+        pcVar43 = (code *)FUN_1800d97c0(&local_2830);
+        pcVar29 = local_2890;
+        local_2888 = pcVar43;
+        if (*(int *)(*(longlong *)pcVar43 + 4) != 0x10) goto LAB_18092712c;
+        uVar8 = (uint)local_2870 & 0xff;
+        if (*(char *)(*(longlong *)pcVar43 + 0xa6) == '\0') {
+          uVar8 = 0;
+        }
+        local_2870 = (code *)CONCAT44(local_2870._4_4_,uVar8);
+        puVar18 = (undefined8 *)FUN_180372c20(local_2640,auStack_2338);
+        uVar12 = *puVar18;
+        plVar16 = (longlong *)FUN_180372c20(*(longlong *)pcVar43 + 0x88,auStack_2330);
+        puVar18 = (undefined8 *)FUN_180721770(*(longlong *)local_2888 + 0x88,auStack_2328);
+        local_28b8 = (code *)*plVar16;
+        FUN_1801a5b20(local_2640,&local_2778,uVar12,*puVar18);
+        FUN_1801a6810(&local_2830,local_2700,0);
+        uVar12 = FUN_180372c20(local_2848,auStack_2570);
+        cVar3 = FUN_1801ead70(&local_2830,uVar12);
+      } while (cVar3 != '\0');
+      cVar3 = (char)local_2870;
+    }
+code_r0x00018092710c:
+    if (cVar3 == '\0') {
+      local_2828 = (code *)FUN_1808e3a30(local_2640,0);
+      pcVar29 = local_2890;
+    }
+    else {
+      local_2828 = (code *)FUN_1808e3f90();
+      pcVar29 = local_2890;
+    }
+    break;
+  case 0x23:
+    plVar16 = (longlong *)FUN_18092f9b0(local_2848,0);
+    pcVar29 = local_2890;
+    if ((*(int *)(*plVar16 + 4) == 0x10) &&
+       (plVar16 = (longlong *)FUN_18092f9b0(pcVar20,1), pcVar29 = local_2890,
+       *(int *)(*plVar16 + 4) == 0x10)) {
+      puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,0);
+      uVar12 = FUN_1808db3a0(*puVar18,auStack_22d8,0xffffffff);
+      iVar36 = FUN_1809b6870(uVar12,0);
+      FUN_18003f2b0(auStack_22d8);
+      if (0 < iVar36) {
+        do {
+          puVar18 = (undefined8 *)FUN_180372c20(local_2640,auStack_2320);
+          uVar12 = *puVar18;
+          plVar16 = (longlong *)FUN_18092f9b0(local_2848,1);
+          plVar16 = (longlong *)FUN_180372c20(*plVar16 + 0x88,auStack_2318);
+          plVar27 = (longlong *)FUN_18092f9b0(local_2848,1);
+          puVar18 = (undefined8 *)FUN_180721770(*plVar27 + 0x88,auStack_2310);
+          local_28b8 = (code *)*plVar16;
+          FUN_1801a5b20(local_2640,&local_2778,uVar12,*puVar18);
+          uVar8 = (int)pcVar43 + 1;
+          pcVar43 = (code *)(ulonglong)uVar8;
+          puVar18 = (undefined8 *)FUN_1801a67e0(local_2848,0);
+          uVar12 = FUN_1808db3a0(*puVar18,auStack_22d8,0xffffffff);
+          iVar36 = FUN_1809b6870(uVar12,0);
+          FUN_18003f2b0(auStack_22d8);
+        } while ((int)uVar8 < iVar36);
+      }
+      plVar16 = (longlong *)FUN_18092f9b0(local_2848,1);
+      cVar3 = *(char *)(*plVar16 + 0xa6);
+      goto code_r0x00018092710c;
+    }
+    break;
+  case 0x24:
+    plVar16 = (longlong *)FUN_1801a67e0(local_2848,0);
+    pcVar29 = local_2890;
+    if (*(int *)(*plVar16 + 4) == 0x10) {
+      puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,0);
+      uVar12 = FUN_1808db3e0(*puVar18,auStack_18a0,local_2850[0],local_2898[0]);
+      local_28b0 = (code *)CONCAT44(local_28b0._4_4_,local_2850[0]);
+Source: /private/tmp/tlinter-r63-pass117-detect-sign-worker.txt; SHA256: dcd6eb31650d68f88a26d4f452c9ccffde0ff8cc62710e9e1d21c57b209ae214
+
+===== Source lines 811..866 =====
+  case 0x22:
+    puVar13 = *(undefined8 **)(param_1 + 8);
+    local_a0 = (longlong *)
+               ((ulonglong)((longlong)*(undefined8 **)(param_1 + 0x10) + (7 - (longlong)puVar13)) >>
+               3);
+    if (*(undefined8 **)(param_1 + 0x10) < puVar13) {
+      local_a0 = plVar20;
+    }
+    plVar18 = plVar20;
+    if (local_a0 != (longlong *)0x0) {
+      do {
+        local_c0[0] = 0;
+        local_d8[0] = 1;
+        local_f8 = CONCAT71(local_f8._1_7_,param_5);
+        FUN_1808f46c0(*puVar13,local_c0,local_d8,local_d0);
+        uVar21 = (int)plVar18 + local_c0[0];
+        plVar18 = (longlong *)(ulonglong)uVar21;
+        puVar13 = puVar13 + 1;
+        plVar20 = (longlong *)((longlong)plVar20 + 1);
+      } while (plVar20 != local_a0);
+      local_b8 = (void *)CONCAT44(local_b8._4_4_,uVar21);
+      param_3 = local_c8;
+    }
+    piVar8 = (int *)&local_b8;
+    if ((int)uVar21 <= *local_88) {
+      piVar8 = local_88;
+    }
+    *local_88 = *piVar8;
+    *param_3 = 0;
+    local_c8 = param_3;
+    break;
+  case 0x23:
+    do {
+      local_e0 = 1;
+      local_e8 = 0;
+      local_f0 = 0xffffffff;
+      local_f8 = CONCAT44(local_f8._4_4_,1);
+      cVar4 = FUN_180914500(**(undefined8 **)(param_1 + 8),1,0,0);
+    } while (cVar4 == '\x01');
+    if (*(int *)(**(longlong **)(param_1 + 8) + 4) != 0x10) {
+                    /* WARNING: Subroutine does not return */
+      FUN_180972760(param_1 + 0x1e0,*(undefined4 *)(param_1 + 0x200),
+                    "Left operand of replicate expression is not constant!\n");
+    }
+    local_f8 = local_f8 & 0xffffffffffffff00;
+    FUN_1808f46c0((*(longlong **)(param_1 + 8))[1],local_c0,local_d8,0);
+    uVar9 = FUN_1808db3a0(**(undefined8 **)(param_1 + 8),&local_70,0xffffffff);
+    iVar14 = FUN_1809b6870(uVar9,0);
+    local_b0 = CONCAT44(local_b0._4_4_,iVar14 * local_c0[0]);
+    piVar8 = (int *)&local_b0;
+    if (iVar14 * local_c0[0] <= *param_2) {
+      piVar8 = param_2;
+    }
+    *param_2 = *piVar8;
+    FUN_1800400b0(local_68);
+    *local_c8 = 0;

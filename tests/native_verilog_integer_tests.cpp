@@ -71,6 +71,26 @@ int main(int argc, char** argv) {
         {"", "64'h3**64'hffffffffffffffff", 0xaaaaaaaaaaaaaaabULL, 64, false},
         {"localparam [7:0] P=4'h2**4'h4;", "P", 16, 8, false},
         {"localparam P=4'h2**4'h4;", "P", 0, 4, false},
+        {"", "{4'h1,4'h2}", 0x12, 8, false},
+        {"", "{2{4'ha}}", 0xaa, 8, false},
+        {"", "{{4'h1,4'h2},4'h3}", 0x123, 12, false},
+        {"", "{4'shf,4'sh8}", 0xf8, 8, false},
+        {"", "{4'hf+4'h1,4'h1}", 1, 8, false},
+        {"", "({4'hf+4'h1,4'h1})+16'h0", 1, 16, false},
+        {"", "{2{4'hf+4'h1}}", 0, 8, false},
+        {"", "{1{4'shf}}", 15, 4, false},
+        {"", "{2{{2{4'h1}}}}", 0x1111, 16, false},
+        {"", "{64{1'b1}}", 0xffffffffffffffffULL, 64, false},
+        {"", "{1{64'h8000000000000000}}", 0x8000000000000000ULL, 64, false},
+        {"", "{1'b1}", 1, 1, false},
+        {"", "{2{4'ha,4'hb}}", 0xabab, 16, false},
+        {"", "{(1+1){4'h1}}", 0x11, 8, false},
+        {"", "{4'h1 << 1,4'h2}", 0x22, 8, false},
+        {"", "{8'shff}+16'sh0", 255, 16, false},
+        {"localparam N=2;", "{N{4'h1}}", 0x11, 8, false},
+        {"localparam signed [7:0] P={4'hf,4'hf};", "P", 255, 8, true},
+        {"localparam [3:0] P={4'h1,4'h2};", "P", 2, 4, false},
+        {"localparam [15:0] P={4'hf+4'h1,4'h1};", "P", 1, 16, false},
         {"localparam [7:0] P=4'shf;", "P", 255, 8, false},
         {"localparam signed [3:0] P=4'hf;", "P", 15, 4, true},
         {"localparam [7:0] P=4'hf+4'h1;", "P", 16, 8, false},
@@ -111,12 +131,13 @@ int main(int argc, char** argv) {
             << value->width << '\t' << value->bits << '\t' << value->cache() << '\t'
             << value->signedValue << '\n';
     }
-    for (const auto& expression : {"1/0", "1%0", "0**-1", "4'h0**4'shf", "1<<-1", "65'h1+1", "1'bx+1", "'1+1", "'h1+1", "1?0:1", "{1'b0,1'b1}", "1+", "0 1", "$clog2(2)"}) {
+    for (const auto& expression : {"1/0", "1%0", "0**-1", "4'h0**4'shf", "1<<-1", "65'h1+1", "1'bx+1", "'1+1", "'h1+1", "1?0:1", "{}", "{1'b0,}", "{,1'b0}", "{1'bx,1'b0}", "{65{1'b1}}", "{64'h0,1'b0}", "{0{1'b1}}", "{-1{1'b1}}", "{1{1'b1}", "{1'b0", "1+", "0 1", "$clog2(2)"}) {
         if (evaluate("", expression)) { ++failures; std::cerr << "FAIL unknown boundary: " << expression << '\n'; }
     }
     for (const auto& declaration : {"parameter P=0;", "parameter Q=0;localparam P=Q;",
              "localparam P=Q,Q=P;", "localparam P=MISSING;", "localparam real P=0;",
-             "localparam [64:0] P=0;", "localparam [W-1:0] P=0;", "localparam P=1'bx;"}) {
+             "localparam [64:0] P=0;", "localparam [W-1:0] P=0;", "localparam P=1'bx;",
+             "parameter N=2;localparam P={N{1'b1}};"}) {
         if (evaluate(declaration, "P")) { ++failures; std::cerr << "FAIL binding boundary: " << declaration << '\n'; }
     }
     return failures == 0 ? 0 : 1;

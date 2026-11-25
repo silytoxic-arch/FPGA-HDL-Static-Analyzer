@@ -6814,7 +6814,12 @@ int main() {
         {"", "2**0", 1}, {"", "4'h2**4'h4", 0},
         {"", "(4'h2**4'h4)+8'h0", 16}, {"", "8'shff**-3", 0xffffffffU},
         {"", "8'shfe**-2", 0}, {"", "2**3**2", 64},
-        {"localparam [7:0] P=4'h2**4'h4;", "P", 16}
+        {"localparam [7:0] P=4'h2**4'h4;", "P", 16},
+        {"", "{1'b0,1'b1}", 1}, {"", "{1'b1,1'b0}", 2},
+        {"", "{2{1'b1}}", 3}, {"", "{2{1'b0}}", 0},
+        {"", "{1{4'shf}}", 15}, {"", "{4'hf+4'h1,4'h1}", 1},
+        {"localparam signed [7:0] P={4'hf,4'hf};", "P", 0xffffffffU},
+        {"localparam N=2;", "{N{1'b1}}", 3}
     };
     for (const auto& test : resetFoldCases) {
         for (const auto edge : {0U, 1U}) {
@@ -6835,7 +6840,8 @@ int main() {
     }
     for (const auto* declaration : {"parameter P=0;", "parameter K=0;localparam P=K;",
              "localparam P=1'bx+1;", "localparam P=1/0;", "localparam P=65'h1+0;",
-             "localparam P=0**-1;"}) {
+             "localparam P=0**-1;", "parameter N=2;localparam P={N{1'b0}};",
+             "localparam P={65{1'b0}};", "localparam P={1'bx,1'b0};"}) {
         result = analyzeVerilog(std::string("module probe(input CLK,RST,D,output reg PRIME,Q);\n") +
             declaration + "\nalways @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
             "always @(posedge RST) if(RST==P) Q<=0; else Q<=D;\nendmodule\n");
@@ -6853,6 +6859,21 @@ int main() {
         if (item.ruleId == "GJB10157.7.1.3") resetConditionLines.push_back(item.line);
     check(resetConditionLines == std::vector<std::size_t>{5, 7},
           "R-6-3 locates folded localparam use and unary source, not the declaration");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D,output reg PRIME,Q);\n"
+        "always @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
+        "always @(posedge RST) if(RST==\n{\n1'b0,1'b0}) Q<=0;\nendmodule\n");
+    resetConditionLines.clear();
+    for (const auto& item : result.violations)
+        if (item.ruleId == "GJB10157.7.1.3") resetConditionLines.push_back(item.line);
+    check(resetConditionLines == std::vector<std::size_t>{4},
+          "R-6-3 locates a folded concatenation at its opening brace");
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D,output reg Q,OTHER);\n"
+        "always @(posedge CLK or posedge RST) if(RST) Q<={1'b0}; else Q<=D;\n"
+        "always @(posedge CLK) if(!CLK) OTHER<=0; else OTHER<=D;\nendmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 0,
+          "R-6-3 recovered concatenation data closes the simple reset catalog and excludes CLK");
     // Establish an admitted reset name in a separate multi-edge process.
     // The condition under test is in a single-edge process, so its shape
     // does not have to establish its own asynchronous-reset catalog entry.
@@ -7133,7 +7154,7 @@ int main() {
              "1+2*3", "8/2", "7%4", "2**3", "1<<2", "8>>1", "8>>>1",
              "1<2", "1>=2", "1==0", "1!=0", "1===0", "1!==0", "1&&0", "1||0",
              "8'hf0|8'h0f", "8'hf0^8'h0f", "8'hf0~^8'h0f", "&8'hff", "!0",
-             "'0", "8'hxz", "1/0"}) {
+             "'0", "8'hxz", "1/0", "{8{1'b0}}", "{4'h0,4'h0}"}) {
         result = analyzeVerilog(
             std::string("module probe #(parameter RESET=8'h00)(input CLK,RST,input [7:0] D,output reg [7:0] Q,output reg X,Y); localparam ALIAS=(RESET),NEXT=ALIAS+1;\n") +
             "always @(posedge CLK or posedge RST) if(RST) Q<=" + resetValue + "; else Q<=D;\n" +
@@ -7145,7 +7166,7 @@ int main() {
                   return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
               }), context.c_str());
     }
-    for (const auto& resetValue : {"RV", "CYCLE", "MISSING", "$clog2(2)", "{8{1'b0}}", "1'b0?0:1", "1+", "0 1"}) {
+    for (const auto& resetValue : {"RV", "CYCLE", "MISSING", "$clog2(2)", "{8{RV}}", "{65{1'b0}}", "1'b0?0:1", "1+", "0 1"}) {
         result = analyzeVerilog(
             std::string("module probe(input CLK,RST,input [7:0] D,RV,output reg [7:0] Q,output reg X); localparam CYCLE=OTHER,OTHER=CYCLE;\n") +
             "always @(posedge CLK or posedge RST) if(RST) Q<=" + resetValue + "; else Q<=D;\n" +
