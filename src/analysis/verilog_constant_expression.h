@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -71,6 +72,26 @@ public:
                 it != scopes_[scope].names.end())
                 return !it->second.parameter && !it->second.ambiguous;
             if (scope == 0) return false;
+            scope = scopes_[scope].parent;
+        }
+    }
+
+    // Returns the initializer's token range in its declaration scope. This is
+    // symbol binding only: it does not evaluate values, widths or overrides.
+    [[nodiscard]] std::optional<std::pair<std::size_t, std::size_t>>
+    parameterInitializer(std::size_t index) const {
+        if (index >= tokens_.size() ||
+            tokens_[index].kind != parser::HdlTokenKind::Identifier) return std::nullopt;
+        auto scope = tokenScopes_[index];
+        for (;;) {
+            if (const auto it = scopes_[scope].names.find(tokens_[index].text);
+                it != scopes_[scope].names.end()) {
+                const auto& binding = it->second;
+                if (!binding.parameter || binding.ambiguous || binding.begin >= binding.end)
+                    return std::nullopt;
+                return std::pair{binding.begin, binding.end};
+            }
+            if (scope == 0) return std::nullopt;
             scope = scopes_[scope].parent;
         }
     }

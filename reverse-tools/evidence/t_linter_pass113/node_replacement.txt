@@ -1,0 +1,30 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1808dbab0 1808dbab0 FUN_1808dbab0 =====
+
+void FUN_1808dbab0(undefined8 param_1,undefined8 param_2)
+
+{
+  void *_Memory;
+
+  _Memory = (void *)FUN_1808db990();
+  FUN_1808dbbb0(param_2);
+  FUN_1808d9a90(param_2,_Memory);
+  *(undefined8 *)((longlong)_Memory + 0x10) = *(undefined8 *)((longlong)_Memory + 8);
+  FUN_1800da990((longlong)_Memory + 0x20,
+                *(undefined8 *)(*(longlong *)((longlong)_Memory + 0x20) + 8));
+  *(longlong *)(*(longlong *)((longlong)_Memory + 0x20) + 8) =
+       *(longlong *)((longlong)_Memory + 0x20);
+  *(undefined8 *)*(undefined8 *)((longlong)_Memory + 0x20) =
+       *(undefined8 *)((longlong)_Memory + 0x20);
+  *(longlong *)(*(longlong *)((longlong)_Memory + 0x20) + 0x10) =
+       *(longlong *)((longlong)_Memory + 0x20);
+  *(undefined8 *)((longlong)_Memory + 0x28) = 0;
+  if (_Memory != (void *)0x0) {
+    FUN_1808d9570(_Memory);
+    free(_Memory);
+  }
+  return;
+}
+
+

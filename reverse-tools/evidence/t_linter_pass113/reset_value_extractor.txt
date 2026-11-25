@@ -1,0 +1,448 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x180282ef0 180282ef0 FUN_180282ef0 =====
+
+longlong FUN_180282ef0(longlong param_1,undefined8 param_2,longlong param_3,longlong param_4,
+                      undefined8 param_5,longlong param_6,undefined1 param_7,longlong param_8,
+                      longlong param_9,undefined8 param_10)
+
+{
+  ulonglong *puVar1;
+  undefined4 *puVar2;
+  undefined4 *puVar3;
+  code *pcVar4;
+  undefined4 uVar5;
+  undefined4 uVar6;
+  undefined4 uVar7;
+  char cVar8;
+  undefined8 uVar9;
+  longlong lVar10;
+  undefined8 uVar11;
+  undefined8 uVar12;
+  ulonglong uVar13;
+  void *pvVar14;
+  void *pvVar15;
+  ulonglong uVar16;
+  int iVar17;
+  uint uVar18;
+  ulonglong uVar19;
+  undefined1 local_178;
+  int local_170 [2];
+  void *local_168;
+  void *pvStack_160;
+  longlong local_158;
+  void *local_150;
+  longlong lStack_148;
+  longlong local_140;
+  undefined1 local_138 [8];
+  void *local_130;
+  undefined8 uStack_128;
+  longlong local_120;
+  void *local_118;
+  undefined8 uStack_110;
+  longlong local_108;
+  undefined1 *local_100;
+  undefined8 local_f8;
+  undefined1 *local_f0;
+  undefined1 local_e8 [56];
+  undefined1 local_b0 [56];
+  undefined1 local_78 [64];
+
+  local_f8 = 0xfffffffffffffffe;
+  uVar16 = 0;
+  local_100 = local_e8;
+  uVar9 = FUN_180996780(local_e8,param_8);
+  FUN_1801d8e40(param_5,local_170,uVar9);
+  FUN_180996f10(param_1,5,local_170[0]);
+  uVar13 = uVar16;
+  uVar19 = uVar16;
+  if (0 < local_170[0]) {
+    do {
+      if (local_168 != pvStack_160) {
+        FUN_1809c5180(local_170);
+      }
+      if ((ulonglong)(lStack_148 - (longlong)local_150 >> 4) <= uVar16) {
+        std::_Xout_of_range("invalid vector<T> subscript");
+        pcVar4 = (code *)swi(3);
+        lVar10 = (*pcVar4)();
+        return lVar10;
+      }
+      puVar2 = (undefined4 *)((longlong)local_150 + uVar13);
+      if (*(longlong *)(param_1 + 8) != *(longlong *)(param_1 + 0x10)) {
+        FUN_1809c5180(param_1);
+      }
+      if ((ulonglong)(*(longlong *)(param_1 + 0x28) - *(longlong *)(param_1 + 0x20) >> 4) <= uVar16)
+      {
+        std::_Xout_of_range("invalid vector<T> subscript");
+        pcVar4 = (code *)swi(3);
+        lVar10 = (*pcVar4)();
+        return lVar10;
+      }
+      uVar5 = puVar2[1];
+      uVar6 = puVar2[2];
+      uVar7 = puVar2[3];
+      puVar3 = (undefined4 *)(*(longlong *)(param_1 + 0x20) + uVar13);
+      *puVar3 = *puVar2;
+      puVar3[1] = uVar5;
+      puVar3[2] = uVar6;
+      puVar3[3] = uVar7;
+      uVar18 = (int)uVar19 + 1;
+      uVar16 = uVar16 + 1;
+      uVar13 = uVar13 + 0x10;
+      uVar19 = (ulonglong)uVar18;
+    } while ((int)uVar18 < local_170[0]);
+  }
+  iVar17 = 0;
+  FUN_180996fc0(local_138);
+  cVar8 = FUN_18099a9c0(param_1,local_138);
+  if (cVar8 == '\0') {
+    do {
+      FUN_18099a860(local_138,param_1);
+      local_100 = local_b0;
+      local_f0 = local_78;
+      uVar9 = FUN_180996780(local_b0,param_6);
+      uVar11 = FUN_180996780(local_78,local_170);
+      FUN_180282250(param_2,uVar11,param_1,param_3 + 0x48,uVar9,param_7,0,param_10);
+      FUN_1801d9540(param_5,param_1);
+      cVar8 = FUN_1809bcb00(param_1);
+      if (cVar8 != '\0') break;
+      if (100 < iVar17) {
+        uVar9 = FUN_1809730c0(param_9,1);
+        uVar11 = FUN_1809730c0(param_1,1);
+        uVar12 = FUN_1809730c0(param_4 + 8,1);
+                    /* WARNING: Subroutine does not return */
+        FUN_180972550("Async reset %s yields endless loop at value %s for signal %s.\n",uVar12,
+                      uVar11,uVar9);
+      }
+      FUN_18099a860(local_170,param_1);
+      iVar17 = iVar17 + 1;
+      cVar8 = FUN_18099a9c0(param_1,local_138);
+    } while (cVar8 == '\0');
+  }
+  FUN_1809bc4a0(param_1);
+  if (local_118 != (void *)0x0) {
+    uVar13 = local_108 - (longlong)local_118 >> 4;
+    if (0xfffffffffffffff < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar14 = local_118;
+    if (0xfff < uVar13 << 4) {
+      if (((ulonglong)local_118 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar14 = *(void **)((longlong)local_118 + -8);
+      if (local_118 <= pvVar14) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)local_118 - (longlong)pvVar14) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)local_118 - (longlong)pvVar14)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar14);
+    local_118 = (void *)0x0;
+    uStack_110 = 0;
+    local_108 = 0;
+  }
+  if (local_130 != (void *)0x0) {
+    FUN_18003e5c0(local_130,uStack_128,&local_130,local_178);
+    uVar13 = (local_120 - (longlong)local_130) / 0x28;
+    if (0x666666666666666 < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar14 = local_130;
+    if (0xfff < uVar13 * 0x28) {
+      if (((ulonglong)local_130 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar14 = *(void **)((longlong)local_130 + -8);
+      if (local_130 <= pvVar14) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)local_130 - (longlong)pvVar14) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)local_130 - (longlong)pvVar14)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar14);
+    local_130 = (void *)0x0;
+    uStack_128 = 0;
+    local_120 = 0;
+  }
+  if (local_150 != (void *)0x0) {
+    uVar13 = local_140 - (longlong)local_150 >> 4;
+    if (0xfffffffffffffff < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar14 = local_150;
+    if (0xfff < uVar13 << 4) {
+      if (((ulonglong)local_150 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar14 = *(void **)((longlong)local_150 + -8);
+      if (local_150 <= pvVar14) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)local_150 - (longlong)pvVar14) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)local_150 - (longlong)pvVar14)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar14);
+    local_150 = (void *)0x0;
+    lStack_148 = 0;
+    local_140 = 0;
+  }
+  if (local_168 != (void *)0x0) {
+    FUN_18003e5c0(local_168,pvStack_160,&local_168,local_178);
+    uVar13 = (local_158 - (longlong)local_168) / 0x28;
+    if (0x666666666666666 < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar14 = local_168;
+    if (0xfff < uVar13 * 0x28) {
+      if (((ulonglong)local_168 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar14 = *(void **)((longlong)local_168 + -8);
+      if (local_168 <= pvVar14) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)local_168 - (longlong)pvVar14) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)local_168 - (longlong)pvVar14)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar14);
+    local_168 = (void *)0x0;
+    pvStack_160 = (void *)0x0;
+    local_158 = 0;
+  }
+  pvVar14 = *(void **)(param_6 + 0x20);
+  if (pvVar14 != (void *)0x0) {
+    uVar13 = *(longlong *)(param_6 + 0x30) - (longlong)pvVar14 >> 4;
+    if (0xfffffffffffffff < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar15 = pvVar14;
+    if (0xfff < uVar13 << 4) {
+      if (((ulonglong)pvVar14 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar15 = *(void **)((longlong)pvVar14 - 8);
+      if (pvVar14 <= pvVar15) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)pvVar14 - (longlong)pvVar15) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)pvVar14 - (longlong)pvVar15)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar15);
+    *(undefined8 *)(param_6 + 0x20) = 0;
+    *(undefined8 *)(param_6 + 0x28) = 0;
+    *(undefined8 *)(param_6 + 0x30) = 0;
+  }
+  puVar1 = (ulonglong *)(param_6 + 8);
+  if (*puVar1 != 0) {
+    FUN_18003e5c0(*puVar1,*(undefined8 *)(param_6 + 0x10),puVar1,local_178);
+    pvVar14 = (void *)*puVar1;
+    uVar13 = (*(longlong *)(param_6 + 0x18) - (longlong)pvVar14) / 0x28;
+    if (0x666666666666666 < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar15 = pvVar14;
+    if (0xfff < uVar13 * 0x28) {
+      if (((ulonglong)pvVar14 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar15 = *(void **)((longlong)pvVar14 - 8);
+      if (pvVar14 <= pvVar15) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)pvVar14 - (longlong)pvVar15) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)pvVar14 - (longlong)pvVar15)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar15);
+    *puVar1 = 0;
+    *(undefined8 *)(param_6 + 0x10) = 0;
+    *(undefined8 *)(param_6 + 0x18) = 0;
+  }
+  pvVar14 = *(void **)(param_8 + 0x20);
+  if (pvVar14 != (void *)0x0) {
+    uVar13 = *(longlong *)(param_8 + 0x30) - (longlong)pvVar14 >> 4;
+    if (0xfffffffffffffff < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar15 = pvVar14;
+    if (0xfff < uVar13 << 4) {
+      if (((ulonglong)pvVar14 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar15 = *(void **)((longlong)pvVar14 - 8);
+      if (pvVar14 <= pvVar15) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)pvVar14 - (longlong)pvVar15) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)pvVar14 - (longlong)pvVar15)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar15);
+    *(undefined8 *)(param_8 + 0x20) = 0;
+    *(undefined8 *)(param_8 + 0x28) = 0;
+    *(undefined8 *)(param_8 + 0x30) = 0;
+  }
+  if (*(longlong *)(param_8 + 8) != 0) {
+    FUN_18003e5c0(*(longlong *)(param_8 + 8),*(undefined8 *)(param_8 + 0x10),param_8 + 8,local_178);
+    pvVar14 = *(void **)(param_8 + 8);
+    uVar13 = (*(longlong *)(param_8 + 0x18) - (longlong)pvVar14) / 0x28;
+    if (0x666666666666666 < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar15 = pvVar14;
+    if (0xfff < uVar13 * 0x28) {
+      if (((ulonglong)pvVar14 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar15 = *(void **)((longlong)pvVar14 - 8);
+      if (pvVar14 <= pvVar15) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)pvVar14 - (longlong)pvVar15) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)pvVar14 - (longlong)pvVar15)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar15);
+    *(undefined8 *)(param_8 + 8) = 0;
+    *(undefined8 *)(param_8 + 0x10) = 0;
+    *(undefined8 *)(param_8 + 0x18) = 0;
+  }
+  pvVar14 = *(void **)(param_9 + 0x20);
+  if (pvVar14 != (void *)0x0) {
+    uVar13 = *(longlong *)(param_9 + 0x30) - (longlong)pvVar14 >> 4;
+    if (0xfffffffffffffff < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar15 = pvVar14;
+    if (0xfff < uVar13 << 4) {
+      if (((ulonglong)pvVar14 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar15 = *(void **)((longlong)pvVar14 - 8);
+      if (pvVar14 <= pvVar15) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)pvVar14 - (longlong)pvVar15) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)pvVar14 - (longlong)pvVar15)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar15);
+    *(undefined8 *)(param_9 + 0x20) = 0;
+    *(undefined8 *)(param_9 + 0x28) = 0;
+    *(undefined8 *)(param_9 + 0x30) = 0;
+  }
+  if (*(longlong *)(param_9 + 8) != 0) {
+    FUN_18003e5c0(*(longlong *)(param_9 + 8),*(undefined8 *)(param_9 + 0x10),param_9 + 8,local_178);
+    pvVar14 = *(void **)(param_9 + 8);
+    uVar13 = (*(longlong *)(param_9 + 0x18) - (longlong)pvVar14) / 0x28;
+    if (0x666666666666666 < uVar13) {
+                    /* WARNING: Subroutine does not return */
+      _invalid_parameter_noinfo_noreturn();
+    }
+    pvVar15 = pvVar14;
+    if (0xfff < uVar13 * 0x28) {
+      if (((ulonglong)pvVar14 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      pvVar15 = *(void **)((longlong)pvVar14 - 8);
+      if (pvVar14 <= pvVar15) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if ((ulonglong)((longlong)pvVar14 - (longlong)pvVar15) < 8) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+      if (0x27 < (ulonglong)((longlong)pvVar14 - (longlong)pvVar15)) {
+                    /* WARNING: Subroutine does not return */
+        _invalid_parameter_noinfo_noreturn();
+      }
+    }
+    free(pvVar15);
+    *(undefined8 *)(param_9 + 8) = 0;
+    *(undefined8 *)(param_9 + 0x10) = 0;
+    *(undefined8 *)(param_9 + 0x18) = 0;
+  }
+  return param_1;
+}
+
+

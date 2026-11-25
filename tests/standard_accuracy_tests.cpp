@@ -7037,9 +7037,23 @@ int main() {
              {"RST == 1'sb1", "posedge", 2},
              {"RST == 1'bx", "negedge", 1},
              {"RST === 1'bz", "negedge", 1},
-             {"RST !== 1'b?", "posedge", 1}}) {
+             {"RST !== 1'b?", "posedge", 1},
+             {"RST == 1", "posedge", 1},
+             {"RST == 2'b01", "posedge", 1},
+             {"RST == 32'b0", "negedge", 1},
+             {"RST == 8'h80", "posedge", 2},
+             {"RST == 33'h100000000", "negedge", 1},
+             {"RST == '1", "posedge", 1},
+             {"RST == '0", "negedge", 1},
+             {"RST == 'x", "negedge", 1},
+             {"RST == K", "posedge", 1},
+             {"RST == (1+0)", "posedge", 1},
+             {"RST == (3-3)", "negedge", 1},
+             {"RST != (1-1)", "posedge", 1},
+             {"1+0 == RST", "posedge", 1},
+             {"K === RST", "posedge", 1}}) {
         result = analyzeVerilog(
-            std::string("module probe(input CLK,RST,D, output reg Q,X,Y);\n") +
+            std::string("module probe(input CLK,RST,D, output reg Q,X,Y); localparam K=1'b1;\n") +
             "always @(posedge CLK or " + edge + " RST) if(" + condition +
             ") Q<=0; else Q<=D;\n" +
             "always @(posedge CLK) if(!CLK) X<=0; else X<=D;\n" +
@@ -7049,9 +7063,10 @@ int main() {
                   return item.ruleId == "GJB10157.7.1.3" && item.line == 3;
               }) && std::ranges::any_of(result.violations, [](const auto& item) {
                   return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
-              }), "R-6-3 admits one-bit comparison reset roots without extending diagnostic condition shapes");
+              }), "R-6-3 admits constant comparison ports while preserving scalar origins and diagnostic shapes");
     }
-    for (const auto& condition : {"RST == 1", "RST == 2'b01", "RST == D", "RST == K"}) {
+    for (const auto& condition : {"RST == D", "RST == (D+1)", "RST == {D,1'b0}", "RST == K[0]",
+                                  "!RST == 32'b1", "~RST == 2'b01", "(RST==1'b1) == 32'b1"}) {
         result = analyzeVerilog(
             std::string("module probe(input CLK,RST,D, output reg Q,X); localparam K=1'b1;\n") +
             "always @(posedge CLK or posedge RST) if(" + condition +
@@ -7059,8 +7074,45 @@ int main() {
             "always @(posedge CLK) if(!CLK) X<=0; else X<=D;\nendmodule\n");
         check(std::ranges::any_of(result.violations, [](const auto& item) {
                   return item.ruleId == "GJB10157.7.1.3" && item.line == 3;
-              }), "R-6-3 keeps unproven comparison widths and nonliteral operands outside the closed catalog");
+              }), "R-6-3 keeps runtime and unrecovered comparison operands outside the closed catalog");
     }
+    for (const auto& resetValue : {
+             "RESET", "ALIAS", "NEXT", "(RESET+1)&8'hff", "~RESET", "-1",
+             "1+2*3", "8/2", "7%4", "2**3", "1<<2", "8>>1", "8>>>1",
+             "1<2", "1>=2", "1==0", "1!=0", "1===0", "1!==0", "1&&0", "1||0",
+             "8'hf0|8'h0f", "8'hf0^8'h0f", "8'hf0~^8'h0f", "&8'hff", "!0",
+             "'0", "8'hxz", "1/0"}) {
+        result = analyzeVerilog(
+            std::string("module probe #(parameter RESET=8'h00)(input CLK,RST,input [7:0] D,output reg [7:0] Q,output reg X,Y); localparam ALIAS=(RESET),NEXT=ALIAS+1;\n") +
+            "always @(posedge CLK or posedge RST) if(RST) Q<=" + resetValue + "; else Q<=D;\n" +
+            "always @(posedge CLK) if(!CLK) X<=0; else X<=1;\n" +
+            "always @(posedge RST) if(!RST) Y<=0; else Y<=1;\nendmodule\n");
+        const auto context = std::string("R-6-3 recovers constant reset data without treating its clock as reset: ") + resetValue;
+        check(count(result, "GJB10157.7.1.3") == 1 &&
+              std::ranges::any_of(result.violations, [](const auto& item) {
+                  return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
+              }), context.c_str());
+    }
+    for (const auto& resetValue : {"RV", "CYCLE", "MISSING", "$clog2(2)", "{8{1'b0}}", "1'b0?0:1", "1+", "0 1"}) {
+        result = analyzeVerilog(
+            std::string("module probe(input CLK,RST,input [7:0] D,RV,output reg [7:0] Q,output reg X); localparam CYCLE=OTHER,OTHER=CYCLE;\n") +
+            "always @(posedge CLK or posedge RST) if(RST) Q<=" + resetValue + "; else Q<=D;\n" +
+            "always @(posedge CLK) if(!CLK) X<=0; else X<=1;\nendmodule\n");
+        check(std::ranges::any_of(result.violations, [](const auto& item) {
+                  return item.ruleId == "GJB10157.7.1.3" && item.line == 3;
+              }), "R-6-3 does not close the catalog from runtime, cyclic, unresolved or unsupported reset values");
+    }
+    result = analyzeVerilog(
+        "module a(input CLK,RST,input [7:0] D,output reg [7:0] Q,output reg X); localparam VALUE=0;\n"
+        "always @(posedge CLK or posedge RST) if(RST) Q<=VALUE; else Q<=D;\n"
+        "always @(posedge CLK) if(!CLK) X<=0; else X<=1; endmodule\n"
+        "module b(input CLK,RST,input [7:0] D,VALUE,output reg [7:0] Q,output reg X);\n"
+        "always @(posedge CLK or posedge RST) if(RST) Q<=VALUE; else Q<=D;\n"
+        "always @(posedge CLK) if(!CLK) X<=0; else X<=1; endmodule\n");
+    check(count(result, "GJB10157.7.1.3") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB10157.7.1.3" && item.line == 6;
+          }), "R-6-3 parameter binding does not leak a reset constant into a sibling module variable");
     for (const auto& dataWidth : {"[W-1:0]", "[3:0]"}) {
         result = analyzeVerilog(
             std::string("module probe #(parameter W=8)(input CLK,RST, input ") + dataWidth +

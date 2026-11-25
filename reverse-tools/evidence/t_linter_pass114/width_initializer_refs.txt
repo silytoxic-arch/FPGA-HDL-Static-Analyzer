@@ -1,0 +1,8 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+Initializer references only; full reference-file SHA256: 9d33d812e7eb1637aa1efff92cf1f7e2a45545dd6ac31371d5c37e41016b035f
+===== 18137e14c =====
+1809cb4ca READ 1809ca7f0 FUN_1809ca7f0 :: MOVSXD RCX,dword ptr [0x18137e14c]
+1809cb501 WRITE 1809ca7f0 FUN_1809ca7f0 :: MOV dword ptr [0x18137e14c],EBX
+===== 18137e16c =====
+1809cb711 DATA 1809ca7f0 FUN_1809ca7f0 :: LEA RCX,[0x18137e16c]

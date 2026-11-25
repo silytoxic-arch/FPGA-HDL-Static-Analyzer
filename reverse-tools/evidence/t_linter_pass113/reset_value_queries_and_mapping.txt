@@ -1,0 +1,101 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1809bc4a0 1809bc4a0 FUN_1809bc4a0 =====
+
+ulonglong FUN_1809bc4a0(longlong param_1)
+
+{
+  longlong lVar1;
+  longlong *plVar2;
+  ulonglong uVar3;
+
+  FUN_1809beba0();
+  plVar2 = *(longlong **)(param_1 + 8);
+  do {
+    if (plVar2 == *(longlong **)(param_1 + 0x10)) {
+      return (ulonglong)plVar2 & 0xffffffffffffff00;
+    }
+    if ((0 < (int)plVar2[4]) && (*plVar2 == 0)) {
+      lVar1 = plVar2[1];
+      uVar3 = 0;
+      if (plVar2[2] != lVar1) {
+        do {
+          if (*(char *)(lVar1 + uVar3) == '\x05') {
+            return CONCAT71((int7)((ulonglong)plVar2 >> 8),1);
+          }
+          uVar3 = uVar3 + 1;
+        } while (uVar3 < (ulonglong)(plVar2[2] - lVar1));
+      }
+    }
+    plVar2 = plVar2 + 5;
+  } while( true );
+}
+
+
+
+===== 0x1801d8e40 1801d8e40 FUN_1801d8e40 =====
+
+undefined8 FUN_1801d8e40(undefined8 param_1,undefined8 param_2,longlong param_3,undefined8 param_4)
+
+{
+  longlong lVar1;
+
+  FUN_1801d9540(param_1,param_3,param_3,param_4,0,0xfffffffffffffffe);
+  FUN_1801d8630(param_2,param_3);
+  lVar1 = *(longlong *)(param_3 + 0x20);
+  if (lVar1 != 0) {
+    FUN_1804a1d00(param_3 + 0x20,lVar1,*(longlong *)(param_3 + 0x30) - lVar1 >> 4,param_4,1);
+    *(undefined8 *)(param_3 + 0x20) = 0;
+    *(undefined8 *)(param_3 + 0x28) = 0;
+    *(undefined8 *)(param_3 + 0x30) = 0;
+  }
+  FUN_18003f1c0(param_3 + 8);
+  return param_2;
+}
+
+
+
+===== 0x1801d9540 1801d9540 FUN_1801d9540 =====
+
+void FUN_1801d9540(undefined8 param_1,int *param_2)
+
+{
+  int iVar1;
+  code *pcVar2;
+  undefined4 uVar3;
+  undefined4 uVar4;
+  undefined4 uVar5;
+  undefined4 *puVar6;
+  int iVar7;
+  undefined4 *puVar8;
+
+  iVar1 = *param_2;
+  iVar7 = 0;
+  if (iVar1 != 0) {
+    do {
+      if (*(longlong *)(param_2 + 2) != *(longlong *)(param_2 + 4)) {
+        FUN_1809c5180(param_2);
+      }
+      if ((ulonglong)(*(longlong *)(param_2 + 10) - *(longlong *)(param_2 + 8) >> 4) <=
+          (ulonglong)(longlong)iVar7) {
+        std::_Xout_of_range("invalid vector<T> subscript");
+        pcVar2 = (code *)swi(3);
+        (*pcVar2)();
+        return;
+      }
+      puVar8 = (undefined4 *)((longlong)iVar7 * 0x10 + *(longlong *)(param_2 + 8));
+      puVar6 = (undefined4 *)FUN_1801d4f20(param_1,puVar8);
+      iVar7 = iVar7 + 1;
+      uVar3 = puVar6[1];
+      uVar4 = puVar6[2];
+      uVar5 = puVar6[3];
+      *puVar8 = *puVar6;
+      puVar8[1] = uVar3;
+      puVar8[2] = uVar4;
+      puVar8[3] = uVar5;
+    } while (iVar7 != iVar1);
+  }
+  return;
+}
+
+

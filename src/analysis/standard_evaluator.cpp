@@ -4540,17 +4540,22 @@ void checkResetConditionEdgePolarity(
         }
         return std::pair{begin, end};
     };
+    using ResetValueRange = std::pair<std::size_t, std::size_t>;
+    struct ResetAssignment {
+        std::size_t target;
+        ResetValueRange value;
+    };
     const auto simpleAssignment = [&](std::size_t begin, std::size_t end)
-        -> std::optional<std::pair<std::size_t, std::size_t>> {
+        -> std::optional<ResetAssignment> {
         const auto [first, last] = statementRange(begin, end);
         if (last < first + 4 || tokens[first].kind != parser::HdlTokenKind::Identifier ||
             (tokens[first + 1].text != "=" && tokens[first + 1].text != "<=") ||
             tokens[last - 1].text != ";") return std::nullopt;
         const auto [rhs, rhsEnd] = primaryRange(first + 2, last - 1);
-        if (rhsEnd != rhs + 1) return std::nullopt;
-        return std::pair{first, rhs};
+        if (rhs >= rhsEnd) return std::nullopt;
+        return ResetAssignment{first, {rhs, rhsEnd}};
     };
-    using ResetAssignments = std::map<std::string, std::size_t>;
+    using ResetAssignments = std::map<std::string, ResetValueRange>;
     std::function<std::optional<ResetAssignments>(std::size_t, std::size_t)> branchAssignments;
     branchAssignments = [&](std::size_t begin, std::size_t end)
         -> std::optional<ResetAssignments> {
@@ -4568,7 +4573,7 @@ void checkResetConditionEdgePolarity(
             } else {
                 const auto assignment = simpleAssignment(at, memberEnd);
                 if (!assignment ||
-                    !assignments.emplace(tokens[assignment->first].text, assignment->second).second)
+                    !assignments.emplace(tokens[assignment->target].text, assignment->value).second)
                     return std::nullopt;
             }
             at = memberEnd;
@@ -4577,6 +4582,53 @@ void checkResetConditionEdgePolarity(
         return assignments;
     };
     const VerilogConstantExpressions symbols(tokens);
+    std::vector<ResetValueRange> activeInitializers;
+    std::function<bool(std::size_t, std::size_t, unsigned)> constantResetValue;
+    constantResetValue = [&](std::size_t begin, std::size_t end, unsigned depth) {
+        if (depth >= 256) return false;
+        const auto [first, last] = primaryRange(begin, end);
+        if (first >= last) return false;
+        bool operand = true;
+        for (auto at = first; at < last;) {
+            const auto& word = tokens[at].text;
+            if (operand) {
+                if (word == "+" || word == "-" || word == "!" || word == "~" ||
+                    word == "&" || word == "|" || word == "^" || word == "~&" ||
+                    word == "~|" || word == "~^" || word == "^~") { ++at; continue; }
+                if (word == "(") {
+                    const auto close = closeParen(tokens, at);
+                    if (close >= last || !constantResetValue(at, close + 1, depth + 1))
+                        return false;
+                    at = close + 1;
+                } else {
+                    if (!constantValue(tokens[at])) {
+                        const auto initializer = symbols.parameterInitializer(at);
+                        if (!initializer ||
+                            std::ranges::find(activeInitializers, *initializer) != activeInitializers.end())
+                            return false;
+                        activeInitializers.push_back(*initializer);
+                        const bool known = constantResetValue(
+                            initializer->first, initializer->second, depth + 1);
+                        activeInitializers.pop_back();
+                        if (!known) return false;
+                    }
+                    ++at;
+                }
+                operand = false;
+            } else {
+                if (word != "+" && word != "-" && word != "*" && word != "/" &&
+                    word != "%" && word != "**" && word != "<<" && word != ">>" &&
+                    word != "<<<" && word != ">>>" && word != "<" && word != ">" &&
+                    word != "<=" && word != ">=" && word != "==" && word != "!=" &&
+                    word != "===" && word != "!==" && word != "&&" && word != "||" &&
+                    word != "&" && word != "|" && word != "^" && word != "~^" && word != "^~")
+                    return false;
+                operand = true;
+                ++at;
+            }
+        }
+        return !operand;
+    };
 
     // runRulesPrepare snapshots modules after proc_arst. The native rule
     // accepts only level-sensitive reset syncs (type < 2); proc_arst keeps a
@@ -4616,16 +4668,17 @@ void checkResetConditionEdgePolarity(
             const auto found = signalWidths.find(signal);
             return found != signalWidths.end() && found->second == 1;
         };
-        const auto oneBitLiteral = [&](std::size_t at) {
-            if (!constantValue(tokens[at])) return false;
-            auto text = tokens[at].text;
+        const auto oneBitConstantPort = [&](std::size_t begin, std::size_t finish) {
+            const auto [first, last] = primaryRange(begin, finish);
+            if (last != first + 1 || !constantValue(tokens[first])) return false;
+            auto text = tokens[first].text;
             text.erase(std::remove(text.begin(), text.end(), '_'), text.end());
             const auto quote = text.find('\'');
             if (quote == std::string::npos || quote == 0) return false;
             unsigned width = 0;
-            for (std::size_t digit = 0; digit < quote; ++digit) {
-                if (text[digit] < '0' || text[digit] > '9') return false;
-                width = width * 10U + static_cast<unsigned>(text[digit] - '0');
+            for (std::size_t at = 0; at < quote; ++at) {
+                if (text[at] < '0' || text[at] > '9') return false;
+                width = width * 10U + static_cast<unsigned>(text[at] - '0');
                 if (width > 1) return false;
             }
             return width == 1;
@@ -4633,8 +4686,8 @@ void checkResetConditionEdgePolarity(
         // Native root matching includes $eq/$eqx/$ne/$nex with a constant
         // port and a recursively matched one-bit port. This recovers the
         // unique scalar origin only; it does not extend diagnostic IF shapes.
-        std::function<std::optional<std::size_t>(std::size_t, std::size_t)> resetRoot;
-        resetRoot = [&](std::size_t begin, std::size_t finish)
+        std::function<std::optional<std::size_t>(std::size_t, std::size_t, bool)> resetRoot;
+        resetRoot = [&](std::size_t begin, std::size_t finish, bool oneBitContext)
             -> std::optional<std::size_t> {
             const auto [first, last] = primaryRange(begin, finish);
             if (first >= last) return std::nullopt;
@@ -4642,6 +4695,9 @@ void checkResetConditionEdgePolarity(
                 tokens[first].kind == parser::HdlTokenKind::Identifier &&
                 scalar(tokens[first].text) && symbols.isDeclaredRuntimeIdentifier(first))
                 return first;
+            // Identifier generation preserves its wire width. Operator Y
+            // widths can instead grow with a wider comparison operand hint.
+            if (!oneBitContext) return std::nullopt;
             int depth = 0;
             std::optional<std::size_t> comparison;
             for (auto at = first; at < last; ++at) {
@@ -4657,14 +4713,14 @@ void checkResetConditionEdgePolarity(
             if (comparison) {
                 const auto [left, leftEnd] = primaryRange(first, *comparison);
                 const auto [right, rightEnd] = primaryRange(*comparison + 1, last);
-                if (leftEnd == left + 1 && oneBitLiteral(left))
-                    return resetRoot(right, rightEnd);
-                if (rightEnd == right + 1 && oneBitLiteral(right))
-                    return resetRoot(left, leftEnd);
+                if (constantResetValue(left, leftEnd, 0))
+                    return resetRoot(right, rightEnd, oneBitConstantPort(left, leftEnd));
+                if (constantResetValue(right, rightEnd, 0))
+                    return resetRoot(left, leftEnd, oneBitConstantPort(right, rightEnd));
                 return std::nullopt;
             }
             if (tokens[first].text == "!" || tokens[first].text == "~")
-                return resetRoot(first + 1, last);
+                return resetRoot(first + 1, last, true);
             return std::nullopt;
         };
         bool catalogClosed = knownLeaf;
@@ -4731,7 +4787,7 @@ void checkResetConditionEdgePolarity(
                     catalogClosed = false; continue;
                 }
                 const auto conditionEnd = closeParen(tokens, root + 1);
-                const auto condition = resetRoot(root + 2, conditionEnd);
+                const auto condition = resetRoot(root + 2, conditionEnd, true);
                 const auto thenEnd = statementEnd(tokens, conditionEnd + 1);
                 if (!condition || thenEnd >= rootEnd || tokens[thenEnd].text != "else") {
                     catalogClosed = false; continue;
@@ -4744,7 +4800,9 @@ void checkResetConditionEdgePolarity(
                     for (const auto& [target, rhs] : *thenAssignments) {
                         const auto other = elseAssignments->find(target);
                         const auto targetWidth = signalWidths.find(target);
-                        const auto runtimeData = [&](std::size_t at) {
+                        const auto runtimeData = [&](ResetValueRange value) {
+                            const auto [at, last] = value;
+                            if (last != at + 1) return false;
                             if (!symbols.isDeclaredRuntimeIdentifier(at)) return false;
                             const auto dataWidth = signalWidths.find(tokens[at].text);
                             return dataWidth != signalWidths.end() &&
@@ -4752,9 +4810,9 @@ void checkResetConditionEdgePolarity(
                                 dataWidth->second == targetWidth->second;
                         };
                         if (targetWidth == signalWidths.end() || other == elseAssignments->end() ||
-                            !((constantValue(tokens[rhs]) &&
+                            !((constantResetValue(rhs.first, rhs.second, 0) &&
                                runtimeData(other->second)) ||
-                              (constantValue(tokens[other->second]) &&
+                              (constantResetValue(other->second.first, other->second.second, 0) &&
                                runtimeData(rhs)))) {
                             assignmentsKnown = false;
                             break;
