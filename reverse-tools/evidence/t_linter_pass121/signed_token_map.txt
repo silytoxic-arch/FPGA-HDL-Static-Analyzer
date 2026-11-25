@@ -1,0 +1,44 @@
+Source: /private/tmp/tlinter-r63-pass121-signed-token-string.txt; SHA256: 6f9ab239865cb83c3716dac24bc32f14db4ce4c555e7fd4e6f7c70f23de5b422
+std::string array base local_1e78; signed entry local_b78; stride 0x20; (0x1e78-0xb78)/0x20 = 0x98
+
+Source lines 388..402
+  local_1ea0 = 0xfffffffffffffffe;
+  local_18[0] = DAT_18131ef10 ^ (ulonglong)auStack_1ec8;
+  FUN_180a38770(local_1e78,&local_1ea8);
+  local_1e60 = 0xf;
+  local_1e68 = 0;
+  local_1e78[0] = 0;
+  FUN_180040680(local_1e78,&DAT_180de47b9,0);
+  FUN_180a38770(local_1e58,&local_1ea8);
+  local_1e40 = 0xf;
+  local_1e48 = 0;
+  local_1e58[0] = 0;
+  FUN_180040680(local_1e58,"\'always\'",8);
+  FUN_180a38770(local_1e38,&local_1ea8);
+  local_1e20 = 0xf;
+  local_1e28 = 0;
+
+Source lines 768..775
+  FUN_18004a000(local_bf8,"\'rtranif0\'");
+  FUN_18004a000(local_bd8,&DAT_180de7b8c);
+  FUN_18004a000(local_bb8,"\'scalared\'");
+  FUN_18004a000(local_b98,"\'showcancelled\'");
+  FUN_18004a000(local_b78,"\'signed\'");
+  FUN_18004a000(local_b58,&DAT_180de7bbc);
+  FUN_18004a000(local_b38,&DAT_180de7bc0);
+  FUN_18004a000(local_b18,&DAT_180de7bc8);
+
+Source lines 863..875
+  puVar2 = (undefined4 *)FUN_18048de00(local_1e88,local_1e78,local_18);
+  local_1e98 = *puVar2;
+  uStack_1e94 = puVar2[1];
+  uStack_1e90 = puVar2[2];
+  uStack_1e8c = puVar2[3];
+  uVar3 = FUN_180a38770(local_1ea7);
+  FUN_18004a100(&DAT_18133bd20,&local_1e98,uVar3);
+  _eh_vector_destructor_iterator_(local_1e78,0x20,0xf3,FUN_18003efe0);
+  atexit(FUN_180da26e0);
+  return;
+}
+
+

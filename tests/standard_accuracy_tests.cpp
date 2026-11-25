@@ -6836,7 +6836,15 @@ int main() {
         {"localparam [0:0] P=1'sb1;", "P", 0xffffffffU},
         {"localparam signed [0:0] P=1'b1;", "P", 1},
         {"localparam [0:0] P=1'sb1;", "P+1'b0", 1},
-        {"localparam signed [0:0] P=1'b1;", "+P", 0xffffffffU}
+        {"localparam signed [0:0] P=1'b1;", "+P", 0xffffffffU},
+        {"localparam signed P=1'b1;", "P", 1},
+        {"localparam signed P=1'b1;", "P+1'sb0", 0xffffffffU},
+        {"localparam signed P=1'b1;", "P<1'sb0", 0},
+        {"localparam P=1'sb1;", "P", 0xffffffffU},
+        {"localparam P=1'sb1;", "P+1'sb0", 1},
+        {"localparam P=1'sb1;", "P<1'sb0", 1},
+        {"localparam P=4'shf;", "P/4'sh2", 7},
+        {"localparam P=4'shf;", "(P+4'sh0)<4'sh0", 0}
     };
     for (const auto& test : resetFoldCases) {
         for (const auto edge : {0U, 1U}) {

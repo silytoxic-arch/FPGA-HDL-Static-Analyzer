@@ -57,6 +57,8 @@ private:
         Value value;
         Ptr left, right;
         unsigned width{};
+        // Inference stage: a parameter reference reads the declaration flag.
+        // Value::signedValue describes the substituted CONSTANT node instead.
         bool sign{};
         std::size_t source{};
         Ptr condition{};
@@ -240,13 +242,18 @@ private:
             // width sign update leaves +0xbc untouched, and AST clone copies it.
             if (rebuild) value->storedCache.reset();
             else value->storedCache = cacheBeforeTypeChange;
-        } else if (sign && *sign != value->signedValue) {
-            // The frontend path for sign-only, no-range declarations is not
-            // recovered. Do not infer a new value/cache from language syntax.
+        } else if (sign && !*sign && value->signedValue) {
+            // The recovered Verilog2005 declaration callback only has SIGNED.
+            // Keep a sign-changing SystemVerilog UNSIGNED form unresolved.
             return {};
         }
         value->source = index;
-        return literal(*value);
+        auto result = literal(*value);
+        // Identifier width inference reads the declaration flag. Substitution
+        // clones the initializer constant, whose sign/cache can differ when
+        // there is no explicit range. Retain both stages in Node and Value.
+        result->sign = sign.value_or(false);
+        return result;
     }
     Ptr parse(std::size_t begin, std::size_t end, unsigned depth) {
         if (begin >= end || end > tokens_.size() || depth >= 256) return {};
@@ -359,7 +366,8 @@ private:
         return parser.at == end ? root : Ptr{};
     }
     static Value resized(Value value, unsigned width, bool sign) {
-        if (width > value.width && sign && value.negative()) value.bits |= ~mask(value.width);
+        if (width > value.width && sign && ((value.bits >> (value.width - 1)) & 1U) != 0)
+            value.bits |= ~mask(value.width);
         value.bits &= mask(width); value.width = width; value.signedValue = sign;
         return value;
     }
@@ -369,7 +377,9 @@ private:
         if (width == 0 || width > 64) return std::nullopt;
         const bool sign = forcedSign.value_or(node->sign);
         const auto& op = node->op;
-        if (op.empty()) return resized(node->value, width, sign);
+        // A literal/parameter clone is not rebuilt by an inherited context.
+        // Its parent converts the physical constant immediately before use.
+        if (op.empty()) return node->value;
         if (op == "?:") {
             // The condition is self-determined and uses its entire bit vector,
             // independently of result width and of the diagnostic low32 cache.
@@ -380,6 +390,7 @@ private:
             auto result = fold(condition->bits != 0 ? node->left : node->right,
                                width, sign, depth + 1);
             if (result) {
+                *result = resized(*result, width, sign);
                 result->source = node->source;
                 result->storedCache.reset(); // Native builds a fresh constant.
             }
@@ -394,6 +405,7 @@ private:
         auto lhs = fold(node->left, operandWidth,
             boolean && node->right && !logical ? std::optional<bool>{comparisonSign} : operandSign, depth + 1);
         if (!lhs) return std::nullopt;
+        if (!boolean) *lhs = resized(*lhs, width, sign);
         std::uint64_t bits = 0;
         if (!node->right) {
             if (op == "+") bits = lhs->bits;
@@ -409,6 +421,16 @@ private:
                 shift(op) || op == "**" ? std::optional<bool>{} :
                 boolean && !logical ? std::optional<bool>{comparisonSign} : operandSign, depth + 1);
             if (!rhs) return std::nullopt;
+            if (boolean && !logical) {
+                // Native comparison dispatch rereads both CONSTANT +0xa4
+                // fields after substitution, and uses their physical widths.
+                const bool physicalSign = lhs->signedValue && rhs->signedValue;
+                const auto physicalWidth = std::max(lhs->width, rhs->width);
+                *lhs = resized(*lhs, physicalWidth, physicalSign);
+                *rhs = resized(*rhs, physicalWidth, physicalSign);
+            } else if (!boolean && !shift(op) && op != "**") {
+                *rhs = resized(*rhs, width, sign);
+            }
             const auto a = lhs->bits, b = rhs->bits;
             if (op == "+") bits = a + b;
             else if (op == "-") bits = a - b;
@@ -461,7 +483,8 @@ private:
                        op == ">" ? !less && a != b : !less;
             } else return std::nullopt;
         }
-        return Value{bits & mask(width), width, boolean ? false : sign, node->source};
+        const auto resultWidth = boolean ? 1U : width;
+        return Value{bits & mask(resultWidth), resultWidth, boolean ? false : sign, node->source};
     }
 };
 

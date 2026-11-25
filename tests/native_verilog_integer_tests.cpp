@@ -133,12 +133,32 @@ int main(int argc, char** argv) {
         {"localparam P='shffffffff;", "P", 0xffffffffULL, 33, true},
         {"localparam [7:0] P='h1;", "P", 1, 8, false},
         {"", "'sd255+1", 256, 32, true},
+        {"localparam signed P=4'hf;", "P", 15, 4, false},
+        {"localparam signed P=4'hf;", "+P", 15, 4, true},
+        {"localparam signed P=4'hf;", "P+4'sh0", 15, 4, true},
+        {"localparam signed P=4'hf;", "P<4'sh0", 0, 1, false},
+        {"localparam signed P=4'hf;", "(P+4'sh0)<4'sh0", 1, 1, false},
+        {"localparam signed P=4'hf;", "P/4'sh2", 0, 4, true},
+        {"localparam signed P=4'hf;", "P>>>1", 15, 4, true},
+        {"localparam signed P=4'hf;", "1 ? P : 4'sh0", 15, 4, true},
+        {"localparam signed P=4'hf;", "{P,4'h0}", 240, 8, false},
+        {"localparam P=4'shf;", "P", 15, 4, true},
+        {"localparam P=4'shf;", "P/4'sh2", 7, 4, false},
+        {"localparam P=4'shf;", "P>>>1", 7, 4, false},
+        {"localparam P=4'shf;", "P<4'sh0", 1, 1, false},
+        {"localparam P=4'shf;", "(P+4'sh0)<4'sh0", 0, 1, false},
+        {"localparam P=4'shf;", "1 ? P : 4'sh0", 15, 4, false},
+        {"localparam signed P=4'hf;localparam Q=P;", "Q", 15, 4, false},
+        {"localparam signed P=4'hf;localparam Q=P;", "Q/4'sh2", 7, 4, false},
+        {"localparam signed P=1'b1;", "P", 1, 1, false},
+        {"localparam signed P=1'b1;", "P<1'sb0", 0, 1, false},
+        {"localparam P=1'sb1;", "P+1'sb0", 1, 1, false},
         {"localparam [7:0] P=4'shf;", "P", 255, 8, false},
         {"localparam signed [3:0] P=4'hf;", "P", 15, 4, true},
         {"localparam [7:0] P=4'hf+4'h1;", "P", 16, 8, false},
         {"localparam P=4'hf+4'h1;", "P", 0, 4, false},
         {"localparam P=4'hf+4'h1;", "P+8'h0", 0, 8, false},
-        {"localparam P=0,Q=P+1;", "Q", 1, 32, true},
+        {"localparam P=0,Q=P+1;", "Q", 1, 32, false},
         {"localparam integer P=-1;", "P", 0xffffffffULL, 32, true},
         {"localparam bit P=2;", "P", 0, 1, false},
         {"localparam unsigned P=4'hf;", "P", 15, 4, false},
@@ -179,7 +199,7 @@ int main(int argc, char** argv) {
     for (const auto& declaration : {"parameter P=0;", "parameter Q=0;localparam P=Q;",
              "localparam P=Q,Q=P;", "localparam P=MISSING;", "localparam real P=0;",
              "localparam [64:0] P=0;", "localparam [W-1:0] P=0;", "localparam P=1'bx;",
-             "localparam signed P=4'hf;", "localparam unsigned P=4'shf;",
+             "localparam unsigned P=4'shf;",
              "parameter N=2;localparam P={N{1'b1}};"}) {
         if (evaluate(declaration, "P")) { ++failures; std::cerr << "FAIL binding boundary: " << declaration << '\n'; }
     }
@@ -194,7 +214,13 @@ int main(int argc, char** argv) {
              {"localparam [7:0] P=4'shf;", "P", 255},
              {"localparam [7:0] P=4'shf+4'sh0;", "P", 0xffffffffU},
              {"localparam [0:0] P=1'sb1;localparam [0:0] Q=P;", "Q", 0xffffffffU},
-             {"localparam [0:0] P=1'sb1;localparam [1:0] Q=P;", "Q", 1}}) {
+             {"localparam [0:0] P=1'sb1;localparam [1:0] Q=P;", "Q", 1},
+             {"localparam signed P=1'b1;", "P", 1},
+             {"localparam signed P=1'b1;", "P+1'sb0", 0xffffffffU},
+             {"localparam signed P=1'b1;", "P<1'sb0", 0},
+             {"localparam P=1'sb1;", "P", 0xffffffffU},
+             {"localparam P=1'sb1;", "P+1'sb0", 1},
+             {"localparam P=1'sb1;", "P<1'sb0", 1}}) {
         const auto value = evaluate(test.declaration, test.expression);
         if (!value || value->cache() != test.cache) {
             ++failures;

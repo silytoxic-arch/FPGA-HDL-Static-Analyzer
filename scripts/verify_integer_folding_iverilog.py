@@ -47,7 +47,14 @@ def main():
         ("", "'shffffffff>>>31"): ((33, 1), (32, 4294967295)),
         ("", "'sh80000000<0"): ((1, 0), (1, 1)),
         ("localparam P='shffffffff;", "P"): ((33, 4294967295), (32, 4294967295)),
+        ("localparam signed P=4'hf;", "P<4'sh0"): ((1, 0), (1, 1)),
+        ("localparam P=4'shf;", "P/4'sh2"): ((4, 7), (4, 0)),
+        ("localparam P=4'shf;", "P>>>1"): ((4, 7), (4, 15)),
+        ("localparam P=4'shf;", "(P+4'sh0)<4'sh0"): ((1, 0), (1, 1)),
+        ("localparam signed P=4'hf;localparam Q=P;", "Q/4'sh2"): ((4, 7), (4, 0)),
+        ("localparam signed P=1'b1;", "P<1'sb0"): ((1, 0), (1, 1)),
     }
+    type_boundary_keys = {key for key in native_boundaries if key[0] and key[1] != "P"}
     for index, (decl, expr, width, bits, cache, sign) in enumerate(cases):
         expected = (int(width), int(bits))
         known_boundary = native_boundaries.get((decl, expr)) == (expected, actual.get(index))
@@ -55,20 +62,24 @@ def main():
         checks.append({"declaration": decl, "expression": expr, "model": expected,
                        "iverilog": actual.get(index), "matched": actual.get(index) == expected,
                        "knownNativeDecimalBoundary": native_decimal_boundary,
-                       "knownNativeLiteralBoundary": known_boundary})
+                       "knownNativeLiteralBoundary": known_boundary and (decl, expr) not in type_boundary_keys,
+                       "knownNativeTypeBoundary": known_boundary and (decl, expr) in type_boundary_keys,
+                       "knownNativeBoundary": known_boundary})
     version = subprocess.run(["iverilog", "-V"], capture_output=True, text=True).stdout.splitlines()[0]
     report = {"scope": "Independent HDL semantics, not proprietary runtime equivalence",
               "oracle": version, "flags": ["-g2012", "-gstrict-expr-width"],
-              "scopeNote": "Checks natural width and bits; signed cache has separate C++ assertions. Exact native/Icarus literal parser differences are recorded separately, not counted as matches.",
+              "scopeNote": "Checks natural width and bits; signed cache has separate C++ assertions. Exact native/Icarus parser and type-stage differences are recorded separately, not counted as matches.",
               "total": len(checks),
               "matched": sum(item["matched"] for item in checks),
               "knownLiteralDifferences": sum(item["knownNativeLiteralBoundary"] for item in checks),
+              "knownTypeDifferences": sum(item["knownNativeTypeBoundary"] for item in checks),
+              "knownDifferences": sum(item["knownNativeBoundary"] for item in checks),
               "checks": checks}
     pathlib.Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f'{report["matched"]}/{report["total"]} integer folding oracle checks matched')
-    if report["knownLiteralDifferences"]:
-        print(f'{report["knownLiteralDifferences"]} exact native/Icarus literal differences recorded separately')
-    failures = [item for item in checks if not item["matched"] and not item["knownNativeLiteralBoundary"]]
+    if report["knownDifferences"]:
+        print(f'{report["knownDifferences"]} exact native/Icarus parser/type differences recorded separately')
+    failures = [item for item in checks if not item["matched"] and not item["knownNativeBoundary"]]
     if failures:
         for item in checks:
             if item in failures:
