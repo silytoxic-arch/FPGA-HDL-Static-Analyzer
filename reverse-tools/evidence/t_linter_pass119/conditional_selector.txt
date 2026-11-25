@@ -1,0 +1,63 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 18090c960 18090c960 FUN_18090c960 =====
+
+undefined8 * FUN_18090c960(longlong param_1,undefined8 *param_2)
+
+{
+  longlong lVar1;
+  bool bVar2;
+  bool bVar3;
+  int iVar4;
+  byte *pbVar5;
+  undefined8 uVar6;
+  undefined8 uVar7;
+  double dVar8;
+  
+  iVar4 = FUN_1808e37d0();
+  if (iVar4 == 0) {
+    param_2[1] = 0;
+    *param_2 = 0;
+    return param_2;
+  }
+  bVar2 = false;
+  bVar3 = false;
+  lVar1 = **(longlong **)(param_1 + 8);
+  if (*(int *)(lVar1 + 4) == 0x10) {
+    bVar3 = false;
+    for (pbVar5 = *(byte **)(lVar1 + 0x88); pbVar5 != *(byte **)(lVar1 + 0x90); pbVar5 = pbVar5 + 1)
+    {
+      if (*pbVar5 == 1) {
+        bVar2 = true;
+      }
+      if (1 < *pbVar5) {
+        bVar3 = true;
+      }
+    }
+LAB_18090ca05:
+    uVar6 = 0;
+    if (!bVar2) {
+      uVar7 = uVar6;
+      if (!bVar3) {
+        uVar7 = *(undefined8 *)(*(longlong *)(param_1 + 8) + 0x10);
+        uVar6 = *(undefined8 *)(*(longlong *)(param_1 + 8) + 8);
+      }
+      goto LAB_18090ca2d;
+    }
+  }
+  else {
+    dVar8 = (double)FUN_1808db220(lVar1,1);
+    if (dVar8 == 0.0) {
+      bVar2 = false;
+      goto LAB_18090ca05;
+    }
+  }
+  uVar7 = *(undefined8 *)(*(longlong *)(param_1 + 8) + 8);
+  uVar6 = *(undefined8 *)(*(longlong *)(param_1 + 8) + 0x10);
+LAB_18090ca2d:
+  param_2[1] = uVar6;
+  *param_2 = uVar7;
+  return param_2;
+}
+
+

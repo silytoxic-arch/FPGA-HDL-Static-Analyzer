@@ -91,6 +91,26 @@ int main(int argc, char** argv) {
         {"localparam signed [7:0] P={4'hf,4'hf};", "P", 255, 8, true},
         {"localparam [3:0] P={4'h1,4'h2};", "P", 2, 4, false},
         {"localparam [15:0] P={4'hf+4'h1,4'h1};", "P", 1, 16, false},
+        {"", "1 ? 4'hf : 8'h0", 15, 8, false},
+        {"", "1 ? 4'shf : 8'sh0", 255, 8, true},
+        {"", "1 ? 4'shf : 8'h0", 15, 8, false},
+        {"", "0 ? 4'h0 : 8'shff", 255, 8, false},
+        {"", "0 ? 8'sh0 : 4'shf", 255, 8, true},
+        {"", "(1 ? 4'hf+4'h1 : 4'h0)+8'h0", 16, 8, false},
+        {"", "1 ? 4'hf+4'h1 : 8'h0", 16, 8, false},
+        {"", "1 ? 0 ? 1 : 2 : 3", 2, 32, true},
+        {"", "0 ? 1 : 0 ? 2 : 3", 3, 32, true},
+        {"", "64'h100000000 ? 0 : 1", 0, 32, true},
+        {"", "0 ? 8'h0 : 4'h8<<1", 16, 8, false},
+        {"", "1 ? 4'sh8>>>1 : 8'h0", 4, 8, false},
+        {"", "1 ? 4'sh8>>>1 : 8'sh0", 252, 8, true},
+        {"", "(1 ? 4'shf : 4'sh0)<8'h1", 0, 1, false},
+        {"", "{1 ? 4'hf+4'h1 : 4'h0,4'h1}", 1, 8, false},
+        {"", "1 ? 8'h1 : 4'h0/4'h0", 1, 8, false},
+        {"", "1 ? 1 : 0**-1", 1, 32, true},
+        {"localparam signed [7:0] P=1 ? 4'shf : 4'sh0;", "P", 255, 8, true},
+        {"localparam [7:0] P=1 ? 4'hf+4'h1 : 4'h0;", "P", 16, 8, false},
+        {"localparam K=64'h100000000;", "K ? 1 : 0", 1, 32, true},
         {"localparam [7:0] P=4'shf;", "P", 255, 8, false},
         {"localparam signed [3:0] P=4'hf;", "P", 15, 4, true},
         {"localparam [7:0] P=4'hf+4'h1;", "P", 16, 8, false},
@@ -131,7 +151,7 @@ int main(int argc, char** argv) {
             << value->width << '\t' << value->bits << '\t' << value->cache() << '\t'
             << value->signedValue << '\n';
     }
-    for (const auto& expression : {"1/0", "1%0", "0**-1", "4'h0**4'shf", "1<<-1", "65'h1+1", "1'bx+1", "'1+1", "'h1+1", "1?0:1", "{}", "{1'b0,}", "{,1'b0}", "{1'bx,1'b0}", "{65{1'b1}}", "{64'h0,1'b0}", "{0{1'b1}}", "{-1{1'b1}}", "{1{1'b1}", "{1'b0", "1+", "0 1", "$clog2(2)"}) {
+    for (const auto& expression : {"1/0", "1%0", "0**-1", "4'h0**4'shf", "1<<-1", "65'h1+1", "1'bx+1", "'1+1", "'h1+1", "1?0", "1?:0", "1?0:", "1'bx ? 0:1", "MISSING ? 0:1", "0 ? 0:1/0", "{}", "{1'b0,}", "{,1'b0}", "{1'bx,1'b0}", "{65{1'b1}}", "{64'h0,1'b0}", "{0{1'b1}}", "{-1{1'b1}}", "{1{1'b1}", "{1'b0", "1+", "0 1", "$clog2(2)"}) {
         if (evaluate("", expression)) { ++failures; std::cerr << "FAIL unknown boundary: " << expression << '\n'; }
     }
     for (const auto& declaration : {"parameter P=0;", "parameter Q=0;localparam P=Q;",

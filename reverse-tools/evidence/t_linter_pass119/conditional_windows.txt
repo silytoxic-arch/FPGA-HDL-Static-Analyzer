@@ -1,0 +1,140 @@
+Source: /private/tmp/tlinter-r63-pass105-frontend-lowering.txt; SHA256: 6bd09b183cf566599a64d28c94cd0abba082f083ea7c9f391b293f3a84c7661d
+
+===== Source lines 12867..12978 =====
+  case 0x48:
+    puVar18 = (undefined8 *)FUN_1801a67e0(local_2848,0);
+    iVar36 = FUN_1808e37d0(*puVar18);
+    pcVar29 = local_2890;
+    if (iVar36 != 0) {
+      FUN_18090c960(local_2890,&local_2778);
+      pvVar31 = local_2778;
+      if (local_2778 == (void *)0x0) {
+        plVar16 = (longlong *)FUN_1801a67e0(pcVar20,1);
+        if ((*(int *)(*plVar16 + 4) == 0x10) &&
+           (plVar16 = (longlong *)FUN_1801a67e0(pcVar20,2), *(int *)(*plVar16 + 4) == 0x10)) {
+          puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,1);
+          FUN_1808db3e0(*puVar18,auStack_24b8,local_2850[0],local_2898[0]);
+          puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,2);
+          FUN_1808db3e0(*puVar18,auStack_1f00,local_2850[0],local_2898[0]);
+          lVar15 = FUN_18095d310(auStack_24b0);
+          if (lVar15 != 0) {
+            do {
+              pcVar44 = (char *)FUN_1801a67f0(auStack_24b0,pcVar43);
+              pcVar35 = (char *)FUN_1801a67f0(auStack_1ef8,pcVar43);
+              if (*pcVar44 != *pcVar35) {
+                *pcVar44 = '\x02';
+              }
+              pcVar43 = pcVar43 + 1;
+              pcVar20 = (code *)FUN_18095d310(auStack_24b0);
+            } while (pcVar43 < pcVar20);
+          }
+          local_2828 = (code *)FUN_1808e3a30(auStack_24b0,local_2898[0]);
+          FUN_18003f2b0(auStack_1f00);
+          FUN_18003f2b0(auStack_24b8);
+          pcVar29 = local_2890;
+        }
+        else {
+          puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,1);
+          iVar36 = FUN_1808e37d0(*puVar18);
+          pcVar29 = local_2890;
+          if (iVar36 != 0) {
+            puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,2);
+            iVar36 = FUN_1808e37d0(*puVar18);
+            pcVar29 = local_2890;
+            if (iVar36 != 0) {
+              local_2778 = operator_new(0x2c8);
+              if (local_2778 == (void *)0x0) {
+                local_2828 = (code *)0x0;
+              }
+              else {
+                local_28b0 = (code *)0x0;
+                local_28b8 = (code *)0x0;
+                local_2828 = (code *)FUN_1808d8dc0(local_2778,0x11,0);
+              }
+              puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,1);
+              puVar17 = (undefined8 *)FUN_1801a67e0(local_2848,2);
+              dVar48 = (double)FUN_1808db220(*puVar18,local_2898[0]);
+              dVar47 = (double)FUN_1808db220(*puVar17,local_2898[0]);
+              if (dVar48 == dVar47) {
+                puVar18 = (undefined8 *)FUN_1801a67e0(local_2848,1);
+                lVar15 = FUN_1808db220(*puVar18,local_2898[0]);
+                *(longlong *)(local_2828 + 200) = lVar15;
+                pcVar29 = local_2890;
+              }
+              else {
+                *(longlong *)(local_2828 + 200) = 0;
+                pcVar29 = local_2890;
+              }
+            }
+          }
+        }
+      }
+      else if (*(int *)((longlong)local_2778 + 4) == 0x10) {
+        uStack_2694 = local_2850[0];
+        bStack_274b = local_2898[0];
+        cStack_2787 = '\0';
+        local_28b8 = (code *)((ulonglong)local_28b8 & 0xffffffffffffff00);
+        FUN_1808f4650(CONCAT44(uStack_276c,uStack_2770),&uStack_2694,&bStack_274b,&cStack_2787);
+        if (cStack_2787 == '\0') {
+          FUN_1808db3e0(pvVar31,auStack_2390,local_2850[0],local_2898[0]);
+          bVar42 = local_2898[0];
+          if (((*(char *)((longlong)pvVar31 + 0xa6) == '\0') ||
+              (uVar13 = FUN_18095d310(auStack_2388), (uVar13 & 7) != 0)) || (bVar42 != 0)) {
+            local_2828 = (code *)FUN_1808e3a30(auStack_2388,bVar42);
+          }
+          else {
+            local_2828 = (code *)FUN_1808e3f90(auStack_2388);
+          }
+          FUN_18003f2b0(auStack_2390);
+          pcVar29 = local_2890;
+        }
+        else {
+          local_2778 = operator_new(0x2c8);
+          if (local_2778 != (void *)0x0) {
+            local_28b0 = (code *)0x0;
+            local_28b8 = (code *)0x0;
+            pcVar43 = (code *)FUN_1808d8dc0(local_2778,0x11,0);
+          }
+          local_28b8 = (code *)((ulonglong)local_28b8 & 0xffffffffffffff00);
+          local_2828 = pcVar43;
+          FUN_1808f4650(pvVar31,local_2850,local_2898,0);
+          lVar15 = FUN_1808db220(pvVar31,local_2898[0]);
+          *(longlong *)(pcVar43 + 200) = lVar15;
+          pcVar29 = local_2890;
+        }
+      }
+      else {
+        iVar36 = FUN_1808e37d0(local_2778);
+        pcVar29 = local_2890;
+        if (iVar36 != 0) {
+          local_2828 = (code *)FUN_1808db990(pvVar31);
+          pcVar29 = local_2890;
+        }
+      }
+    }
+    break;
+Source: /private/tmp/tlinter-r63-pass117-detect-sign-worker.txt; SHA256: dcd6eb31650d68f88a26d4f452c9ccffde0ff8cc62710e9e1d21c57b209ae214
+
+===== Source lines 1004..1025 =====
+  case 0x48:
+    if ((ulonglong)(*(longlong *)(param_1 + 0x10) - *(longlong *)(param_1 + 8) >> 3) < 2) {
+      std::_Xout_of_range("invalid vector<T> subscript");
+      pcVar2 = (code *)swi(3);
+      (*pcVar2)();
+      return;
+    }
+    local_f8._0_1_ = param_5;
+    FUN_1808f46c0(*(undefined8 *)(*(longlong *)(param_1 + 8) + 8),param_2,param_3,local_d0);
+    pcVar23 = local_d0;
+    if ((ulonglong)(*(longlong *)(param_1 + 0x10) - *(longlong *)(param_1 + 8) >> 3) < 3) {
+      std::_Xout_of_range("invalid vector<T> subscript");
+      pcVar2 = (code *)swi(3);
+      (*pcVar2)();
+      return;
+    }
+    local_f8 = CONCAT71(local_f8._1_7_,param_5);
+    FUN_1808f46c0(*(undefined8 *)(*(longlong *)(param_1 + 8) + 0x10),param_2,local_c8,local_d0);
+    local_d0 = pcVar23;
+    break;
+  case 0x49:
+    if (*(char *)(*(longlong *)(param_1 + 0x1d0) + 0xa4) == '\0') {

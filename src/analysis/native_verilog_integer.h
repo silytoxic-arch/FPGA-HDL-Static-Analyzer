@@ -57,6 +57,7 @@ private:
         unsigned width{};
         bool sign{};
         std::size_t source{};
+        Ptr condition{};
     };
     struct Operator { std::string text; std::size_t count{1}; };
     const std::vector<parser::HdlToken>& tokens_;
@@ -286,6 +287,17 @@ private:
                 } else return {};
                 while (at < end) {
                     op = owner.operation(at, end);
+                    if (op.text == "?" && minimum == 0) {
+                        ++at;
+                        const auto whenTrue = expression(0, depth + 1);
+                        if (!whenTrue || at >= end || owner.tokens_[at++].text != ":") return {};
+                        const auto whenFalse = expression(0, depth + 1);
+                        if (!whenFalse) return {};
+                        lhs = std::make_shared<Node>(Node{"?:", {}, whenTrue, whenFalse,
+                            std::max(whenTrue->width, whenFalse->width),
+                            whenTrue->sign && whenFalse->sign, source, lhs});
+                        continue;
+                    }
                     const auto p = precedence(op.text);
                     if (p == 0 || p < minimum) break;
                     at += op.count;
@@ -316,6 +328,18 @@ private:
         const bool sign = forcedSign.value_or(node->sign);
         const auto& op = node->op;
         if (op.empty()) return resized(node->value, width, sign);
+        if (op == "?:") {
+            // The condition is self-determined and uses its entire bit vector,
+            // independently of result width and of the diagnostic low32 cache.
+            const auto condition = fold(node->condition, 0, std::nullopt, depth + 1);
+            if (!condition) return std::nullopt;
+            // Both result arms determine width/sign, but only the selected
+            // arm supplies value bits. Preserve the conditional's own line.
+            auto result = fold(condition->bits != 0 ? node->left : node->right,
+                               width, sign, depth + 1);
+            if (result) result->source = node->source;
+            return result;
+        }
         const bool boolean = node->right ? booleanBinary(op) : booleanUnary(op);
         const bool logical = op == "&&" || op == "||";
         const auto operandWidth = boolean && node->right && !logical

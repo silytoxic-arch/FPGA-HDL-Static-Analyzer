@@ -4532,6 +4532,37 @@ void checkResetConditionEdgePolarity(
         }
         return at == end;
     };
+    const auto comparisonRoot = [&](std::size_t begin, std::size_t end)
+        -> std::optional<std::size_t> {
+        std::optional<std::size_t> comparison;
+        int depth = 0;
+        bool operand = true;
+        for (auto at = begin; at < end; ++at) {
+            const auto& word = tokens[at].text;
+            if (word == "(" || word == "[" || word == "{") ++depth;
+            else if (word == ")" || word == "]" || word == "}") {
+                if (--depth < 0) return std::nullopt;
+                if (depth == 0) operand = false;
+            } else if (depth == 0) {
+                if (operand) {
+                    if (word == "+" || word == "-" || word == "!" || word == "~" ||
+                        word == "&" || word == "|" || word == "^" || word == "~&" ||
+                        word == "~|" || word == "~^" || word == "^~") continue;
+                    operand = false;
+                } else {
+                    // These binary operators bind below equality. Their AST
+                    // roots cannot enter the native equality report branch.
+                    if (word == "?" || word == ":" || word == "||" || word == "&&" ||
+                        word == "|" || word == "^" || word == "~^" || word == "^~" || word == "&")
+                        return std::nullopt;
+                    if (word == "==" || word == "!=" || word == "===" || word == "!==")
+                        comparison = at; // Equal precedence is left-associative.
+                    operand = true;
+                }
+            }
+        }
+        return depth == 0 && !operand ? comparison : std::nullopt;
+    };
     const auto statementRange = [&](std::size_t begin, std::size_t end) {
         while (begin < end && tokens[begin].text == "begin" &&
                tokens[end - 1].text == "end" && statementEnd(tokens, begin) == end) {
@@ -4703,18 +4734,7 @@ void checkResetConditionEdgePolarity(
             // Identifier generation preserves its wire width. Operator Y
             // widths can instead grow with a wider comparison operand hint.
             if (!oneBitContext) return std::nullopt;
-            int depth = 0;
-            std::optional<std::size_t> comparison;
-            for (auto at = first; at < last; ++at) {
-                const auto& word = tokens[at].text;
-                if (word == "(" || word == "[" || word == "{") ++depth;
-                else if (word == ")" || word == "]" || word == "}") --depth;
-                else if (depth == 0 &&
-                         (word == "==" || word == "!=" || word == "===" || word == "!==")) {
-                    if (comparison) return std::nullopt;
-                    comparison = at;
-                }
-            }
+            const auto comparison = comparisonRoot(first, last);
             if (comparison) {
                 const auto [left, leftEnd] = primaryRange(first, *comparison);
                 const auto [right, rightEnd] = primaryRange(*comparison + 1, last);
@@ -4898,17 +4918,10 @@ void checkResetConditionEdgePolarity(
                     conditionPolarity = false;
                 }
             } else {
-                std::vector<std::size_t> equality;
-                int depth = 0;
-                for (auto token = first; token < last; ++token) {
-                    const auto& word = tokens[token].text;
-                    if (word == "(" || word == "[" || word == "{") ++depth;
-                    else if (word == ")" || word == "]" || word == "}") --depth;
-                    else if (depth == 0 && word == "==") equality.push_back(token);
-                }
-                if (equality.size() == 1) {
-                    const auto [left, leftEnd] = primaryRange(first, equality[0]);
-                    const auto [right, rightEnd] = primaryRange(equality[0] + 1, last);
+                const auto equality = comparisonRoot(first, last);
+                if (equality && tokens[*equality].text == "==") {
+                    const auto [left, leftEnd] = primaryRange(first, *equality);
+                    const auto [right, rightEnd] = primaryRange(*equality + 1, last);
                     const auto cacheExpression = [&](std::size_t begin, std::size_t end)
                         -> std::optional<std::pair<std::uint32_t, std::size_t>> {
                         if (end == begin + 1) {
