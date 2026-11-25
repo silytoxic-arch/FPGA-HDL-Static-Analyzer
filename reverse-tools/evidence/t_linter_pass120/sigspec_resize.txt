@@ -1,0 +1,41 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 1809ba570 1809ba570 FUN_1809ba570 =====
+
+void FUN_1809ba570(int *param_1,int param_2,char param_3)
+
+{
+  int iVar1;
+  undefined8 *puVar2;
+  undefined8 local_18;
+  ulonglong uStack_10;
+  
+  FUN_1809beba0();
+  if (param_2 < *param_1) {
+    FUN_1809c0af0(param_1,param_2,*param_1 - param_2);
+  }
+  iVar1 = *param_1;
+  if (iVar1 < param_2) {
+    if (iVar1 < 1) {
+      local_18 = 0;
+      uStack_10 = CONCAT71(uStack_10._1_7_,2);
+    }
+    else {
+      puVar2 = (undefined8 *)FUN_1801d0d00(param_1,iVar1 + -1);
+      local_18 = *puVar2;
+      uStack_10 = puVar2[1];
+    }
+    if (param_3 == '\0') {
+      local_18 = 0;
+      uStack_10 = uStack_10 & 0xffffffffffffff00;
+    }
+    iVar1 = *param_1;
+    while (iVar1 < param_2) {
+      FUN_1809b6560(param_1,&local_18);
+      iVar1 = *param_1;
+    }
+  }
+  return;
+}
+
+

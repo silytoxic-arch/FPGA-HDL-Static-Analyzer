@@ -1,0 +1,89 @@
+Source: reverse-tools/evidence/t_linter_pass96/bit_conversion.txt; SHA256: 306dbe2247e1c5f82c654748cc9747dbc19d8285391fa590b0fe0d3f7d25ef92
+Source lines 367..453
+        }
+        if ((undefined1 *)param_1[1] != (undefined1 *)0x0) {
+          *(undefined1 *)param_1[1] = local_res10[*param_1 - (longlong)pbVar13];
+        }
+      }
+      else {
+        if (pbVar6 == (bool *)param_1[2]) {
+          FUN_1800d12d0(param_1,1);
+        }
+        if (param_1[1] != 0) {
+          *(bool *)param_1[1] = uVar12 != 0;
+        }
+      }
+      param_1[1] = param_1[1] + 1;
+      pbVar6 = pbStack_48;
+    }
+  }
+  else {
+    iVar1 = local_res20 + -1;
+    local_68 = 0;
+    iVar8 = iVar1;
+    if (iVar1 != 0) {
+      do {
+        if (iVar8 == -1) break;
+        pbVar14 = (bool *)(ulonglong)((int)pbVar14 + 1);
+        iVar8 = iVar8 >> 1;
+      } while (iVar8 != 0);
+      local_68 = (uint)pbVar14;
+    }
+    bVar11 = pbStack_48 != _Dst;
+    pbStack_48 = pbVar6;
+    if (bVar11) {
+      do {
+        pbVar9 = pbVar9 + -1;
+        if ((iVar1 < (int)(uint)*pbVar9) && (*pbVar9 < 0xf0)) {
+          uVar4 = (*DAT_18137cbb0)();
+                    /* WARNING: Subroutine does not return */
+          FUN_180972760(&DAT_18137ccc8,uVar4,"Digit larger than %d used in in base-%d constant.\n",
+                        iVar1,local_res20);
+        }
+        if (0 < (int)pbVar14) {
+          uVar12 = 1;
+          do {
+            bVar11 = *pbVar9;
+            if (bVar11 == true) {
+              local_res10[0] = (bool)2;
+              if (param_5 == 'x') {
+                local_res10[0] = (bool)4;
+              }
+            }
+            else if (bVar11 == true) {
+              local_res10[0] = (bool)(((param_5 + 0x88U & 0xfd) == 0) + 3);
+            }
+            else if (bVar11 == true) {
+              local_res10[0] = true;
+            }
+            else {
+              local_res10[0] = ((byte)uVar12 & bVar11) != 0;
+            }
+            FUN_1800d27d0(param_1,local_res10);
+            uVar12 = uVar12 << 1 | (uint)((int)uVar12 < 0);
+            pbVar14 = pbVar14 + -1;
+          } while (pbVar14 != (bool *)0x0);
+          pbVar14 = (bool *)(ulonglong)local_68;
+          _Dst = local_50;
+          pbVar7 = local_60;
+        }
+      } while (pbVar9 != _Dst);
+    }
+  }
+  iVar1 = local_res18;
+  iVar8 = (int)param_1[1] - (int)*param_1;
+  if (*param_1 == param_1[1]) {
+    local_res10[0] = false;
+  }
+  else {
+    local_res10[0] = *(bool *)(param_1[1] - 1);
+  }
+  if (local_res18 < 0) {
+    if (iVar8 < 0x20) {
+      bVar10 = 0;
+      if (1 < local_res10[0]) {
+        bVar10 = local_res10[0];
+      }
+      local_res10[0] = (bool)bVar10;
+      FUN_1800d2860(param_1,0x20,local_res10);
+    }

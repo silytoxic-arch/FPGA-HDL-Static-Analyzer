@@ -25,7 +25,9 @@ public:
         unsigned width{};
         bool signedValue{};
         std::size_t source{};
+        std::optional<std::uint32_t> storedCache{};
         [[nodiscard]] std::uint32_t cache() const {
+            if (storedCache) return *storedCache;
             auto result = static_cast<std::uint32_t>(bits);
             if (signedValue && width < 32 && negative())
                 result |= ~static_cast<std::uint32_t>(mask(width));
@@ -116,12 +118,14 @@ private:
         const auto quote = text.find('\'');
         unsigned width = 0, base = 10;
         bool sign = true;
+        const bool unsizedBased = quote == 0;
         std::size_t at = 0;
         if (quote != std::string::npos) {
-            if (quote == 0) return std::nullopt;
-            const auto [last, error] = std::from_chars(text.data(), text.data() + quote, width);
-            if (error != std::errc{} || last != text.data() + quote || width == 0 || width > 64)
-                return std::nullopt;
+            if (!unsizedBased) {
+                const auto [last, error] = std::from_chars(text.data(), text.data() + quote, width);
+                if (error != std::errc{} || last != text.data() + quote || width == 0 || width > 64)
+                    return std::nullopt;
+            }
             sign = false;
             at = quote + 1;
             if (at < text.size() && text[at] == 's') { sign = true; ++at; }
@@ -135,19 +139,35 @@ private:
             }
         }
         if (at == text.size()) return std::nullopt;
+        const auto digits = text.size() - at;
+        if (unsizedBased && base != 10) {
+            const unsigned perDigit = base == 2 ? 1 : base == 8 ? 3 : 4;
+            // Native nondecimal conversion keeps every radix digit, including
+            // leading zeros. Explicitly sized literals still truncate below.
+            if (digits > 64 / perDigit) return std::nullopt;
+            width = std::max(32U, static_cast<unsigned>(digits) * perDigit);
+        }
         std::uint64_t bits = 0;
         for (; at < text.size(); ++at) {
             const auto c = text[at];
             const unsigned digit = c >= '0' && c <= '9' ? c - '0' :
                 c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : 99;
             if (digit >= base) return std::nullopt;
-            if (quote == std::string::npos && bits > (~std::uint64_t{0} - digit) / base)
+            if ((quote == std::string::npos || (unsizedBased && base == 10)) &&
+                bits > (~std::uint64_t{0} - digit) / base)
                 return std::nullopt;
             bits = bits * base + digit;
         }
         if (quote == std::string::npos) {
             // Native decimal conversion appends a zero sign bit when needed.
             width = std::max(32U, static_cast<unsigned>(std::bit_width(bits)) + 1U);
+            if (width > 64) return std::nullopt;
+        } else if (unsizedBased) {
+            if (base == 10)
+                width = std::max(32U, static_cast<unsigned>(std::bit_width(bits)));
+            // Unsized signed based literals append a zero sign bit only when
+            // the physical conversion's highest bit is one (native parser).
+            if (sign && ((bits >> (width - 1)) & 1U) != 0) ++width;
             if (width > 64) return std::nullopt;
         }
         return Value{bits & mask(width), width, sign, source};
@@ -205,11 +225,26 @@ private:
             tokens_[at + 1].text != "=") return {};
         active_.push_back(key);
         const auto root = parse(binding->begin, binding->end, depth + 1);
-        auto value = root ? fold(root, width.value_or(0), std::nullopt, depth + 1) : std::nullopt;
+        // Literal/alias nodes keep their physical width until declaration
+        // normalization. Arithmetic nodes are folded in the declaration width.
+        auto value = root ? fold(root, root->op.empty() ? 0 : width.value_or(0),
+                                 std::nullopt, depth + 1) : std::nullopt;
         active_.pop_back();
         if (!value) return {};
-        if (width) { value->bits &= mask(*width); value->width = *width; }
-        if (sign) value->signedValue = *sign;
+        if (width) {
+            const auto cacheBeforeTypeChange = value->cache();
+            const bool rebuild = value->width != *width;
+            *value = resized(*value, *width, value->signedValue);
+            if (sign) value->signedValue = *sign;
+            // Native creates a new constant only when width changes. A same-
+            // width sign update leaves +0xbc untouched, and AST clone copies it.
+            if (rebuild) value->storedCache.reset();
+            else value->storedCache = cacheBeforeTypeChange;
+        } else if (sign && *sign != value->signedValue) {
+            // The frontend path for sign-only, no-range declarations is not
+            // recovered. Do not infer a new value/cache from language syntax.
+            return {};
+        }
         value->source = index;
         return literal(*value);
     }
@@ -277,6 +312,13 @@ private:
                 } else if (op.text == "(") {
                     ++at; lhs = expression(0, depth + 1);
                     if (!lhs || at >= end || owner.tokens_[at++].text != ")") return {};
+                } else if (op.text == "'" && at + 1 < end &&
+                           owner.tokens_[at].offset + 1 == owner.tokens_[at + 1].offset) {
+                    // Raw parser input splits an unsized based literal into
+                    // apostrophe + identifier; evaluator input already joins it.
+                    const auto value = number("'" + owner.tokens_[at + 1].text, at);
+                    if (!value) return {};
+                    lhs = literal(*value); at += 2;
                 } else if (owner.tokens_[at].kind == parser::HdlTokenKind::Number) {
                     const auto value = number(owner.tokens_[at].text, at);
                     if (!value) return {};
@@ -337,7 +379,10 @@ private:
             // arm supplies value bits. Preserve the conditional's own line.
             auto result = fold(condition->bits != 0 ? node->left : node->right,
                                width, sign, depth + 1);
-            if (result) result->source = node->source;
+            if (result) {
+                result->source = node->source;
+                result->storedCache.reset(); // Native builds a fresh constant.
+            }
             return result;
         }
         const bool boolean = node->right ? booleanBinary(op) : booleanUnary(op);

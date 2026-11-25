@@ -1,0 +1,198 @@
+Source: reverse-tools/evidence/t_linter_pass96/numeric_conversion.txt; SHA256: c48bfb2dab0465ca6fad540c81b615d7b9d38dc548f967bf8ecdc2c435e6eb38
+
+===== Source lines 405..497 =====
+  }
+  local_48 = CONCAT44(local_48._4_4_,iVar11);
+  if (local_80 != '\'') {
+LAB_1800d1dc4:
+    FUN_18003efe0(param_1);
+    return 0;
+  }
+  local_70 = (byte *)0x0;
+  pbStack_68 = (byte *)0x0;
+  local_60 = (byte *)0x0;
+  local_75 = iVar11 < 0;
+  local_78[2] = local_40[1] == 's';
+  if ((bool)local_78[2]) {
+    local_40 = local_40 + 1;
+  }
+  switch((int)local_40[1]) {
+  case 0x42:
+  case 0x62:
+    pcVar5 = local_40 + 2;
+    goto LAB_1800d1c0f;
+  default:
+    iVar11 = tolower((int)local_40[1]);
+    cVar2 = (char)iVar11;
+    if (((1 < (byte)(cVar2 - 0x30U)) && (cVar2 != 'x')) && (cVar2 != 'z')) {
+      if (local_70 != (byte *)0x0) {
+        pbVar4 = local_70;
+        if (0xfff < (ulonglong)((longlong)local_60 - (longlong)local_70)) {
+          if (((ulonglong)local_70 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+          pbVar4 = *(byte **)(local_70 + -8);
+          if (local_70 <= pbVar4) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+          if ((ulonglong)((longlong)local_70 - (longlong)pbVar4) < 8) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+          if (0x27 < (ulonglong)((longlong)local_70 - (longlong)pbVar4)) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+        }
+        free(pbVar4);
+        local_70 = (byte *)0x0;
+        pbStack_68 = (byte *)0x0;
+        local_60 = (byte *)0x0;
+      }
+      goto LAB_1800d1dc4;
+    }
+    local_75 = true;
+    pcVar5 = local_40 + 1;
+    iVar11 = 1;
+LAB_1800d1c0f:
+    uVar14 = 2;
+    break;
+  case 0x44:
+  case 100:
+    pcVar5 = local_40 + 2;
+    uVar14 = 10;
+    break;
+  case 0x48:
+  case 0x68:
+    pcVar5 = local_40 + 2;
+    uVar14 = 0x10;
+    break;
+  case 0x4f:
+  case 0x6f:
+    pcVar5 = local_40 + 2;
+    uVar14 = 8;
+  }
+  local_88 = local_78[1];
+  local_80 = local_75;
+  FUN_1800d1e40(&local_70,pcVar5,iVar11,uVar14);
+  if ((((int)local_48 < 0) && (local_78[2] != '\0')) && (pbStack_68[-1] == 1)) {
+    local_78[0] = 0;
+    if ((local_78 < pbStack_68) && (local_70 <= local_78)) {
+      local_50 = (byte **)(local_78 + -(longlong)local_70);
+      if ((pbStack_68 == local_60) && (local_60 == pbStack_68)) {
+        if ((longlong)local_70 - (longlong)pbStack_68 == 1) {
+          std::_Xlength_error("vector<T> too long");
+          pcVar1 = (code *)swi(3);
+          lVar13 = (*pcVar1)();
+          return lVar13;
+        }
+        uVar7 = (longlong)local_60 - (longlong)local_70;
+        pbVar4 = pbVar9;
+        if (uVar7 <= -(uVar7 >> 1) - 1) {
+          pbVar4 = (byte *)(uVar7 + (uVar7 >> 1));
+        }
+        if (pbVar4 < pbStack_68 + (1 - (longlong)local_70)) {
+
+===== Source lines 515..550 =====
+        pbVar4 = pbVar9;
+        if (uVar7 <= -(uVar7 >> 1) - 1) {
+          pbVar4 = (byte *)(uVar7 + (uVar7 >> 1));
+        }
+        if (pbVar4 < pbStack_68 + (1 - (longlong)local_70)) {
+          pbVar4 = pbStack_68 + (1 - (longlong)local_70);
+        }
+        FUN_1800d11f0(&local_70,pbVar4);
+      }
+      if (pbStack_68 != (byte *)0x0) {
+        *pbStack_68 = 0;
+      }
+    }
+    pbStack_68 = pbStack_68 + 1;
+  }
+  local_50 = (byte **)FUN_1808e3930(&local_70,local_78[2],local_75);
+  if (*pcVar6 != '\0') {
+    pbVar9 = (byte *)0xffffffffffffffff;
+    do {
+      pbVar9 = pbVar9 + 1;
+    } while (pcVar6[(longlong)pbVar9] != '\0');
+  }
+  FUN_180040680((longlong)local_50 + 0x48,pcVar6,pbVar9);
+  FUN_1800400b0(&local_70);
+  FUN_18003efe0(param_1);
+  return (longlong)local_50;
+}
+
+
+
+===== 0x1808e3a40 1808e3a40 FUN_1808e3a40 =====
+
+byte * FUN_1808e3a40(uint param_1,byte param_2,int param_3)
+
+{
+  ulonglong *puVar1;
+Source: reverse-tools/evidence/t_linter_pass96/bit_conversion.txt; SHA256: 306dbe2247e1c5f82c654748cc9747dbc19d8285391fa590b0fe0d3f7d25ef92
+
+===== Source lines 435..460 =====
+    }
+  }
+  iVar1 = local_res18;
+  iVar8 = (int)param_1[1] - (int)*param_1;
+  if (*param_1 == param_1[1]) {
+    local_res10[0] = false;
+  }
+  else {
+    local_res10[0] = *(bool *)(param_1[1] - 1);
+  }
+  if (local_res18 < 0) {
+    if (iVar8 < 0x20) {
+      bVar10 = 0;
+      if (1 < local_res10[0]) {
+        bVar10 = local_res10[0];
+      }
+      local_res10[0] = (bool)bVar10;
+      FUN_1800d2860(param_1,0x20,local_res10);
+    }
+    FUN_1800400b0(&local_50);
+  }
+  else {
+    if ((param_6 != '\0') && (local_res18 < iVar8)) {
+      uVar4 = (*DAT_18137cbb0)();
+                    /* WARNING: Subroutine does not return */
+      FUN_180972760(&DAT_18137ccc8,uVar4,
+Source: /private/tmp/tlinter-r63-pass105-frontend-lowering.txt; SHA256: 6bd09b183cf566599a64d28c94cd0abba082f083ea7c9f391b293f3a84c7661d
+
+===== Source lines 851..882 =====
+  case 0x10:
+  case 0x11:
+    if ((int)local_2d80[0] < 0) {
+      local_2d80[0] = 0xffffffff;
+      local_2d90[0] = '\x01';
+      local_2db8 = (uint *)((ulonglong)local_2db8._1_7_ << 8);
+      FUN_1808f46c0(param_1,local_2d80,local_2d90,0);
+      if (0xffffff < (int)local_2d80[0]) {
+        local_2db8 = (uint *)CONCAT44(local_2db8._4_4_,0x1000000);
+                    /* WARNING: Subroutine does not return */
+        FUN_180972760((longlong)param_1 + 0x1e0,*(undefined4 *)((longlong)param_1 + 0x200),
+                      "Expression width %d exceeds implementation limit of %d!\n");
+      }
+    }
+    *(char *)((longlong)param_1 + 0xa4) = local_2d90[0];
+    if (*(int *)((longlong)param_1 + 4) == 0x10) {
+      if (*(char *)((longlong)param_1 + 0xac) != '\0') {
+        uVar26 = FUN_1808db650(param_1,local_1998,local_2d80[0]);
+        FUN_180996800(local_2d18,uVar26);
+        local_2d88 = 1;
+        FUN_1800400b0(local_1990);
+        return local_2d18;
+      }
+      uVar26 = FUN_1808db3a0(param_1,local_1978,0xffffffff);
+      FUN_180996800(local_2d18,uVar26);
+      local_2d88 = 1;
+      FUN_1800400b0(local_1970);
+      return local_2d18;
+    }
+    uVar26 = FUN_1808e8d40(param_1,local_1958,local_2d80[0],1);
+    FUN_180996800(local_20f0,uVar26);
+    FUN_1800400b0(local_1950);

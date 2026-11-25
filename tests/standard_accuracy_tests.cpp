@@ -6809,7 +6809,7 @@ int main() {
         {"", "8'sh80>>>8", 0xffffffffU}, {"", "4294967295+1", 0},
         {"localparam [7:0] P=4'hf+4'h1;", "P", 16},
         {"localparam P=4'hf+4'h1;", "P", 0},
-        {"localparam signed [3:0] P=4'hf;", "P", 0xffffffffU},
+        {"localparam signed [3:0] P=4'hf;", "P", 15},
         {"localparam P=0,K=P+1;", "K", 1},
         {"", "2**0", 1}, {"", "4'h2**4'h4", 0},
         {"", "(4'h2**4'h4)+8'h0", 16}, {"", "8'shff**-3", 0xffffffffU},
@@ -6818,7 +6818,7 @@ int main() {
         {"", "{1'b0,1'b1}", 1}, {"", "{1'b1,1'b0}", 2},
         {"", "{2{1'b1}}", 3}, {"", "{2{1'b0}}", 0},
         {"", "{1{4'shf}}", 15}, {"", "{4'hf+4'h1,4'h1}", 1},
-        {"localparam signed [7:0] P={4'hf,4'hf};", "P", 0xffffffffU},
+        {"localparam signed [7:0] P={4'hf,4'hf};", "P", 255},
         {"localparam N=2;", "{N{1'b1}}", 3},
         {"", "1 ? 0 : 1", 0}, {"", "0 ? 0 : 1", 1},
         {"", "64'h100000000 ? 0 : 1", 0},
@@ -6827,7 +6827,16 @@ int main() {
         {"", "1 ? 8'h1 : 4'h0/4'h0", 1},
         {"", "(1 ? 4'hf+4'h1 : 4'h0)+8'h0", 16},
         {"localparam P=0 ? 1 : 0 ? 2 : 3;", "P", 3},
-        {"", "&8'hff", 1}, {"", "|8'h0", 0}
+        {"", "&8'hff", 1}, {"", "|8'h0", 0},
+        {"", "'h1-1", 0}, {"", "'b10-1", 1},
+        {"", "'h1+4'shf", 16}, {"", "'sh1+4'shf", 0},
+        {"", "'shffffffff>>>31", 1}, {"", "'sh80000000<0", 0},
+        {"", "'hffffffffffffffff+64'h1", 0},
+        {"localparam P='shffffffff;", "P>>>31", 1},
+        {"localparam [0:0] P=1'sb1;", "P", 0xffffffffU},
+        {"localparam signed [0:0] P=1'b1;", "P", 1},
+        {"localparam [0:0] P=1'sb1;", "P+1'b0", 1},
+        {"localparam signed [0:0] P=1'b1;", "+P", 0xffffffffU}
     };
     for (const auto& test : resetFoldCases) {
         for (const auto edge : {0U, 1U}) {
@@ -6850,7 +6859,8 @@ int main() {
              "localparam P=1'bx+1;", "localparam P=1/0;", "localparam P=65'h1+0;",
              "localparam P=0**-1;", "parameter N=2;localparam P={N{1'b0}};",
              "localparam P={65{1'b0}};", "localparam P={1'bx,1'b0};",
-             "parameter K=1;localparam P=K ? 0 : 1;", "localparam P=1'bx ? 0 : 1;"}) {
+             "parameter K=1;localparam P=K ? 0 : 1;", "localparam P=1'bx ? 0 : 1;",
+             "localparam P='shffffffffffffffff+0;", "localparam P='1+1;"}) {
         result = analyzeVerilog(std::string("module probe(input CLK,RST,D,output reg PRIME,Q);\n") +
             declaration + "\nalways @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
             "always @(posedge RST) if(RST==P) Q<=0; else Q<=D;\nendmodule\n");
