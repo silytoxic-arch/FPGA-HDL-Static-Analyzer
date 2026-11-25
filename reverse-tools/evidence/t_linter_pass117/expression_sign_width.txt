@@ -1,0 +1,77 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 1808f4650 1808f4650 FUN_1808f4650 =====
+
+void FUN_1808f4650(longlong param_1,int *param_2,undefined1 *param_3,undefined1 *param_4)
+
+{
+  *param_2 = -1;
+  *param_3 = 1;
+  if (param_4 != (undefined1 *)0x0) {
+    *param_4 = 0;
+  }
+  FUN_1808f46c0();
+  if (*param_2 < 0x1000000) {
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  FUN_180972760(param_1 + 0x1e0,*(undefined4 *)(param_1 + 0x200),
+                "Expression width %d exceeds implementation limit of %d!\n",*param_2,0x1000000);
+}
+
+
+
+===== 18095e6a0 18095e6a0 FUN_18095e6a0 =====
+
+undefined8 FUN_18095e6a0(undefined8 param_1,longlong param_2,char param_3,int *param_4)
+
+{
+  byte bVar1;
+  ulonglong uVar2;
+  ulonglong uVar3;
+  byte bVar4;
+  int iVar5;
+  undefined8 local_48;
+  void *local_40;
+  undefined1 local_38 [8];
+  void *local_30;
+  
+  uVar2 = 0;
+  local_48 = 0;
+  local_40 = (void *)0x0;
+  iVar5 = 1;
+  uVar3 = *(longlong *)(param_2 + 0x10) - *(longlong *)(param_2 + 8);
+  bVar4 = 1;
+  if (param_3 != '\0') {
+    if (uVar3 == 0) goto LAB_18095e741;
+    bVar4 = 1;
+    if (*(char *)((uVar3 - 1) + *(longlong *)(param_2 + 8)) == '\x01') {
+      bVar4 = 0;
+      iVar5 = -1;
+      uVar3 = uVar3 - 1;
+    }
+  }
+  if (uVar3 != 0) {
+    do {
+      bVar1 = *(byte *)(uVar2 + *(longlong *)(param_2 + 8));
+      if (bVar1 < 2) {
+        FUN_1809cdd80(&local_48,uVar2 & 0xffffffff,bVar1 == bVar4);
+      }
+      else if (*param_4 < 0) {
+        *param_4 = (int)uVar2;
+      }
+      uVar2 = uVar2 + 1;
+    } while (uVar2 < uVar3);
+  }
+LAB_18095e741:
+  if (iVar5 == -1) {
+    FUN_1809cd280(local_38,1);
+    FUN_1809cd4d0(&local_48,&local_48,local_38);
+    free(local_30);
+  }
+  FUN_1809cc7c0(param_1,&local_48,iVar5);
+  free(local_40);
+  return param_1;
+}
+
+

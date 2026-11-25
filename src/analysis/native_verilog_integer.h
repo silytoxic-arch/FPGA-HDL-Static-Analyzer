@@ -226,7 +226,7 @@ private:
                     op.text == "&" || op.text == "|" || op.text == "^" || op.text == "~&" ||
                     op.text == "~|" || op.text == "~^" || op.text == "^~") {
                     at += op.count;
-                    const auto operand = expression(12, depth + 1);
+                    const auto operand = expression(13, depth + 1);
                     if (!operand) return {};
                     const bool boolean = booleanUnary(op.text);
                     lhs = std::make_shared<Node>(Node{op.text, {}, operand, {},
@@ -247,7 +247,8 @@ private:
                     const auto p = precedence(op.text);
                     if (p == 0 || p < minimum) break;
                     at += op.count;
-                    const auto rhs = expression(p + (op.text == "**" ? 0 : 1), depth + 1);
+                    // HDL power is left-associative; unary operators bind tighter.
+                    const auto rhs = expression(p + 1, depth + 1);
                     if (!rhs) return {};
                     const bool boolean = booleanBinary(op.text);
                     const bool leftWidth = shift(op.text) || op.text == "**";
@@ -301,7 +302,26 @@ private:
             if (op == "+") bits = a + b;
             else if (op == "-") bits = a - b;
             else if (op == "*") bits = a * b;
-            else if (op == "/" || op == "%") {
+            else if (op == "**") {
+                if (rhs->negative()) {
+                    // Integer reciprocals: zero to a negative power produces
+                    // unknown bits; +/-1 survive, other nonzero bases yield 0.
+                    if (a == 0) return std::nullopt;
+                    if (a == 1) bits = 1;
+                    else if (lhs->negative() && a == mask(width)) bits = (b & 1) ? a : 1;
+                    else bits = 0;
+                } else {
+                    // Native repeated squaring reduces modulo the result width.
+                    // At most 64 steps even for a 64-bit exponent.
+                    auto exponent = b, base = a;
+                    bits = 1;
+                    while (exponent != 0) {
+                        if ((exponent & 1) != 0) bits = (bits * base) & mask(width);
+                        exponent >>= 1;
+                        if (exponent != 0) base = (base * base) & mask(width);
+                    }
+                }
+            } else if (op == "/" || op == "%") {
                 if (b == 0) return std::nullopt;
                 const bool an = lhs->negative(), bn = rhs->negative();
                 const auto am = an ? (std::uint64_t{0} - a) & mask(width) : a;

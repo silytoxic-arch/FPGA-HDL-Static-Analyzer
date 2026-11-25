@@ -6810,7 +6810,11 @@ int main() {
         {"localparam [7:0] P=4'hf+4'h1;", "P", 16},
         {"localparam P=4'hf+4'h1;", "P", 0},
         {"localparam signed [3:0] P=4'hf;", "P", 0xffffffffU},
-        {"localparam P=0,K=P+1;", "K", 1}
+        {"localparam P=0,K=P+1;", "K", 1},
+        {"", "2**0", 1}, {"", "4'h2**4'h4", 0},
+        {"", "(4'h2**4'h4)+8'h0", 16}, {"", "8'shff**-3", 0xffffffffU},
+        {"", "8'shfe**-2", 0}, {"", "2**3**2", 64},
+        {"localparam [7:0] P=4'h2**4'h4;", "P", 16}
     };
     for (const auto& test : resetFoldCases) {
         for (const auto edge : {0U, 1U}) {
@@ -6830,7 +6834,8 @@ int main() {
         }
     }
     for (const auto* declaration : {"parameter P=0;", "parameter K=0;localparam P=K;",
-             "localparam P=1'bx+1;", "localparam P=1/0;", "localparam P=65'h1+0;"}) {
+             "localparam P=1'bx+1;", "localparam P=1/0;", "localparam P=65'h1+0;",
+             "localparam P=0**-1;"}) {
         result = analyzeVerilog(std::string("module probe(input CLK,RST,D,output reg PRIME,Q);\n") +
             declaration + "\nalways @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
             "always @(posedge RST) if(RST==P) Q<=0; else Q<=D;\nendmodule\n");

@@ -52,6 +52,25 @@ int main(int argc, char** argv) {
         {"", "0||8'hff", 1, 1, false},
         {"", "0&&8'hff", 0, 1, false},
         {"", "8'h0 + -1", 0xffffffffULL, 32, false},
+        {"", "2**3", 8, 32, true},
+        {"", "2**3**2", 64, 32, true},
+        {"", "2**(3**2)", 512, 32, true},
+        {"", "-2**2", 4, 32, true},
+        {"", "-(2**2)", 0xfffffffcULL, 32, true},
+        {"", "4'h2**4'h4", 0, 4, false},
+        {"", "(4'h2**4'h4)+8'h0", 16, 8, false},
+        {"", "4'sh8**1'h1", 8, 4, true},
+        {"", "(4'sh8**1'h1)>>>1", 12, 4, true},
+        {"", "4'sh8**1'sh1", 0, 4, true},
+        {"", "8'shff**-2", 1, 8, true},
+        {"", "8'shff**-3", 255, 8, true},
+        {"", "8'shfe**-2", 0, 8, true},
+        {"", "8'hff**-3", 0, 8, false},
+        {"", "0**0", 1, 32, true},
+        {"", "1**-1", 1, 32, true},
+        {"", "64'h3**64'hffffffffffffffff", 0xaaaaaaaaaaaaaaabULL, 64, false},
+        {"localparam [7:0] P=4'h2**4'h4;", "P", 16, 8, false},
+        {"localparam P=4'h2**4'h4;", "P", 0, 4, false},
         {"localparam [7:0] P=4'shf;", "P", 255, 8, false},
         {"localparam signed [3:0] P=4'hf;", "P", 15, 4, true},
         {"localparam [7:0] P=4'hf+4'h1;", "P", 16, 8, false},
@@ -92,7 +111,7 @@ int main(int argc, char** argv) {
             << value->width << '\t' << value->bits << '\t' << value->cache() << '\t'
             << value->signedValue << '\n';
     }
-    for (const auto& expression : {"1/0", "1%0", "2**3", "1<<-1", "65'h1+1", "1'bx+1", "'1+1", "'h1+1", "1?0:1", "{1'b0,1'b1}", "1+", "0 1", "$clog2(2)"}) {
+    for (const auto& expression : {"1/0", "1%0", "0**-1", "4'h0**4'shf", "1<<-1", "65'h1+1", "1'bx+1", "'1+1", "'h1+1", "1?0:1", "{1'b0,1'b1}", "1+", "0 1", "$clog2(2)"}) {
         if (evaluate("", expression)) { ++failures; std::cerr << "FAIL unknown boundary: " << expression << '\n'; }
     }
     for (const auto& declaration : {"parameter P=0;", "parameter Q=0;localparam P=Q;",
