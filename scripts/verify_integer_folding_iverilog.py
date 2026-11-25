@@ -55,6 +55,24 @@ def main():
         ("localparam signed P=1'b1;", "P<1'sb0"): ((1, 0), (1, 1)),
     }
     type_boundary_keys = {key for key in native_boundaries if key[0] and key[1] != "P"}
+    # Static target evidence: simplify uses ordinary signed/zero extension;
+    # genRTLIL fill propagation operates on a process clone, not the retained
+    # diagnostic AST. Exact pairs below are separate from semantic matches.
+    unbased_boundaries = {
+        ("", "'1+8'h0"): ((8, 1), (8, 255)),
+        ("", "'1+0"): ((32, 1), (32, 4294967295)),
+        ("", "'1+1"): ((32, 2), (32, 0)),
+        ("", "(~'1)+8'h0"): ((8, 254), (8, 0)),
+        ("", "'1==8'h1"): ((1, 1), (1, 0)),
+        ("", "'1==8'hff"): ((1, 0), (1, 1)),
+        ("", "'1<8'h2"): ((1, 1), (1, 0)),
+        ("", "1 ? '1 : 8'h0"): ((8, 1), (8, 255)),
+        ("", "0 ? 8'h0 : '1"): ((8, 1), (8, 255)),
+        ("localparam [7:0] P='1;", "P"): ((8, 1), (8, 255)),
+        ("localparam signed [7:0] P='1;", "P"): ((8, 1), (8, 255)),
+        ("localparam [7:0] P='1+1;", "P"): ((8, 2), (8, 0)),
+    }
+    native_boundaries.update(unbased_boundaries)
     for index, (decl, expr, width, bits, cache, sign) in enumerate(cases):
         expected = (int(width), int(bits))
         known_boundary = native_boundaries.get((decl, expr)) == (expected, actual.get(index))
@@ -62,23 +80,25 @@ def main():
         checks.append({"declaration": decl, "expression": expr, "model": expected,
                        "iverilog": actual.get(index), "matched": actual.get(index) == expected,
                        "knownNativeDecimalBoundary": native_decimal_boundary,
-                       "knownNativeLiteralBoundary": known_boundary and (decl, expr) not in type_boundary_keys,
+                       "knownNativeLiteralBoundary": known_boundary and (decl, expr) not in type_boundary_keys and (decl, expr) not in unbased_boundaries,
                        "knownNativeTypeBoundary": known_boundary and (decl, expr) in type_boundary_keys,
+                       "knownNativeUnbasedFillBoundary": known_boundary and (decl, expr) in unbased_boundaries,
                        "knownNativeBoundary": known_boundary})
     version = subprocess.run(["iverilog", "-V"], capture_output=True, text=True).stdout.splitlines()[0]
     report = {"scope": "Independent HDL semantics, not proprietary runtime equivalence",
               "oracle": version, "flags": ["-g2012", "-gstrict-expr-width"],
-              "scopeNote": "Checks natural width and bits; signed cache has separate C++ assertions. Exact native/Icarus parser and type-stage differences are recorded separately, not counted as matches.",
+              "scopeNote": "Checks natural width and bits; signed cache has separate C++ assertions. Exact native/Icarus parser, type-stage and unbased fill-stage differences are recorded separately, not counted as matches.",
               "total": len(checks),
               "matched": sum(item["matched"] for item in checks),
               "knownLiteralDifferences": sum(item["knownNativeLiteralBoundary"] for item in checks),
               "knownTypeDifferences": sum(item["knownNativeTypeBoundary"] for item in checks),
+              "knownUnbasedFillDifferences": sum(item["knownNativeUnbasedFillBoundary"] for item in checks),
               "knownDifferences": sum(item["knownNativeBoundary"] for item in checks),
               "checks": checks}
     pathlib.Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f'{report["matched"]}/{report["total"]} integer folding oracle checks matched')
     if report["knownDifferences"]:
-        print(f'{report["knownDifferences"]} exact native/Icarus parser/type differences recorded separately')
+        print(f'{report["knownDifferences"]} exact native/Icarus parser/type/fill-stage differences recorded separately')
     failures = [item for item in checks if not item["matched"] and not item["knownNativeBoundary"]]
     if failures:
         for item in checks:

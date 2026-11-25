@@ -1,0 +1,217 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Static decompilation excerpts; no target execution.
+
+Source: reverse-tools/evidence/t_linter_pass96/numeric_conversion.txt; SHA256: c48bfb2dab0465ca6fad540c81b615d7b9d38dc548f967bf8ecdc2c435e6eb38
+
+Source lines 403..497
+  if (pcVar6 == local_40) {
+    iVar11 = -1;
+  }
+  local_48 = CONCAT44(local_48._4_4_,iVar11);
+  if (local_80 != '\'') {
+LAB_1800d1dc4:
+    FUN_18003efe0(param_1);
+    return 0;
+  }
+  local_70 = (byte *)0x0;
+  pbStack_68 = (byte *)0x0;
+  local_60 = (byte *)0x0;
+  local_75 = iVar11 < 0;
+  local_78[2] = local_40[1] == 's';
+  if ((bool)local_78[2]) {
+    local_40 = local_40 + 1;
+  }
+  switch((int)local_40[1]) {
+  case 0x42:
+  case 0x62:
+    pcVar5 = local_40 + 2;
+    goto LAB_1800d1c0f;
+  default:
+    iVar11 = tolower((int)local_40[1]);
+    cVar2 = (char)iVar11;
+    if (((1 < (byte)(cVar2 - 0x30U)) && (cVar2 != 'x')) && (cVar2 != 'z')) {
+      if (local_70 != (byte *)0x0) {
+        pbVar4 = local_70;
+        if (0xfff < (ulonglong)((longlong)local_60 - (longlong)local_70)) {
+          if (((ulonglong)local_70 & 0x1f) != 0) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+          pbVar4 = *(byte **)(local_70 + -8);
+          if (local_70 <= pbVar4) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+          if ((ulonglong)((longlong)local_70 - (longlong)pbVar4) < 8) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+          if (0x27 < (ulonglong)((longlong)local_70 - (longlong)pbVar4)) {
+                    /* WARNING: Subroutine does not return */
+            _invalid_parameter_noinfo_noreturn();
+          }
+        }
+        free(pbVar4);
+        local_70 = (byte *)0x0;
+        pbStack_68 = (byte *)0x0;
+        local_60 = (byte *)0x0;
+      }
+      goto LAB_1800d1dc4;
+    }
+    local_75 = true;
+    pcVar5 = local_40 + 1;
+    iVar11 = 1;
+LAB_1800d1c0f:
+    uVar14 = 2;
+    break;
+  case 0x44:
+  case 100:
+    pcVar5 = local_40 + 2;
+    uVar14 = 10;
+    break;
+  case 0x48:
+  case 0x68:
+    pcVar5 = local_40 + 2;
+    uVar14 = 0x10;
+    break;
+  case 0x4f:
+  case 0x6f:
+    pcVar5 = local_40 + 2;
+    uVar14 = 8;
+  }
+  local_88 = local_78[1];
+  local_80 = local_75;
+  FUN_1800d1e40(&local_70,pcVar5,iVar11,uVar14);
+  if ((((int)local_48 < 0) && (local_78[2] != '\0')) && (pbStack_68[-1] == 1)) {
+    local_78[0] = 0;
+    if ((local_78 < pbStack_68) && (local_70 <= local_78)) {
+      local_50 = (byte **)(local_78 + -(longlong)local_70);
+      if ((pbStack_68 == local_60) && (local_60 == pbStack_68)) {
+        if ((longlong)local_70 - (longlong)pbStack_68 == 1) {
+          std::_Xlength_error("vector<T> too long");
+          pcVar1 = (code *)swi(3);
+          lVar13 = (*pcVar1)();
+          return lVar13;
+        }
+        uVar7 = (longlong)local_60 - (longlong)local_70;
+        pbVar4 = pbVar9;
+        if (uVar7 <= -(uVar7 >> 1) - 1) {
+          pbVar4 = (byte *)(uVar7 + (uVar7 >> 1));
+        }
+        if (pbVar4 < pbStack_68 + (1 - (longlong)local_70)) {
+
+Source lines 515..550
+        pbVar4 = pbVar9;
+        if (uVar7 <= -(uVar7 >> 1) - 1) {
+          pbVar4 = (byte *)(uVar7 + (uVar7 >> 1));
+        }
+        if (pbVar4 < pbStack_68 + (1 - (longlong)local_70)) {
+          pbVar4 = pbStack_68 + (1 - (longlong)local_70);
+        }
+        FUN_1800d11f0(&local_70,pbVar4);
+      }
+      if (pbStack_68 != (byte *)0x0) {
+        *pbStack_68 = 0;
+      }
+    }
+    pbStack_68 = pbStack_68 + 1;
+  }
+  local_50 = (byte **)FUN_1808e3930(&local_70,local_78[2],local_75);
+  if (*pcVar6 != '\0') {
+    pbVar9 = (byte *)0xffffffffffffffff;
+    do {
+      pbVar9 = pbVar9 + 1;
+    } while (pcVar6[(longlong)pbVar9] != '\0');
+  }
+  FUN_180040680((longlong)local_50 + 0x48,pcVar6,pbVar9);
+  FUN_1800400b0(&local_70);
+  FUN_18003efe0(param_1);
+  return (longlong)local_50;
+}
+
+
+
+===== 0x1808e3a40 1808e3a40 FUN_1808e3a40 =====
+
+byte * FUN_1808e3a40(uint param_1,byte param_2,int param_3)
+
+{
+  ulonglong *puVar1;
+
+Source: reverse-tools/evidence/t_linter_pass96/constant_builders.txt; SHA256: 34bc4a13cc08b49d4f519d5627828b4bd96e2b3a865b43769b7a1f7d32eabfef
+
+Source lines 1..58
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 0x1808e3930 1808e3930 FUN_1808e3930 =====
+
+longlong FUN_1808e3930(undefined8 param_1,char param_2,undefined1 param_3)
+
+{
+  longlong *plVar1;
+  char cVar2;
+  void *pvVar3;
+  longlong lVar4;
+  ulonglong uVar5;
+  undefined8 uVar6;
+  
+  uVar6 = 0xfffffffffffffffe;
+  pvVar3 = operator_new(0x2c8);
+  if (pvVar3 == (void *)0x0) {
+    lVar4 = 0;
+  }
+  else {
+    lVar4 = FUN_1808d8dc0(pvVar3,0x10,0,0,0,0,uVar6);
+  }
+  *(char *)(lVar4 + 0xa4) = param_2;
+  plVar1 = (longlong *)(lVar4 + 0x88);
+  FUN_1801a6350(plVar1,param_1);
+  uVar5 = 0;
+  do {
+    if (uVar5 < (ulonglong)(*(longlong *)(lVar4 + 0x90) - *plVar1)) {
+      cVar2 = *(char *)(uVar5 + *plVar1);
+LAB_1808e39dc:
+      *(uint *)(lVar4 + 0xbc) =
+           *(uint *)(lVar4 + 0xbc) | (uint)(cVar2 == '\x01') << ((byte)uVar5 & 0x1f);
+    }
+    else if ((param_2 != '\0') && (*plVar1 != *(longlong *)(lVar4 + 0x90))) {
+      cVar2 = *(char *)(*(longlong *)(lVar4 + 0x90) + -1);
+      goto LAB_1808e39dc;
+    }
+    uVar5 = uVar5 + 1;
+    if (0x1f < uVar5) {
+      *(undefined1 *)(lVar4 + 0xa9) = 1;
+      *(int *)(lVar4 + 0xb4) = (*(int *)(lVar4 + 0x90) - *(int *)plVar1) + -1;
+      *(undefined4 *)(lVar4 + 0xb8) = 0;
+      *(undefined1 *)(lVar4 + 0xac) = param_3;
+      return lVar4;
+    }
+  } while( true );
+}
+
+
+
+===== 0x1808e3a30 1808e3a30 FUN_1808e3a30 =====
+
+void FUN_1808e3a30(undefined8 param_1,undefined8 param_2)
+
+{
+  FUN_1808e3930(param_1,param_2,0);
+  return;
+}
+
+Source: /private/tmp/tlinter-r63-pass117-detect-sign-worker.txt; SHA256: dcd6eb31650d68f88a26d4f452c9ccffde0ff8cc62710e9e1d21c57b209ae214
+
+Source lines 105..116
+  case 0x10:
+    iVar14 = *(int *)(param_1 + 0x90) - *(int *)(param_1 + 0x88);
+    local_b0 = CONCAT44(local_b0._4_4_,iVar14);
+    piVar8 = (int *)&local_b0;
+    if (iVar14 <= *param_2) {
+      piVar8 = param_2;
+    }
+    *param_2 = *piVar8;
+    if (*(char *)(param_1 + 0xa4) == '\0') {
+      *param_3 = 0;
+    }
+    break;

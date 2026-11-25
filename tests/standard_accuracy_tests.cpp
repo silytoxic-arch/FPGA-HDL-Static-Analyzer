@@ -6803,6 +6803,15 @@ int main() {
           "R-6-3 preserves raw unknown literal cache and folds negative integer operands");
     struct ResetFoldCase { const char* declaration; const char* expression; unsigned cache; };
     const ResetFoldCase resetFoldCases[] = {
+        {"", "'0+8'h0", 0}, {"", "'1+8'h0", 1},
+        {"", "'1+0", 1}, {"", "'1+1", 2},
+        {"", "'1+'1", 0}, {"", "(~'1)+8'h0", 254},
+        {"", "'1==8'h1", 1}, {"", "'1==8'hff", 0},
+        {"", "'1<8'h2", 1}, {"", "{'1,1'b0}", 2},
+        {"", "1 ? '1 : 8'h0", 1},
+        {"localparam [7:0] P='1;", "P", 1},
+        {"localparam P='1;", "P+8'h0", 1},
+        {"localparam signed [0:0] P='1;", "P", 1},
         {"", "1-1", 0}, {"", "4'hf+4'h1", 0},
         {"", "(4'hf+4'h1)+8'h0", 16}, {"", "-4'sd1", 0xffffffffU},
         {"", "4'shf<4'sh1", 1}, {"", "4'shf<8'h1", 0},
@@ -6868,7 +6877,7 @@ int main() {
              "localparam P=0**-1;", "parameter N=2;localparam P={N{1'b0}};",
              "localparam P={65{1'b0}};", "localparam P={1'bx,1'b0};",
              "parameter K=1;localparam P=K ? 0 : 1;", "localparam P=1'bx ? 0 : 1;",
-             "localparam P='shffffffffffffffff+0;", "localparam P='1+1;"}) {
+             "localparam P='shffffffffffffffff+0;", "localparam P='x+1;", "localparam P='z+1;"}) {
         result = analyzeVerilog(std::string("module probe(input CLK,RST,D,output reg PRIME,Q);\n") +
             declaration + "\nalways @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
             "always @(posedge RST) if(RST==P) Q<=0; else Q<=D;\nendmodule\n");

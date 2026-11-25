@@ -117,6 +117,12 @@ private:
     }
     static std::optional<Value> number(std::string text, std::size_t source) {
         text.erase(std::remove(text.begin(), text.end(), '_'), text.end());
+        // Native numeric conversion makes unbased 0/1 a physical one-bit
+        // unsigned CONSTANT (+0xac marks later RTL fill handling). The
+        // recovered simplify operators use ordinary resize, not that fill
+        // helper; ALWAYS RTL generation mutates a clone of the diagnostic AST.
+        if (text == "'0" || text == "'1")
+            return Value{static_cast<std::uint64_t>(text[1] - '0'), 1, false, source};
         const auto quote = text.find('\'');
         unsigned width = 0, base = 10;
         bool sign = true;
