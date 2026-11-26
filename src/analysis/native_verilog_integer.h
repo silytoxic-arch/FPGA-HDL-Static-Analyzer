@@ -41,6 +41,16 @@ public:
                          const VerilogConstantExpressions& symbols)
         : tokens_(tokens), symbols_(symbols) {}
 
+    // The constant-only callback copies the system function name differently
+    // from the ordinary-expression callback. Keep this unresolved route out of
+    // both numeric folding and reset-catalog constantness fallback.
+    [[nodiscard]] bool hasUnrecoveredInitializerCall(std::size_t begin, std::size_t end) const {
+        if (end > tokens_.size()) return true;
+        for (auto token = begin; token + 1 < end; ++token)
+            if (tokens_[token].text == "$clog2" && tokens_[token + 1].text == "(") return true;
+        return false;
+    }
+
     [[nodiscard]] std::optional<Value> evaluate(std::size_t begin, std::size_t end) {
         const auto node = parse(begin, end, 0);
         return node ? fold(node, 0, std::nullopt, 0) : std::nullopt;
@@ -231,6 +241,11 @@ private:
         }
         if (at + 1 >= tokens_.size() || tokens_[at].kind != parser::HdlTokenKind::Identifier ||
             tokens_[at + 1].text != "=") return {};
+        // Localparam initialization uses Constant_mintypmax_expression in the
+        // recovered frontend. Its system-call callback copies a raw name,
+        // unlike the escaped ordinary-expression callback. Until that separate
+        // route is connected to the builtin dispatch, do not invent its value.
+        if (hasUnrecoveredInitializerCall(binding->begin, binding->end)) return {};
         active_.push_back(key);
         const auto root = parse(binding->begin, binding->end, depth + 1);
         // Literal/alias nodes keep their physical width until declaration
@@ -336,6 +351,11 @@ private:
                     const auto value = number(owner.tokens_[at].text, at);
                     if (!value) return {};
                     lhs = literal(*value); ++at;
+                } else if (op.text == "$clog2" && at + 1 < end && owner.tokens_[at + 1].text == "(") {
+                    at += 2;
+                    const auto argument = expression(0, depth + 1);
+                    if (!argument || at >= end || owner.tokens_[at++].text != ")") return {};
+                    lhs = std::make_shared<Node>(Node{"$clog2", {}, argument, {}, 32, true, source});
                 } else if (owner.tokens_[at].kind == parser::HdlTokenKind::Identifier) {
                     lhs = owner.parameter(at++, depth + 1);
                     if (!lhs) return {};
@@ -386,6 +406,16 @@ private:
         // A literal/parameter clone is not rebuilt by an inherited context.
         // Its parent converts the physical constant immediately before use.
         if (op.empty()) return node->value;
+        if (op == "$clog2") {
+            // Native FCALL children are simplified without inherited width or
+            // sign. The builtin then consumes their physical vector, subtracts
+            // one iff nonzero (unsigned, same width), and scans its highest one.
+            // It creates a fresh 32-bit signed constant, regardless of context.
+            const auto argument = fold(node->left, 0, std::nullopt, depth + 1);
+            if (!argument) return std::nullopt;
+            return Value{argument->bits == 0 ? 0U : std::bit_width(argument->bits - 1),
+                         32, true, node->source};
+        }
         if (op == "?:") {
             // The condition is self-determined and uses its entire bit vector,
             // independently of result width and of the diagnostic low32 cache.

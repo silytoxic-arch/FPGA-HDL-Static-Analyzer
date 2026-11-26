@@ -6803,6 +6803,13 @@ int main() {
           "R-6-3 preserves raw unknown literal cache and folds negative integer operands");
     struct ResetFoldCase { const char* declaration; const char* expression; unsigned cache; };
     const ResetFoldCase resetFoldCases[] = {
+        {"", "$clog2(0)", 0}, {"", "$clog2(1)", 0},
+        {"", "$clog2(2)", 1}, {"", "$clog2(3)", 2},
+        {"", "$clog2(1'sb1)", 0}, {"", "$clog2(8'shff)", 8},
+        {"", "$clog2(64'hffffffffffffffff)", 64},
+        {"", "$clog2(4'hf+4'h1)+64'h0", 0},
+        {"", "$clog2($clog2(17))", 3},
+        {"localparam signed [0:0] P=1'b1;", "$clog2(P)", 0},
         {"", "'0+8'h0", 0}, {"", "'1+8'h0", 1},
         {"", "'1+0", 1}, {"", "'1+1", 2},
         {"", "'1+'1", 0}, {"", "(~'1)+8'h0", 254},
@@ -6872,11 +6879,32 @@ int main() {
             }
         }
     }
+    result = analyzeVerilog(
+        "module probe(input CLK,RST,D,output reg PRIME,Q1,Q2);\n"
+        "always @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
+        "always @(posedge RST) begin\n"
+        "if(RST==\n"
+        "$clog2(\n"
+        "1)) Q1<=0;\n"
+        "if(\n"
+        "$clog2(1)\n"
+        "==RST) Q2<=0;\n"
+        "end\nendmodule\n");
+    resetConditionLines.clear();
+    for (const auto& item : result.violations) {
+        if (item.ruleId != "GJB10157.7.1.3") continue;
+        resetConditionLines.push_back(item.line);
+        check(item.column == 1, "R-6-3 folded builtin keeps native no-column reporting");
+    }
+    check(resetConditionLines == std::vector<std::size_t>{5, 8},
+          "R-6-3 folded builtin retains call line instead of argument or enclosing IF line");
     for (const auto* declaration : {"parameter P=0;", "parameter K=0;localparam P=K;",
              "localparam P=1'bx+1;", "localparam P=1/0;", "localparam P=65'h1+0;",
              "localparam P=0**-1;", "parameter N=2;localparam P={N{1'b0}};",
              "localparam P={65{1'b0}};", "localparam P={1'bx,1'b0};",
              "parameter K=1;localparam P=K ? 0 : 1;", "localparam P=1'bx ? 0 : 1;",
+             "localparam P=$clog2(2);", "localparam P=$clog2(1'bx);", "localparam P=$clog2(1/0);",
+             "parameter N=2;localparam P=$clog2(N);", "localparam P=$signed(0);",
              "localparam P='shffffffffffffffff+0;", "localparam P='x+1;", "localparam P='z+1;"}) {
         result = analyzeVerilog(std::string("module probe(input CLK,RST,D,output reg PRIME,Q);\n") +
             declaration + "\nalways @(posedge CLK or posedge RST) if(RST) PRIME<=0; else PRIME<=D;\n"
@@ -7210,7 +7238,7 @@ int main() {
     }
     for (const auto& resetValue : {
              "RESET", "ALIAS", "NEXT", "(RESET+1)&8'hff", "~RESET", "-1",
-             "1+2*3", "8/2", "7%4", "2**3", "1<<2", "8>>1", "8>>>1",
+             "$clog2(2)", "1+2*3", "8/2", "7%4", "2**3", "1<<2", "8>>1", "8>>>1",
              "1<2", "1>=2", "1==0", "1!=0", "1===0", "1!==0", "1&&0", "1||0",
              "8'hf0|8'h0f", "8'hf0^8'h0f", "8'hf0~^8'h0f", "&8'hff", "!0",
              "'0", "8'hxz", "1/0", "{8{1'b0}}", "{4'h0,4'h0}", "1 ? 0 : 1"}) {
@@ -7225,9 +7253,9 @@ int main() {
                   return item.ruleId == "GJB10157.7.1.3" && item.line == 4;
               }), context.c_str());
     }
-    for (const auto& resetValue : {"RV", "CYCLE", "MISSING", "$clog2(2)", "{8{RV}}", "{65{1'b0}}", "RST ? 0 : 1", "1+", "0 1"}) {
+    for (const auto& resetValue : {"RV", "CYCLE", "CONST_CALL", "MISSING", "$clog2(RV)", "$signed(2)", "{8{RV}}", "{65{1'b0}}", "RST ? 0 : 1", "1+", "0 1"}) {
         result = analyzeVerilog(
-            std::string("module probe(input CLK,RST,input [7:0] D,RV,output reg [7:0] Q,output reg X); localparam CYCLE=OTHER,OTHER=CYCLE;\n") +
+            std::string("module probe(input CLK,RST,input [7:0] D,RV,output reg [7:0] Q,output reg X); localparam CYCLE=OTHER,OTHER=CYCLE; localparam CONST_CALL=$clog2(2);\n") +
             "always @(posedge CLK or posedge RST) if(RST) Q<=" + resetValue + "; else Q<=D;\n" +
             "always @(posedge CLK) if(!CLK) X<=0; else X<=1;\nendmodule\n");
         check(std::ranges::any_of(result.violations, [](const auto& item) {

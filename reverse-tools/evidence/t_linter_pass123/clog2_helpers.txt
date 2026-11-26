@@ -1,0 +1,91 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 1809b66c0 1809b66c0 FUN_1809b66c0 =====
+
+ulonglong FUN_1809b66c0(longlong param_1)
+
+{
+  ulonglong uVar1;
+  ulonglong uVar2;
+  ulonglong uVar3;
+
+  uVar3 = 0;
+  uVar1 = *(longlong *)(param_1 + 0x10) - *(longlong *)(param_1 + 8);
+  uVar2 = 0;
+  if (uVar1 != 0) {
+    uVar2 = uVar1;
+    do {
+      if (*(char *)(*(longlong *)(param_1 + 8) + uVar3) == '\x01') {
+        return CONCAT71((int7)(uVar2 >> 8),1);
+      }
+      uVar3 = uVar3 + 1;
+      uVar2 = *(longlong *)(param_1 + 0x10) - *(longlong *)(param_1 + 8);
+    } while (uVar3 < uVar2);
+  }
+  return uVar2 & 0xffffffffffffff00;
+}
+
+
+
+===== 1801e5ab0 1801e5ab0 FUN_1801e5ab0 =====
+
+int FUN_1801e5ab0(longlong param_1)
+
+{
+  return *(int *)(param_1 + 0x10) - *(int *)(param_1 + 8);
+}
+
+
+
+===== 1809630c0 1809630c0 FUN_1809630c0 =====
+
+undefined8
+FUN_1809630c0(undefined8 param_1,longlong param_2,longlong param_3,undefined1 param_4,
+             undefined1 param_5,int param_6)
+
+{
+  undefined8 uVar1;
+  undefined8 uVar2;
+  undefined1 **ppuVar3;
+  undefined4 local_88 [2];
+  undefined1 *local_80;
+  undefined4 local_78;
+  undefined1 *local_70;
+  undefined1 local_68 [8];
+  undefined1 local_60 [8];
+  void *local_58;
+  undefined8 local_50;
+  undefined1 local_48 [8];
+  undefined1 local_40 [8];
+  void *local_38;
+  undefined1 local_30 [8];
+  undefined1 local_28 [8];
+  void *local_20;
+
+  local_50 = 0xfffffffffffffffe;
+  local_78 = 0;
+  local_88[0] = 0xffffffff;
+  uVar1 = FUN_18095e6a0(local_30,param_3,param_5,local_88);
+  uVar2 = FUN_18095e6a0(local_48,param_2,param_4,local_88);
+  FUN_18095e280(uVar2,local_68,uVar1);
+  local_80 = local_40;
+  free(local_38);
+  local_80 = local_28;
+  free(local_20);
+  if (param_6 < 0) {
+    local_70 = (undefined1 *)(*(longlong *)(param_3 + 0x10) - *(longlong *)(param_3 + 8));
+    local_80 = (undefined1 *)(*(longlong *)(param_2 + 0x10) - *(longlong *)(param_2 + 8));
+    ppuVar3 = &local_70;
+    if (local_70 <= local_80) {
+      ppuVar3 = &local_80;
+    }
+    param_6 = (int)*ppuVar3;
+  }
+  FUN_18095e4f0(param_1,local_68,param_6,local_88[0]);
+  local_78 = 1;
+  local_80 = local_60;
+  free(local_58);
+  return param_1;
+}
+
+

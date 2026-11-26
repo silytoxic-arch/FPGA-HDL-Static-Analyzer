@@ -17,6 +17,29 @@ int main(int argc, char** argv) {
         bool sign;
     };
     const std::vector<Case> cases{
+        {"", "$clog2(0)", 0, 32, true},
+        {"", "$clog2(1)", 0, 32, true},
+        {"", "$clog2(2)", 1, 32, true},
+        {"", "$clog2(3)", 2, 32, true},
+        {"", "$clog2(4)", 2, 32, true},
+        {"", "$clog2(5)", 3, 32, true},
+        {"", "$clog2(1'sb1)", 0, 32, true},
+        {"", "$clog2(4'sh8)", 3, 32, true},
+        {"", "$clog2(8'shff)", 8, 32, true},
+        {"", "$clog2(-1)", 32, 32, true},
+        {"", "$clog2(64'hffffffffffffffff)", 64, 32, true},
+        {"", "$clog2(64'h8000000000000000)", 63, 32, true},
+        {"", "$clog2(64'sh8000000000000000)", 63, 32, true},
+        {"", "$clog2(4'hf+4'h1)", 0, 32, true},
+        {"", "$clog2(4'hf+4'h1)+64'h0", 0, 64, false},
+        {"", "$clog2((4'hf+4'h1)+8'h0)", 4, 32, true},
+        {"", "$clog2($clog2(17))", 3, 32, true},
+        {"", "$clog2('0)", 0, 32, true},
+        {"", "$clog2('1)", 0, 32, true},
+        {"", "$clog2({8'hff,8'hff})", 16, 32, true},
+        {"", "$clog2(1 ? 4'hf : 8'h0)", 4, 32, true},
+        {"localparam N=17;", "$clog2(N)", 5, 32, true},
+        {"localparam signed [0:0] P=1'b1;", "$clog2(P)", 0, 32, true},
         {"", "'0", 0, 1, false},
         {"", "'1", 1, 1, false},
         {"", "'0+8'h0", 0, 8, false},
@@ -218,18 +241,22 @@ int main(int argc, char** argv) {
             << value->width << '\t' << value->bits << '\t' << value->cache() << '\t'
             << value->signedValue << '\n';
     }
-    for (const auto& expression : {"1/0", "1%0", "0**-1", "4'h0**4'shf", "1<<-1", "65'h1+1", "1'bx+1", "'x+1", "'z+1", "'1x", "' 1", "'h10000000000000000+1", "'shffffffffffffffff+0", "'d18446744073709551616+0", "1?0", "1?:0", "1?0:", "1'bx ? 0:1", "MISSING ? 0:1", "0 ? 0:1/0", "{}", "{1'b0,}", "{,1'b0}", "{1'bx,1'b0}", "{65{1'b1}}", "{64'h0,1'b0}", "{0{1'b1}}", "{-1{1'b1}}", "{1{1'b1}", "{1'b0", "1+", "0 1", "$clog2(2)"}) {
+    for (const auto& expression : {"1/0", "1%0", "0**-1", "4'h0**4'shf", "1<<-1", "65'h1+1", "1'bx+1", "'x+1", "'z+1", "'1x", "' 1", "'h10000000000000000+1", "'shffffffffffffffff+0", "'d18446744073709551616+0", "1?0", "1?:0", "1?0:", "1'bx ? 0:1", "MISSING ? 0:1", "0 ? 0:1/0", "{}", "{1'b0,}", "{,1'b0}", "{1'bx,1'b0}", "{65{1'b1}}", "{64'h0,1'b0}", "{0{1'b1}}", "{-1{1'b1}}", "{1{1'b1}", "{1'b0", "1+", "0 1", "$clog2()", "$clog2(1,2)", "$clog2(2", "$clog2(1/0)", "$clog2(1'bx)", "$clog2(65'h1)", "$clog2(MISSING)", "$clog2($signed(2))", "$signed(2)", "$unsigned(2)", "$CLOG2(2)"}) {
         if (evaluate("", expression)) { ++failures; std::cerr << "FAIL unknown boundary: " << expression << '\n'; }
     }
     for (const auto& declaration : {"parameter P=0;", "parameter Q=0;localparam P=Q;",
              "localparam P=Q,Q=P;", "localparam P=MISSING;", "localparam real P=0;",
              "localparam [64:0] P=0;", "localparam [W-1:0] P=0;", "localparam P=1'bx;",
              "localparam unsigned P=4'shf;",
+             "localparam P=$clog2(17);", "localparam [7:0] P=$clog2(4'hf+4'h1);",
+             "localparam P=$clog2(2);localparam Q=$clog2(P+1);",
              "parameter N=2;localparam P={N{1'b1}};"}) {
         if (evaluate(declaration, "P")) { ++failures; std::cerr << "FAIL binding boundary: " << declaration << '\n'; }
     }
     struct CacheCase { const char* declaration; const char* expression; std::uint32_t cache; };
     for (const auto& test : std::vector<CacheCase>{
+             {"localparam [0:0] P=1'sb1;", "$clog2(P)", 0},
+             {"localparam [32:0] P=33'h100000000;", "$clog2(P)", 32},
              {"localparam signed [0:0] P='1;", "P", 1},
              {"localparam signed [0:0] P='1;", "+P", 0xffffffffU},
              {"localparam [7:0] P='1;", "P", 1},

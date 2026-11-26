@@ -1,0 +1,114 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 18006bc40 18006bc40 FUN_18006bc40 =====
+
+undefined8 FUN_18006bc40(longlong param_1,longlong param_2)
+
+{
+  undefined8 *puVar1;
+  longlong lVar2;
+  longlong lVar3;
+  undefined8 uVar4;
+  undefined8 *puVar5;
+  longlong lVar6;
+
+  puVar1 = *(undefined8 **)(param_1 + 0x18);
+  if (*(undefined8 **)(param_1 + 0x10) == puVar1) {
+    return 0;
+  }
+  puVar5 = *(undefined8 **)(param_1 + 0x10);
+  lVar2 = 0;
+  while( true ) {
+    if (puVar5 == puVar1) {
+      return 0;
+    }
+    lVar3 = __RTDynamicCast(*puVar5,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                            &antlrcpptest::Verilog2005Parser::String_Context::RTTI_Type_Descriptor,0
+                           );
+    lVar6 = lVar2;
+    if ((lVar3 != 0) && (lVar6 = lVar2 + 1, lVar2 == param_2)) break;
+    puVar5 = puVar5 + 1;
+    lVar2 = lVar6;
+  }
+  uVar4 = __RTDynamicCast(*puVar5,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                          &antlrcpptest::Verilog2005Parser::String_Context::RTTI_Type_Descriptor,0);
+  return uVar4;
+}
+
+
+
+===== 1800666c0 1800666c0 FUN_1800666c0 =====
+
+undefined8 FUN_1800666c0(longlong param_1,longlong param_2)
+
+{
+  undefined8 *puVar1;
+  longlong lVar2;
+  longlong lVar3;
+  undefined8 uVar4;
+  undefined8 *puVar5;
+  longlong lVar6;
+
+  puVar1 = *(undefined8 **)(param_1 + 0x18);
+  if (*(undefined8 **)(param_1 + 0x10) == puVar1) {
+    return 0;
+  }
+  puVar5 = *(undefined8 **)(param_1 + 0x10);
+  lVar2 = 0;
+  while( true ) {
+    if (puVar5 == puVar1) {
+      return 0;
+    }
+    lVar3 = __RTDynamicCast(*puVar5,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                            &antlrcpptest::Verilog2005Parser::Constant_function_callContext::
+                             RTTI_Type_Descriptor,0);
+    lVar6 = lVar2;
+    if ((lVar3 != 0) && (lVar6 = lVar2 + 1, lVar2 == param_2)) break;
+    puVar5 = puVar5 + 1;
+    lVar2 = lVar6;
+  }
+  uVar4 = __RTDynamicCast(*puVar5,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                          &antlrcpptest::Verilog2005Parser::Constant_function_callContext::
+                           RTTI_Type_Descriptor,0);
+  return uVar4;
+}
+
+
+
+===== 180066840 180066840 FUN_180066840 =====
+
+undefined8 FUN_180066840(longlong param_1,longlong param_2)
+
+{
+  undefined8 *puVar1;
+  longlong lVar2;
+  longlong lVar3;
+  undefined8 uVar4;
+  undefined8 *puVar5;
+  longlong lVar6;
+
+  puVar1 = *(undefined8 **)(param_1 + 0x18);
+  if (*(undefined8 **)(param_1 + 0x10) == puVar1) {
+    return 0;
+  }
+  puVar5 = *(undefined8 **)(param_1 + 0x10);
+  lVar2 = 0;
+  while( true ) {
+    if (puVar5 == puVar1) {
+      return 0;
+    }
+    lVar3 = __RTDynamicCast(*puVar5,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                            &antlrcpptest::Verilog2005Parser::Constant_multiple_concatenationContext
+                             ::RTTI_Type_Descriptor,0);
+    lVar6 = lVar2;
+    if ((lVar3 != 0) && (lVar6 = lVar2 + 1, lVar2 == param_2)) break;
+    puVar5 = puVar5 + 1;
+    lVar2 = lVar6;
+  }
+  uVar4 = __RTDynamicCast(*puVar5,0,&antlr4::tree::ParseTree::RTTI_Type_Descriptor,
+                          &antlrcpptest::Verilog2005Parser::Constant_multiple_concatenationContext::
+                           RTTI_Type_Descriptor,0);
+  return uVar4;
+}
+
+

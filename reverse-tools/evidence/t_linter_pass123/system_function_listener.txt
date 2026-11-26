@@ -1,0 +1,781 @@
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+Context 180e1d338 slot 128 -> 1800a3720
+
+void FUN_1800a3720(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Verilog2005ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x0001800a375f. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0x1398))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e3dd90 + 1398 -> 1800e7160
+
+void _guard_check_icall(void)
+
+{
+  return;
+}
+
+
+Context 180e1d338 slot 136 -> 1800abc90
+
+void FUN_1800abc90(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Verilog2005ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x0001800abccf. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0x13a0))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e3dd90 + 13a0 -> 180123fa0
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+void FUN_180123fa0(longlong param_1,longlong *param_2)
+
+{
+  longlong lVar1;
+  undefined1 *puVar2;
+  int iVar3;
+  undefined4 uVar4;
+  int iVar5;
+  uint uVar6;
+  longlong *plVar7;
+  longlong *plVar8;
+  longlong *plVar9;
+  longlong *plVar10;
+  longlong *plVar11;
+  longlong lVar12;
+  size_t sVar13;
+  undefined8 uVar14;
+  longlong lVar15;
+  undefined1 *puVar16;
+  ulonglong uVar17;
+  undefined1 auStack_f8 [32];
+  undefined8 local_d8;
+  undefined8 local_d0;
+  undefined8 local_c8;
+  int iStack_c0;
+  int iStack_bc;
+  longlong local_b8;
+  longlong local_b0;
+  longlong local_a8 [4];
+  undefined1 local_88;
+  undefined7 uStack_87;
+  ulonglong local_78;
+  ulonglong local_70;
+  ulonglong local_68 [6];
+
+  local_a8[3] = 0xfffffffffffffffe;
+  local_68[4] = DAT_18131ef10 ^ (ulonglong)auStack_f8;
+  local_b0 = param_1;
+  plVar7 = (longlong *)(**(code **)(*param_2 + 0xb0))(param_2);
+  plVar8 = (longlong *)(**(code **)(*param_2 + 0xb0))(param_2);
+  plVar9 = (longlong *)(**(code **)(*param_2 + 0xb0))(param_2);
+  plVar10 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  plVar11 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  lVar12 = (**(code **)(*plVar8 + 8))(plVar8,local_68);
+  uVar14 = *(undefined8 *)(lVar12 + 0x10);
+  iVar3 = (**(code **)(*plVar7 + 0x20))(plVar7);
+  iVar3 = (int)uVar14 + 1 + iVar3;
+  uVar4 = (**(code **)(*plVar9 + 0x18))(plVar9);
+  iVar5 = (**(code **)(*plVar10 + 0x20))(plVar10);
+  iVar5 = iVar5 + 1;
+  DAT_18133c1e8 = (**(code **)(*plVar11 + 0x18))(plVar11);
+  local_c8 = (void *)CONCAT44(uVar4,DAT_18133c1e8);
+  uRam000000018133c1ec = uVar4;
+  iRam000000018133c1f0 = iVar5;
+  iRam000000018133c1f4 = iVar3;
+  iStack_c0 = iVar5;
+  iStack_bc = iVar3;
+  if (0xf < local_68[3]) {
+    FUN_1800409e0(local_68,local_68[0],local_68[3] + 1);
+  }
+  local_68[3] = 0xf;
+  local_68[2] = 0;
+  local_68[0] = local_68[0] & 0xffffffffffffff00;
+  plVar7 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  DAT_18131e000 = (**(code **)(*plVar7 + 0x18))(plVar7);
+  plVar7 = (longlong *)FUN_1800cac50(param_2);
+  (**(code **)(*plVar7 + 0x30))(plVar7,&local_88);
+  local_c8 = operator_new(0x2c8);
+  local_b8 = 0;
+  if (local_c8 != (void *)0x0) {
+    local_d0 = 0;
+    local_d8 = 0;
+    local_b8 = FUN_1808d8dc0(local_c8,0x1c,0,0);
+  }
+  uVar17 = local_70;
+  puVar2 = (undefined1 *)CONCAT71(uStack_87,local_88);
+  puVar16 = &local_88;
+  if (0xf < local_70) {
+    puVar16 = puVar2;
+  }
+  sVar13 = 8;
+  if (local_78 < 8) {
+    sVar13 = local_78;
+  }
+  local_c8 = (void *)local_b8;
+  if (sVar13 == 0) {
+    uVar6 = 0;
+  }
+  else {
+    uVar6 = memcmp(puVar16,"$display",sVar13);
+  }
+  if (uVar6 == 0) {
+    if (local_78 < 8) {
+      uVar6 = 0xffffffff;
+    }
+    else {
+      uVar6 = (uint)(local_78 != 8);
+    }
+  }
+  if (uVar6 != 0) {
+    puVar16 = &local_88;
+    if (0xf < uVar17) {
+      puVar16 = puVar2;
+    }
+    sVar13 = 6;
+    if (local_78 < 6) {
+      sVar13 = local_78;
+    }
+    if (sVar13 == 0) {
+      uVar6 = 0;
+    }
+    else {
+      uVar6 = memcmp(puVar16,"$write",sVar13);
+    }
+    if (uVar6 == 0) {
+      if (local_78 < 6) {
+        uVar6 = 0xffffffff;
+      }
+      else {
+        uVar6 = (uint)(local_78 != 6);
+      }
+    }
+    if (uVar6 != 0) {
+      puVar16 = &local_88;
+      if (0xf < uVar17) {
+        puVar16 = puVar2;
+      }
+      sVar13 = 7;
+      if (local_78 < 7) {
+        sVar13 = local_78;
+      }
+      if (sVar13 == 0) {
+        uVar6 = 0;
+      }
+      else {
+        uVar6 = memcmp(puVar16,"$strobe",sVar13);
+      }
+      if (uVar6 == 0) {
+        if (local_78 < 7) {
+          uVar6 = 0xffffffff;
+        }
+        else {
+          uVar6 = (uint)(local_78 != 7);
+        }
+      }
+      if (uVar6 != 0) {
+        puVar16 = &local_88;
+        if (0xf < uVar17) {
+          puVar16 = puVar2;
+        }
+        sVar13 = 8;
+        if (local_78 < 8) {
+          sVar13 = local_78;
+        }
+        if (sVar13 == 0) {
+          uVar6 = 0;
+        }
+        else {
+          uVar6 = memcmp(puVar16,"$monitor",sVar13);
+        }
+        if (uVar6 == 0) {
+          if (local_78 < 8) {
+            uVar6 = 0xffffffff;
+          }
+          else {
+            uVar6 = (uint)(local_78 != 8);
+          }
+        }
+        if (uVar6 != 0) {
+          puVar16 = &local_88;
+          if (0xf < uVar17) {
+            puVar16 = puVar2;
+          }
+          sVar13 = 5;
+          if (local_78 < 5) {
+            sVar13 = local_78;
+          }
+          if (sVar13 == 0) {
+            uVar6 = 0;
+          }
+          else {
+            uVar6 = memcmp(puVar16,"$time",sVar13);
+          }
+          if (uVar6 == 0) {
+            if (local_78 < 5) {
+              uVar6 = 0xffffffff;
+            }
+            else {
+              uVar6 = (uint)(local_78 != 5);
+            }
+          }
+          if (uVar6 != 0) {
+            puVar16 = &local_88;
+            if (0xf < uVar17) {
+              puVar16 = puVar2;
+            }
+            sVar13 = 5;
+            if (local_78 < 5) {
+              sVar13 = local_78;
+            }
+            if (sVar13 == 0) {
+              uVar6 = 0;
+            }
+            else {
+              uVar6 = memcmp(puVar16,"$stop",sVar13);
+            }
+            if (uVar6 == 0) {
+              if (local_78 < 5) {
+                uVar6 = 0xffffffff;
+              }
+              else {
+                uVar6 = (uint)(local_78 != 5);
+              }
+            }
+            if (uVar6 != 0) {
+              puVar16 = &local_88;
+              if (0xf < uVar17) {
+                puVar16 = puVar2;
+              }
+              sVar13 = 7;
+              if (local_78 < 7) {
+                sVar13 = local_78;
+              }
+              if (sVar13 == 0) {
+                uVar6 = 0;
+              }
+              else {
+                uVar6 = memcmp(puVar16,"$finish",sVar13);
+              }
+              if (uVar6 == 0) {
+                if (local_78 < 7) {
+                  uVar6 = 0xffffffff;
+                }
+                else {
+                  uVar6 = (uint)(local_78 != 7);
+                }
+              }
+              if (uVar6 != 0) {
+                puVar16 = &local_88;
+                if (0xf < uVar17) {
+                  puVar16 = puVar2;
+                }
+                sVar13 = 9;
+                if (local_78 < 9) {
+                  sVar13 = local_78;
+                }
+                if (sVar13 == 0) {
+                  uVar6 = 0;
+                }
+                else {
+                  uVar6 = memcmp(puVar16,"$dumpfile",sVar13);
+                }
+                if (uVar6 == 0) {
+                  if (local_78 < 9) {
+                    uVar6 = 0xffffffff;
+                  }
+                  else {
+                    uVar6 = (uint)(local_78 != 9);
+                  }
+                }
+                if (uVar6 != 0) {
+                  puVar16 = &local_88;
+                  if (0xf < uVar17) {
+                    puVar16 = puVar2;
+                  }
+                  sVar13 = 9;
+                  if (local_78 < 9) {
+                    sVar13 = local_78;
+                  }
+                  if (sVar13 == 0) {
+                    uVar6 = 0;
+                  }
+                  else {
+                    uVar6 = memcmp(puVar16,"$dumpvars",sVar13);
+                  }
+                  if (uVar6 == 0) {
+                    if (local_78 < 9) {
+                      uVar6 = 0xffffffff;
+                    }
+                    else {
+                      uVar6 = (uint)(local_78 != 9);
+                    }
+                  }
+                  if (uVar6 != 0) {
+                    puVar16 = &local_88;
+                    if (0xf < uVar17) {
+                      puVar16 = puVar2;
+                    }
+                    sVar13 = 7;
+                    if (local_78 < 7) {
+                      sVar13 = local_78;
+                    }
+                    if (sVar13 == 0) {
+                      uVar6 = 0;
+                    }
+                    else {
+                      uVar6 = memcmp(puVar16,"$dumpon",sVar13);
+                    }
+                    if (uVar6 == 0) {
+                      if (local_78 < 7) {
+                        uVar6 = 0xffffffff;
+                      }
+                      else {
+                        uVar6 = (uint)(local_78 != 7);
+                      }
+                    }
+                    if (uVar6 != 0) {
+                      puVar16 = &local_88;
+                      if (0xf < uVar17) {
+                        puVar16 = puVar2;
+                      }
+                      sVar13 = 8;
+                      if (local_78 < 8) {
+                        sVar13 = local_78;
+                      }
+                      if (sVar13 == 0) {
+                        uVar6 = 0;
+                      }
+                      else {
+                        uVar6 = memcmp(puVar16,"$dumpoff",sVar13);
+                      }
+                      if (uVar6 == 0) {
+                        if (local_78 < 8) {
+                          uVar6 = 0xffffffff;
+                        }
+                        else {
+                          uVar6 = (uint)(local_78 != 8);
+                        }
+                      }
+                      if (uVar6 != 0) {
+                        puVar16 = &local_88;
+                        if (0xf < uVar17) {
+                          puVar16 = puVar2;
+                        }
+                        sVar13 = 8;
+                        if (local_78 < 8) {
+                          sVar13 = local_78;
+                        }
+                        if (sVar13 == 0) {
+                          uVar6 = 0;
+                        }
+                        else {
+                          uVar6 = memcmp(puVar16,"$dumpall",sVar13);
+                        }
+                        if (uVar6 == 0) {
+                          if (local_78 < 8) {
+                            uVar6 = 0xffffffff;
+                          }
+                          else {
+                            uVar6 = (uint)(local_78 != 8);
+                          }
+                        }
+                        if (uVar6 != 0) {
+                          puVar16 = &local_88;
+                          if (0xf < uVar17) {
+                            puVar16 = puVar2;
+                          }
+                          sVar13 = 6;
+                          if (local_78 < 6) {
+                            sVar13 = local_78;
+                          }
+                          if (sVar13 == 0) {
+                            uVar6 = 0;
+                          }
+                          else {
+                            uVar6 = memcmp(puVar16,"$setup",sVar13);
+                          }
+                          if (uVar6 == 0) {
+                            if (local_78 < 6) {
+                              uVar6 = 0xffffffff;
+                            }
+                            else {
+                              uVar6 = (uint)(local_78 != 6);
+                            }
+                          }
+                          if (uVar6 != 0) {
+                            puVar16 = &local_88;
+                            if (0xf < uVar17) {
+                              puVar16 = puVar2;
+                            }
+                            sVar13 = 5;
+                            if (local_78 < 5) {
+                              sVar13 = local_78;
+                            }
+                            if (sVar13 == 0) {
+                              uVar6 = 0;
+                            }
+                            else {
+                              uVar6 = memcmp(puVar16,"$hold",sVar13);
+                            }
+                            if (uVar6 == 0) {
+                              if (local_78 < 5) {
+                                uVar6 = 0xffffffff;
+                              }
+                              else {
+                                uVar6 = (uint)(local_78 != 5);
+                              }
+                            }
+                            if (uVar6 != 0) {
+                              puVar16 = &local_88;
+                              if (0xf < uVar17) {
+                                puVar16 = puVar2;
+                              }
+                              sVar13 = 10;
+                              if (local_78 < 10) {
+                                sVar13 = local_78;
+                              }
+                              if (sVar13 == 0) {
+                                uVar6 = 0;
+                              }
+                              else {
+                                uVar6 = memcmp(puVar16,"$setuphold",sVar13);
+                              }
+                              if (uVar6 == 0) {
+                                if (local_78 < 10) {
+                                  uVar6 = 0xffffffff;
+                                }
+                                else {
+                                  uVar6 = (uint)(local_78 != 10);
+                                }
+                              }
+                              if (uVar6 != 0) {
+                                puVar16 = &local_88;
+                                if (0xf < uVar17) {
+                                  puVar16 = puVar2;
+                                }
+                                sVar13 = 8;
+                                if (local_78 < 8) {
+                                  sVar13 = local_78;
+                                }
+                                if (sVar13 == 0) {
+                                  uVar6 = 0;
+                                }
+                                else {
+                                  uVar6 = memcmp(puVar16,"$removal",sVar13);
+                                }
+                                if (uVar6 == 0) {
+                                  if (local_78 < 8) {
+                                    uVar6 = 0xffffffff;
+                                  }
+                                  else {
+                                    uVar6 = (uint)(local_78 != 8);
+                                  }
+                                }
+                                if (uVar6 != 0) {
+                                  puVar16 = &local_88;
+                                  if (0xf < uVar17) {
+                                    puVar16 = puVar2;
+                                  }
+                                  sVar13 = 9;
+                                  if (local_78 < 9) {
+                                    sVar13 = local_78;
+                                  }
+                                  if (sVar13 == 0) {
+                                    uVar6 = 0;
+                                  }
+                                  else {
+                                    uVar6 = memcmp(puVar16,"$recovery",sVar13);
+                                  }
+                                  if (uVar6 == 0) {
+                                    if (local_78 < 9) {
+                                      uVar6 = 0xffffffff;
+                                    }
+                                    else {
+                                      uVar6 = (uint)(local_78 != 9);
+                                    }
+                                  }
+                                  if (uVar6 != 0) {
+                                    puVar16 = &local_88;
+                                    if (0xf < uVar17) {
+                                      puVar16 = puVar2;
+                                    }
+                                    sVar13 = 7;
+                                    if (local_78 < 7) {
+                                      sVar13 = local_78;
+                                    }
+                                    if (sVar13 == 0) {
+                                      uVar6 = 0;
+                                    }
+                                    else {
+                                      uVar6 = memcmp(puVar16,"$recrem",sVar13);
+                                    }
+                                    if (uVar6 == 0) {
+                                      if (local_78 < 7) {
+                                        uVar6 = 0xffffffff;
+                                      }
+                                      else {
+                                        uVar6 = (uint)(local_78 != 7);
+                                      }
+                                    }
+                                    if (uVar6 != 0) {
+                                      puVar16 = &local_88;
+                                      if (0xf < uVar17) {
+                                        puVar16 = puVar2;
+                                      }
+                                      sVar13 = 5;
+                                      if (local_78 < 5) {
+                                        sVar13 = local_78;
+                                      }
+                                      if (sVar13 == 0) {
+                                        uVar6 = 0;
+                                      }
+                                      else {
+                                        uVar6 = memcmp(puVar16,"$skew",sVar13);
+                                      }
+                                      if (uVar6 == 0) {
+                                        if (local_78 < 5) {
+                                          uVar6 = 0xffffffff;
+                                        }
+                                        else {
+                                          uVar6 = (uint)(local_78 != 5);
+                                        }
+                                      }
+                                      if (uVar6 != 0) {
+                                        puVar16 = &local_88;
+                                        if (0xf < uVar17) {
+                                          puVar16 = puVar2;
+                                        }
+                                        sVar13 = 9;
+                                        if (local_78 < 9) {
+                                          sVar13 = local_78;
+                                        }
+                                        if (sVar13 == 0) {
+                                          uVar6 = 0;
+                                        }
+                                        else {
+                                          uVar6 = memcmp(puVar16,"$timeskew",sVar13);
+                                        }
+                                        if (uVar6 == 0) {
+                                          if (local_78 < 9) {
+                                            uVar6 = 0xffffffff;
+                                          }
+                                          else {
+                                            uVar6 = (uint)(local_78 != 9);
+                                          }
+                                        }
+                                        if (uVar6 != 0) {
+                                          puVar16 = &local_88;
+                                          if (0xf < uVar17) {
+                                            puVar16 = puVar2;
+                                          }
+                                          sVar13 = 9;
+                                          if (local_78 < 9) {
+                                            sVar13 = local_78;
+                                          }
+                                          if (sVar13 == 0) {
+                                            uVar6 = 0;
+                                          }
+                                          else {
+                                            uVar6 = memcmp(puVar16,"$fullskew",sVar13);
+                                          }
+                                          if (uVar6 == 0) {
+                                            if (local_78 < 9) {
+                                              uVar6 = 0xffffffff;
+                                            }
+                                            else {
+                                              uVar6 = (uint)(local_78 != 9);
+                                            }
+                                          }
+                                          if (uVar6 != 0) {
+                                            puVar16 = &local_88;
+                                            if (0xf < uVar17) {
+                                              puVar16 = puVar2;
+                                            }
+                                            sVar13 = 9;
+                                            if (local_78 < 9) {
+                                              sVar13 = local_78;
+                                            }
+                                            if (sVar13 == 0) {
+                                              uVar6 = 0;
+                                            }
+                                            else {
+                                              uVar6 = memcmp(puVar16,"$nochange",sVar13);
+                                            }
+                                            if (uVar6 == 0) {
+                                              if (local_78 < 9) {
+                                                uVar6 = 0xffffffff;
+                                              }
+                                              else {
+                                                uVar6 = (uint)(local_78 != 9);
+                                              }
+                                            }
+                                            if (uVar6 != 0) {
+                                              puVar16 = &local_88;
+                                              if (0xf < uVar17) {
+                                                puVar16 = puVar2;
+                                              }
+                                              sVar13 = 5;
+                                              if (local_78 < 5) {
+                                                sVar13 = local_78;
+                                              }
+                                              if (sVar13 == 0) {
+                                                uVar6 = 0;
+                                              }
+                                              else {
+                                                uVar6 = memcmp(puVar16,"$info",sVar13);
+                                              }
+                                              if (uVar6 == 0) {
+                                                if (local_78 < 5) {
+                                                  uVar6 = 0xffffffff;
+                                                }
+                                                else {
+                                                  uVar6 = (uint)(local_78 != 5);
+                                                }
+                                              }
+                                              if (uVar6 != 0) {
+                                                puVar16 = &local_88;
+                                                if (0xf < uVar17) {
+                                                  puVar16 = puVar2;
+                                                }
+                                                sVar13 = 8;
+                                                if (local_78 < 8) {
+                                                  sVar13 = local_78;
+                                                }
+                                                uVar6 = 0;
+                                                if (sVar13 != 0) {
+                                                  uVar6 = memcmp(puVar16,"$warning",sVar13);
+                                                }
+                                                if (uVar6 == 0) {
+                                                  if (local_78 < 8) {
+                                                    uVar6 = 0xffffffff;
+                                                  }
+                                                  else {
+                                                    uVar6 = (uint)(local_78 != 8);
+                                                  }
+                                                }
+                                                if (uVar6 != 0) {
+                                                  puVar16 = &local_88;
+                                                  if (0xf < uVar17) {
+                                                    puVar16 = puVar2;
+                                                  }
+                                                  sVar13 = 6;
+                                                  if (local_78 < 6) {
+                                                    sVar13 = local_78;
+                                                  }
+                                                  uVar6 = 0;
+                                                  if (sVar13 != 0) {
+                                                    uVar6 = memcmp(puVar16,"$error",sVar13);
+                                                  }
+                                                  if (uVar6 == 0) {
+                                                    if (local_78 < 6) {
+                                                      uVar6 = 0xffffffff;
+                                                    }
+                                                    else {
+                                                      uVar6 = (uint)(local_78 != 6);
+                                                    }
+                                                  }
+                                                  if ((uVar6 != 0) &&
+                                                     (iVar3 = FUN_1800dc7d0(&local_88,"$fatal"),
+                                                     iVar3 != 0)) {
+                                                    uVar14 = FUN_1800d37b0(local_68,&DAT_180e3dc90,
+                                                                           &local_88);
+                                                    FUN_1800d8f70(local_b8 + 0x48,uVar14);
+                                                    FUN_18003efe0(local_68);
+                                                    goto LAB_18012493a;
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if ((undefined1 *)(local_b8 + 0x48) != &local_88) {
+    FUN_180040550((undefined1 *)(local_b8 + 0x48),&local_88,0,0xffffffffffffffff);
+  }
+LAB_18012493a:
+  lVar12 = local_b0;
+  FUN_180132830(local_b0 + 8,&local_c8);
+  lVar15 = FUN_1800ca620(param_2);
+  uVar17 = 0;
+  if (lVar15 != 0) {
+    while( true ) {
+      uVar14 = FUN_1800ca620(param_2);
+      plVar7 = (longlong *)FUN_1800ad360(uVar14,local_a8);
+      lVar15 = plVar7[1];
+      lVar1 = *plVar7;
+      if (local_a8[0] != 0) {
+        FUN_18043ae30(local_a8[0],local_a8[2] - local_a8[0] >> 3);
+        local_a8[0] = 0;
+        local_a8[1] = 0;
+        local_a8[2] = 0;
+      }
+      if ((ulonglong)(lVar15 - lVar1 >> 3) <= uVar17) break;
+      uVar14 = FUN_1800ca620(param_2);
+      plVar7 = (longlong *)FUN_1800ad360(uVar14,local_68);
+      local_c8 = (void *)(**(code **)(*(longlong *)(lVar12 + 0x100) + 8))
+                                   ((longlong *)(lVar12 + 0x100),
+                                    *(undefined8 *)(*plVar7 + uVar17 * 8));
+      FUN_180132830(*(longlong *)(*(longlong *)(lVar12 + 0x10) + -8) + 8,&local_c8);
+      if (local_68[0] != 0) {
+        FUN_18043ae30(local_68[0],(longlong)(local_68[2] - local_68[0]) >> 3);
+        local_68[0] = 0;
+        local_68[1] = 0;
+        local_68[2] = 0;
+      }
+      uVar17 = (ulonglong)((int)uVar17 + 1);
+    }
+  }
+  (**(code **)(*(longlong *)(lVar12 + 0x100) + 0x10))
+            ((longlong *)(lVar12 + 0x100),param_2,*(undefined8 *)(*(longlong *)(lVar12 + 0x10) + -8)
+            );
+  *(longlong *)(lVar12 + 0x10) = *(longlong *)(lVar12 + 0x10) + -8;
+  if (0xf < local_70) {
+    FUN_1800409e0(&local_88,CONCAT71(uStack_87,local_88),local_70 + 1);
+  }
+  return;
+}
+

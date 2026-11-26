@@ -73,6 +73,15 @@ def main():
         ("localparam [7:0] P='1+1;", "P"): ((8, 2), (8, 0)),
     }
     native_boundaries.update(unbased_boundaries)
+    # Native $clog2 subtracts one from the physical argument vector using
+    # unsigned, same-width arithmetic. Icarus widens small signed arguments.
+    function_boundaries = {
+        ("", "$clog2(1'sb1)"): ((32, 0), (32, 32)),
+        ("", "$clog2(4'sh8)"): ((32, 3), (32, 32)),
+        ("", "$clog2(8'shff)"): ((32, 8), (32, 32)),
+        ("localparam signed [0:0] P=1'b1;", "$clog2(P)"): ((32, 0), (32, 32)),
+    }
+    native_boundaries.update(function_boundaries)
     for index, (decl, expr, width, bits, cache, sign) in enumerate(cases):
         expected = (int(width), int(bits))
         known_boundary = native_boundaries.get((decl, expr)) == (expected, actual.get(index))
@@ -80,25 +89,27 @@ def main():
         checks.append({"declaration": decl, "expression": expr, "model": expected,
                        "iverilog": actual.get(index), "matched": actual.get(index) == expected,
                        "knownNativeDecimalBoundary": native_decimal_boundary,
-                       "knownNativeLiteralBoundary": known_boundary and (decl, expr) not in type_boundary_keys and (decl, expr) not in unbased_boundaries,
+                       "knownNativeLiteralBoundary": known_boundary and (decl, expr) not in type_boundary_keys and (decl, expr) not in unbased_boundaries and (decl, expr) not in function_boundaries,
                        "knownNativeTypeBoundary": known_boundary and (decl, expr) in type_boundary_keys,
                        "knownNativeUnbasedFillBoundary": known_boundary and (decl, expr) in unbased_boundaries,
+                       "knownNativeFunctionBoundary": known_boundary and (decl, expr) in function_boundaries,
                        "knownNativeBoundary": known_boundary})
     version = subprocess.run(["iverilog", "-V"], capture_output=True, text=True).stdout.splitlines()[0]
     report = {"scope": "Independent HDL semantics, not proprietary runtime equivalence",
               "oracle": version, "flags": ["-g2012", "-gstrict-expr-width"],
-              "scopeNote": "Checks natural width and bits; signed cache has separate C++ assertions. Exact native/Icarus parser, type-stage and unbased fill-stage differences are recorded separately, not counted as matches.",
+              "scopeNote": "Checks natural width and bits; signed cache has separate C++ assertions. Exact native/Icarus parser, type-stage, unbased fill-stage and builtin-function differences are recorded separately, not counted as matches.",
               "total": len(checks),
               "matched": sum(item["matched"] for item in checks),
               "knownLiteralDifferences": sum(item["knownNativeLiteralBoundary"] for item in checks),
               "knownTypeDifferences": sum(item["knownNativeTypeBoundary"] for item in checks),
               "knownUnbasedFillDifferences": sum(item["knownNativeUnbasedFillBoundary"] for item in checks),
+              "knownFunctionDifferences": sum(item["knownNativeFunctionBoundary"] for item in checks),
               "knownDifferences": sum(item["knownNativeBoundary"] for item in checks),
               "checks": checks}
     pathlib.Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f'{report["matched"]}/{report["total"]} integer folding oracle checks matched')
     if report["knownDifferences"]:
-        print(f'{report["knownDifferences"]} exact native/Icarus parser/type/fill-stage differences recorded separately')
+        print(f'{report["knownDifferences"]} exact native/Icarus parser/type/fill/function differences recorded separately')
     failures = [item for item in checks if not item["matched"] and not item["knownNativeBoundary"]]
     if failures:
         for item in checks:

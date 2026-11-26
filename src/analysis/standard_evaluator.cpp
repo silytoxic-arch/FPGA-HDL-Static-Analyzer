@@ -4640,6 +4640,7 @@ void checkResetConditionEdgePolarity(
                     if (!constantValue(tokens[at])) {
                         const auto initializer = symbols.parameterInitializer(at);
                         if (!initializer ||
+                            integerFold.hasUnrecoveredInitializerCall(initializer->first, initializer->second) ||
                             std::ranges::find(activeInitializers, *initializer) != activeInitializers.end())
                             return false;
                         activeInitializers.push_back(*initializer);
