@@ -1,0 +1,308 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Static decompilation only. Source line endings normalized.
+
+Source: /private/tmp/tlinter-r63-pass124-frontends.txt; SHA256: d2144cb887c92223981c31878a3f24b42befc1e531b81c4be297c5bdf3fce41c
+
+Source lines 225..247
+  local_f54 = 0;
+  local_f51 = 0;
+  local_f55 = 0;
+  local_f56 = 0;
+  local_f46 = 0;
+  local_f47 = 0;
+  local_f48 = 0;
+  local_f49 = 0;
+  local_f4a = 0;
+  local_f68 = '\0';
+  local_f52 = '\0';
+  local_f44 = '\0';
+  local_f4d = 0;
+  local_f4e = 0;
+  local_f4f = 0;
+  local_f57 = 0;
+  local_f58 = 0;
+  local_f50 = 0;
+  local_f4b = 0;
+  local_f4c = 0;
+  bVar6 = false;
+  local_f45 = '\0';
+  local_f60 = param_4;
+
+Source lines 760..779
+                                  local_ff8 = 2;
+                                  iVar8 = FUN_1801a9f30(&local_a60);
+                                  if (iVar8 == 0) {
+                                    uVar10 = FUN_1800d3650(&local_a60,local_940);
+                                    FUN_1801ac930(&local_ef8,uVar10);
+                                    pbVar21 = local_940;
+                                    goto LAB_18094bd69;
+                                  }
+                                  iVar8 = FUN_1800dc7d0(&local_a60,"-antlr");
+                                  if (iVar8 != 0) {
+                                    FUN_18003efe0(&local_a60);
+                                    param_1 = local_f30;
+                                    cVar5 = local_f68;
+                                    goto LAB_18094c273;
+                                  }
+                                  local_f45 = '\x01';
+                                }
+                                FUN_18003efe0(&local_a60);
+                                cVar5 = local_f68;
+                                goto LAB_18094c251;
+
+Source lines 850..885
+  if (0xf < (ulonglong)plVar27[3]) {
+    plVar11 = (longlong *)*plVar27;
+  }
+  FUN_180972aa0(local_f10,"Executing Verilog-2005 frontend: %s\n",plVar11);
+  plVar11 = plVar27;
+  if (0xf < (ulonglong)plVar27[3]) {
+    plVar11 = (longlong *)*plVar27;
+  }
+  pcVar22 = "Verilog";
+  if (DAT_18137d46d != '\0') {
+    pcVar22 = "SystemVerilog";
+  }
+  pcVar23 = "";
+  if (DAT_18137d46e != '\0') {
+    pcVar23 = "formal ";
+  }
+  FUN_180971c50("Parsing %s%s input from `%s\' to AST representation.\n",pcVar23,pcVar22,plVar11);
+  if (plVar27 != &DAT_18137ccc8) {
+    FUN_180040550(&DAT_18137ccc8,plVar27,0,0xffffffffffffffff);
+  }
+  _DAT_18137cba8 = FUN_180142ea0;
+  DAT_18137cbb0 = FUN_180138520;
+  local_f20 = operator_new(0x2c8);
+  plVar11 = plVar18;
+  if (local_f20 != (byte *)0x0) {
+    local_ff0 = (undefined8 *)0x0;
+    local_ff8 = 0;
+    plVar11 = (longlong *)FUN_1808d8dc0(local_f20,1,0);
+  }
+  DAT_18137d480 = (longlong *)*param_2;
+  local_a08 = 0xf;
+  local_a10 = 0;
+  local_a20 = 0;
+  DAT_18137d470 = plVar11;
+  plVar11 = DAT_18137d480;
+  if (local_f52 == '\0') {
+
+Source lines 950..977
+    } while (plVar24 != plVar29);
+  }
+  FUN_18094ee80(&DAT_18137d4f0,&local_f08);
+  local_a00 = (byte *)0x0;
+  pbStack_9f8 = (byte *)0x0;
+  local_a00 = (byte *)FUN_1800da120(&local_a00);
+  FUN_18094ee80(&DAT_18137d4f0,&local_a00);
+  FUN_1800eb720(&local_a00,&local_f20,*(longlong *)local_a00,local_a00);
+  FUN_180309c90(local_a00,1);
+  if (local_f45 == '\0') {
+    cVar5 = FUN_18035dd90(&local_a20,&DAT_180de47b9);
+    if (cVar5 != '\0') {
+      if (DAT_18137d470 != (longlong *)0x0) {
+        FUN_1800d9a70(DAT_18137d470,1);
+        DAT_18137d470 = (longlong *)0x0;
+      }
+      FUN_1800d8620(&local_f08);
+      FUN_18003efe0(&local_a20);
+      FUN_1801a9490(&local_ee8);
+      FUN_1801a9490(&local_ef8);
+      FUN_180941d00(local_ed8);
+      FUN_18003efe0(plVar27);
+      FUN_18003f230(local_f60);
+      return;
+    }
+    FUN_1800d8fe0(DAT_18137d470 + 0x3c,plVar27);
+    FUN_1801a8f10(local_e08,1);
+    FUN_18037cbd0(local_e08,plVar27,1);
+
+Source lines 1193..1223
+      FUN_180a5ba80(&local_f30);
+    }
+    FUN_1800703e0(local_398,local_e98);
+    FUN_180949e00(&local_f18);
+    FUN_1807ff060(local_398);
+    FUN_1807fd3d0(local_398,&local_f18);
+    uVar10 = FUN_1800c8190(local_398);
+    FUN_180133270(local_6f8,local_398);
+    (**(code **)(*(longlong *)PTR_PTR_18131e870 + 8))(PTR_PTR_18131e870,local_6f8,uVar10);
+    FUN_1801332d0(local_6f8);
+    FUN_180949e60(&local_f18);
+    FUN_1800753f0(local_398);
+    FUN_18003efe0(local_778);
+    FUN_1801a94c0(&local_a40);
+    FUN_1801a9600(local_6b8);
+    FUN_1801a9600(local_e98);
+    FUN_1800d2c30(local_e48);
+    FUN_18004ac50(local_168);
+    FUN_1801a9520(local_3e8);
+    FUN_18003efe0(local_448);
+    FUN_1801a9790(local_e08);
+    pbVar21 = local_f10;
+    plVar18 = local_f60;
+    FUN_180142ea0(1);
+    FUN_180142dd0(0);
+    FUN_180950990();
+    FUN_180142c10();
+  }
+  else {
+    iVar8 = FUN_1800dc7d0(&local_a20,&DAT_180de47b9);
+    plVar18 = DAT_18137d470;
+
+Source lines 1395..1424
+            FUN_18003efe0(local_940);
+            plVar18 = plVar18 + 1;
+          } while (plVar18 != plVar27);
+        }
+        FUN_1801a94c0(&local_9c0);
+      }
+      plVar27 = local_f40;
+    }
+    FUN_1800703e0(&local_5b8,local_e98);
+    FUN_180949d10(&local_f30);
+    FUN_1807ff060(&local_5b8);
+    FUN_1807fd3d0(&local_5b8,&local_f30);
+    uVar10 = FUN_1800c8190(&local_5b8);
+    FUN_1800d7890(local_cf8,&local_5b8);
+    (**(code **)(*(longlong *)PTR_PTR_18131e870 + 8))(PTR_PTR_18131e870,local_cf8,uVar10);
+    FUN_1800d8870(local_cf8);
+    FUN_180949e40(&local_f30);
+    FUN_1800753f0(&local_5b8);
+    FUN_1801a94c0(&local_980);
+    FUN_1801a9600(local_e48);
+    FUN_1801a9600(local_e98);
+    FUN_1800d2c30(local_6f8);
+    FUN_18004ac50(local_288);
+    FUN_1801a9520(local_6b8);
+    FUN_18003efe0(local_9e0);
+    pbVar21 = local_f10;
+    plVar18 = local_f60;
+  }
+  plVar11 = DAT_18137d470;
+  FUN_180721770(DAT_18137d470 + 1,&local_f40);
+
+Source lines 1453..1481
+  if (local_f44 != '\0') {
+    FUN_18094a450(plVar11);
+    plVar11 = DAT_18137d470;
+  }
+  if (DAT_181370118 == '\0') {
+    local_f70 = DAT_18137d46c;
+    local_f78 = local_f50;
+    local_f80 = local_f58;
+    local_f88 = local_f57;
+    local_f90 = local_f4f;
+    local_f98 = local_f4e;
+    local_fa0 = local_f4d;
+    local_fa8 = local_f4c;
+    local_fb0 = DAT_18137d47c;
+    local_fb8 = local_f4b;
+    local_fc0 = local_f4a;
+    local_fc8 = local_f49;
+    local_fd0 = local_f48;
+    local_fd8 = local_f47;
+    local_fe0 = local_f46;
+    local_fe8 = local_f56;
+    local_ff0 = (undefined8 *)CONCAT71(local_ff0._1_7_,local_f55);
+    local_ff8 = CONCAT71(local_ff8._1_7_,local_f51);
+    FUN_1808e46a0(pbVar21,plVar11,local_f53,local_f54);
+  }
+  if ((local_f52 == '\0') && (DAT_18137d480 != (longlong *)0x0)) {
+    puVar20 = (undefined8 *)((longlong)*(int *)(*DAT_18137d480 + 4) + (longlong)DAT_18137d480);
+    (**(code **)*puVar20)(puVar20,1);
+  }
+
+Source lines 1668..1682
+  local_6f0 = 0;
+  local_6f8 = FUN_1801a9a70(&local_6f8,0,0);
+  local_718 = (longlong *)0x0;
+  local_710 = 0;
+  plVar12 = (longlong *)FUN_1801a9a70(&local_718,0,0);
+  _DAT_18133c930 = 0;
+  _DAT_18133c934 = 0;
+  DAT_18133ca62 = 1;
+  local_718 = plVar12;
+  FUN_180972aa0(param_5,"Executing VHDL frontend.\n");
+  local_7e8 = CONCAT71(local_7e8._1_7_,local_757);
+  FUN_1801a8c20(param_4,*param_4 + 0x20,DAT_18133c938,DAT_18133c940);
+  uVar22 = 1;
+  lVar14 = *param_4;
+  if (1 < (ulonglong)(param_4[1] - lVar14 >> 5)) {
+
+Source lines 2348..2364
+        local_790 = local_742;
+        local_798 = local_741;
+        local_7a0 = local_740;
+        local_7a8 = local_73f;
+        local_7b0 = local_73e;
+        local_7b8 = local_73d;
+        local_7c0 = local_73c;
+        local_7c8 = local_73b;
+        local_7d0 = 0;
+        local_7d8 = local_73a;
+        local_7e0 = CONCAT71(local_7e0._1_7_,local_739);
+        local_7e8 = CONCAT71(local_7e8._1_7_,local_738);
+        FUN_1808e59e0(local_700,DAT_18133ca90,local_757,local_737);
+      }
+      if ((cVar8 == '\0') && (DAT_18133cab0 != (longlong *)0x0)) {
+        puVar18 = (undefined8 *)((longlong)*(int *)(*DAT_18133cab0 + 4) + (longlong)DAT_18133cab0);
+        (**(code **)*puVar18)(puVar18,1);
+
+Source: /private/tmp/tlinter-r63-pass124-root-processing-entrypoints.txt; SHA256: 7620b2394e3dea23d9b5a1f976a40f8fad40eb246ea3f071c504eb564f2dfedf
+
+Source lines 751..766
+        if (0xf < local_270) {
+          FUN_1800409e0(&local_288,CONCAT71(uStack_287,local_288),local_270 + 1);
+        }
+        local_270 = 0xf;
+        local_278 = 0;
+        local_288 = 0;
+        FUN_1809c0580(local_2c0,lVar24);
+      }
+      param_1 = local_2c0;
+      local_308 = local_308 & 0xffffffffffffff00;
+      FUN_1808e6f70(local_2c0);
+      DAT_18137cbd0 = 0;
+    }
+    else if (iVar10 == 0x6d) {
+      local_2f0 = 0;
+      local_2f8 = 0;
+
+Source lines 1588..1607
+            }
+          }
+        }
+LAB_1808e6b19:
+        if (cVar16 != '\0') {
+          uVar11 = FUN_1800d37b0(&local_d0,"$abstract\\",*plVar20 + 0x48);
+          FUN_1800d8f70(*plVar20 + 0x48,uVar11);
+          if (0xf < local_b8) {
+            FUN_1800409e0(&local_d0,CONCAT71(uStack_cf,local_d0),local_b8 + 1);
+          }
+          local_b8 = 0xf;
+          local_c0 = 0;
+          local_d0 = 0;
+        }
+        local_198 = (code *)((ulonglong)local_198 & 0xffffffffffffff00);
+        FUN_1808e81d0(local_110,*plVar20,cVar16);
+        DAT_18137cbd0 = 0;
+        if (0xf < local_90) {
+          FUN_1800409e0(&local_a8,CONCAT71(uStack_a7,local_a8));
+        }
+
+Source lines 1970..1982
+      local_a0 = 0xf;
+      local_a8 = 0;
+      local_b8 = 0;
+    }
+    local_1c8 = (void **)((ulonglong)local_1c8 & 0xffffffffffffff00);
+    if (*(char *)(local_148 + 0x2f3) == '\0') {
+      FUN_1808e6f70(param_3,pvVar13,0,0);
+    }
+    else {
+      FUN_1808e81d0();
+    }
+    local_1a8 = (ulonglong *)local_1b8;
+    puVar11 = &local_f8;

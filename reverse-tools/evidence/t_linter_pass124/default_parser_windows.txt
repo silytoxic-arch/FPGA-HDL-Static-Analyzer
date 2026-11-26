@@ -1,0 +1,302 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Static decompilation only. Source line endings normalized.
+
+Source: /private/tmp/tlinter-r63-pass124-bison-actions-large.txt; SHA256: 0ba7773e5a02abc7aaa247998d159320226c8042b23bbf886113991ae19af382
+
+Source lines 606..640
+LAB_180950c9a:
+    if (iVar10 == 3) {
+      uVar44 = 0;
+      goto LAB_18095bc9f;
+    }
+    sVar8 = *(short *)(&DAT_180f5d140 + (longlong)iVar10 * 2);
+    if (sVar8 != -0x423) {
+      uVar43 = 2;
+      if (uVar9 == 0xfffffffe) {
+        if (DAT_18137d488 != 0) {
+          uVar11 = __acrt_iob_func(2);
+          FUN_180143570(uVar11,"Reading a token: ");
+        }
+        uVar9 = FUN_180138530(&local_21c0,&local_1848);
+        local_2224 = uVar9;
+      }
+      if ((int)uVar9 < 1) {
+        uVar43 = 0;
+        local_2224 = 0;
+        if (DAT_18137d488 != 0) {
+          uVar11 = __acrt_iob_func(2);
+          pcVar35 = "Now at end of input.\n";
+LAB_180950df5:
+          FUN_180143570(uVar11,pcVar35);
+        }
+      }
+      else {
+        if ((int)uVar9 < 0x198) {
+          uVar43 = (uint)(byte)(&DAT_180f5baf0)[(int)uVar9];
+        }
+        if (DAT_18137d488 != 0) {
+          uVar11 = __acrt_iob_func(2);
+          FUN_180143570(uVar11,&DAT_180f64ca4,"Next token is");
+          uVar11 = __acrt_iob_func(2);
+          pcVar35 = "nterm";
+
+Source lines 865..899
+LAB_1809513e2:
+    local_2150 = (longlong)iVar42;
+    local_2148 = (longlong)(char)(&DAT_180f626b0)[local_2150];
+    ppppppplVar31 = (longlong *******)ppppppplVar20[1 - local_2148];
+    iVar10 = piVar46[2];
+    if ((&DAT_180f626b0)[local_2150] == '\0') {
+      iVar47 = piVar46[3];
+      iVar38 = iVar10;
+      iVar49 = iVar47;
+    }
+    else {
+      iVar47 = piVar46[local_2148 * -4 + 5];
+      iVar38 = piVar46[local_2148 * -4 + 4];
+      iVar49 = piVar46[3];
+    }
+    local_2240 = ppppppplVar31;
+    local_2200 = iVar38;
+    iStack_21fc = iVar47;
+    iStack_21f8 = iVar10;
+    iStack_21f4 = iVar49;
+    if (DAT_18137d488 != 0) {
+      FUN_18095d990(local_2218,ppppppplVar20,local_2268,iVar42);
+    }
+    ppppppplVar33 = ppppppplRam000000018137d448;
+    ppppppplVar24 = ppppppplRam000000018137d440;
+    uVar44 = local_2240._4_4_;
+    piVar46 = local_2268;
+    ppppppplVar29 = ppppppplVar20;
+    switch(iVar42) {
+    case 2:
+      DAT_18137d4e0 = DAT_18137d4d8;
+      FUN_180132830(&DAT_18137d4d8,&DAT_18137d470);
+      ppppppplVar24 = ppppppplRam000000018137d440;
+      break;
+    case 3:
+
+Source lines 1290..1331
+        ppppppplVar24 = ppppppplRam000000018137d440;
+      }
+      break;
+    case 0x2b:
+      if (ppppppplRam000000018137d440 != (longlong *******)0x0) {
+        FUN_1808d9570(ppppppplRam000000018137d440);
+        free(ppppppplVar24);
+      }
+      pvStack_2128 = operator_new(0x2c8);
+      ppppppplVar29 = (longlong *******)0x0;
+      if (pvStack_2128 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvStack_2128,9,0);
+      }
+      goto DAT_180951fa4;
+    case 0x2d:
+      if (ppppppplRam000000018137d440 != (longlong *******)0x0) {
+        FUN_1808d9570(ppppppplRam000000018137d440);
+        free(ppppppplVar24);
+      }
+      pvStack_2120 = operator_new(0x2c8);
+      ppppppplVar29 = (longlong *******)0x0;
+      if (pvStack_2120 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvStack_2120,10,0);
+      }
+DAT_180951fa4:
+      ppppppplRam000000018137d440 = ppppppplVar29;
+      ppppppplStack_2260 = (longlong *******)FUN_1808e3a40(0,1,0x20);
+      ppppppplVar29 = (longlong *******)&ppppppplStack_2260;
+code_r0x000180951fc4:
+      FUN_180132830(ppppppplRam000000018137d440 + 1,ppppppplVar29);
+      pppppplVar45 = ppppppplVar20[-1];
+      ppppppplVar29 = ppppppplRam000000018137d440;
+      goto code_r0x000180951fdf;
+    case 0x37:
+      lVar39 = *(longlong *)(DAT_18137d4e0 + -8);
+      if ((*(longlong *)(lVar39 + 0x10) - *(longlong *)(lVar39 + 8) >> 3 == 0) ||
+         (*(int *)(*(longlong *)(*(longlong *)(lVar39 + 0x10) + -8) + 4) != 6)) {
+        FUN_18094e390("SystemVerilog interface in module port list cannot have a default value.");
+
+Source lines 2946..2960
+    case 0x138:
+    case 0x139:
+    case 0x13c:
+      ppppppplVar29 = (longlong *******)*ppppppplVar20;
+      goto joined_r0x000180955857;
+    case 0x13d:
+    case 0x161:
+      *(char *)((longlong)ppppppplRam000000018137d440 + 0xa4) = '\x01';
+      ppppppplVar24 = ppppppplRam000000018137d440;
+      break;
+    case 0x13e:
+    case 0x162:
+      *(char *)((longlong)ppppppplRam000000018137d440 + 0xa4) = '\0';
+      ppppppplVar24 = ppppppplRam000000018137d440;
+      break;
+
+Source lines 3004..3050
+      goto code_r0x000180952494;
+    case 0x14c:
+      pvStack_1eb8 = operator_new(0x2c8);
+      ppppppplVar29 = (longlong *******)0x0;
+      if (pvStack_1eb8 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvStack_1eb8,9,0);
+      }
+      goto DAT_18095519b;
+    case 0x14d:
+    case 0x14f:
+    case 0x17a:
+    case 0x183:
+    case 0x1a7:
+    case 0x1a9:
+      ppppppplVar29 = ppppppplRam000000018137d440;
+      goto joined_r0x000180955857;
+    case 0x14e:
+      pvStack_1eb0 = operator_new(0x2c8);
+      ppppppplVar29 = (longlong *******)0x0;
+      if (pvStack_1eb0 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvStack_1eb0,10,0);
+      }
+DAT_18095519b:
+      ppppppplRam000000018137d440 = ppppppplVar29;
+      ppppppplStack_2250 = (longlong *******)FUN_1808e3a40(0,1,0x20);
+      ppppppplVar29 = (longlong *******)&ppppppplStack_2250;
+      goto code_r0x000180951fc4;
+    case 0x152:
+      plVar25 = (longlong *)FUN_180a23380(&DAT_18137d4d8);
+      plVar25 = (longlong *)FUN_180a23380(*plVar25 + 8);
+      lVar39 = *plVar25;
+      plVar25 = (longlong *)FUN_1801a67e0(lVar39 + 8,0);
+      if (*plVar25 != 0) {
+        FUN_1800d9a70(*plVar25,1);
+      }
+      plVar25 = (longlong *)FUN_1801a67e0(lVar39 + 8,0);
+      *plVar25 = (longlong)*ppppppplVar20;
+      ppppppplVar24 = ppppppplRam000000018137d440;
+      break;
+    case 0x153:
+      plVar25 = (longlong *)FUN_180a23380(&DAT_18137d4d8);
+      plVar25 = (longlong *)FUN_180a23380(*plVar25 + 8);
+      lVar39 = *plVar25;
+
+Source lines 6040..6099
+      }
+      goto code_r0x00018095bb05;
+    case 0x288:
+      pvStack_1ab0 = operator_new(0x2c8);
+      ppppppplVar29 = (longlong *******)0x0;
+      if (pvStack_1ab0 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvStack_1ab0,0x1c,0);
+      }
+      ppppppplStack_2260 = ppppppplVar29;
+      FUN_1800d8fe0(ppppppplVar29 + 9,ppppppplVar20[-1]);
+      if (ppppppplVar20[-1] != (longlong ******)0x0) {
+        FUN_18094f490(ppppppplVar20[-1],1);
+      }
+      FUN_180132830(&DAT_18137d4d8,&ppppppplStack_2260);
+      *(int *)(ppppppplStack_2260 + 0x40) = local_2268[-4];
+      *(int *)(ppppppplStack_2260 + 0x41) = local_2268[-3];
+      *(int *)((longlong)ppppppplStack_2260 + 0x204) = local_2268[-2];
+      *(int *)((longlong)ppppppplStack_2260 + 0x20c) = local_2268[-1];
+      pppppplVar45 = *ppppppplVar20;
+      ppppppplVar29 = ppppppplStack_2260;
+      piVar46 = local_2268;
+      goto code_r0x00018095845e;
+    case 0x289:
+      puVar28 = (undefined8 *)FUN_180a23380(&DAT_18137d4d8);
+      ppppppplVar31 = (longlong *******)*puVar28;
+      FUN_1801a87c0(&DAT_18137d4d8);
+      ppppppplVar24 = ppppppplRam000000018137d440;
+      break;
+    case 0x28a:
+      pvStack_1aa8 = operator_new(0x2c8);
+      if (pvStack_1aa8 == (void *)0x0) {
+        ppppppplVar31 = (longlong *******)0x0;
+      }
+      else {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar31 = (longlong *******)FUN_1808d8dc0(pvStack_1aa8,0x1e,ppppppplVar20[-1]);
+      }
+      pppppplVar45 = ppppppplVar20[-3];
+      ppppppplVar29 = ppppppplVar31;
+      goto code_r0x000180951fdf;
+    case 0x28b:
+      pvStack_1aa0 = operator_new(0x2c8);
+      if (pvStack_1aa0 == (void *)0x0) {
+        ppppppplVar31 = (longlong *******)0x0;
+      }
+      else {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar31 = (longlong *******)FUN_1808d8dc0(pvStack_1aa0,0x1f,ppppppplVar20[-1]);
+      }
+      pppppplVar45 = ppppppplVar20[-3];
+      ppppppplVar29 = ppppppplVar31;
+code_r0x000180951fdf:
+      FUN_18094fcd0(ppppppplVar29,pppppplVar45);
+      ppppppplVar24 = ppppppplRam000000018137d440;
+      break;
+    case 0x28d:
+
+Source lines 6628..6677
+      *(int *)(ppppppplVar31 + 0x40) = local_2268[-8];
+      iVar10 = local_2268[-7];
+      goto code_r0x00018095ad85;
+    case 0x2b4:
+      if (DAT_18137d46d == '\0') {
+        FUN_18094e390("Static cast is only supported in SystemVerilog mode.");
+      }
+      pvStack_1930 = operator_new(0x2c8);
+      if (pvStack_1930 == (void *)0x0) {
+        ppppppplVar31 = (longlong *******)0x0;
+      }
+      else {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar31 = (longlong *******)FUN_1808d8dc0(pvStack_1930,0x1e,ppppppplVar20[-1],0);
+      }
+      goto DAT_18095b9a4;
+    case 0x2b5:
+      if (DAT_18137d46d == '\0') {
+        FUN_18094e390("Static cast is only supported in SystemVerilog mode.");
+      }
+      pvStack_1928 = operator_new(0x2c8);
+      if (pvStack_1928 == (void *)0x0) {
+        ppppppplVar31 = (longlong *******)0x0;
+      }
+      else {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar31 = (longlong *******)FUN_1808d8dc0(pvStack_1928,0x1f,ppppppplVar20[-1],0);
+      }
+      goto DAT_18095b9a4;
+    case 0x2b6:
+      if (DAT_18137d46d == '\0') {
+        FUN_18094e390("Static cast is only supported in SystemVerilog mode.");
+      }
+      pvStack_1920 = operator_new(0x2c8);
+      if (pvStack_1920 == (void *)0x0) {
+        ppppppplVar31 = (longlong *******)0x0;
+      }
+      else {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar31 =
+             (longlong *******)FUN_1808d8dc0(pvStack_1920,0x21,ppppppplVar20[-4],ppppppplVar20[-1]);
+      }
+DAT_18095b9a4:
+      *(int *)(ppppppplVar31 + 0x40) = local_2268[-0x10];
+      *(int *)(ppppppplVar31 + 0x41) = local_2268[-0xf];
+      *(int *)((longlong)ppppppplVar31 + 0x204) = local_2268[-2];
+      *(int *)((longlong)ppppppplVar31 + 0x20c) = local_2268[-1];

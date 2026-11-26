@@ -1,0 +1,56 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 180138520 180138520 FUN_180138520 =====
+
+undefined4 FUN_180138520(void)
+
+{
+  return DAT_18131e000;
+}
+
+
+
+===== 180142ea0 180142ea0 FUN_180142ea0 =====
+
+void FUN_180142ea0(undefined4 param_1)
+
+{
+  DAT_18131e000 = param_1;
+  return;
+}
+
+
+
+===== 180142dd0 180142dd0 FUN_180142dd0 =====
+
+void FUN_180142dd0(undefined8 param_1)
+
+{
+  undefined8 uVar1;
+  longlong lVar2;
+  undefined8 *puVar3;
+
+  if ((DAT_18133c290 == 0) ||
+     (puVar3 = (undefined8 *)(DAT_18133c290 + DAT_18133c280 * 8), lVar2 = DAT_18133c290,
+     *(longlong *)(DAT_18133c290 + DAT_18133c280 * 8) == 0)) {
+    FUN_180138400();
+    puVar3 = (undefined8 *)(DAT_18133c290 + DAT_18133c280 * 8);
+    uVar1 = FUN_180138220(DAT_18133c238,0x40000);
+    lVar2 = DAT_18133c290;
+    *puVar3 = uVar1;
+  }
+  if (lVar2 == 0) {
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = *puVar3;
+  }
+  FUN_180138360(uVar1,param_1);
+  lVar2 = *(longlong *)(DAT_18133c290 + DAT_18133c280 * 8);
+  DAT_18133c248 = *(undefined1 **)(lVar2 + 0x10);
+  DAT_18133c29c = *(undefined4 *)(lVar2 + 0x1c);
+  DAT_18133c2a0 = DAT_18133c248;
+  DAT_18133c238 = **(undefined8 **)(DAT_18133c290 + DAT_18133c280 * 8);
+  DAT_18133c298 = *DAT_18133c248;
+  return;
+}

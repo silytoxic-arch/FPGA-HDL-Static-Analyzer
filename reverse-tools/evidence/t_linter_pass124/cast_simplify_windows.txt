@@ -1,0 +1,105 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Static decompilation only. Source line endings normalized.
+
+Source: /private/tmp/tlinter-r63-pass117-detect-sign-worker.txt; SHA256: dcd6eb31650d68f88a26d4f452c9ccffde0ff8cc62710e9e1d21c57b209ae214
+
+Source lines 720..743
+  case 0x1e:
+    puVar13 = *(undefined8 **)(param_1 + 8);
+    if (*(longlong *)(param_1 + 0x10) - (longlong)puVar13 >> 3 == 0) {
+      std::_Xout_of_range("invalid vector<T> subscript");
+      pcVar2 = (code *)swi(3);
+      (*pcVar2)();
+      return;
+    }
+    local_f8 = local_f8 & 0xffffffffffffff00;
+    pcVar23 = (char *)0x0;
+    param_3 = local_d8;
+    goto LAB_1808f4f2b;
+  case 0x1f:
+    if (*(longlong *)(param_1 + 0x10) - (longlong)*(undefined8 **)(param_1 + 8) >> 3 == 0) {
+      std::_Xout_of_range("invalid vector<T> subscript");
+      pcVar2 = (code *)swi(3);
+      (*pcVar2)();
+      return;
+    }
+    local_f8 = (ulonglong)local_f8._1_7_ << 8;
+    FUN_1808f46c0(**(undefined8 **)(param_1 + 8),param_2,local_d8,0);
+    *local_c8 = 0;
+    break;
+  case 0x20:
+
+Source: /private/tmp/tlinter-r63-pass105-frontend-lowering.txt; SHA256: 6bd09b183cf566599a64d28c94cd0abba082f083ea7c9f391b293f3a84c7661d
+
+Source lines 5233..5242
+  case 0x1c:
+  case 0x4c:
+    local_27a6 = '\x01';
+    break;
+  case 0x1d:
+  case 0x1e:
+  case 0x1f:
+  case 0x20:
+  case 0x21:
+  case 0x22:
+
+Source lines 5789..5830
+          DAT_18137cbf0 = local_2890;
+          puVar18 = (undefined8 *)FUN_1801a67e0(pcVar43,uVar13);
+          DAT_18137cbf8 = (code *)*puVar18;
+        }
+        if ((*(int *)(local_2890 + 4) - 0x52U < 2) &&
+           (plVar16 = (longlong *)FUN_1801a67e0(pcVar43,uVar13), *(int *)(*plVar16 + 4) == 0x54)) {
+          puVar18 = (undefined8 *)FUN_1801a67e0(pcVar43,uVar13);
+          DAT_18137cbe8 = (code *)*puVar18;
+        }
+        if (uVar13 == 0) {
+          bVar46 = local_27c8 == (code)0x0;
+LAB_180917c69:
+          if (!bVar46) {
+            local_27e0 = CONCAT44(local_27e0._4_4_,0xffffffff);
+            local_27a7 = 0;
+          }
+        }
+        else {
+          if (uVar13 == 1) {
+            bVar46 = local_27f0 == 0;
+            goto LAB_180917c69;
+          }
+          if (uVar13 == 2) {
+            bVar46 = local_27a5 == '\0';
+            goto LAB_180917c69;
+          }
+        }
+        if (local_27a6 != '\0') {
+          local_27e0 = CONCAT44(local_27e0._4_4_,0xffffffff);
+          local_27a7 = 0;
+        }
+        puVar18 = (undefined8 *)FUN_1801a67e0(pcVar43,uVar13);
+        local_28a0 = (byte)local_2870;
+        local_28a8 = local_27a7;
+        local_28b0 = (code *)CONCAT44(local_28b0._4_4_,(uint)local_27e0);
+        local_28b8 = (code *)CONCAT44(local_28b8._4_4_,local_2840);
+        cVar3 = FUN_180914500(*puVar18,(ulonglong)local_27e8 & 0xff,local_2880,
+                              (ulonglong)local_27d0 & 0xff);
+        if (cVar3 == '\0') break;
+        local_2810 = CONCAT31(local_2810._1_3_,1);
+      }
+      if (((local_2840 == 2) &&
+
+Source lines 12240..12254
+  case 0x1f:
+    plVar16 = (longlong *)FUN_1801a67e0(local_2848,0);
+    pcVar29 = local_2890;
+    if (*(int *)(*plVar16 + 4) == 0x10) {
+      puVar18 = (undefined8 *)FUN_1801a67e0(pcVar20,0);
+      FUN_1808db3e0(*puVar18,auStack_2020,local_2850[0],local_2898[0]);
+      pcVar29 = local_2890;
+      local_2828 = (code *)FUN_1808e3a30(auStack_2018,*(int *)(local_2890 + 4) == 0x1e);
+      FUN_18003f2b0(auStack_2020);
+    }
+    break;
+  case 0x20:
+  case 0x43:
+    pcVar28 = FUN_180961e40;
+    goto code_r0x00018092689f;

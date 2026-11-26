@@ -1,0 +1,35 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 18094a450 18094a450 FUN_18094a450 =====
+
+void FUN_18094a450(longlong param_1)
+
+{
+  undefined8 *puVar1;
+  ulonglong uVar2;
+  ulonglong uVar3;
+  longlong *plVar4;
+
+  if (*(int *)(param_1 + 4) != 5) {
+    puVar1 = *(undefined8 **)(param_1 + 8);
+    uVar3 = 0;
+    uVar2 = (*(longlong *)(param_1 + 0x10) - (longlong)puVar1) + 7U >> 3;
+    if (*(undefined8 **)(param_1 + 0x10) < puVar1) {
+      uVar2 = uVar3;
+    }
+    if (uVar2 != 0) {
+      do {
+        FUN_18094a450(*puVar1);
+        uVar3 = uVar3 + 1;
+        puVar1 = puVar1 + 1;
+      } while (uVar3 != uVar2);
+    }
+    return;
+  }
+  plVar4 = (longlong *)(param_1 + 0x48);
+  if (0xf < *(ulonglong *)(param_1 + 0x60)) {
+    plVar4 = (longlong *)*plVar4;
+  }
+                    /* WARNING: Subroutine does not return */
+  FUN_180972760(param_1 + 0x1e0,*(undefined4 *)(param_1 + 0x200),"Found DPI function %s.\n",plVar4);
+}

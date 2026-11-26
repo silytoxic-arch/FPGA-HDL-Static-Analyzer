@@ -41,16 +41,6 @@ public:
                          const VerilogConstantExpressions& symbols)
         : tokens_(tokens), symbols_(symbols) {}
 
-    // The constant-only callback copies the system function name differently
-    // from the ordinary-expression callback. Keep this unresolved route out of
-    // both numeric folding and reset-catalog constantness fallback.
-    [[nodiscard]] bool hasUnrecoveredInitializerCall(std::size_t begin, std::size_t end) const {
-        if (end > tokens_.size()) return true;
-        for (auto token = begin; token + 1 < end; ++token)
-            if (tokens_[token].text == "$clog2" && tokens_[token + 1].text == "(") return true;
-        return false;
-    }
-
     [[nodiscard]] std::optional<Value> evaluate(std::size_t begin, std::size_t end) {
         const auto node = parse(begin, end, 0);
         return node ? fold(node, 0, std::nullopt, 0) : std::nullopt;
@@ -241,11 +231,6 @@ private:
         }
         if (at + 1 >= tokens_.size() || tokens_[at].kind != parser::HdlTokenKind::Identifier ||
             tokens_[at + 1].text != "=") return {};
-        // Localparam initialization uses Constant_mintypmax_expression in the
-        // recovered frontend. Its system-call callback copies a raw name,
-        // unlike the escaped ordinary-expression callback. Until that separate
-        // route is connected to the builtin dispatch, do not invent its value.
-        if (hasUnrecoveredInitializerCall(binding->begin, binding->end)) return {};
         active_.push_back(key);
         const auto root = parse(binding->begin, binding->end, depth + 1);
         // Literal/alias nodes keep their physical width until declaration
@@ -264,8 +249,8 @@ private:
             if (rebuild) value->storedCache.reset();
             else value->storedCache = cacheBeforeTypeChange;
         } else if (sign && !*sign && value->signedValue) {
-            // The recovered Verilog2005 declaration callback only has SIGNED.
-            // Keep a sign-changing SystemVerilog UNSIGNED form unresolved.
+            // Explicit no-range UNSIGNED normalization remains separately
+            // unverified in the default parser; keep sign-changing forms unknown.
             return {};
         }
         value->source = index;
@@ -351,11 +336,26 @@ private:
                     const auto value = number(owner.tokens_[at].text, at);
                     if (!value) return {};
                     lhs = literal(*value); ++at;
-                } else if (op.text == "$clog2" && at + 1 < end && owner.tokens_[at + 1].text == "(") {
+                } else if ((op.text == "$clog2" || op.text == "$signed" || op.text == "$unsigned") &&
+                           at + 1 < end && owner.tokens_[at + 1].text == "(") {
+                    const auto opening = at + 1;
                     at += 2;
                     const auto argument = expression(0, depth + 1);
                     if (!argument || at >= end || owner.tokens_[at++].text != ")") return {};
-                    lhs = std::make_shared<Node>(Node{"$clog2", {}, argument, {}, 32, true, source});
+                    const bool clog2 = op.text == "$clog2";
+                    // Default FCALL construction sees opening-paren lookahead;
+                    // sign conversions are constructed after the closing one.
+                    lhs = std::make_shared<Node>(Node{op.text, {}, argument, {},
+                        clog2 ? 32U : argument->width, clog2 || op.text == "$signed",
+                        clog2 ? opening : at - 1});
+                } else if ((op.text == "signed" || op.text == "unsigned") && at + 2 < end &&
+                           owner.tokens_[at + 1].text == "'" && owner.tokens_[at + 2].text == "(") {
+                    at += 3;
+                    const auto argument = expression(0, depth + 1);
+                    if (!argument || at >= end || owner.tokens_[at++].text != ")") return {};
+                    const bool toSigned = op.text == "signed";
+                    lhs = std::make_shared<Node>(Node{toSigned ? "$signed" : "$unsigned", {},
+                        argument, {}, argument->width, toSigned, at - 1});
                 } else if (owner.tokens_[at].kind == parser::HdlTokenKind::Identifier) {
                     lhs = owner.parameter(at++, depth + 1);
                     if (!lhs) return {};
@@ -406,6 +406,18 @@ private:
         // A literal/parameter clone is not rebuilt by an inherited context.
         // Its parent converts the physical constant immediately before use.
         if (op.empty()) return node->value;
+        if (op == "$signed" || op == "$unsigned") {
+            // AST_TO_SIGNED / AST_TO_UNSIGNED simplify their operand without
+            // context, then apply the node context resize and build a fresh
+            // constant whose physical sign is fixed by the conversion opcode.
+            auto argument = fold(node->left, 0, std::nullopt, depth + 1);
+            if (!argument) return std::nullopt;
+            *argument = resized(*argument, width, sign);
+            argument->signedValue = op == "$signed";
+            argument->storedCache.reset();
+            argument->source = node->source;
+            return argument;
+        }
         if (op == "$clog2") {
             // Native FCALL children are simplified without inherited width or
             // sign. The builtin then consumes their physical vector, subtracts

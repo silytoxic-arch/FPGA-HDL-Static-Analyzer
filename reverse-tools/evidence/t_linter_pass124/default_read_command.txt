@@ -1,0 +1,88 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Static decompilation only. Source line endings normalized.
+
+Source: /private/tmp/tlinter-r63-pass124-parser-selection-refs.txt; SHA256: aa1318c52d82ce2dc9bb63baac583921d431a0bb8b16276792a93c19991f5bca
+
+Source lines 1510..1591
+      lVar9 = *param_4;
+    } while (uVar13 < (ulonglong)(param_4[1] - lVar9 >> 5));
+  }
+  local_260 = &local_210;
+  uVar8 = FUN_18003ea30(&local_210,param_4);
+  local_280 = 0;
+  local_288 = uVar13;
+  FUN_180986150(local_230,local_238,param_3,uVar8);
+  lVar9 = FUN_1805e6f10(param_3,0x2e,0xffffffffffffffff);
+  FUN_1800d3650(param_3,&local_150,lVar9 + 1,0xffffffffffffffff);
+  local_118 = 0xf;
+  local_120 = 0;
+  local_130 = 0;
+  FUN_180040680(&local_130,&DAT_180de47b9,0);
+  puVar7 = &local_150;
+  if (0xf < local_138) {
+    puVar7 = (undefined1 *)CONCAT71(uStack_14f,local_150);
+  }
+  if ((ulonglong)(local_140 != 0) == 0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = memcmp(puVar7,&DAT_180e9e678,(ulonglong)(local_140 != 0));
+  }
+  if (uVar5 == 0) {
+    if (local_140 == 0) {
+      uVar5 = 0xffffffff;
+    }
+    else {
+      uVar5 = (uint)(local_140 != 1);
+    }
+  }
+  if (((uVar5 == 0) || (iVar6 = FUN_1800dc7d0(&local_150,&DAT_180e4998c), iVar6 == 0)) ||
+     ((iVar6 = FUN_1800dc7d0(&local_150,&DAT_180f1a51c), iVar6 == 0 ||
+      (iVar6 = FUN_1800dc7d0(&local_150,&DAT_180f1a520), iVar6 == 0)))) {
+    FUN_180624020(&local_1b0);
+    uVar8 = FUN_1800d37b0(&local_210,"read_verilog -sv ",&local_130);
+    uVar8 = FUN_1801a4ac0(&local_170,uVar8,&local_1b0);
+    uVar8 = FUN_1801380f0(&local_190,uVar8,&DAT_180f1a524);
+    uVar8 = FUN_1801a4ac0(&local_1f0,uVar8,param_3);
+    FUN_1801380f0(&local_1d0,uVar8,&DAT_180de4860);
+    if (0xf < local_1d8) {
+      FUN_1800409e0(&local_1f0,CONCAT71(uStack_1ef,local_1f0),local_1d8 + 1);
+    }
+    local_1d8 = 0xf;
+    local_1e0 = 0;
+    local_1f0 = 0;
+    if (0xf < local_178) {
+      FUN_1800409e0(&local_190,CONCAT71(uStack_18f,local_190),local_178 + 1);
+    }
+    local_178 = 0xf;
+    local_180 = 0;
+    local_190 = 0;
+    if (0xf < local_158) {
+      FUN_1800409e0(&local_170,CONCAT71(uStack_16f,local_170),local_158 + 1);
+    }
+    local_158 = 0xf;
+    local_160 = 0;
+    local_170 = 0;
+    if (0xf < local_1f8) {
+      FUN_1800409e0(&local_210,CONCAT71(uStack_20f,local_210),local_1f8 + 1);
+    }
+    local_1f8 = 0xf;
+    local_200 = 0;
+    local_210 = 0;
+    this = (basic_ostream<char,std::char_traits<char>_> *)FUN_18003de50(cout_exref,&local_1d0);
+    std::basic_ostream<char,std::char_traits<char>_>::operator<<(this,FUN_1800d7690);
+    local_260 = &local_1f0;
+    local_1d8 = 0xf;
+    local_1e0 = 0;
+    local_1f0 = 0;
+    FUN_180040550(&local_1f0,&local_1d0,0,0xffffffffffffffff);
+    FUN_180981fa0(param_5,&local_1f0);
+    if (0xf < local_1b8) {
+      FUN_1800409e0(&local_1d0,CONCAT71(uStack_1cf,local_1d0),local_1b8 + 1);
+    }
+    local_1b8 = 0xf;
+    local_1c0 = 0;
+    local_1d0 = 0;
+  }
+  else {
+    iVar6 = FUN_1800dc7d0(&local_150,&DAT_180f1a53c);

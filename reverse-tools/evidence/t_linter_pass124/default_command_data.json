@@ -1,0 +1,41 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "scope": "Recorded PE C-string reads through section-table VA translation; no target execution",
+  "values": [
+    {
+      "address": "0x180de4898",
+      "ascii": " ",
+      "bytesWithNul": "20 00"
+    },
+    {
+      "address": "0x180f1a524",
+      "ascii": " \"",
+      "bytesWithNul": "20 22 00"
+    },
+    {
+      "address": "0x180de4860",
+      "ascii": "\"",
+      "bytesWithNul": "22 00"
+    },
+    {
+      "address": "0x180e9e678",
+      "ascii": "v",
+      "bytesWithNul": "76 00"
+    },
+    {
+      "address": "0x180e4998c",
+      "ascii": "V",
+      "bytesWithNul": "56 00"
+    },
+    {
+      "address": "0x180f1a51c",
+      "ascii": "sv",
+      "bytesWithNul": "73 76 00"
+    },
+    {
+      "address": "0x180f1a520",
+      "ascii": "SV",
+      "bytesWithNul": "53 56 00"
+    }
+  ]
+}

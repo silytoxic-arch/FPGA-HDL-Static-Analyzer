@@ -1,10 +1,10 @@
-# FPGA HDL Static Analyzer — V1.4.241
+# FPGA HDL Static Analyzer — V1.4.242
 
 [![Windows Build](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml/badge.svg)](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml)
 
 公开源码仓库使用 GitHub Actions 在 Windows Server 2022、Visual Studio 2022 和 Qt 6.8.3 环境中自动编译、运行全部测试并生成 Windows x64 ZIP。可在仓库的 **Actions → Windows Build** 页面手动触发，构建完成后从 `FPGA-HDL-Static-Analyzer-Windows-x64` 工件下载。
 
-V1.4.241 深化官方三段式规则 `R-6-3`：恢复普通表达式中 `$clog2` 的物理位向量常量计算、32 位有符号结果及调用行定位，补充小位宽有符号输入、嵌套调用、上下文隔离与错误参数边界。详见 [本轮记录](docs/v1_4_241_release.md)。
+V1.4.242 校准默认 Verilog 解析链：依据默认词法器和语法表恢复局部参数中的 `$clog2`、`$signed` / `$unsigned` 与符号静态转换，并修正跨行调用的默认语法位置。原始静态证据与离线表回放可复查。详见 [本轮记录](docs/v1_4_242_release.md)。
 
 V1.4.214 深化官方三段式规则 `R-5-5`：恢复两条原生诊断正文、Error、赋值物理行无列定位，以及“目标名 + 物理行”的报告重数；确认启用 `initial` 时 DLL 仅登记赋值目标而不校验 RHS 固定性。复杂 default/reset 分支继续要求人工复核。详见 [本轮记录](docs/v1_4_214_release.md)。
 

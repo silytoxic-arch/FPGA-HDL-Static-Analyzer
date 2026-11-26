@@ -1,0 +1,2116 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "scope": "Offline LALR grammar-table replay; predefined token kinds; no target execution, no semantic actions or full runtime",
+  "fixtures": [
+    {
+      "source": "module m; localparam P=$clog2(2); endmodule",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_LOCALPARAM",
+        "TOK_ID",
+        "'='",
+        "TOK_ID",
+        "'('",
+        "TOK_CONSTVAL",
+        "')'",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "reductions": [
+        {
+          "rule": 2,
+          "hex": "0x2",
+          "lhs": "$@1",
+          "rhs": [],
+          "lastReadTokenIndex": -1,
+          "lastReadToken": null
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 33,
+          "hex": "0x21",
+          "lhs": "$@5",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 34,
+          "hex": "0x22",
+          "lhs": "$@6",
+          "rhs": [],
+          "lastReadTokenIndex": 1,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 39,
+          "hex": "0x27",
+          "lhs": "module_para_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 49,
+          "hex": "0x31",
+          "lhs": "module_args_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 170,
+          "hex": "0xaa",
+          "lhs": "module_body",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 334,
+          "hex": "0x14e",
+          "lhs": "$@36",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 319,
+          "hex": "0x13f",
+          "lhs": "param_signed",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 163,
+          "hex": "0xa3",
+          "lhs": "range",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 322,
+          "hex": "0x142",
+          "lhs": "param_range",
+          "rhs": [
+            "range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 326,
+          "hex": "0x146",
+          "lhs": "param_implicit_type",
+          "rhs": [
+            "param_signed",
+            "param_range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 330,
+          "hex": "0x14a",
+          "lhs": "param_type",
+          "rhs": [
+            "param_implicit_type"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 340,
+          "hex": "0x154",
+          "lhs": "single_param_decl_ident",
+          "rhs": [
+            "TOK_ID"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 27,
+          "hex": "0x1b",
+          "lhs": "hierarchical_id",
+          "rhs": [
+            "TOK_ID"
+          ],
+          "lastReadTokenIndex": 6,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 7,
+          "lastReadToken": "'('"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 7,
+          "lastReadToken": "'('"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 7,
+          "lastReadToken": "'('"
+        },
+        {
+          "rule": 648,
+          "hex": "0x288",
+          "lhs": "$@83",
+          "rhs": [],
+          "lastReadTokenIndex": 7,
+          "lastReadToken": "'('"
+        },
+        {
+          "rule": 697,
+          "hex": "0x2b9",
+          "lhs": "integral_number",
+          "rhs": [
+            "TOK_CONSTVAL"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 645,
+          "hex": "0x285",
+          "lhs": "basic_expr",
+          "rhs": [
+            "integral_number"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 612,
+          "hex": "0x264",
+          "lhs": "single_arg",
+          "rhs": [
+            "expr"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 610,
+          "hex": "0x262",
+          "lhs": "arg_list2",
+          "rhs": [
+            "single_arg"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 608,
+          "hex": "0x260",
+          "lhs": "arg_list",
+          "rhs": [
+            "arg_list2"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 54,
+          "hex": "0x36",
+          "lhs": "optional_comma",
+          "rhs": [],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 649,
+          "hex": "0x289",
+          "lhs": "basic_expr",
+          "rhs": [
+            "hierarchical_id",
+            "attr",
+            "$@83",
+            "'('",
+            "arg_list",
+            "optional_comma",
+            "')'"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 338,
+          "hex": "0x152",
+          "lhs": "single_param_decl",
+          "rhs": [
+            "single_param_decl_ident",
+            "'='",
+            "expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 336,
+          "hex": "0x150",
+          "lhs": "param_decl_list",
+          "rhs": [
+            "single_param_decl"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 335,
+          "hex": "0x14f",
+          "lhs": "localparam_decl",
+          "rhs": [
+            "attr",
+            "TOK_LOCALPARAM",
+            "$@36",
+            "param_type",
+            "param_decl_list",
+            "';'"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 174,
+          "hex": "0xae",
+          "lhs": "module_body_stmt",
+          "rhs": [
+            "localparam_decl"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 166,
+          "hex": "0xa6",
+          "lhs": "module_body",
+          "rhs": [
+            "module_body",
+            "module_body_stmt"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 484,
+          "hex": "0x1e4",
+          "lhs": "opt_label",
+          "rhs": [],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 35,
+          "hex": "0x23",
+          "lhs": "module",
+          "rhs": [
+            "attr",
+            "TOK_MODULE",
+            "$@5",
+            "TOK_ID",
+            "$@6",
+            "module_para_opt",
+            "module_args_opt",
+            "';'",
+            "module_body",
+            "TOK_ENDMODULE",
+            "opt_label"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 13,
+          "hex": "0xd",
+          "lhs": "design",
+          "rhs": [],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 4,
+          "hex": "0x4",
+          "lhs": "design",
+          "rhs": [
+            "module",
+            "design"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 3,
+          "hex": "0x3",
+          "lhs": "input",
+          "rhs": [
+            "$@1",
+            "design"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        }
+      ]
+    },
+    {
+      "source": "module m; localparam P=$signed(2); endmodule",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_LOCALPARAM",
+        "TOK_ID",
+        "'='",
+        "TOK_TO_SIGNED",
+        "'('",
+        "TOK_CONSTVAL",
+        "')'",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "reductions": [
+        {
+          "rule": 2,
+          "hex": "0x2",
+          "lhs": "$@1",
+          "rhs": [],
+          "lastReadTokenIndex": -1,
+          "lastReadToken": null
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 33,
+          "hex": "0x21",
+          "lhs": "$@5",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 34,
+          "hex": "0x22",
+          "lhs": "$@6",
+          "rhs": [],
+          "lastReadTokenIndex": 1,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 39,
+          "hex": "0x27",
+          "lhs": "module_para_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 49,
+          "hex": "0x31",
+          "lhs": "module_args_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 170,
+          "hex": "0xaa",
+          "lhs": "module_body",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 334,
+          "hex": "0x14e",
+          "lhs": "$@36",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 319,
+          "hex": "0x13f",
+          "lhs": "param_signed",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 163,
+          "hex": "0xa3",
+          "lhs": "range",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 322,
+          "hex": "0x142",
+          "lhs": "param_range",
+          "rhs": [
+            "range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 326,
+          "hex": "0x146",
+          "lhs": "param_implicit_type",
+          "rhs": [
+            "param_signed",
+            "param_range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 330,
+          "hex": "0x14a",
+          "lhs": "param_type",
+          "rhs": [
+            "param_implicit_type"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 340,
+          "hex": "0x154",
+          "lhs": "single_param_decl_ident",
+          "rhs": [
+            "TOK_ID"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 6,
+          "lastReadToken": "TOK_TO_SIGNED"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 6,
+          "lastReadToken": "TOK_TO_SIGNED"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 7,
+          "lastReadToken": "'('"
+        },
+        {
+          "rule": 697,
+          "hex": "0x2b9",
+          "lhs": "integral_number",
+          "rhs": [
+            "TOK_CONSTVAL"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 645,
+          "hex": "0x285",
+          "lhs": "basic_expr",
+          "rhs": [
+            "integral_number"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 650,
+          "hex": "0x28a",
+          "lhs": "basic_expr",
+          "rhs": [
+            "TOK_TO_SIGNED",
+            "attr",
+            "'('",
+            "expr",
+            "')'"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 338,
+          "hex": "0x152",
+          "lhs": "single_param_decl",
+          "rhs": [
+            "single_param_decl_ident",
+            "'='",
+            "expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 336,
+          "hex": "0x150",
+          "lhs": "param_decl_list",
+          "rhs": [
+            "single_param_decl"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 335,
+          "hex": "0x14f",
+          "lhs": "localparam_decl",
+          "rhs": [
+            "attr",
+            "TOK_LOCALPARAM",
+            "$@36",
+            "param_type",
+            "param_decl_list",
+            "';'"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 174,
+          "hex": "0xae",
+          "lhs": "module_body_stmt",
+          "rhs": [
+            "localparam_decl"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 166,
+          "hex": "0xa6",
+          "lhs": "module_body",
+          "rhs": [
+            "module_body",
+            "module_body_stmt"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 484,
+          "hex": "0x1e4",
+          "lhs": "opt_label",
+          "rhs": [],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 35,
+          "hex": "0x23",
+          "lhs": "module",
+          "rhs": [
+            "attr",
+            "TOK_MODULE",
+            "$@5",
+            "TOK_ID",
+            "$@6",
+            "module_para_opt",
+            "module_args_opt",
+            "';'",
+            "module_body",
+            "TOK_ENDMODULE",
+            "opt_label"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 13,
+          "hex": "0xd",
+          "lhs": "design",
+          "rhs": [],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 4,
+          "hex": "0x4",
+          "lhs": "design",
+          "rhs": [
+            "module",
+            "design"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 3,
+          "hex": "0x3",
+          "lhs": "input",
+          "rhs": [
+            "$@1",
+            "design"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        }
+      ]
+    },
+    {
+      "source": "module m; localparam P=$unsigned(2); endmodule",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_LOCALPARAM",
+        "TOK_ID",
+        "'='",
+        "TOK_TO_UNSIGNED",
+        "'('",
+        "TOK_CONSTVAL",
+        "')'",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "reductions": [
+        {
+          "rule": 2,
+          "hex": "0x2",
+          "lhs": "$@1",
+          "rhs": [],
+          "lastReadTokenIndex": -1,
+          "lastReadToken": null
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 33,
+          "hex": "0x21",
+          "lhs": "$@5",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 34,
+          "hex": "0x22",
+          "lhs": "$@6",
+          "rhs": [],
+          "lastReadTokenIndex": 1,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 39,
+          "hex": "0x27",
+          "lhs": "module_para_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 49,
+          "hex": "0x31",
+          "lhs": "module_args_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 170,
+          "hex": "0xaa",
+          "lhs": "module_body",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 334,
+          "hex": "0x14e",
+          "lhs": "$@36",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 319,
+          "hex": "0x13f",
+          "lhs": "param_signed",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 163,
+          "hex": "0xa3",
+          "lhs": "range",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 322,
+          "hex": "0x142",
+          "lhs": "param_range",
+          "rhs": [
+            "range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 326,
+          "hex": "0x146",
+          "lhs": "param_implicit_type",
+          "rhs": [
+            "param_signed",
+            "param_range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 330,
+          "hex": "0x14a",
+          "lhs": "param_type",
+          "rhs": [
+            "param_implicit_type"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 340,
+          "hex": "0x154",
+          "lhs": "single_param_decl_ident",
+          "rhs": [
+            "TOK_ID"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 6,
+          "lastReadToken": "TOK_TO_UNSIGNED"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 6,
+          "lastReadToken": "TOK_TO_UNSIGNED"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 7,
+          "lastReadToken": "'('"
+        },
+        {
+          "rule": 697,
+          "hex": "0x2b9",
+          "lhs": "integral_number",
+          "rhs": [
+            "TOK_CONSTVAL"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 645,
+          "hex": "0x285",
+          "lhs": "basic_expr",
+          "rhs": [
+            "integral_number"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 651,
+          "hex": "0x28b",
+          "lhs": "basic_expr",
+          "rhs": [
+            "TOK_TO_UNSIGNED",
+            "attr",
+            "'('",
+            "expr",
+            "')'"
+          ],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 338,
+          "hex": "0x152",
+          "lhs": "single_param_decl",
+          "rhs": [
+            "single_param_decl_ident",
+            "'='",
+            "expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 336,
+          "hex": "0x150",
+          "lhs": "param_decl_list",
+          "rhs": [
+            "single_param_decl"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 335,
+          "hex": "0x14f",
+          "lhs": "localparam_decl",
+          "rhs": [
+            "attr",
+            "TOK_LOCALPARAM",
+            "$@36",
+            "param_type",
+            "param_decl_list",
+            "';'"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 174,
+          "hex": "0xae",
+          "lhs": "module_body_stmt",
+          "rhs": [
+            "localparam_decl"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 166,
+          "hex": "0xa6",
+          "lhs": "module_body",
+          "rhs": [
+            "module_body",
+            "module_body_stmt"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 484,
+          "hex": "0x1e4",
+          "lhs": "opt_label",
+          "rhs": [],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 35,
+          "hex": "0x23",
+          "lhs": "module",
+          "rhs": [
+            "attr",
+            "TOK_MODULE",
+            "$@5",
+            "TOK_ID",
+            "$@6",
+            "module_para_opt",
+            "module_args_opt",
+            "';'",
+            "module_body",
+            "TOK_ENDMODULE",
+            "opt_label"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 13,
+          "hex": "0xd",
+          "lhs": "design",
+          "rhs": [],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 4,
+          "hex": "0x4",
+          "lhs": "design",
+          "rhs": [
+            "module",
+            "design"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 3,
+          "hex": "0x3",
+          "lhs": "input",
+          "rhs": [
+            "$@1",
+            "design"
+          ],
+          "lastReadTokenIndex": 12,
+          "lastReadToken": "$end"
+        }
+      ]
+    },
+    {
+      "source": "module m; localparam P=signed'(2); endmodule",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_LOCALPARAM",
+        "TOK_ID",
+        "'='",
+        "TOK_SIGNED",
+        "OP_CAST",
+        "'('",
+        "TOK_CONSTVAL",
+        "')'",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "reductions": [
+        {
+          "rule": 2,
+          "hex": "0x2",
+          "lhs": "$@1",
+          "rhs": [],
+          "lastReadTokenIndex": -1,
+          "lastReadToken": null
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 33,
+          "hex": "0x21",
+          "lhs": "$@5",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 34,
+          "hex": "0x22",
+          "lhs": "$@6",
+          "rhs": [],
+          "lastReadTokenIndex": 1,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 39,
+          "hex": "0x27",
+          "lhs": "module_para_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 49,
+          "hex": "0x31",
+          "lhs": "module_args_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 170,
+          "hex": "0xaa",
+          "lhs": "module_body",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 334,
+          "hex": "0x14e",
+          "lhs": "$@36",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 319,
+          "hex": "0x13f",
+          "lhs": "param_signed",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 163,
+          "hex": "0xa3",
+          "lhs": "range",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 322,
+          "hex": "0x142",
+          "lhs": "param_range",
+          "rhs": [
+            "range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 326,
+          "hex": "0x146",
+          "lhs": "param_implicit_type",
+          "rhs": [
+            "param_signed",
+            "param_range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 330,
+          "hex": "0x14a",
+          "lhs": "param_type",
+          "rhs": [
+            "param_implicit_type"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 340,
+          "hex": "0x154",
+          "lhs": "single_param_decl_ident",
+          "rhs": [
+            "TOK_ID"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 697,
+          "hex": "0x2b9",
+          "lhs": "integral_number",
+          "rhs": [
+            "TOK_CONSTVAL"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 645,
+          "hex": "0x285",
+          "lhs": "basic_expr",
+          "rhs": [
+            "integral_number"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 692,
+          "hex": "0x2b4",
+          "lhs": "basic_expr",
+          "rhs": [
+            "TOK_SIGNED",
+            "OP_CAST",
+            "'('",
+            "expr",
+            "')'"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 338,
+          "hex": "0x152",
+          "lhs": "single_param_decl",
+          "rhs": [
+            "single_param_decl_ident",
+            "'='",
+            "expr"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 336,
+          "hex": "0x150",
+          "lhs": "param_decl_list",
+          "rhs": [
+            "single_param_decl"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 335,
+          "hex": "0x14f",
+          "lhs": "localparam_decl",
+          "rhs": [
+            "attr",
+            "TOK_LOCALPARAM",
+            "$@36",
+            "param_type",
+            "param_decl_list",
+            "';'"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 174,
+          "hex": "0xae",
+          "lhs": "module_body_stmt",
+          "rhs": [
+            "localparam_decl"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 166,
+          "hex": "0xa6",
+          "lhs": "module_body",
+          "rhs": [
+            "module_body",
+            "module_body_stmt"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 484,
+          "hex": "0x1e4",
+          "lhs": "opt_label",
+          "rhs": [],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 35,
+          "hex": "0x23",
+          "lhs": "module",
+          "rhs": [
+            "attr",
+            "TOK_MODULE",
+            "$@5",
+            "TOK_ID",
+            "$@6",
+            "module_para_opt",
+            "module_args_opt",
+            "';'",
+            "module_body",
+            "TOK_ENDMODULE",
+            "opt_label"
+          ],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 13,
+          "hex": "0xd",
+          "lhs": "design",
+          "rhs": [],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 4,
+          "hex": "0x4",
+          "lhs": "design",
+          "rhs": [
+            "module",
+            "design"
+          ],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 3,
+          "hex": "0x3",
+          "lhs": "input",
+          "rhs": [
+            "$@1",
+            "design"
+          ],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        }
+      ]
+    },
+    {
+      "source": "module m; localparam P=unsigned'(2); endmodule",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_LOCALPARAM",
+        "TOK_ID",
+        "'='",
+        "TOK_UNSIGNED",
+        "OP_CAST",
+        "'('",
+        "TOK_CONSTVAL",
+        "')'",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "reductions": [
+        {
+          "rule": 2,
+          "hex": "0x2",
+          "lhs": "$@1",
+          "rhs": [],
+          "lastReadTokenIndex": -1,
+          "lastReadToken": null
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 33,
+          "hex": "0x21",
+          "lhs": "$@5",
+          "rhs": [],
+          "lastReadTokenIndex": 0,
+          "lastReadToken": "TOK_MODULE"
+        },
+        {
+          "rule": 34,
+          "hex": "0x22",
+          "lhs": "$@6",
+          "rhs": [],
+          "lastReadTokenIndex": 1,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 39,
+          "hex": "0x27",
+          "lhs": "module_para_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 49,
+          "hex": "0x31",
+          "lhs": "module_args_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 170,
+          "hex": "0xaa",
+          "lhs": "module_body",
+          "rhs": [],
+          "lastReadTokenIndex": 2,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 14,
+          "hex": "0xe",
+          "lhs": "$@2",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 17,
+          "hex": "0x11",
+          "lhs": "attr_opt",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 15,
+          "hex": "0xf",
+          "lhs": "attr",
+          "rhs": [
+            "$@2",
+            "attr_opt"
+          ],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 334,
+          "hex": "0x14e",
+          "lhs": "$@36",
+          "rhs": [],
+          "lastReadTokenIndex": 3,
+          "lastReadToken": "TOK_LOCALPARAM"
+        },
+        {
+          "rule": 319,
+          "hex": "0x13f",
+          "lhs": "param_signed",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 163,
+          "hex": "0xa3",
+          "lhs": "range",
+          "rhs": [],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 322,
+          "hex": "0x142",
+          "lhs": "param_range",
+          "rhs": [
+            "range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 326,
+          "hex": "0x146",
+          "lhs": "param_implicit_type",
+          "rhs": [
+            "param_signed",
+            "param_range"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 330,
+          "hex": "0x14a",
+          "lhs": "param_type",
+          "rhs": [
+            "param_implicit_type"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 340,
+          "hex": "0x154",
+          "lhs": "single_param_decl_ident",
+          "rhs": [
+            "TOK_ID"
+          ],
+          "lastReadTokenIndex": 4,
+          "lastReadToken": "TOK_ID"
+        },
+        {
+          "rule": 697,
+          "hex": "0x2b9",
+          "lhs": "integral_number",
+          "rhs": [
+            "TOK_CONSTVAL"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 645,
+          "hex": "0x285",
+          "lhs": "basic_expr",
+          "rhs": [
+            "integral_number"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 693,
+          "hex": "0x2b5",
+          "lhs": "basic_expr",
+          "rhs": [
+            "TOK_UNSIGNED",
+            "OP_CAST",
+            "'('",
+            "expr",
+            "')'"
+          ],
+          "lastReadTokenIndex": 10,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 640,
+          "hex": "0x280",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 338,
+          "hex": "0x152",
+          "lhs": "single_param_decl",
+          "rhs": [
+            "single_param_decl_ident",
+            "'='",
+            "expr"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 336,
+          "hex": "0x150",
+          "lhs": "param_decl_list",
+          "rhs": [
+            "single_param_decl"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 335,
+          "hex": "0x14f",
+          "lhs": "localparam_decl",
+          "rhs": [
+            "attr",
+            "TOK_LOCALPARAM",
+            "$@36",
+            "param_type",
+            "param_decl_list",
+            "';'"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 174,
+          "hex": "0xae",
+          "lhs": "module_body_stmt",
+          "rhs": [
+            "localparam_decl"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 166,
+          "hex": "0xa6",
+          "lhs": "module_body",
+          "rhs": [
+            "module_body",
+            "module_body_stmt"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 484,
+          "hex": "0x1e4",
+          "lhs": "opt_label",
+          "rhs": [],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 35,
+          "hex": "0x23",
+          "lhs": "module",
+          "rhs": [
+            "attr",
+            "TOK_MODULE",
+            "$@5",
+            "TOK_ID",
+            "$@6",
+            "module_para_opt",
+            "module_args_opt",
+            "';'",
+            "module_body",
+            "TOK_ENDMODULE",
+            "opt_label"
+          ],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 13,
+          "hex": "0xd",
+          "lhs": "design",
+          "rhs": [],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 4,
+          "hex": "0x4",
+          "lhs": "design",
+          "rhs": [
+            "module",
+            "design"
+          ],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        },
+        {
+          "rule": 3,
+          "hex": "0x3",
+          "lhs": "input",
+          "rhs": [
+            "$@1",
+            "design"
+          ],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "$end"
+        }
+      ]
+    }
+  ],
+  "tokenBindings": [
+    {
+      "externalToken": "0x103",
+      "symbolIndex": 4,
+      "symbol": "TOK_ID"
+    },
+    {
+      "externalToken": "0x104",
+      "symbolIndex": 5,
+      "symbol": "TOK_CONSTVAL"
+    },
+    {
+      "externalToken": "0x11b",
+      "symbolIndex": 28,
+      "symbol": "TOK_LOCALPARAM"
+    },
+    {
+      "externalToken": "0x12e",
+      "symbolIndex": 47,
+      "symbol": "TOK_SIGNED"
+    },
+    {
+      "externalToken": "0x158",
+      "symbolIndex": 89,
+      "symbol": "TOK_TO_SIGNED"
+    },
+    {
+      "externalToken": "0x159",
+      "symbolIndex": 90,
+      "symbol": "TOK_TO_UNSIGNED"
+    },
+    {
+      "externalToken": "0x16b",
+      "symbolIndex": 108,
+      "symbol": "TOK_UNSIGNED"
+    },
+    {
+      "externalToken": "0x195",
+      "symbolIndex": 160,
+      "symbol": "OP_CAST"
+    }
+  ],
+  "lexerProbes": [
+    {
+      "input": "$clog2",
+      "accepts": [
+        {
+          "length": 6,
+          "state": 90,
+          "actions": [
+            122,
+            123,
+            16441
+          ]
+        }
+      ]
+    },
+    {
+      "input": "$signed",
+      "accepts": [
+        {
+          "length": 7,
+          "state": 666,
+          "actions": [
+            119,
+            122,
+            123,
+            16441
+          ]
+        }
+      ]
+    },
+    {
+      "input": "$unsigned",
+      "accepts": [
+        {
+          "length": 9,
+          "state": 782,
+          "actions": [
+            120,
+            122,
+            123,
+            16441
+          ]
+        }
+      ]
+    },
+    {
+      "input": "signed",
+      "accepts": [
+        {
+          "length": 6,
+          "state": 637,
+          "actions": [
+            89,
+            122,
+            123,
+            16441
+          ]
+        }
+      ]
+    },
+    {
+      "input": "unsigned",
+      "accepts": [
+        {
+          "length": 8,
+          "state": 773,
+          "actions": [
+            90,
+            122,
+            123,
+            16441
+          ]
+        }
+      ]
+    },
+    {
+      "input": "'",
+      "accepts": [
+        {
+          "length": 1,
+          "state": 24,
+          "actions": [
+            160,
+            191,
+            192,
+            193
+          ]
+        }
+      ]
+    },
+    {
+      "input": "localparam",
+      "accepts": [
+        {
+          "length": 10,
+          "state": 843,
+          "actions": [
+            27,
+            122,
+            123,
+            16441
+          ]
+        }
+      ]
+    },
+    {
+      "input": "CLK",
+      "accepts": [
+        {
+          "length": 3,
+          "state": 139,
+          "actions": [
+            122,
+            123,
+            16441
+          ]
+        }
+      ]
+    },
+    {
+      "input": "P",
+      "accepts": [
+        {
+          "length": 1,
+          "state": 36,
+          "actions": [
+            122,
+            123,
+            191,
+            192,
+            193,
+            16441
+          ]
+        }
+      ]
+    }
+  ]
+}

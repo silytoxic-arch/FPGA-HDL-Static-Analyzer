@@ -1,0 +1,11 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 1808e46a0 =====
+1813c8a78 DATA <no-function> :: <no-instruction>
+18125eed0 DATA <no-function> :: <no-instruction>
+18094e2a3 UNCONDITIONAL_CALL 18094b1e0 FUN_18094b1e0 :: CALL 0x1808e46a0
+
+===== 1808e59e0 =====
+1813c8a84 DATA <no-function> :: <no-instruction>
+18125f1e0 DATA <no-function> :: <no-instruction>
+1801abbba UNCONDITIONAL_CALL 1801aa4c0 FUN_1801aa4c0 :: CALL 0x1808e59e0

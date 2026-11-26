@@ -1,0 +1,126 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 180133270 180133270 FUN_180133270 =====
+
+undefined8 * FUN_180133270(undefined8 *param_1)
+
+{
+  *param_1 = antlr4::tree::ParseTreeListener::vftable;
+  *param_1 = antlrcpptest::Verilog2005ParserListener::vftable;
+  *param_1 = antlrcpptest::Verilog2005ParserBaseListener::vftable;
+  *param_1 = Yosys::Verilog2005StyleLisener::vftable;
+  param_1[4] = 0xf;
+  param_1[3] = 0;
+  *(undefined1 *)(param_1 + 1) = 0;
+  return param_1;
+}
+
+
+
+===== 1800d7890 1800d7890 FUN_1800d7890 =====
+
+undefined8 * FUN_1800d7890(undefined8 *param_1,undefined8 param_2)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+  undefined8 *puVar3;
+
+  *param_1 = antlr4::tree::ParseTreeListener::vftable;
+  *param_1 = antlrcpptest::Verilog2005ParserListener::vftable;
+  *param_1 = antlrcpptest::Verilog2005ParserBaseListener::vftable;
+  *param_1 = Yosys::Verilog2005Lisener::vftable;
+  param_1[1] = 0;
+  param_1[2] = 0;
+  param_1[3] = 0;
+  puVar1 = param_1 + 4;
+  *puVar1 = 0;
+  param_1[5] = 0;
+  uVar2 = FUN_1800da0d0(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 7;
+  *puVar1 = 0;
+  param_1[8] = 0;
+  uVar2 = FUN_1800da120(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 9;
+  *puVar1 = 0;
+  param_1[10] = 0;
+  param_1[0xb] = 0;
+  param_1[0xc] = 0;
+  param_1[0xd] = 0;
+  puVar3 = operator_new(0x10);
+  if (puVar3 == (undefined8 *)0x0) {
+                    /* WARNING: Subroutine does not return */
+    _invalid_parameter_noinfo_noreturn();
+  }
+  *puVar1 = puVar3;
+  *puVar3 = 0;
+  puVar3[1] = 0;
+  *(undefined8 **)*puVar1 = puVar1;
+  param_1[0x12] = 0;
+  param_1[0x13] = 0;
+  param_1[0x14] = 0;
+  puVar1 = param_1 + 0x1a;
+  *puVar1 = 0;
+  param_1[0x1b] = 0;
+  uVar2 = FUN_1800da120(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0x1c;
+  *puVar1 = 0;
+  param_1[0x1d] = 0;
+  uVar2 = FUN_1800d9fe0(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0x1e;
+  *puVar1 = 0;
+  param_1[0x1f] = 0;
+  uVar2 = FUN_1800da120(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x20] = Yosys::ParseTreeAttribute<Yosys::AST::AstNode*___ptr64>::vftable;
+  puVar1 = param_1 + 0x21;
+  *puVar1 = 0;
+  param_1[0x22] = 0;
+  uVar2 = FUN_1800d9ea0(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x23] =
+       Yosys::
+       ParseTreeAttribute<std::basic_string<char,std::char_traits<char>,std::allocator<char>_>_>::
+       vftable;
+  puVar1 = param_1 + 0x24;
+  *puVar1 = 0;
+  param_1[0x25] = 0;
+  uVar2 = FUN_1800da030(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x26] = Yosys::ParseTreeAttribute<Yosys::specify_target*___ptr64>::vftable;
+  puVar1 = param_1 + 0x27;
+  *puVar1 = 0;
+  param_1[0x28] = 0;
+  uVar2 = FUN_1800d9f40(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x29] = Yosys::ParseTreeAttribute<Yosys::specify_rise_fall*___ptr64>::vftable;
+  puVar1 = param_1 + 0x2a;
+  *puVar1 = 0;
+  param_1[0x2b] = 0;
+  uVar2 = FUN_1800d9ef0(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x2c] = Yosys::ParseTreeAttribute<Yosys::specify_triple*___ptr64>::vftable;
+  puVar1 = param_1 + 0x2d;
+  *puVar1 = 0;
+  param_1[0x2e] = 0;
+  uVar2 = FUN_1800d9f90(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x2f] = 0;
+  param_1[0x31] = 0;
+  puVar1 = param_1 + 0x4e;
+  *puVar1 = 0;
+  param_1[0x4f] = 0;
+  uVar2 = FUN_1800da080(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0x50;
+  *puVar1 = 0;
+  param_1[0x51] = 0;
+  uVar2 = FUN_1800da120(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x19] = param_2;
+  return param_1;
+}
