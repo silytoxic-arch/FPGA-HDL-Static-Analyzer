@@ -1242,7 +1242,7 @@ const rules = native.rules.map(rule => {
       'GJB10157.5.2.2': 'tests/verilog_naming_shape_tests.cpp',
       'GJB10157.5.2.4': ['tests/verilog_power_names_tests.cpp', 'tests/verilog_naming_shape_tests.cpp'],
       'GJB10157.5.2.12': ['tests/verilog_name_length_tests.cpp', 'tests/verilog_naming_shape_tests.cpp', 'tests/standard_accuracy_tests.cpp'],
-      'GJB9765.4.10.h': ['tests/vhdl_edge_condition_tests.cpp', 'tests/vhdl_clock_control_tests.cpp'],
+      'GJB9765.4.10.h': ['tests/vhdl_edge_condition_tests.cpp', 'tests/vhdl_clock_control_tests.cpp', 'tests/audit_t_linter_rules_tests.py', 'tests/fixtures/vhdl_a10_4_documentation_violation.vhd'],
       'GJB9765.4.10.j': ['tests/analyzer_tests.cpp', 'tests/standard_accuracy_tests.cpp'],
       'GJB10157.5.1.1': ['tests/verilog_header_policy_tests.cpp', 'tests/config_file_tests.cpp', 'tests/CMakeLists.txt'],
       'GJB10157.5.2.3': ['tests/verilog_keyword_names_tests.cpp', 'tests/config_file_tests.cpp', 'tests/analyzer_tests.cpp', 'tests/standard_accuracy_tests.cpp', 'tests/CMakeLists.txt'],

@@ -18,3 +18,5 @@
 
 # Retained native evidence is SHA-addressed: preserve raw bytes across platforms.
 reverse-tools/evidence/** -text -whitespace
+# Exact attachment excerpt: its whitespace is part of the recorded source SHA.
+tests/fixtures/vhdl_a10_4_documentation_violation.vhd -text -whitespace

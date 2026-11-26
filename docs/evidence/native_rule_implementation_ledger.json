@@ -10471,7 +10471,9 @@
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/vhdl_edge_condition_tests.cpp",
-        "tests/vhdl_clock_control_tests.cpp"
+        "tests/vhdl_clock_control_tests.cpp",
+        "tests/audit_t_linter_rules_tests.py",
+        "tests/fixtures/vhdl_a10_4_documentation_violation.vhd"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB9765_VHDL.4.10.h.html",
