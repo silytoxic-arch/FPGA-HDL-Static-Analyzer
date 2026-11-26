@@ -1,0 +1,62 @@
+T-Linter GJB9765_VHDL_4_6_f tri-state pair-exemption evidence
+================================================================
+
+Target: /Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/T-Linter.dll
+Target SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Provider: REA Ghidra 12.1.4 static pseudocode; target was not executed
+Entry: FUN_180772510 at 0x180772510
+Shape helper: FUN_180775050 at 0x180775050
+Retained evidence: docs/evidence/rea_vhdl_multiple_drivers_4_6_f_bundle.json
+Entry Evidence: ev_982a769700f868228aa94da64e031116a9f0b1037f4c9199e0811e3831a9582c
+Helper Evidence: ev_a0769ec98ec45f1313372f18cd322b34143713336780574d1f0b0958a2c8a15b
+
+Observed helper boundary
+------------------------
+
+For AST_ASSIGN_LE (0x56), FUN_180775050 admits exactly three children. The
+first child must be AST_IDENTIFIER (0x13) and is stored as the assignment
+target. The third child must be a direct constant-family node accepted by the
+native constant decoder. The middle child must be AST_WHEN (0xb6) with exactly
+two children.
+
+Inside AST_WHEN, its first child must be a direct AST_IDENTIFIER and is stored
+in the returned record. Its second child must be AST type 0x58 with one child;
+that child must be a two-operand relation selected by the native relation mask.
+The helper looks up the two direct operand names in the rule's resolved-name
+map and stores the first matching name in a second returned field.
+
+Observed pairwise decision
+--------------------------
+
+FUN_180772510 invokes FUN_180775050 for both driver records of a same-target
+pair. It builds a completeness boolean for each returned record by requiring
+three non-null fields. If either record is incomplete, execution enters the
+diagnostic path. When both are complete, the entry compares the corresponding
+extracted control-name strings; unequal strings enter the diagnostic path,
+while equal strings skip it.
+
+The packaged compliant example independently corroborates the field role:
+three drivers use direct data names B/C/D and relations A="01", A="10" and
+A="11". Their relation constants differ, but their extracted control source A
+is identical and the example is marked compliant. Therefore the exemption is
+not merely the presence of WHEN ... ELSE Z; it is the native-recognized direct
+shape plus a shared control-source name across every driver pair.
+
+Product mapping
+---------------
+
+The source adapter admits the bounded equivalent: one direct data identifier,
+one simple binary relation with a direct identifier operand, and an ELSE 'Z'
+branch. All assignments to the target must resolve the same case-insensitive
+control identifier. Different controls, complex data expressions, complex
+conditions, or a non-tri-state driver remain reported.
+
+Unknowns
+--------
+
+The exact proprietary names of AST 0x58 and constant-family 0xb2/0xb3, the
+resolved-name map's complete producer semantics, process-form tri-state
+lowering (AST 0xaa), hierarchy/netlist propagation, resolution functions,
+selected/indexed targets, malformed trees and exact diagnostic multiplicity
+remain unresolved. Unsupported clean paths remain ManualReviewRequired; this
+evidence does not establish full vendor equivalence.

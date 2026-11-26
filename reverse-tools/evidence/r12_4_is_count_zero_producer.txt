@@ -1,0 +1,34 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Tool: Ghidra 12.1.4 static decompiler/listing
+
+String: is_count_zero
+Address: 0x180f12870
+References:
+- 0x1806ed825 in FUN_1806ed640 (rule consumer)
+- 0x18091b7d0 in FUN_180914500 (frontend producer)
+
+Relevant producer flow in FUN_180914500
+
+1. When original node type at local_2890+4 equals 0x5c (AST_FOR), the
+   frontend establishes loop context and sets the iteration counter local_27e0
+   to 1 before testing the condition.
+2. It clones the condition into local_2818 with FUN_1808db990.
+3. FUN_1808f4650 prepares width/sign information.
+4. It repeatedly calls FUN_180914500(local_2818, 1, 0) until simplification
+   reaches a fixed point.
+5. A non-AST_CONSTANT simplified result on an AST_FOR emits the separate
+   is_loop_condition_const record.
+6. It then reads dword local_2818+0xbc. Cross-rule constant evaluation proves
+   +0xbc is the integer value field for a valid AST_CONSTANT.
+7. If that value is zero, original node type is AST_FOR and local_27e0 is
+   still exactly 1, it appends a record whose attribute string is
+   is_count_zero, source path is original FOR+0x1e0 and line is FOR+0x210.
+8. The zero branch destroys the cloned condition and exits the loop lowering
+   path before body expansion. A nonzero condition proceeds with loop body
+   lowering and counter update.
+
+This establishes that is_count_zero means the first frontend-simplified FOR
+condition is the constant integer zero. It is not limited to source-level
+decimal literals and applies to both procedural and generate AST_FOR nodes
+that reach this lowering path.

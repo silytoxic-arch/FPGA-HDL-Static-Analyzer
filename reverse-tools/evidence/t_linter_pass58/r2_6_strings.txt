@@ -1,0 +1,15 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+PE section: .rdata VMA 0x180de0000, raw file offset 0xddf400
+
+0x180eedccc (file offset 0xeed0cc)
+hex: ba cd 00 00
+GB18030: 和
+
+0x180eedcd0 (file offset 0xeed0d0)
+hex: bd fb d6 b9 bd f6 ca b9 d3 c3 b4 f3 d0 a1 d0 b4 c7 f8 b7 d6 c3 fc c3 fb 00
+GB18030: 禁止仅使用大小写区分命名
+
+FUN_18053a3c0 stores the fixed severity literal "error" with length 5 and writes
+the candidate node +0x210 value into the diagnostic location field. It does not
+populate a source column.

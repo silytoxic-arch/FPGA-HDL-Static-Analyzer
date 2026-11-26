@@ -1,0 +1,14 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Vtable address: 0x180eeb450
+Bytes (48):
+70 98 52 80 01 00 00 00 a0 38 72 80 01 00 00 00
+20 70 69 80 01 00 00 00 e0 e7 03 80 01 00 00 00
+00 d4 62 80 01 00 00 00 20 98 52 80 01 00 00 00
+Decoded slots:
+slot 0 = 0x180529870
+slot 1 = 0x1807238a0
+slot 2 = 0x180697020
+Message address: 0x180eeb498
+GB18030 bytes length: 0x3c
+Decoded message: 端口列表应按照“时钟、复位、输入、输出、双向端口”的顺序描述

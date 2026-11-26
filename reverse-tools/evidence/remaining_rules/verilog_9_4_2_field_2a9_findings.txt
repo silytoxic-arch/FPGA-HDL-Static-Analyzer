@@ -1,0 +1,31 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Provider: Ghidra 12.1.4, complete default analysis, offline static inspection
+
+Full .text scalar-offset search for 0x2a9:
+  0x1800e15fc  MOV byte ptr [RDI + 0x2a9],0x1  function 0x1800e1200
+  0x180170fd7  MOV EDX,0x2a9                  function 0x180170ee0
+  0x180357471  CMP byte ptr [RBX + 0x2a9],0x0  function 0x180357360
+  0x180543bec  CMP byte ptr [RSI + 0x2a9],0x0  function 0x1805437e0
+  0x18058cff6  CMP byte ptr [RDX + 0x2a9],0x1  function 0x18058cff0
+  0x1808da0a3  MOVZX EAX,byte ptr [RDI + 0x2a9] function 0x1808d9a90
+  0x1808da0aa  MOV byte ptr [RBX + 0x2a9],AL   function 0x1808d9a90
+
+Observed function roles:
+  - 0x1800e1200 creates AST type 0x53, writes +0x2a9=1, attaches the
+    current frontend statement, then creates AST_BLOCK type 0x54.
+  - 0x1808d9a90 is the AST copy path and copies +0x2a9 unchanged.
+  - 0x18058cff0 returns true only for type 0x53 and +0x2a9==1.
+  - 0x18058cad0 iterates the selected nodes and emits one Warning using
+    source path +0x1e0 and source line +0x210.
+  - 0x180170ee0 passes numeric 0x2a9 to a parser-state helper; it is not
+    an AST-node constant-one field write.
+
+Diagnostic bytes at 0x180ef6268:
+  bd fb d6 b9 ca b9 d3 c3 69 6e 69 74 69 61 6c d3 ef be e4 00
+GB18030 decoding: 禁止使用initial语句
+
+Inference boundary:
+  Packaged grammar/RTTI names associate the producer with
+  Initial_constructContext. Function names and original C++ field names are
+  unavailable. Static inspection did not execute the Windows target.

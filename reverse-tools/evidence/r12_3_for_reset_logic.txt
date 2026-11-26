@@ -1,0 +1,79 @@
+T-Linter.dll target
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB10157_VLOG.9.3.3 / official R-12-3
+Primary predicate: FUN_1805874a0
+Completeness helper: FUN_180560070
+Message data: DAT_180ef5998
+
+Observed primary-predicate facts (Ghidra 12.1.4 static decompilation):
+
+1. The per-record root vector must contain exactly one item and that item must
+   be AST_MODULE(2).
+2. AST_ALWAYS(0x52) nodes are gathered recursively below the module.
+3. Every AST_POSEDGE/AST_NEGEDGE(0x65/0x66) below an admitted ALWAYS is
+   gathered. An event contributes a normalized name only when it has exactly
+   one child and that child is AST_IDENTIFIER(0x13). There is no native
+   classification of one event as clock and another as reset in this entry.
+4. The entry inspects direct AST_FOR(0x5c) children of the process AST_BLOCK
+   (0x54), with one first-child AST_BLOCK unwrap.
+5. For every AST_BLOCK child of the FOR it similarly unwraps one first-child
+   block and inspects direct AST_CASE(0x57) children.
+6. A CASE receives the event-name-match flag when one of its direct
+   AST_REDUCE_BOOL(0x2d) children has exactly one child that is either:
+   - AST_IDENTIFIER(0x13), or
+   - AST_LOGIC_NOT(0x47) with exactly one AST_IDENTIFIER child,
+   and that identifier name equals any collected edge-event name.
+7. The entry calls FUN_180560070 for the same CASE and reports only when both
+   the event-name-match flag and helper result are true.
+8. The report is constructed once for every admitted CASE. Its path comes from
+   the sole module root and its line field is read from the current AST_FOR.
+
+Observed FUN_180560070 facts:
+
+- It walks direct AST_COND(0x58) children of the supplied AST_CASE.
+- Within one COND it records whether AST_DEFAULT(0x5b) was seen before the
+  AST_BLOCK child.
+- If that block contains an AST_CASE on the same source line as the COND, the
+  helper recursively follows that case and returns its result. This is the
+  native lowering path for an else-if chain.
+- If no same-line nested case exists, the helper returns true exactly when the
+  current COND had AST_DEFAULT. It therefore requires a complete if/else or an
+  else-if chain ending in a final else/default.
+- The helper never reads assignment targets or values from either branch.
+
+Call-site assembly at 0x180587ee0..0x180587f16:
+
+180587ee0 XOR R14D,R14D
+180587ee3 MOV qword ptr [RBP + 0x60],R14
+180587ee7 LEA R8,[RBP + 0x60]
+180587eeb MOV RDX,qword ptr [RDI]
+180587eee MOV RBX,qword ptr [RBP + 0x30]
+180587ef2 MOV RCX,RBX
+180587ef5 CALL 0x180560070
+180587eff CMP AL,0x1
+180587f09 CMP byte ptr [RSP + 0x24],R14B
+180587f14 TEST CL,CL
+
+This confirms the third helper argument is an output pointer and that the
+boolean return is combined with the independently stored event-name-match flag.
+
+DAT_180ef5998 bytes (GBK, before NUL):
+
+66 6f 72 d1 ad bb b7 d6 d0 cd ac ca b1 b3 f6 cf d6 b8 b4 ce bb b2 bf b7 d6
+ba cd c2 df bc ad b2 bf b7 d6
+
+Decoded GBK message:
+
+for循环中同时出现复位部分和逻辑部分
+
+Evidence authorities:
+- ev_8f101f9b2d643f53865518245673a2851837d98e45fab8793e73277b4505e60a
+  (complete FUN_1805874a0 pseudo-code)
+- Fresh read-only Ghidra extraction of FUN_180560070, call-site instructions,
+  and DAT_180ef5998 on 2026-11-11 from the same DLL digest.
+
+Boundaries:
+- Static evidence only; the vendor DLL was not executed.
+- Full frontend AST_BLOCK/AST_CASE source lowering, normalization of escaped or
+  selected identifiers, macro/generated locations, malformed-source behavior,
+  and global diagnostic order remain unresolved.

@@ -1,0 +1,28 @@
+===== Yosys::GJB10157_VLOG_5_1_4::vftable_meta_ptr @ 180eeb340 =====
+slot 0 (+0x0): 180ff7af8 <no function>
+slot 1 (+0x8): 180528fc0 FUN_180528fc0
+slot 2 (+0x10): 1807238a0 FUN_1807238a0
+slot 3 (+0x18): 180697020 FUN_180697020
+slot 4 (+0x20): 18003e7e0 FUN_18003e7e0
+slot 5 (+0x28): 18062d400 FUN_18062d400
+slot 6 (+0x30): 180528f70 FUN_180528f70
+slot 7 (+0x38): 3735313031424a47 <no function>
+slot 8 (+0x40): 2e352e474f4c565f <no function>
+slot 9 (+0x48): 00342e31 <no function>
+slot 10 (+0x50): d0d0bfc3e9d2a8bd <no function>
+slot 11 (+0x58): a1d0fdcafbb7d6d7 <no function>
+
+===== Yosys::GJB10157_VLOG_5_1_4::vftable @ 180eeb348 =====
+slot 0 (+0x0): 180528fc0 FUN_180528fc0
+slot 1 (+0x8): 1807238a0 FUN_1807238a0
+slot 2 (+0x10): 180697020 FUN_180697020
+slot 3 (+0x18): 18003e7e0 FUN_18003e7e0
+slot 4 (+0x20): 18062d400 FUN_18062d400
+slot 5 (+0x28): 180528f70 FUN_180528f70
+slot 6 (+0x30): 3735313031424a47 <no function>
+slot 7 (+0x38): 2e352e474f4c565f <no function>
+slot 8 (+0x40): 00342e31 <no function>
+slot 9 (+0x48): d0d0bfc3e9d2a8bd <no function>
+slot 10 (+0x50): a1d0fdcafbb7d6d7 <no function>
+slot 11 (+0x58): 0000dad3 <no function>
+

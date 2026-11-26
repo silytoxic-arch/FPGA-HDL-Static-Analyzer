@@ -1,0 +1,33 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Encoding: GB18030
+
+0x180ef5dc8 length 0x11
+bd fb d6 b9 b5 f7 d3 c3 b5 dd b9 e9 ba af ca fd 2e
+禁止调用递归函数.
+
+0x180ef5ddc length 4
+ba af ca fd
+函数
+
+0x180e8d694 length 1
+2f
+/
+
+0x180ef5de8 length 0x0c
+b4 e6 d4 da b5 dd b9 e9 b5 f7 d3 c3
+存在递归调用
+
+0x180eeaed4 length 2
+a1 a2
+、
+
+0x180ef5df8 length 0x0c
+d7 e9 b3 c9 b5 dd b9 e9 b5 f7 d3 c3
+组成递归调用
+
+The run strips the leading internal-name byte from group/function names before
+formatting. One-member path:
+  禁止调用递归函数.函数<module>/<function>存在递归调用
+Multi-member path:
+  禁止调用递归函数.函数<module>/<function>、...组成递归调用

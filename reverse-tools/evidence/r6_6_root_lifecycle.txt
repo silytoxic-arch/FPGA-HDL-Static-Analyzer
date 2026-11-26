@@ -1,0 +1,48 @@
+T-Linter GJB9765_VHDL_4_6_e root-lifecycle evidence
+=====================================================
+
+Target: /Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/T-Linter.dll
+Target SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Provider: Ghidra 12.1.4, read-only saved project, -noanalysis targeted decompilation
+Observed function: FUN_180605b20 at 0x180605b20
+Source transcript: reverse-tools/Library/ghidra/home/Library/ghidra/ghidra_12.1.4_PUBLIC/application.log, 2026-10-20 20:39:07 entry
+
+Focused decompiler observations
+--------------------------------
+
+The entry obtains the rule input-record container from object +0x78 and walks
+every record:
+
+    puVar3 = *(undefined8 **)(param_1 + 0x78);
+    puVar4 = (undefined8 *)*puVar3;
+    do {
+        if (puVar4 == puVar3) return;
+        ...
+        FUN_1801acf00(&plStack_180,puVar4 + 8);
+        lVar20 = *plStack_180;
+
+The copied vector's first pointer is the root passed to the recursive builder.
+Before that call, the entry clears the three global containers used by this
+rule (candidate operator records and the signed/unsigned name maps):
+
+    [clear tree at 0x1813596e0]
+    [clear tree at 0x1813596d0]
+    [clear tree at 0x181359848]
+    FUN_1806067a0(lVar20);
+
+There is no comparison of lVar20's AST type with AST_ARCHITECTURE before the
+builder call. Therefore the recovered lifetime is one isolated state set per
+input AST root, not one state set per source file and not architecture-only.
+This supports applying the already recovered FUN_1806067a0/FUN_180607060
+operator predicate to independent package specification and package-body roots
+while resetting declaration and operator state between roots.
+
+Boundary
+--------
+
+This evidence does not recover proprietary frontend lowering for every VHDL
+design unit, subtype/overload resolution, selected/indexed names, cross-file
+visibility, malformed trees, or diagnostic ordering/multiplicity. It supports
+root admission and state lifetime only; the operator mask and signed/unsigned
+predicate remain supported by the separate focused decompilation recorded in
+docs/evidence/native_vhdl_mixed_signedness_4_6_e_findings.md.

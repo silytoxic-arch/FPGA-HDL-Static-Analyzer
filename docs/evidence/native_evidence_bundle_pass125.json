@@ -1,0 +1,1007 @@
+{
+  "purpose": "Restore previously referenced static text evidence, byte-for-byte. Missing target headers remain explicitly unverified; content digest alone is not target provenance.",
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "files": [
+    {
+      "destination": "reverse-tools/evidence/a16_1/native_core_functions.txt",
+      "size": 17273,
+      "sha256": "7586a6687b654b8778aaa72f42b43e2835fbbe4c9d329012ccec2dd2efc52d9d",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a16_1/native_message_helpers.txt",
+      "size": 6707,
+      "sha256": "a246ecbac3c7a4f1fd766bc03efb81c4bc56efff8566735557bd1054414dd90c",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a16_1/native_name_helper.txt",
+      "size": 1090,
+      "sha256": "aefec5928e6b1bd5c9573b39c2feafcec0f68a548b37fc012be40f4bb4d0d07c",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a16_1/native_verilog_lexer.txt",
+      "size": 251443,
+      "sha256": "029139d1fdf4ecc25c9c1fc73841093407b2a6c12f48c5ce9e8b92244ed1554b",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/native_config_setter.txt",
+      "size": 1817,
+      "sha256": "bb61e19bc18045d8be7aa9aec5c9ffa59cba7f25db72ec572b1fbae5f8c11eef",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/native_constructor.txt",
+      "size": 743,
+      "sha256": "1ea8b05329e8f0b6a4c190643aab87958ae72454ceb8e9ebfeb5067169abd659",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/native_core_functions.txt",
+      "size": 9771,
+      "sha256": "5d370c021f0d1e4a7347369c82227cf7b7389caf6e231d72a340b02c7fee7fa7",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/native_line_conversion.txt",
+      "size": 2267,
+      "sha256": "1165c6d990db4de4398d4ff0b1e5174558df7625bc0692e3208b18c2515cefca",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/native_vtable.txt",
+      "size": 1144,
+      "sha256": "5067ad33c49e562024c41321e4949c5b88ee08783645bd8af77e534f0454142b",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/runcheck_config_block.txt",
+      "size": 5660,
+      "sha256": "e3082fe062c0e53b5d86f5579206620646a552327d095671cfb2913e0fccf795",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/runcheck_config_dispatch.txt",
+      "size": 564330,
+      "sha256": "cf212add5b88c0c40739c4f8c7b0374bccfcfd9106b88b5c77be311218383afc",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_4/runcheck_metadata_block.txt",
+      "size": 3319,
+      "sha256": "ba42bd7f2f10f0fde07cc738601aa66a8230eae8db9e4598a80cca18287bb9c5",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_5/native_constructor_reference.txt",
+      "size": 236,
+      "sha256": "85d592612ec732bf14d4013f25d6a35d87b6276f923e9a2bb18c78b32d508aa9",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_5/native_core_functions.txt",
+      "size": 27719,
+      "sha256": "b03b86f4d4431fecafac866587718b6a1a33b684eb83c06518a742532dd2a689",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_5/native_relation_and_record_helpers.txt",
+      "size": 7813,
+      "sha256": "24e1fd46e481203d9ec49f011d080924ad51a98698cba2134c71a86443053c95",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_5/native_vtable_and_message.txt",
+      "size": 520,
+      "sha256": "d8bdfe75e16c9d92ab72e068264b8cd1bffa00950624123d0ab9613e74b77bbd",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_7/native_core_functions.txt",
+      "size": 24279,
+      "sha256": "c028eea8d768e5022fded40efec85333402541bd5f6f171c5cb1959104e6e101",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_7/native_record_producers.txt",
+      "size": 29045,
+      "sha256": "77a232df5e7ec95614c342cac42c89f87e740b8a7aef658099572ece0d8825cf",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r14_2/native_core_functions.txt",
+      "size": 81597,
+      "sha256": "66499b5a41301d3e527d7c615bcce6dec8ab88e96494c10d86ff9729fd2e18d9",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r14_2/native_helpers.txt",
+      "size": 21051,
+      "sha256": "490e079b05cad5eaabbd0f0d2a2b793ea92f559e63fdd4c617287d4104cc5478",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r14_2/native_strings.txt",
+      "size": 3876,
+      "sha256": "2e972bcfcb706c96b5a1d5162dc3fb286a3a23e1fdc8d731bda7a098fe268622",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r16_2/native_core_functions.txt",
+      "size": 45590,
+      "sha256": "2a4f31704758db7f2e03f8278053feb8636f7a69815bef29ab5f57faa87811b2",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r16_2/native_regex_helpers.txt",
+      "size": 2881,
+      "sha256": "4788fdd1614475c66ae0342c4ef233c01beaefa630b8bd94b2cda00098597371",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass59/r2_8_decompile.txt",
+      "size": 40837,
+      "sha256": "69043729aff26e9014db4c404350c59d76f268034d5847e093012eacc8e995c8",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass59/r2_8_strings.txt",
+      "size": 1844,
+      "sha256": "dfcf576d9979f8773c1fa54743e0d8b18e7f6ff974a0ab5c9e0acbace72220c9",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass60/r2_10_decompile.txt",
+      "size": 17474,
+      "sha256": "1c7e44df6c35e5268306f6f0c79bafdfd70ca13ad875c8b25cbbdc0dbe530269",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass60/r2_10_strings.txt",
+      "size": 446,
+      "sha256": "2639109b3787df329683c75d62ea975d373a8b6123b43fd9c07d258c0f6a282e",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass61/r2_3_decompile.txt",
+      "size": 56581,
+      "sha256": "dab46701b0cda3bbeda3430c019f545b8bf193de8d4fa908ef0f43bdaae82c52",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass61/r2_3_strings.txt",
+      "size": 1052,
+      "sha256": "64a44e3ebbb6aaa0fb8d0a0e8cda46c51387e6926bf31f3e7c4947b9da7ae7e4",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a12_1/native_entry_functions.txt",
+      "size": 17343,
+      "sha256": "07e3da2618c7ee51e6ad595049fc5543d3846224ea1b4dd018b6e243ae837ce9",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a12_1/native_strings.txt",
+      "size": 924,
+      "sha256": "99d0c8a2854b8d50fe695e5234004a01407fa8d609632f5187ad4d552084b124",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a13_1/native_entry_functions.txt",
+      "size": 15687,
+      "sha256": "bf5103669f5d76eb9851178754348480fcdc164ebec7bdb40e8e433bf1ad7b5f",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a13_1/native_strings.txt",
+      "size": 4281,
+      "sha256": "23202097e1ebaae56909755ec1742bd274a339dfdf7306f3ee7788f45a96355b",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_8/native_alt_map_insertions.txt",
+      "size": 2305,
+      "sha256": "54bbeaeda66014aa2a1fd18b481f7d964858f650da8c47dd76912c64229d7caf",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_8/native_core_functions.txt",
+      "size": 24318,
+      "sha256": "588f036c2fe5555b1fec0f855a3f8aef7bafa482a7e9c3f3b860a0d7437f1bec",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_8/native_driver_functions.txt",
+      "size": 47290,
+      "sha256": "17eb69f2367669ec525447e2576ce0afe2da4b3ab324731c86f17b5c4e64900e",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_8/native_map_binding.txt",
+      "size": 6918,
+      "sha256": "fb8979084bf203022ba6ecf82582cecd1d8afb7f15ea3a5e626d35326596c904",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_8/native_map_insertions.txt",
+      "size": 15087,
+      "sha256": "53df8ffbb6f5c3c5cd27c66e1104b260ec9dff07452a882fa194777c8f05e77e",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_8/native_rule_prepare.txt",
+      "size": 7654,
+      "sha256": "007872bebb172b33c6e7de6e56bf6037d9e51395bb95b1dc05be272ea79cb222",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a1_8/native_run_dispatch.txt",
+      "size": 4374,
+      "sha256": "ffea803a61033334a7e5a73bf6446cdf2c44a8fa2c09ad3c35b58eca417c0548",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_1_module_filename_entry.txt",
+      "size": 17311,
+      "sha256": "acdbd8c29f949b76698e476dfa9a21d7f6dc1b5bddb37c37ccf442fe946ade39",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_1_module_filename_helpers.txt",
+      "size": 6302,
+      "sha256": "449c346932d302902c95fccd8fa1a2276347b8c18d734583cb43933f94bdeff7",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_1_module_filename_strings.txt",
+      "size": 4984,
+      "sha256": "98f9cf4199a397c9dbe9a0c432016d646bbf5fbce9bd9a26e41994676e45cc5d",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_2_name_length_entry.txt",
+      "size": 13870,
+      "sha256": "7e2ee731f5c8c2757a42434c68e98e5e9f6909c55336bc99d55eaa27336cfe41",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_2_name_length_helpers.txt",
+      "size": 3997,
+      "sha256": "8ab3c5344a53cfb3bc4a052a5452408c3d77a6225380e9469533ae26b892217f",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_2_name_length_strings.txt",
+      "size": 3370,
+      "sha256": "925ac6f3c2f0725ba574a23a54750c8b7f5da423247a4e3f309a5655586748a7",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_2_name_length_xrefs.txt",
+      "size": 1213,
+      "sha256": "ff3cacad872f34946ee34e5ee300ae7ba2bcf6bf6e7bd4285651d364aa11b9ee",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_2_runcheck_config_dispatch.txt",
+      "size": 721845,
+      "sha256": "aeb1c9e12f7d0385da200019983697f7c35c7609e33f9e48d698a0d685b03ade",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_3_clock_name_entry.txt",
+      "size": 23442,
+      "sha256": "0961f483c7fde5d0a448b53bbdb7b72a6d5ff80cd168e6612e3e42aed56cb2c5",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_3_clock_name_helpers.txt",
+      "size": 11879,
+      "sha256": "a202ef1e1abc859fff5498becdc5b5c1765d24ec7a8276cb593b5b3645b6528b",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_3_clock_name_strings.txt",
+      "size": 4332,
+      "sha256": "84d9e2cbab9041dc26fafa6c00d252da4889272062322b274dd2cb5c2723ed08",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_4_reset_name_entry.txt",
+      "size": 22987,
+      "sha256": "0b6d25cebaa24c8acb9cca801810444f506e29c0a6b0ca748ef8145c5a816e47",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_4_reset_name_strings.txt",
+      "size": 10315,
+      "sha256": "8244c1ab2f21468bf94d55e3a2510b83c6f771cf965b1c98f176da931b3e0dbe",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_5_naming_case_entry.txt",
+      "size": 22924,
+      "sha256": "13a1afd1f7ffad5be0c2a08657d7e67a149cc0ddef9b861841aa76deafb598f4",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_5_naming_case_message_helper.txt",
+      "size": 1212,
+      "sha256": "eb01263358076bdb17416583d939fc53efb9708e4755f603ea0cf1bc96a1bcb1",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_5_naming_case_strings.txt",
+      "size": 2883,
+      "sha256": "d82ef023972b6158488bcf768dc27f98ba8641ba97e63b27220068c9e23f06f2",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_6_defparam_entry.txt",
+      "size": 9379,
+      "sha256": "88a7e65c08c7abb8461d656c7f88e3ccf744e118bafe623fd7aba280d03c673a",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_7_parameter_reuse_entry.txt",
+      "size": 14154,
+      "sha256": "fb5bfc569f9703ca25251c6386c17b3dbcf2307119671a0d162ff777696c91d2",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_7_parameter_reuse_helpers.txt",
+      "size": 5841,
+      "sha256": "812e4f93ccc8b755a2d38ac99c32d4cbdacfc3486e9454b1f2a6b095831bf4ff",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_7_parameter_reuse_strings.txt",
+      "size": 3299,
+      "sha256": "f22d16f9f35e8f666965c642fe9a4791d2a2d5079571541a1a44cfb4953f41c7",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_8_constructor_messages.txt",
+      "size": 1405,
+      "sha256": "fa1eef89c15952c6aa0e04b88d9723390a72e625128f90fd0cb24a111cb27371",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a2_8_relation_helpers.txt",
+      "size": 10788,
+      "sha256": "df196c3f66ff49361d5bd08aa861f703c29b4cecedc0bb40ffdb71efb2ef4058",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_ast_enum_mapper.txt",
+      "size": 12503,
+      "sha256": "78d56f0b3146c837c180974a5279ef43a718bc17c2507e45d1e7597d8b9bd7b0",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_category2_admission_and_layout.txt",
+      "size": 18922,
+      "sha256": "0da5ff5ef5b14872f54587a2e44c158cc0454611e05a3594d425765cd34951bc",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_condition_helpers.txt",
+      "size": 15084,
+      "sha256": "24e8f30ecb4fc06aaec6f57f2092eb4c794dd51f46c75ff6be77e885147d8e90",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_condition_relation_and_if_lowering.txt",
+      "size": 26271,
+      "sha256": "c28ee14e9a5e0bd25937a47498b7838194e1db24a06d00976350d268f70d91b1",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_entry_full.txt",
+      "size": 34289,
+      "sha256": "35864579d2c94d27fa77759e8378cddb0524eb9f00b455bdadbeef4dc0a400dc",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_named_constant_producer_and_lookup.txt",
+      "size": 41167,
+      "sha256": "de02e8895b2c10e81fa31a3c8d9f03991a8156faf39c9282b68cb1b359f6da54",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_relation_classifiers.txt",
+      "size": 28648,
+      "sha256": "fe947c42cfa888e3b8e93c1cf62117091633e2ed145964ca41105882602147b2",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_29_relation_producer.txt",
+      "size": 6195,
+      "sha256": "c890837fabf89d09f358ab6ac32d3415be028e7ed92daf559bb71c32aa582216",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_30_entry.txt",
+      "size": 21347,
+      "sha256": "b6522272ce08624f0bed60593b08d85c79c1365a5ca540a5ef14726aaaa02b78",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_base_constructor.txt",
+      "size": 2503,
+      "sha256": "27f5af813dedcdf6183a432c91e36b332e6760eb2daabf9ddce3d78ece252ce2",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_client_configuration.md",
+      "size": 2435,
+      "sha256": "c209ec8402416f8408abcd1bafa558d4595db1bf838db2201ae725e368eddddb",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_constructor_config_setter.txt",
+      "size": 4484,
+      "sha256": "c69c8ea6a065889c0b00c729fb6199e41985fa3c18ba49875f3a283dffcda195",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_entry.txt",
+      "size": 36189,
+      "sha256": "e53565bafac39f24eba2a83ed9ea4bcc16ede0983997ad811be0be553d45ced8",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_graph_container_helpers.txt",
+      "size": 5074,
+      "sha256": "0932dd62921111f1e121469c5d7cd3be341d44957f8d62edf3eaed20e6f20765",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_graph_helpers.txt",
+      "size": 14344,
+      "sha256": "ed6ef91052bd9730a2845330a7e732515d8c85ede25def55e44089886130d66a",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_graph_insert_disassembly.txt",
+      "size": 1988,
+      "sha256": "bd9900a644f69139ac4946e028ac71061a9dcbb424284790f8c1a60de8e640cd",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_per_design_root_scope.txt",
+      "size": 3012,
+      "sha256": "78c5566febd23b4e26ca896b07f16c3d3639df2d6d51ef5c4dc9d1676e1d9d79",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_31_root_port_architecture_collector.txt",
+      "size": 2786,
+      "sha256": "b93fab8ab2b02b0830c806f64ed0cef59ea0effe4c4d12d499d28b3eef9b67fc",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_32_bound_root_project_resolution.txt",
+      "size": 2801,
+      "sha256": "c3c12da777faaf2d7e1d7c9eab5d269d3c292ccb97535343f787cb4c840a160f",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/a5_32_entry_connection_builder.txt",
+      "size": 61010,
+      "sha256": "6c6fdeb30c6ff9a139033adb061cdafca36a12eac883c082e31cc724b4a51c03",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r12_1_for_constant_attributes.txt",
+      "size": 3602,
+      "sha256": "3fa8e1135ca6c32ea0130b8b0bdb4a0477b0f52f4d7b7e506e031629353ab35a",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r12_2_for_body_runtime_arithmetic.txt",
+      "size": 2723,
+      "sha256": "1b3a71a8621b5f8a0a6d13180ee71b121aabae5a7a0c48deb26f92b6c844df53",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r12_3_for_reset_logic.txt",
+      "size": 3569,
+      "sha256": "ccceaebac0503dbca1fade07f6377316e21d4a22f264d51d9995e109aae927b9",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r12_4_is_count_zero_producer.txt",
+      "size": 1642,
+      "sha256": "58c6a1ca066ba8fc021dc82bae6ff1b0b3ec5051cde02d6c9458f03d1cfb5314",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r12_5_function_recursion_core.txt",
+      "size": 2281,
+      "sha256": "8e068ba7e6107c55a87bcc31ccd9df561666624d88fb0b42dd4880834e298c44",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r12_5_function_recursion_strings.txt",
+      "size": 750,
+      "sha256": "267451a0faac764ec252b3ff4719eee7af5b54562ec4d89d806d26cdb9548396",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_1_ast_always_reachability.txt",
+      "size": 2784,
+      "sha256": "b73656da07ad394f5092de27eff1c22e493c0d01e6ce2f8700b76ab817e7dd16",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_5/native_entry_functions.txt",
+      "size": 21582,
+      "sha256": "91e84ea74fa67a2db98a6e06ea4855033992bb0067c1af654cadd10bb45e6dbe",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_5/native_strings.txt",
+      "size": 1821,
+      "sha256": "c3661e9d298c2370270f85a515d2419739fccb00ecc72a09115ad6af1677c521",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_6_producers/para_assign_block.txt",
+      "size": 2512,
+      "sha256": "720187873886561c5c242eb1d968c91c5541dd8a7793b76030984233784178b8",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_6_producers/para_assign_instructions.txt",
+      "size": 6189,
+      "sha256": "447ba1990911433051f820536526641f44806bead2ec33318100b002cbfacebe",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_6_producers/string_references.txt",
+      "size": 531223,
+      "sha256": "50415a0c3092cfd65a04b3715f5dba59a043d1dab3715ed5ea3db209773986df",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_7/native_entry_functions.txt",
+      "size": 28357,
+      "sha256": "961277c81b4139320aced1e94d63dbcd206a79671b14ab304b5b52da0b50513e",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_7/native_helpers.txt",
+      "size": 50792,
+      "sha256": "18f77335688b198f5563a7d7bc02a9bd259f768d9ed9cc26549e059b92532def",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_8/native_entry_functions.txt",
+      "size": 54729,
+      "sha256": "83697aa455e1b43f00f954ccbe0ea040725728f561276e4af0bfb144c0b1bb49",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_9/relation_initializers.txt",
+      "size": 8062,
+      "sha256": "3607ef112d0a93422a43719c5bf5129763d8ad9e71ec2cba192b131cc232777c",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_9/relation_strings.txt",
+      "size": 6048,
+      "sha256": "78d237ffbad6982ec088db39e1e1b1f7e4322891afd54cd1d06495ad211ae685",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_9/relation_virtual_methods.txt",
+      "size": 49335,
+      "sha256": "c31cb523b2f28eac5b87fa288a2c38d476d97849dc9ccd40b1f49e7b09ba00e3",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r13_9/relation_vtables.txt",
+      "size": 3285,
+      "sha256": "358fcc493dd04d9cd187ab6a0a32f64b2365fed8475f72b2f649ff486bfb9076",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r14_1/native_core_functions.txt",
+      "size": 90612,
+      "sha256": "6d0d4e8759c1c9ea007a7c83ce6c8134c08519169889bd7e21758033c50c6731",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r14_1/native_strings.txt",
+      "size": 6691,
+      "sha256": "e84afd6420f305449df8d9600cda0971c4afd921c0b4a26e8d641e85a3983d86",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r16_1/native_entry_functions.txt",
+      "size": 14222,
+      "sha256": "fb9e6568d346e4719192273860bb1ad9ce13069f7866c8ba63698f404196c691",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r16_1/native_strings.txt",
+      "size": 3496,
+      "sha256": "395d4d3e945fe77316c44d13c291105df70dc85cf96bc773c6c0bbd281327c93",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r2_7_include_decompile.txt",
+      "size": 12055,
+      "sha256": "502e6ea84b7b7fa49a332e1a35022be4a81750eca55f3a1f830a1ca997053be6",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r2_7_include_message.txt",
+      "size": 970,
+      "sha256": "2135a254c5e90fbc7364abb5cf60c4f63f3084fa2413cc0290b3cfc1f7e6f96d",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/r6_1_hierarchy_direction_records.txt",
+      "size": 2897,
+      "sha256": "ceaa55b9a01a07369325507153b1c95dba73af3638034da6297a5c268d090692",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r6_2_constant_evaluator.c",
+      "size": 2942,
+      "sha256": "4bc000795b51fc2a0ab9807e01c1216970a50277bcbae41835a5fb3efd3b6181",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r6_2_width_entry_collector_resolver.c",
+      "size": 74595,
+      "sha256": "a7f1be023c877cc9906fbdd9a7eb6f96bb894321b3c10975f7702fea5985537f",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r6_6_root_lifecycle.txt",
+      "size": 2216,
+      "sha256": "630e82c68fbfc85495b7577261b846142ff90226b855ec591dde6436362011e0",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/r6_7_tristate_pair_exemption.txt",
+      "size": 3239,
+      "sha256": "db44512812349b41dde41c8e66fac0d8eb9872897f71f7879d775f4e81ffc764",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/18027f050.c",
+      "size": 1943,
+      "sha256": "8bee127b9cdda8dea0b644effee2a21d2e4def0a79a0cb746a97201bf4828147",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/1802873a0.c",
+      "size": 1073,
+      "sha256": "12ea64b83869f35dfd3cbe1702716795f7e8a80570e817d1a99b7844179c6967",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/180557340.c",
+      "size": 12759,
+      "sha256": "d714b6337f385dede38ed2b4aa7e3bdf2ddd8281b1f65d2693a981c6a4d9dd96",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/field_183_all.txt",
+      "size": 3645,
+      "sha256": "1f101ca6079ed8156dfd39a801f16de2b5a22be9db6d48894c9ca982ad9552a2",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/field_183_writers_and_metadata.c",
+      "size": 40834,
+      "sha256": "f83b1a90df4df99fdf7241cda6f59af8a212f5f067340bf57d6a4044d25838e5",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/field_184_all.txt",
+      "size": 3740,
+      "sha256": "ed3bdf3d65ecdf3155b8c2c025334bf95615e1819ff6a29e8e866a17db3b71ef",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/field_184_writers.c",
+      "size": 32465,
+      "sha256": "cdd861f7358b36ec3ea441586eaef3fd95b47977e178db2a3f40ca8ee2cc7b8e",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/verilog_9_4_2_field_2a9_findings.txt",
+      "size": 1581,
+      "sha256": "22fe1eefd38d072d99d99657d6737a66d3deb36eba27b119cda951b87255e3d2",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/verilog_9_4_3_function_nonblocking_findings.txt",
+      "size": 1520,
+      "sha256": "a7f8a53e2293a56c9a98e2334b5fb377ebe181cce539498929ab9a0600b36416",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/vhdl_4_8_c_entry_and_collector.c",
+      "size": 15517,
+      "sha256": "94e07b44bb10161eb32b5eebd6d5ea8ff7296ccbaa4634d5bd6012d8d49fff38",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/vhdl_4_8_d_entry_traversal_and_if.c",
+      "size": 32436,
+      "sha256": "c41b6c032dcd6ca0b1ecabc7a0ebd2320ba39f6db3ac3dfca663c19ba3223d9b",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_entry.c",
+      "size": 9865,
+      "sha256": "cc7d198c1dfae47b702e9d056afb482b9371971bb58e4e1e4258b405b4b98ece",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers.c",
+      "size": 3187,
+      "sha256": "3f15f5cd445834aacef093eb3be4d18986a5d57a4ae6a87122c2613cac0c268d",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers2.c",
+      "size": 4624,
+      "sha256": "45a44f1c43fecd33476317bcbe43c38aaf8339376dff4226f22c63202d783dbc",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/expression_width_helper.txt",
+      "size": 37994,
+      "sha256": "4b850c727e8431eb5d085f5a149cd98ca3d56b8186d23acfac41e516f9b9d9bf",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_5_1_3_helpers.txt",
+      "size": 9741,
+      "sha256": "a044164334379582da9d13b152bf8f8429fb847e0dbd36e51a578956e022f1b7",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_1_asm.txt",
+      "size": 35588,
+      "sha256": "f3b95afe2db87086fd08d518e224b93b0a202891ea8669f5cce747b6d9d82f5f",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_1_flag_zero.md",
+      "size": 1885,
+      "sha256": "8c8673cbbc100a494b5c9e8b4940b0050ef213a309fc022ac725cbec444d5230",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_2_flag_zero.md",
+      "size": 1506,
+      "sha256": "2849a8f5f0e558bd40108c7e184634f7f1db8ab05cd25ae36affcbb4c6a57a30",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_3_recursive_identifiers.md",
+      "size": 1505,
+      "sha256": "2f724d237fdb60dd82fef7efb0e6d1203962cc1a8e0d43170e4522e091a31a76",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_7_add_sub_concat.md",
+      "size": 2893,
+      "sha256": "4d1d4bcecc2f49e7e1669b86b5d4fe55d9419b15356438955ad78c5ae5141c71",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_7_core.txt",
+      "size": 54086,
+      "sha256": "c60a4c32ee3db0990c76bd5477e99da9135191fb9c0c084e2a6ca11620ae4af2",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_7_nested_width.md",
+      "size": 2784,
+      "sha256": "a01338e7e42911cb1b2ec1b34380427aeda20c436a5a0c9c7bd968ee3c1bd0c8",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_7_pow_constants.md",
+      "size": 827,
+      "sha256": "f6b76646679bb392f5e7eec055c4e99697f64292bd0a9d29703355cd7e200621",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_8_asm.txt",
+      "size": 17168,
+      "sha256": "cca10df50b8c598577d06c78cf730204918fd217b18be394bb838cb5d9928d9e",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass4/gjb10157_8_8_flag_zero.md",
+      "size": 1428,
+      "sha256": "756a9c1e6e5f624aac693861023cf053bb56105ea35416bf807151b44b91f783",
+      "claimedSha256Matched": null,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass57/r2_5_decompile.txt",
+      "size": 21865,
+      "sha256": "7ffca2822f59e62b87ecb465b91a6990b71a4b8b73d19d28eee826da1d6b20dd",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass57/r2_5_strings.txt",
+      "size": 3363,
+      "sha256": "6786d878317c1dee2a28401381826dba0c17926c9cd88eb81e8126579f3d4b70",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass58/r2_6_decompile.txt",
+      "size": 27735,
+      "sha256": "141615a5c0ea6934247a60df32ebaa31a10330dd8971cbc0e3f081d719da624e",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass58/r2_6_helpers.txt",
+      "size": 1929,
+      "sha256": "5072a6e9d06a3943aa8b1e66ed1a092ad17e0db86e2b1f4a8781524a611cf5d4",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": false
+    },
+    {
+      "destination": "reverse-tools/evidence/t_linter_pass58/r2_6_strings.txt",
+      "size": 572,
+      "sha256": "3955939dadd802c2bcff3da309a867d12ba4c033311fc4bab015fac94d491f61",
+      "claimedSha256Matched": true,
+      "targetHeaderMatched": true
+    }
+  ]
+}

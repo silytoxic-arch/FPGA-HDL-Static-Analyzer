@@ -1,0 +1,29 @@
+Target: T-Linter.dll
+
+=== 0x180020d00 FUN_180020d00 ===
+completed=true; error=
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void FUN_180020d00(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4)
+
+{
+  undefined1 local_res8 [8];
+  undefined1 *local_res10;
+  undefined1 local_30 [16];
+  undefined8 local_20;
+  undefined8 local_18;
+  
+  local_res10 = local_30;
+  FUN_180a38770(local_30,local_res8,param_3,param_4,0xfffffffffffffffe);
+  local_18 = 0xf;
+  local_20 = 0;
+  local_30[0] = 0;
+  FUN_180040680(local_30,"GJB10157_VLOG.5.1.4",0x13);
+  FUN_18062a230(&DAT_1813494e0,local_30,8);
+  _DAT_1813494e0 = Yosys::GJB10157_VLOG_5_1_4::vftable;
+  atexit(FUN_180db5f60);
+  return;
+}
+
+

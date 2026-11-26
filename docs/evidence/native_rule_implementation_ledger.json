@@ -616,9 +616,9 @@
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
       "predicate": "Native FUN_180509910 recognizes an FSM and dispatches FUN_180506fa0. FUN_18050af80 maps case labels to assignment RHS values; FUN_18050aa20 admits simple constant/identifier RHS values and the two simple result arms of a ternary. FUN_18050a420 builds assignment dependencies, and FUN_180506fa0 removes RHS identifiers that remain assigned intermediates. The reporter looks up exact key default and emits one Warning only when that existing entry has an empty filtered set. Missing default does not report, and there is no per-register set difference or separate X/Z/? predicate. Product implements that bounded relation for source-proved one- or two-process FSMs.",
       "predicateEvidence": [
-        "../reverse-tools/evidence/r14_2/native_core_functions.txt",
-        "../reverse-tools/evidence/r14_2/native_helpers.txt",
-        "../reverse-tools/evidence/r14_2/native_strings.txt",
+        "reverse-tools/evidence/r14_2/native_core_functions.txt",
+        "reverse-tools/evidence/r14_2/native_helpers.txt",
+        "reverse-tools/evidence/r14_2/native_strings.txt",
         "docs/evidence/native_verilog_fsm_default_reset_10_2_findings.md#原生证据"
       ],
       "entryObservation": null,
@@ -885,8 +885,8 @@
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
       "predicate": "Native slot 0 FUN_1805215d0 builds driver/user relations and calls FUN_180524530 for each candidate wire. FUN_180524530 excludes exact fsm_encoding=\"none\" and width <= 1, then follows the Yosys-style FF/MUX/state-use recognizer before calling FUN_180522090. FUN_180522090 accepts a case-sensitive fsm_encoding value containing lowercase \"safe\" or a source-associated comment matching one of two case-insensitive embedded regexes for synthesis syn_encoding=\"...safe...\" and synthesis fsm_safe_state=\"...state...\". Otherwise it emits Warning with exact GB18030 diagnostic \"状态机未设置为safe模式\" and no appended state name. Product applies that predicate to a source-proved one-process or direct two-process FSM with a unique width-proved declaration.",
       "predicateEvidence": [
-        "../reverse-tools/evidence/r16_2/native_core_functions.txt",
-        "../reverse-tools/evidence/r16_2/native_regex_helpers.txt",
+        "reverse-tools/evidence/r16_2/native_core_functions.txt",
+        "reverse-tools/evidence/r16_2/native_regex_helpers.txt",
         "docs/evidence/native_verilog_fsm_safe_mode_12_2_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -980,10 +980,10 @@
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
       "predicate": "Native slot 1 FUN_1806ef640 admits only AST_CASE (type 0x57). Slot 0 FUN_1806eeba0 iterates each admitted case node attribute map, resolves each interned attribute name, and emits once for the exact ten-byte key \\full_case. The recovered Verilog lexer action returns TOK_SYNOPSYS_FULL_CASE for its legacy full_case hot-comment branch, and the packaged example proves attachment from //synopsys full_case. The reporter emits Warning and constructs Synopsys full case用于模块<case-node-name-with-leading-colons-trimmed>第<line>行. Product parses exact attached attribute keys across consecutive blocks and the bounded Synopsys/Yosys comment form after the case selector.",
       "predicateEvidence": [
-        "../reverse-tools/evidence/a16_1/native_core_functions.txt",
-        "../reverse-tools/evidence/a16_1/native_message_helpers.txt",
-        "../reverse-tools/evidence/a16_1/native_name_helper.txt",
-        "../reverse-tools/evidence/a16_1/native_verilog_lexer.txt",
+        "reverse-tools/evidence/a16_1/native_core_functions.txt",
+        "reverse-tools/evidence/a16_1/native_message_helpers.txt",
+        "reverse-tools/evidence/a16_1/native_name_helper.txt",
+        "reverse-tools/evidence/a16_1/native_verilog_lexer.txt",
         "docs/evidence/native_verilog_full_case_12_3_findings.md#recovered-predicate"
       ],
       "entryObservation": null,
@@ -1346,14 +1346,14 @@
       "predicateEvidence": [
         "ev_2436427369f32440ad6e1ae1dbadeffc0db7e58ea7a93c45b4df49db11ec02a8",
         "ev_630d95ea5bfb21f6bf8afbde4450ed38ec1652fdb24df59cb1258a1475b7e48e",
-        "../reverse-tools/evidence/a1_4/native_constructor.txt#sha256=1ea8b05329e8f0b6a4c190643aab87958ae72454ceb8e9ebfeb5067169abd659",
-        "../reverse-tools/evidence/a1_4/native_vtable.txt#sha256=5067ad33c49e562024c41321e4949c5b88ee08783645bd8af77e534f0454142b",
-        "../reverse-tools/evidence/a1_4/native_core_functions.txt#sha256=5d370c021f0d1e4a7347369c82227cf7b7389caf6e231d72a340b02c7fee7fa7",
-        "../reverse-tools/evidence/a1_4/native_config_setter.txt#sha256=bb61e19bc18045d8be7aa9aec5c9ffa59cba7f25db72ec572b1fbae5f8c11eef",
-        "../reverse-tools/evidence/a1_4/native_line_conversion.txt#sha256=1165c6d990db4de4398d4ff0b1e5174558df7625bc0692e3208b18c2515cefca",
-        "../reverse-tools/evidence/a1_4/runcheck_config_block.txt#sha256=e3082fe062c0e53b5d86f5579206620646a552327d095671cfb2913e0fccf795",
-        "../reverse-tools/evidence/a1_4/runcheck_config_dispatch.txt#sha256=cf212add5b88c0c40739c4f8c7b0374bccfcfd9106b88b5c77be311218383afc",
-        "../reverse-tools/evidence/a1_4/runcheck_metadata_block.txt#sha256=ba42bd7f2f10f0fde07cc738601aa66a8230eae8db9e4598a80cca18287bb9c5",
+        "reverse-tools/evidence/a1_4/native_constructor.txt#sha256=1ea8b05329e8f0b6a4c190643aab87958ae72454ceb8e9ebfeb5067169abd659",
+        "reverse-tools/evidence/a1_4/native_vtable.txt#sha256=5067ad33c49e562024c41321e4949c5b88ee08783645bd8af77e534f0454142b",
+        "reverse-tools/evidence/a1_4/native_core_functions.txt#sha256=5d370c021f0d1e4a7347369c82227cf7b7389caf6e231d72a340b02c7fee7fa7",
+        "reverse-tools/evidence/a1_4/native_config_setter.txt#sha256=bb61e19bc18045d8be7aa9aec5c9ffa59cba7f25db72ec572b1fbae5f8c11eef",
+        "reverse-tools/evidence/a1_4/native_line_conversion.txt#sha256=1165c6d990db4de4398d4ff0b1e5174558df7625bc0692e3208b18c2515cefca",
+        "reverse-tools/evidence/a1_4/runcheck_config_block.txt#sha256=e3082fe062c0e53b5d86f5579206620646a552327d095671cfb2913e0fccf795",
+        "reverse-tools/evidence/a1_4/runcheck_config_dispatch.txt#sha256=cf212add5b88c0c40739c4f8c7b0374bccfcfd9106b88b5c77be311218383afc",
+        "reverse-tools/evidence/a1_4/runcheck_metadata_block.txt#sha256=ba42bd7f2f10f0fde07cc738601aa66a8230eae8db9e4598a80cca18287bb9c5",
         "docs/evidence/native_verilog_line_length_5_1_4_findings.md#恢复判据"
       ],
       "entryObservation": null,
@@ -1430,10 +1430,10 @@
       "predicate": "Constructor FUN_180020d90 registers GJB10157_VLOG.5.1.5 and installs a vtable whose active slot 0 is FUN_180529870 and slot 1 admits AST_MODULE(2). The run recursively gathers AST_WIRE(6), partitions +0xa0/+0xa1 into input(1/0), output(0/1), inout(1/1), and stores normalized name plus physical line in each 0x28-byte actual record. FUN_1804dedf0 admits relation categories 2/3, independently established as clocks by the adjacent clock-name rule; FUN_1804dee00 admits categories 0/1, corresponding to resets. Clock names are collected before reset names. Only special names present in the input list are retained, followed by unique remaining inputs, outputs and inouts. FUN_180529750 performs exact case-sensitive membership. Duplicate actual names reduce the unique expected count, so unequal vector sizes skip the module. When sizes match, FUN_1800dc750 compares names positionally; the first mismatch emits lowercase error at the actual record physical line, with no recovered column, then breaks. Exact GB18030 text is 端口列表应按照“时钟、复位、输入、输出、双向端口”的顺序描述. Product mirrors this bounded semantic ordering, duplicate-name skip, fixed diagnostic and one-per-module behavior.",
       "predicateEvidence": [
         "ev_6cde339ab2d772dc3b93eb81c829506ac5a663f60a609e9aa78a6cbd14a23f94",
-        "../reverse-tools/evidence/a1_5/native_constructor_reference.txt#sha256=85d592612ec732bf14d4013f25d6a35d87b6276f923e9a2bb18c78b32d508aa9",
-        "../reverse-tools/evidence/a1_5/native_core_functions.txt#sha256=b03b86f4d4431fecafac866587718b6a1a33b684eb83c06518a742532dd2a689",
-        "../reverse-tools/evidence/a1_5/native_relation_and_record_helpers.txt#sha256=24e1fd46e481203d9ec49f011d080924ad51a98698cba2134c71a86443053c95",
-        "../reverse-tools/evidence/a1_5/native_vtable_and_message.txt#sha256=d8bdfe75e16c9d92ab72e068264b8cd1bffa00950624123d0ab9613e74b77bbd",
+        "reverse-tools/evidence/a1_5/native_constructor_reference.txt#sha256=85d592612ec732bf14d4013f25d6a35d87b6276f923e9a2bb18c78b32d508aa9",
+        "reverse-tools/evidence/a1_5/native_core_functions.txt#sha256=b03b86f4d4431fecafac866587718b6a1a33b684eb83c06518a742532dd2a689",
+        "reverse-tools/evidence/a1_5/native_relation_and_record_helpers.txt#sha256=24e1fd46e481203d9ec49f011d080924ad51a98698cba2134c71a86443053c95",
+        "reverse-tools/evidence/a1_5/native_vtable_and_message.txt#sha256=d8bdfe75e16c9d92ab72e068264b8cd1bffa00950624123d0ab9613e74b77bbd",
         "docs/evidence/native_verilog_port_order_5_1_5_findings.md#恢复判据"
       ],
       "entryObservation": null,
@@ -1653,8 +1653,8 @@
       "predicate": "Constructor FUN_180020f40 installs vtable 0x180eeb778, selecting slot 0 FUN_18052ae80 rather than alternate FUN_18074b080. Producers FUN_180134f60, FUN_1801349e0 and FUN_180135fc0 append fixed-size 0xb8 records tagged inputport, inoutport and outputport to one global array, including the source line, port name and source-file string. The active entry iterates every ordered i<j pair, requires both source-file strings to equal the current file and reports the later record exactly when their physical line fields are equal. It uses Warning and the fixed GB18030 message 一行中存在多个端口声明. Product parses conditionally active module ports, groups across the whole source file, and preserves the pair multiplicity N*(N-1)/2 for N ports on one line.",
       "predicateEvidence": [
         "docs/evidence/native_verilog_port_line_5_1_7_findings.md#恢复判据",
-        "../reverse-tools/evidence/a1_7/native_core_functions.txt#sha256=c028eea8d768e5022fded40efec85333402541bd5f6f171c5cb1959104e6e101",
-        "../reverse-tools/evidence/a1_7/native_record_producers.txt#sha256=77a232df5e7ec95614c342cac42c89f87e740b8a7aef658099572ece0d8825cf",
+        "reverse-tools/evidence/a1_7/native_core_functions.txt#sha256=c028eea8d768e5022fded40efec85333402541bd5f6f171c5cb1959104e6e101",
+        "reverse-tools/evidence/a1_7/native_record_producers.txt#sha256=77a232df5e7ec95614c342cac42c89f87e740b8a7aef658099572ece0d8825cf",
         "ev_43873e8a6dc54857da21d8dd2be2dfd83486000a8270327af75ec80b312d790e",
         "attachment:examples_html/GJB10157_VLOG.5.1.7.html#sha256=b3ab663b2d3e30170a85068e93194f4bb0e079bf3acc57791b50d8f0baac7b24"
       ],
@@ -1901,8 +1901,8 @@
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
       "predicate": "Constructor FUN_180021130 registers GJB10157_VLOG.5.2.10 and installs vtable 0x180eebad8; native slot 0 FUN_18052cd30 resolves exactly the AST_MODULE named by the shared setTopModule value DAT_18135b808, collects AST_WIRE nodes below that module that have fields +0xa0 set and +0x58 nonempty, normalizes their names, then collects AST_IDENTIFIER load references and reports each driven candidate absent from the load-reference set. It emits Error at the candidate declaration line with no native column and constructs the exact diagnostic 禁止顶层的输入管脚<name>悬空 from DAT_180eebb28, the normalized candidate name and DAT_180eebb20. Product uses its declaration-, driver-, read- and instance-connection-aware Verilog semantic model, limits an explicitly selected top to that module, maps absent column to 1 and emits the exact recovered text while retaining the broader 5.2.18 mapping.",
       "predicateEvidence": [
-        "../reverse-tools/evidence/t_linter_pass60/r2_10_decompile.txt#sha256=1c7e44df6c35e5268306f6f0c79bafdfd70ca13ad875c8b25cbbdc0dbe530269",
-        "../reverse-tools/evidence/t_linter_pass60/r2_10_strings.txt#sha256=2639109b3787df329683c75d62ea975d373a8b6123b43fd9c07d258c0f6a282e",
+        "reverse-tools/evidence/t_linter_pass60/r2_10_decompile.txt#sha256=1c7e44df6c35e5268306f6f0c79bafdfd70ca13ad875c8b25cbbdc0dbe530269",
+        "reverse-tools/evidence/t_linter_pass60/r2_10_strings.txt#sha256=2639109b3787df329683c75d62ea975d373a8b6123b43fd9c07d258c0f6a282e",
         "ev_6bc1e894e3076c31b7a4412d4c1ff3a616a58190705bb50cb97af2a2335c0043",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
         "docs/evidence/native_verilog_unloaded_driven_signal_5_2_10_findings.md#恢复判据"
@@ -2693,8 +2693,8 @@
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
       "predicate": "Constructor FUN_180021790 registers GJB10157_VLOG.5.2.3 and installs vtable 0x180eeca70; active slot FUN_180535e60 iterates the ordered module-name map at object+0xa8 and admits only a group containing exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79), TASK(3) and FUNCTION(4). Each original normalized name is ASCII case-folded for exact membership in six recovered category tables. Categories are tested in VHDL, Verilog, SystemVerilog, SDF/EDIF, PSL, Windows order; first enabled and matching category wins while an earlier enabled nonmatch continues. Each branch emits Error at the candidate physical line with no native column and concatenates its exact fixed prefix directly with the original normalized name. The shipped rule HTML explicitly prohibits the first four families, so product uses those four as its documented-standard fallback while preserving explicit project overrides and reproduces the per-module-group boundary and exact diagnostic surface.",
       "predicateEvidence": [
-        "../reverse-tools/evidence/t_linter_pass61/r2_3_decompile.txt#sha256=dab46701b0cda3bbeda3430c019f545b8bf193de8d4fa908ef0f43bdaae82c52",
-        "../reverse-tools/evidence/t_linter_pass61/r2_3_strings.txt#sha256=64a44e3ebbb6aaa0fb8d0a0e8cda46c51387e6926bf31f3e7c4947b9da7ae7e4",
+        "reverse-tools/evidence/t_linter_pass61/r2_3_decompile.txt#sha256=dab46701b0cda3bbeda3430c019f545b8bf193de8d4fa908ef0f43bdaae82c52",
+        "reverse-tools/evidence/t_linter_pass61/r2_3_strings.txt#sha256=64a44e3ebbb6aaa0fb8d0a0e8cda46c51387e6926bf31f3e7c4947b9da7ae7e4",
         "docs/evidence/native_verilog_keyword_5_2_3_findings.md#原生实现观察",
         "ev_e1ff709dbf6ffe9075286c99ef5e824912ce9dc45827378aaf7d79cd5afdfe26",
         "ev_e1297c18f51d2cc9b7fecbc64009446b553e2a77709a5091e4e8de912db21e25",
@@ -3166,8 +3166,8 @@
       "predicate": "Constructor FUN_180021af0 registers GJB10157_VLOG.5.2.8 and installs its rule object; native slot 0 FUN_18053f190 iterates direct children of each module record. For child type 6 (the cross-rule AST_WIRE mapping), it emits branch-specific diagnostics for exactly thirteen recovered flags: time, realtime, tri0, tri1, triand, trior, trireg, real, supply0, supply1, uwire, wand and wor. Child type 10 emits the localparam diagnostic unconditionally; child type 9 is explicitly skipped, establishing ordinary parameter as allowed. Each report is Error, uses the candidate physical line and no native column, and preserves the recovered wire/localparam-specific GB18030 text. Product checks those exact types per declared object in active module declarations and ANSI parameter/port lists, including inherited comma-list types, maps the absent column to 1 and emits the exact recovered text.",
       "predicateEvidence": [
         "docs/evidence/native_parameter_types_5_2_8_findings.md#恢复判据",
-        "../reverse-tools/evidence/t_linter_pass59/r2_8_decompile.txt#sha256=69043729aff26e9014db4c404350c59d76f268034d5847e093012eacc8e995c8",
-        "../reverse-tools/evidence/t_linter_pass59/r2_8_strings.txt#sha256=dfcf576d9979f8773c1fa54743e0d8b18e7f6ff974a0ab5c9e0acbace72220c9",
+        "reverse-tools/evidence/t_linter_pass59/r2_8_decompile.txt#sha256=69043729aff26e9014db4c404350c59d76f268034d5847e093012eacc8e995c8",
+        "reverse-tools/evidence/t_linter_pass59/r2_8_strings.txt#sha256=dfcf576d9979f8773c1fa54743e0d8b18e7f6ff974a0ab5c9e0acbace72220c9",
         "attachment:examples_html/GJB10157_VLOG.5.2.8.html#sha256=4cdd5cdaefe302db91524ea941884c40be3dc7ec2ebc0fdaade6891775e0acf4"
       ],
       "entryObservation": null,
@@ -17783,7 +17783,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native FUN_180609b30 admits only AST_ALWAYS(0x52) roots. FUN_1806097d0 recursively appends every AST_NULL(0xb0) and every zero-child AST_BLOCK(0x54), without deduplication; the parent collector additionally appends an AST_ALWAYS whose first AST_BLOCK contains exactly one AST_EDGE(0x67), covering an event/sensitivity-only empty process. Product reports the definite source forms: NULL, empty process bodies, empty IF/ELSIF/ELSE arms, empty CASE alternatives and empty loops, once per matched empty node.",
+      "predicate": "FUN_180609b30 recursively collects type-0xb0 and zero-child AST_BLOCK nodes under AST_ALWAYS and additionally an ALWAYS whose first BLOCK contains exactly one type-0x67 child. Reports preserve multiplicity. Entry FUN_1806090d0 fixes Warning, message 避免在进程中出现空语句, and the node line at +0x214; the native column string is empty, mapped to product column 1. Listener FUN_1801bfbf0 creates an independent AST_BLOCK for every Sequential_statementContext, while Sequence_of_statements callbacks are no-ops. Therefore type 0xb0 must not be equated with the source spelling null: its three direct constructor paths include nodes subsequently retagged 0x8e/4. Product retains the explicitly partial source-form detector for null and empty process/branch/loop forms; exact lowered-node location and multiplicity for every form remain unresolved.",
       "predicateEvidence": [
         "ev_03c2e7fc28f3ac2d6a7397346eb0e367427144af10cee275fc9e47026b833434",
         "ev_4468d660a6b85e939eed70e8d04e61d0eef84a00819bd5f8b3161edb445651e0",
@@ -17791,7 +17791,13 @@
         "docs/evidence/native_vhdl_empty_statement_4_8_e_findings.md",
         "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_entry.c#sha256=cc7d198c1dfae47b702e9d056afb482b9371971bb58e4e1e4258b405b4b98ece",
         "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers.c#sha256=3f15f5cd445834aacef093eb3be4d18986a5d57a4ae6a87122c2613cac0c268d",
-        "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers2.c#sha256=45a44f1c43fecd33476317bcbe43c38aaf8339376dff4226f22c63202d783dbc"
+        "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers2.c#sha256=45a44f1c43fecd33476317bcbe43c38aaf8339376dff4226f22c63202d783dbc",
+        "docs/native_rule_recovery_pass125.md",
+        "reverse-tools/evidence/t_linter_pass125/empty_rule.txt",
+        "reverse-tools/evidence/t_linter_pass125/process_listener.txt",
+        "reverse-tools/evidence/t_linter_pass125/sequential_listener.txt",
+        "reverse-tools/evidence/t_linter_pass125/null_producers.txt",
+        "reverse-tools/evidence/t_linter_pass125/if_listener.txt"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -17821,7 +17827,7 @@
           "matched": true
         }
       ],
-      "limitations": "The AST_EDGE name is supported by the adjacent enum mapping and observed empty-process shape rather than vendor debug symbols. Macro/generated constructs, malformed recovery, subprogram lowering, every VHDL-2008 sequential form, diagnostic wording and complete frontend equivalence remain unverified. Unsupported no-finding paths remain ManualReviewRequired."
+      "limitations": "Fixed report fields are statically recovered, not a runtime comparison. The source adapter does not fully reconstruct lowering: subprogram declarations, generated/invalid syntax, label ownership, sensitivity-only shapes, empty branch source lines and every frontend path remain unresolved. The three bounded direct type-0xb0 producers do not establish all producer paths. No finding remains ManualReviewRequired; no full algorithm equivalence is claimed."
     },
     {
       "publicRuleId": "R-9-1",

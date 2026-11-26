@@ -1,0 +1,62 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB9765_VHDL.4.5.g / public A-5-32
+Functions: FUN_1806bc5c0 at 0x1806bc5c0; FUN_1804d0140 at 0x1804d0140
+Evidence type: static Ghidra pseudocode reconciliation; no vendor execution
+
+Observed project/root boundary
+==============================
+
+1. FUN_1806bc5c0 iterates the rule object's design-root container at +0x78.
+   For every non-null current root (`lVar19`) it creates a fresh connection
+   result container.
+
+2. Before invoking the connection builder, the entry copies both project
+   containers at object+0x68 and object+0x78 into local handles and calls:
+
+       FUN_1804d0140(current_root, result, project_0x78, project_0x68)
+
+   The builder therefore receives the current bound root plus project-level
+   resolver state.  The call is not parameterized by a source path.
+
+3. FUN_1804d0140 recursively collects AST_INSTANCE_ENTITY(0x93) and
+   AST_INSTANCE_COMPONENT(0x94) from the current root.  It uses the supplied
+   project handles while resolving the target/formal side before constructing
+   connection records.
+
+4. For a named association AST type 0x8b, the builder extracts the formal and
+   actual names.  For a positional direct AST_IDENTIFIER(0x13), it obtains the
+   formal at the same association ordinal from the resolved formal list.  Both
+   forms produce the same connection record consumed by FUN_1806bc5c0.
+
+5. FUN_1806bc5c0 lowercases both nonempty record names and performs a complete,
+   length-sensitive comparison.  Each mismatching record independently reaches
+   the Warning branch.
+
+Product consequence
+===================
+
+A direct entity instance may resolve its formal-port list from a unique entity
+declaration elsewhere in the analyzed project; the entity and parent
+architecture do not need to share one physical VHDL file.  Named and positional
+direct-identifier actuals use the same comparison once formal binding succeeds.
+
+If more than one project entity has the same case-folded target name, source
+order is not evidence of the proprietary binder's choice.  The source adapter
+must not guess formals or infer compliance; it leaves that path
+ManualReviewRequired.
+
+Source anchors
+==============
+
+- reverse-tools/evidence/a5_32_entry_connection_builder.txt:
+  FUN_1806bc5c0 pseudocode around lines 127-210 and FUN_1804d0140 beginning at
+  line 552, including its 0x93/0x94 collector and 0x8b/0x13 association paths.
+
+Remaining unknowns
+==================
+
+The formal names of the two project map types, library qualification,
+configuration selection, implicit component binding without a declaration,
+generate elaboration, alias/selected/expression actuals, malformed mixed
+association recovery, and native diagnostic position/order remain unresolved.

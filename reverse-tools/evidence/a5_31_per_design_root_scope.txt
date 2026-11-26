@@ -1,0 +1,63 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB9765_VHDL.4.5.f.30 / public A-5-31
+Evidence type: static Ghidra pseudocode reconciliation; no vendor execution
+
+Observed per-root lifecycle in FUN_1805f5080
+================================================
+
+1. FUN_1805f5080 begins by iterating the ordered root container stored at
+   rule-object +0x78.  For each entry it resolves a root vector and stores the
+   current non-null root in lVar18/local_618.
+
+2. Inside that per-root branch, the tree at rule-object +0x158 is cleared
+   before FUN_1804ca4c0(lVar18, object+0x158, 1) builds the current root's
+   case-folded signal universe.  The reset seed vectors local_5e0/local_5d8 and
+   local_548/local_540 are also initialized inside this branch.
+
+3. After current-root seed collection, the assignment relation container
+   local_568 is freshly initialized by FUN_1804c1e30.  The entry then calls:
+
+       FUN_1805f6790(param_1, lVar18, &local_568)
+
+   and invokes FUN_1805f6590 for each current-root reset seed against that same
+   local_568 container.  The relation container is therefore not a file-global
+   graph shared by all roots.
+
+4. FUN_1805f6790 walks the vector supplied through param_2 and admits only
+   AST_ARCHITECTURE(0x75) children, then only direct AST_ASSIGN_LE(0x56)
+   children of each admitted architecture.  This corroborates an
+   architecture-owned graph, not an arbitrary same-file assignment graph.
+
+Source anchors
+==============
+
+- reverse-tools/evidence/a5_31_entry.txt, especially the root loop beginning
+  with object+0x78, the object+0x158 clear/build sequence, and the
+  FUN_1804c1e30/FUN_1805f6790/FUN_1805f6590 sequence around pseudocode lines
+  170-590.
+- reverse-tools/evidence/a5_31_graph_helpers.txt, FUN_1805f6790 around
+  pseudocode lines 64-78 and FUN_1805f6590 beginning around line 302.
+- reverse-tools/evidence/a5_31_graph_container_helpers.txt and
+  a5_31_graph_insert_disassembly.txt for the directed target-to-source
+  relation representation.
+
+Product consequence
+===================
+
+The source adapter may process several entity/architecture pairs from one
+physical VHDL file, but it must create separate candidate sets, reset seed
+sets, and target-to-source graphs for each architecture/entity design root.
+It must not disable graph propagation merely because the file contains more
+than one entity, and it must not allow a reset identity or alias edge to leak
+from one root into another.
+
+Inference and remaining unknowns
+================================
+
+Mapping the proprietary current-root object to a source architecture/entity
+pair is a bounded source-level inference supported by the admitted
+AST_ARCHITECTURE child and by VHDL's `architecture ... of entity` ownership.
+The exact behavior for multiple architectures of one entity, configuration
+selection, roots assembled across files, duplicate library-unit names, failed
+binding, and native diagnostic ordering/multiplicity remains unresolved.

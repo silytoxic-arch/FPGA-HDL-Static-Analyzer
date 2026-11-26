@@ -3622,6 +3622,25 @@ int main() {
         "end architecture;\n", true);
     check(count(result, "GJB9765.4.8.e") == 1,
           "native zero-child block predicate detects an empty loop body once");
+    // Entry-level report fields are independently recovered, even though the
+    // source-to-AST adapter and every lowered-node location remain partial.
+    for (const std::string body : {
+             "null; wait;", "end process;", "if true then end if; wait;",
+             "case 0 is when others => end case; wait;",
+             "while false loop end loop; wait;", "null; null; wait;"}) {
+        const bool closesProcess = body == "end process;";
+        const auto sample = analyze(
+            "entity probe is end entity;\narchitecture rtl of probe is begin\n"
+            "p: process begin\n  " + body +
+            (closesProcess ? "\n" : "\nend process;\n") + "end architecture;\n", true);
+        const auto expected = body == "null; null; wait;" ? 2 : 1;
+        check(count(sample, "GJB9765.4.8.e") == expected &&
+              std::ranges::all_of(sample.violations, [](const auto& item) {
+                  return item.ruleId != "GJB9765.4.8.e" ||
+                         (item.message == "避免在进程中出现空语句" &&
+                          item.column == 1 && item.severity == analysis::Severity::Warning);
+              }), "VHDL empty-statement reports preserve multiplicity and fixed native fields");
+    }
     result = analyze("entity very_long_entity_name_for_scope is\n"
         "port(port_01234567890123456789: out bit; short: in bit); end entity;\n"
         "architecture rtl of very_long_entity_name_for_scope is\n"

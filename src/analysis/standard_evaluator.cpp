@@ -13774,12 +13774,14 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             return false;
         };
         // Native 4.8.e FUN_180609b30 visits only AST_ALWAYS(0x52) roots.
-        // FUN_1806097d0 recursively appends every AST_NULL(0xb0) and every
+        // FUN_1806097d0 recursively appends every type-0xb0 node and every
         // zero-child AST_BLOCK(0x54), without deduplication. The entry also
         // appends an AST_ALWAYS whose first AST_BLOCK has exactly one
         // AST_EDGE(0x67), covering a sensitivity/event-only empty process.
-        // Mirror the unequivocal source forms: NULL, empty process bodies,
+        // Retain the partial source adapter: NULL, empty process bodies,
         // empty IF/ELSIF/ELSE arms, empty CASE alternatives and empty loops.
+        // Native entry fixes the Warning text and leaves its column empty.
+        // Use the product fallback column 1; do not invent a native column.
         // docs/evidence/native_vhdl_empty_statement_4_8_e_findings.md
         bool inSequentialProcess = false;
         bool inProcessBody = false;
@@ -13805,16 +13807,16 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                         lower(tokens[index + 1].text) == "end" &&
                         lower(tokens[index + 2].text) == "process")
                         emit(result, "GJB9765.4.8.e", source,
-                             tokens[index].line, tokens[index].column,
-                             "进程体没有语句");
+                             tokens[index].line, 1,
+                             "避免在进程中出现空语句");
                 }
                 continue;
             }
             if (word == "null" && index + 1 < tokens.size() &&
                 tokens[index + 1].text == ";") {
                 emit(result, "GJB9765.4.8.e", source,
-                     tokens[index].line, tokens[index].column,
-                     "进程中存在显式空语句 NULL");
+                     tokens[index].line, 1,
+                     "避免在进程中出现空语句");
                 continue;
             }
             if ((word == "then" || word == "else") && index + 1 < tokens.size()) {
@@ -13823,8 +13825,8 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                     (next == "end" && index + 2 < tokens.size() &&
                      lower(tokens[index + 2].text) == "if"))
                     emit(result, "GJB9765.4.8.e", source,
-                         tokens[index].line, tokens[index].column,
-                         "进程中的 if 分支没有语句");
+                         tokens[index].line, 1,
+                         "避免在进程中出现空语句");
             }
             if (tokens[index].text == "=>" && index + 1 < tokens.size()) {
                 const auto next = lower(tokens[index + 1].text);
@@ -13832,8 +13834,8 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                     (next == "end" && index + 2 < tokens.size() &&
                      lower(tokens[index + 2].text) == "case"))
                     emit(result, "GJB9765.4.8.e", source,
-                         tokens[index].line, tokens[index].column,
-                         "进程中的 case 分支没有语句");
+                         tokens[index].line, 1,
+                         "避免在进程中出现空语句");
             }
             if (word == "loop" &&
                 (index == 0 || lower(tokens[index - 1].text) != "end") &&
@@ -13841,8 +13843,8 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                 lower(tokens[index + 1].text) == "end" &&
                 lower(tokens[index + 2].text) == "loop")
                 emit(result, "GJB9765.4.8.e", source,
-                     tokens[index].line, tokens[index].column,
-                     "进程中的 loop 循环体没有语句");
+                     tokens[index].line, 1,
+                     "避免在进程中出现空语句");
         }
         // Native 4.14.b.3 builds two bounded alignment groups from the VHDL
         // AST: an IF group containing its if/elsif/else keywords, and a CASE
@@ -17739,7 +17741,9 @@ void applyStandardProfile(AnalysisResult& result,
         [](const auto& left, const auto& right) {
             // These native rules emit once per admitted AST object/pair. Their
             // byte-for-byte identical diagnostics therefore carry multiplicity.
-            if ((left.ruleId == "GJB10157.7.1.3" &&
+            if ((left.ruleId == "GJB9765.4.8.e" &&
+                 right.ruleId == "GJB9765.4.8.e") ||
+                (left.ruleId == "GJB10157.7.1.3" &&
                  right.ruleId == "GJB10157.7.1.3") ||
                 (left.ruleId == "GJB10157.7.1.2" &&
                  right.ruleId == "GJB10157.7.1.2") ||

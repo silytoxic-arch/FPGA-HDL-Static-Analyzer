@@ -1,0 +1,99 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+=== 18062a230 FUN_18062a230 ===
+completed=true; error=
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+undefined8 * FUN_18062a230(undefined8 *param_1,undefined8 *param_2,undefined4 param_3)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+  undefined1 auStack_68 [32];
+  undefined8 *local_48;
+  undefined8 local_40;
+  undefined8 *local_38;
+  undefined8 *local_30;
+  ulonglong local_28;
+  
+  local_40 = 0xfffffffffffffffe;
+  local_28 = DAT_18131ef10 ^ (ulonglong)auStack_68;
+  *param_1 = Yosys::Rule::vftable;
+  *(undefined1 *)(param_1 + 1) = 1;
+  param_1[5] = 0xf;
+  param_1[4] = 0;
+  *(undefined1 *)(param_1 + 2) = 0;
+  local_38 = param_1;
+  local_30 = param_2;
+  FUN_180040550(param_1 + 2,param_2,0,0xffffffffffffffff);
+  *(undefined4 *)(param_1 + 6) = param_3;
+  param_1[10] = 0xf;
+  param_1[9] = 0;
+  *(undefined1 *)(param_1 + 7) = 0;
+  puVar1 = param_1 + 0xb;
+  *puVar1 = 0;
+  param_1[0xc] = 0;
+  local_48 = puVar1;
+  uVar2 = FUN_18062aa80(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0xd;
+  *puVar1 = 0;
+  param_1[0xe] = 0;
+  local_48 = puVar1;
+  uVar2 = FUN_1804a41f0(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0xf;
+  *puVar1 = 0;
+  param_1[0x10] = 0;
+  local_48 = puVar1;
+  uVar2 = FUN_1804a41f0(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0x11;
+  *puVar1 = 0;
+  param_1[0x12] = 0;
+  local_48 = puVar1;
+  uVar2 = FUN_1804a41f0(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0x13;
+  *puVar1 = 0;
+  param_1[0x14] = 0;
+  local_48 = puVar1;
+  uVar2 = FUN_18062aa80(puVar1);
+  *puVar1 = uVar2;
+  puVar1 = param_1 + 0x15;
+  *puVar1 = 0;
+  param_1[0x16] = 0;
+  local_48 = puVar1;
+  uVar2 = FUN_1804a41f0(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x1b] = 0xf;
+  param_1[0x1a] = 0;
+  *(undefined1 *)(param_1 + 0x18) = 0;
+  param_1[0x1f] = 0xf;
+  param_1[0x1e] = 0;
+  *(undefined1 *)(param_1 + 0x1c) = 0;
+  param_1[0x23] = 0xf;
+  param_1[0x22] = 0;
+  *(undefined1 *)(param_1 + 0x20) = 0;
+  param_1[0x27] = 0xf;
+  param_1[0x26] = 0;
+  *(undefined1 *)(param_1 + 0x24) = 0;
+  puVar1 = param_1 + 0x29;
+  *puVar1 = 0;
+  param_1[0x2a] = 0;
+  local_48 = puVar1;
+  uVar2 = FUN_1804fd530(puVar1);
+  *puVar1 = uVar2;
+  param_1[0x17] = DAT_18135b868;
+  DAT_18135b868 = param_1;
+  if (0xf < (ulonglong)param_2[3]) {
+    FUN_1800409e0(param_2,*param_2,param_2[3] + 1);
+  }
+  param_2[3] = 0xf;
+  param_2[2] = 0;
+  *(undefined1 *)param_2 = 0;
+  return param_1;
+}
+
+

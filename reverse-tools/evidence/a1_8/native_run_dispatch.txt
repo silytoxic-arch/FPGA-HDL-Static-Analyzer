@@ -1,0 +1,140 @@
+Target: T-Linter.dll
+
+=== 0x1806245b0 runRule ===
+completed=true; error=
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* public: class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >
+   __cdecl Yosys::CheckRule::runRule(class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >) __ptr64 */
+
+undefined1 * __thiscall
+Yosys::CheckRule::runRule(undefined8 param_1,undefined1 *param_2,longlong *param_3)
+
+{
+  char cVar1;
+  longlong *plVar2;
+  longlong *plVar3;
+  int iVar4;
+  longlong *plVar5;
+  longlong lVar6;
+  undefined1 auStack_88 [32];
+  longlong local_68;
+  undefined1 local_58 [8];
+  undefined1 *local_50;
+  longlong *local_48;
+  longlong *local_40;
+  undefined4 local_38;
+  undefined8 local_30;
+  longlong *local_20;
+  ulonglong local_18;
+  
+                    /* 0x6245b0  8
+                       ?runRule@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V34@@Z
+                        */
+  local_30 = 0xfffffffffffffffe;
+  local_18 = DAT_18131ef10 ^ (ulonglong)auStack_88;
+  *(undefined8 *)(param_2 + 0x18) = 0xf;
+  *(undefined8 *)(param_2 + 0x10) = 0;
+  *param_2 = 0;
+  local_38 = 1;
+  local_50 = param_2;
+  local_20 = param_3;
+  FUN_18093fd20(&DAT_18135b878,&local_48);
+  lVar6 = 0;
+  plVar5 = local_48;
+  if (local_48 != local_40) {
+    do {
+      lVar6 = lVar6 + 1;
+      if (*(char *)((longlong)plVar5 + 0x19) == '\0') {
+        plVar2 = (longlong *)plVar5[2];
+        if (*(char *)((longlong)plVar2 + 0x19) == '\0') {
+          cVar1 = *(char *)(*plVar2 + 0x19);
+          plVar5 = plVar2;
+          plVar2 = (longlong *)*plVar2;
+          while (cVar1 == '\0') {
+            cVar1 = *(char *)(*plVar2 + 0x19);
+            plVar5 = plVar2;
+            plVar2 = (longlong *)*plVar2;
+          }
+        }
+        else {
+          cVar1 = *(char *)(plVar5[1] + 0x19);
+          plVar3 = (longlong *)plVar5[1];
+          plVar2 = plVar5;
+          while ((plVar5 = plVar3, cVar1 == '\0' && (plVar2 == (longlong *)plVar5[2]))) {
+            cVar1 = *(char *)(plVar5[1] + 0x19);
+            plVar3 = (longlong *)plVar5[1];
+            plVar2 = plVar5;
+          }
+        }
+      }
+    } while (plVar5 != local_40);
+    if (lVar6 != 0) {
+      plVar5 = (longlong *)FUN_18052e9d0(&DAT_18135b878,param_3);
+      if ((plVar5 == DAT_18135b878) ||
+         (iVar4 = FUN_1800dc750(param_3,plVar5 + 4), local_48 = plVar5, iVar4 < 0)) {
+        local_48 = param_3;
+        local_68 = FUN_180621330(&DAT_18135b878,&DAT_180f04cce,&local_48,local_58);
+        FUN_180621850(&DAT_18135b878,&local_48,plVar5,local_68 + 0x20);
+      }
+      plVar5 = (longlong *)local_48[8];
+      local_48 = plVar5;
+      if ((char)plVar5[1] != '\0') {
+        FUN_18062cf50(plVar5);
+        (**(code **)*plVar5)(plVar5);
+        FUN_18062baa0(plVar5);
+      }
+    }
+  }
+  if (0xf < (ulonglong)param_3[3]) {
+    FUN_1800409e0(param_3,*param_3,param_3[3] + 1);
+  }
+  param_3[3] = 0xf;
+  param_3[2] = 0;
+  *(undefined1 *)param_3 = 0;
+  return param_2;
+}
+
+
+
+=== 0x1806272a0 runRulesPost ===
+completed=true; error=
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* public: class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >
+   __cdecl Yosys::CheckRule::runRulesPost(class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >) __ptr64 */
+
+undefined1 * __thiscall
+Yosys::CheckRule::runRulesPost(undefined8 param_1,undefined1 *param_2,undefined8 *param_3)
+
+{
+  undefined1 auStack_58 [32];
+  undefined4 local_38;
+  undefined8 local_30;
+  undefined1 *local_28;
+  undefined8 *local_20;
+  ulonglong local_18;
+  
+                    /* 0x6272a0  16
+                       ?runRulesPost@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V34@@Z
+                        */
+  local_30 = 0xfffffffffffffffe;
+  local_18 = DAT_18131ef10 ^ (ulonglong)auStack_58;
+  *(undefined8 *)(param_2 + 0x18) = 0xf;
+  *(undefined8 *)(param_2 + 0x10) = 0;
+  *param_2 = 0;
+  local_38 = 1;
+  if (0xf < (ulonglong)param_3[3]) {
+    local_28 = param_2;
+    local_20 = param_3;
+    FUN_1800409e0(param_3,*param_3,param_3[3] + 1);
+  }
+  param_3[3] = 0xf;
+  param_3[2] = 0;
+  *(undefined1 *)param_3 = 0;
+  return param_2;
+}
+
+

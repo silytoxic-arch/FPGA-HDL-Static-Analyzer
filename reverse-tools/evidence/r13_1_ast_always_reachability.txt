@@ -1,0 +1,52 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB10157.9.4.1 / public R-13-1
+Authority: shipped-artifact parser tables, with exact upstream revision used only as corroboration
+
+Observed from embedded Bison tables
+-----------------------------------
+- Rule 236: task_func_body has a two-symbol alternative ending in behavioral_stmt.
+- Rules 539..567 are the complete behavioral_stmt production family.
+- Rule 545 is behavioral_stmt -> non_opt_delay behavioral_stmt.
+- Rules 518 and 522 are the blocking/nonblocking intra-assignment delay forms.
+- Rules 460..482 are the disjoint always_stmt / always_cond / always_event family.
+- No rule in the behavioral_stmt family contains always_stmt, always_cond, or always_event.
+
+Observed from the native rule implementation
+--------------------------------------------
+- Slot 2 accepts AST_TASK(3).
+- Run recursively reports AST_ALWAYS(0x52) descendants.
+- Run separately reports AST_ASSIGN_EQ/LE(0x55/0x56) descendants only when byte +0x29b is nonzero.
+- The sole real +0x29b constant-one writer maps to rule 545.
+
+Corroborating source identity
+-----------------------------
+- The DLL contains: Yosys latest (git sha1 6f9602b, Visual Studio).
+- Official Yosys commit 6f9602b4cfedc6441f55272f6c025d64620cd24f uses task_func_body ->
+  task_func_body behavioral_stmt and creates AST_ALWAYS only in always_stmt, which is not a
+  behavioral_stmt alternative.
+- Its simplify implementation returns immediately for AST_FUNCTION and AST_TASK, so generated
+  AST_ALWAYS nodes are not inserted below stored task definitions.
+
+Conclusion
+----------
+For a syntactically accepted task definition in this frontend, the AST_ALWAYS descendant branch is
+unreachable. It is a defensive native branch, not evidence that @(...), @*, wait, or an illegal
+nested always token must be diagnosed by R-13-1. The reachable source predicate is the rule-545
+prefix # path. Intra-assignment delay remains excluded because rules 518/522 do not set +0x29b.
+
+Supporting artifacts
+--------------------
+- reverse-tools/analyze_bison_rule.mjs
+  SHA256 756dffbcdf34220feb3dcd8d6d5569292f78c33af6b20dec23eab8a391be29f5
+- reverse-tools/evidence/r13_1_ast_constructor_all_calls.txt
+  SHA256 39075e73173d25c001996af3067294ac4612cc31d753df3cf68dc4097e49bcb3
+- reverse-tools/evidence/r13_1_ast_always_producers.txt
+  SHA256 5c1445a7f243b658e660a5d07e902f126b2d216faa9aa8b0f3699c1b7982c199
+
+Limitations
+-----------
+- This establishes source reachability for accepted task syntax; it does not claim proprietary
+  malformed-input recovery, diagnostic sorting, or full parser equivalence.
+- The official source is interpretive corroboration. The embedded Bison tables and DLL code remain
+  the authoritative shipped-artifact evidence.

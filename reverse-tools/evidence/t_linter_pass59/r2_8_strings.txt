@@ -1,0 +1,18 @@
+T-Linter.dll SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Encoding: GB18030, decoded directly from PE image bytes
+
+0x180eeea60  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是time类型违反.
+0x180eeeac0  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是realtime类型违反.
+0x180eeeb20  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是tri0类型违反.
+0x180eeeb80  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是tri1类型违反.
+0x180eeebe0  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是triand类型违反.
+0x180eeec40  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是trior类型违反.
+0x180eeeca0  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是trireg类型违反.
+0x180eeed00  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是real类型违反.
+0x180eeed60  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是supply0类型违反.
+0x180eeedc0  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是supply1类型违反.
+0x180eeee20  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是uwire类型违反.
+0x180eeee80  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是wand类型违反.
+0x180eeeee0  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，信号%s是wor类型违反.
+0x180eeef40  禁止使用除reg、wire、integer、tri和parameter之外的数据类型，%s是localparam类型违反.
+0x180eeafc4  error

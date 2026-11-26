@@ -1,0 +1,55 @@
+Target: T-Linter.dll
+
+=== 0x180628d30 setMaxStatesNum ===
+completed=true; error=
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* public: void __cdecl Yosys::CheckRule::setMaxStatesNum(class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >,int) __ptr64 */
+
+void __thiscall
+Yosys::CheckRule::setMaxStatesNum(undefined8 param_1,undefined8 *param_2,undefined4 param_3)
+
+{
+  int iVar1;
+  undefined8 *puVar2;
+  undefined8 *puVar3;
+  undefined1 auStack_68 [32];
+  longlong local_48;
+  undefined1 local_38 [8];
+  undefined8 *local_30;
+  undefined8 local_28;
+  undefined8 *local_20;
+  ulonglong local_18;
+  
+                    /* 0x628d30  21
+                       ?setMaxStatesNum@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z
+                        */
+  puVar3 = DAT_18135b878;
+  local_28 = 0xfffffffffffffffe;
+  local_18 = DAT_18131ef10 ^ (ulonglong)auStack_68;
+  local_20 = param_2;
+  puVar2 = (undefined8 *)FUN_18052e9d0(&DAT_18135b878);
+  if ((puVar2 == DAT_18135b878) || (iVar1 = FUN_1800dc750(param_2,puVar2 + 4), iVar1 < 0)) {
+    puVar2 = DAT_18135b878;
+  }
+  if (puVar2 != puVar3) {
+    puVar3 = (undefined8 *)FUN_18052e9d0(&DAT_18135b878,param_2);
+    if ((puVar3 == DAT_18135b878) || (iVar1 = FUN_1800dc750(param_2,puVar3 + 4), iVar1 < 0)) {
+      local_30 = param_2;
+      local_48 = FUN_180621330(&DAT_18135b878,&DAT_180f04cce,&local_30,local_38);
+      FUN_180621850(&DAT_18135b878,&local_30,puVar3,local_48 + 0x20);
+      puVar3 = local_30;
+    }
+    *(undefined4 *)(puVar3[8] + 0x140) = param_3;
+  }
+  if (0xf < (ulonglong)param_2[3]) {
+    FUN_1800409e0(param_2,*param_2,param_2[3] + 1);
+  }
+  param_2[3] = 0xf;
+  param_2[2] = 0;
+  *(undefined1 *)param_2 = 0;
+  return;
+}
+
+

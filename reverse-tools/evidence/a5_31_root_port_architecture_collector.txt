@@ -1,0 +1,63 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB9765_VHDL.4.5.f.30 / public A-5-31
+Function: FUN_1804ca4c0 at 0x1804ca4c0
+Evidence type: Ghidra 12.1.4 static pseudocode; no vendor execution
+
+Acquisition
+===========
+
+The saved `tlinter-4-8-e` Ghidra project was opened read-only with whole-program
+analysis disabled, and `DecompileAt.java 0x1804ca4c0` was run against the
+already analyzed T-Linter.dll program.  The decompiler completed successfully.
+
+Observed collector behavior
+===========================
+
+FUN_1804ca4c0 receives one current root in param_1, one destination name tree
+in param_2, and a mode byte in param_3.  It iterates only the current root's
+direct children.
+
+1. For every child of type 0xa4 (AST_PORT), it iterates that node's direct
+   children and admits each type-6 declaration.  It copies the declaration
+   name from +0x48, lowercases every byte with `tolower`, and inserts the
+   case-folded name together with the declaration pointer into param_2.
+
+2. When param_3 is 1, every child of type 0x75 (AST_ARCHITECTURE) is also
+   visited.  Its direct children of type 0x78 are handled by the same
+   copy/lowercase/insert sequence.
+
+3. The helper contains no source-path comparison and no physical-file gate.
+   Its ownership boundary is the root object supplied in param_1.
+
+4. FUN_1805f5080 calls this helper as
+
+       FUN_1804ca4c0(current_root, object+0x158, 1)
+
+   after clearing object+0x158 inside the per-root loop.  Consequently the
+   rule's candidate universe combines the bound root's AST_PORT and
+   AST_ARCHITECTURE children even when their source locations originate from
+   different physical files.
+
+Product consequence
+===================
+
+For a project containing an entity declaration in one VHDL file and its
+architecture in another, the source adapter may combine entity ports with the
+architecture's direct signal/assignment graph when the case-insensitive entity
+name resolves to exactly one project design unit.  Diagnostics for a port must
+retain the entity declaration's original file and location.
+
+If the project contains more than one entity with the same folded name, source
+order is not evidence of the native binder's choice.  That architecture is
+therefore left unresolved and the rule remains ManualReviewRequired rather
+than guessing a binding or declaring compliance.
+
+Remaining unknowns
+==================
+
+The proprietary binder that creates each current root, library qualification,
+configuration selection among multiple architectures, duplicate library-unit
+resolution, failed/partial binding, generated roots, and native diagnostic
+ordering/multiplicity remain unresolved.  The 0x78 declaration's full formal
+enum name is not established by this function alone.

@@ -1,0 +1,33 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB10157_VLOG.5.2.18 (public ID A-2-8)
+
+Observed constructor instructions at 0x180021660:
+
+0x1800216cd: LEA RAX, [0x180edc680]
+0x1800216d4: MOV qword ptr [0x18134a820], RAX
+0x1800216db: MOV word ptr [0x18134a978], 0x1
+
+The registered rule object starts at 0x18134a820.  Therefore the final write is
+to object +0x158 and stores little-endian bytes {0x01, 0x00}:
+
+  +0x158 = 1  (the additional internal-signal report branch is enabled)
+  +0x159 = 0  (the zero message variant is selected)
+
+FUN_180533200 selects the following static strings:
+
+  port branch, +0x159 == 0:     DAT_180eec818 = “冗余的端口”
+  port branch, +0x159 != 0:     DAT_180eec808 = “未使用端口”
+  internal branch, +0x159 == 0: DAT_180eec838 = “冗余的内部信号”
+  internal branch, +0x159 != 0: DAT_180eec828 = “未使用信号”
+
+Raw GB18030 bytes decoded directly from the mapped .rdata section:
+
+  0x180eec808: ce b4 ca b9 d3 c3 b6 cb bf da
+  0x180eec818: c8 df d3 e0 b5 c4 b6 cb bf da
+  0x180eec828: ce b4 ca b9 d3 c3 d0 c5 ba c5
+  0x180eec838: c8 df d3 e0 b5 c4 c4 da b2 bf d0 c5 ba c5
+
+This is offline static evidence.  It establishes the shipped constructor
+defaults and selected message literals; it does not establish that an unknown
+external client cannot mutate object memory after construction.

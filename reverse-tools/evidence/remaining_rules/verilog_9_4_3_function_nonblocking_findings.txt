@@ -1,0 +1,29 @@
+Target: T-Linter.dll V3.1.4.25120520251205115359
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB10157_VLOG.9.4.3 / R-13-3
+
+Observed static evidence
+------------------------
+- Constructor FUN_180024660 registers GJB10157_VLOG.9.4.3 and vtable 0x180ef6328.
+- Root selector FUN_18058d740 returns true exactly when *(int *)(node + 4) == 4.
+- Entry FUN_18058d060 obtains admitted roots from FUN_1801acf00, builds the fixed query
+  type 0x56 and calls recursive collector FUN_1804f3870.
+- It iterates every collected node and reports each node independently. Source path is
+  read from node+0x1e0 and line from node+0x210. No target-name, width, clock, RHS or
+  surrounding-control filter is present in the recovered consumer.
+- The report severity literal is "Warning".
+- Bytes at 0x180ef6370 decode as GB18030:
+  禁止在function语句中使用非阻塞赋值.
+
+Corroborated interpretation
+---------------------------
+- Type 4 is FUNCTION root and 0x56 is ASSIGN_LE (nonblocking assignment), based on
+  adjacent recovered assignment rules, packaged examples and the rule-specific flow.
+- The native core predicate is therefore one warning per nonblocking assignment node
+  below an admitted function root.
+
+Unknown / bounded
+-----------------
+- Proprietary parser recovery for malformed source, macro/include provenance, complete
+  class/package elaboration and producer ordering remain unresolved.
+- Static decompilation does not establish runtime behavior outside the recovered paths.

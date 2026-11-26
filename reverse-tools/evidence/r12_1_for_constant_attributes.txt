@@ -1,0 +1,69 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Provider: Ghidra 12.1.4, static decompilation only
+Rule: GJB10157_VLOG.9.3.1 (public R-12-1)
+
+Consumer evidence
+-----------------
+Evidence ev_7224de6505683c4c1fe46103380cea52bc9484884173055f73aa4f9335d92dee
+decompiles FUN_1805856b0.  It first compares the source-name strings obtained
+from the first and third children of every admitted loop record and emits one
+Warning when they differ.  It then walks retained frontend records and performs
+exact byte comparisons against the following two attribute names:
+
+  is_initVal_const
+  is_loop_condition_const
+
+An exact match emits a separate Warning at the stored source path and line.
+
+Producer evidence
+-----------------
+The only observed producers are in the giant frontend simplifier
+FUN_180914500.  The complete retained decompilation is in
+reverse-tools/evidence/r13_6_producers/string_references.txt; the focused
+extract was also inspected at /private/tmp/r12_4_attr_refs.txt.
+
+1. The branch admits AST_FOR (0x5c) and AST_GENFOR (0x60).  It requires child
+   0 and child 2 to be AST_ASSIGN_EQ (0x55).  The procedural left binding must
+   be AST_WIRE (6); the generate left binding must be AST_GENVAR (0x5f).
+   Both assignment LHS nodes must resolve through +0x1d0 to the exact same
+   bound object pointer.  A mismatch reaches the fatal text:
+
+     Incompatible left-hand sides in 1st and 3rd expression of %s for-loop!
+
+2. For the first assignment RHS, the frontend clones the node with
+   FUN_1808db990, prepares width/sign information with FUN_1808f4650, and
+   repeatedly calls FUN_180914500(clone, 1, 0, 0) until no simplification is
+   reported.  If clone type +4 is not AST_CONSTANT (0x10), it stores the
+   original loop path/line with exact attribute is_initVal_const and then
+   reaches the fatal text:
+
+     Right hand side of 1st expression of %s for-loop is not constant!
+
+3. On each unrolled iteration, it clones the loop condition, prepares it with
+   FUN_1808f4650, and repeatedly simplifies it through FUN_180914500.  If the
+   result type +4 is not AST_CONSTANT (0x10) and the original node is AST_FOR,
+   it stores the original loop path/line with exact attribute
+   is_loop_condition_const.  A constant zero on the first test separately
+   produces is_count_zero for R-12-4.
+
+Conclusions
+-----------
+Observed: both attribute polarities are now established.  Their names do not
+mean "is constant"; their presence records failure to simplify to a constant.
+Initializer and condition are tested after frontend simplification, not by a
+source-literal-only predicate.  Procedural and generate loops have distinct
+binding types, but both require exact first/third target identity.
+
+Product-bound inference: FPGA HDL Static Analyzer may safely report a declared
+runtime dependency in the initializer or a declared runtime dependency other
+than the substituted loop counter in the condition.  It may also compare the
+resolved source declaration names of explicit first/third assignment targets.
+This is a bounded source adapter, not proof of pointer-identical elaborated AST.
+
+Unknowns: complete Yosys constant folding, parameter overrides, expression and
+function-like macro expansion, constant-function execution, casts, packages,
+hierarchical bindings, malformed-source recovery, the relationship between a
+frontend fatal path and later rule execution, global ordering, and complete
+native diagnostic multiplicity remain unproved.  Unsupported or unresolved
+forms must remain ManualReviewRequired; absence of a finding is not compliance.

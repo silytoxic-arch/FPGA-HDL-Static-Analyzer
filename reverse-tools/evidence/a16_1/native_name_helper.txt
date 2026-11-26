@@ -1,0 +1,45 @@
+Target: T-Linter.dll
+
+Address: 0x1804e6750
+Function: FUN_1804e6750
+completed=true; error=
+
+longlong FUN_1804e6750(undefined8 *param_1,undefined8 *param_2,ulonglong param_3)
+
+{
+  size_t _MaxCount;
+  ulonglong uVar1;
+  undefined8 *puVar2;
+  void *pvVar3;
+  undefined8 *puVar4;
+  char *pcVar5;
+  
+  _MaxCount = param_2[2];
+  if (0xf < (ulonglong)param_2[3]) {
+    param_2 = (undefined8 *)*param_2;
+  }
+  uVar1 = param_1[2];
+  if (param_3 < uVar1) {
+    puVar4 = param_1;
+    if (0xf < (ulonglong)param_1[3]) {
+      puVar4 = (undefined8 *)*param_1;
+    }
+    puVar2 = param_1;
+    if (0xf < (ulonglong)param_1[3]) {
+      puVar2 = (undefined8 *)*param_1;
+    }
+    for (pcVar5 = (char *)((longlong)puVar2 + param_3); pcVar5 < (char *)(uVar1 + (longlong)puVar4);
+        pcVar5 = pcVar5 + 1) {
+      if ((_MaxCount == 0) ||
+         (pvVar3 = memchr(param_2,(int)*pcVar5,_MaxCount), pvVar3 == (void *)0x0)) {
+        if (0xf < (ulonglong)param_1[3]) {
+          param_1 = (undefined8 *)*param_1;
+        }
+        return (longlong)pcVar5 - (longlong)param_1;
+      }
+    }
+  }
+  return -1;
+}
+
+

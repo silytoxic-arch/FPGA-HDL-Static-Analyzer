@@ -1,0 +1,117 @@
+Target: T-Linter.dll
+
+Address: 0x18051b850
+Function: FUN_18051b850
+completed=true; error=
+
+undefined8 * FUN_18051b850(undefined8 *param_1,char *param_2,undefined4 param_3)
+
+{
+  code *pcVar1;
+  _Locimp *p_Var2;
+  undefined8 *puVar3;
+  longlong lVar4;
+  
+  lVar4 = 0;
+  *param_1 = 0;
+  param_1[1] = 0;
+  param_1[2] = 0;
+  p_Var2 = std::locale::_Init(true);
+  param_1[4] = p_Var2;
+  if (param_2 == (char *)0x0) {
+    std::_Xregex_error(0xd);
+    pcVar1 = (code *)swi(3);
+    puVar3 = (undefined8 *)(*pcVar1)();
+    return puVar3;
+  }
+  if (*param_2 != '\0') {
+    lVar4 = -1;
+    do {
+      lVar4 = lVar4 + 1;
+    } while (param_2[lVar4] != '\0');
+  }
+  FUN_18051a3f0(param_1,param_2,param_2 + lVar4,param_3,0);
+  return param_1;
+}
+
+
+
+Address: 0x18051a310
+Function: FUN_18051a310
+completed=true; error=
+
+ulonglong FUN_18051a310(undefined8 param_1,undefined8 param_2,undefined8 param_3,longlong *param_4,
+                       undefined4 param_5,undefined1 param_6)
+
+{
+  longlong lVar1;
+  byte bVar2;
+  ulonglong in_RAX;
+  ulonglong uVar3;
+  undefined1 local_f8 [64];
+  undefined1 local_b8 [64];
+  longlong local_78 [14];
+  
+  lVar1 = *param_4;
+  if (lVar1 == 0) {
+    uVar3 = in_RAX & 0xffffffffffffff00;
+  }
+  else {
+    FUN_18051b5f0(local_f8,param_1,param_2,param_4 + 1,lVar1,*(undefined4 *)(lVar1 + 0x28),
+                  *(undefined4 *)(lVar1 + 0x20),param_5,0xfffffffffffffffe);
+    bVar2 = FUN_18051a130(local_f8,param_3,param_6);
+    if (local_78[0] != 0) {
+      FUN_1804a1d00(local_78,local_78[0],local_78[2] - local_78[0] >> 4);
+      local_78[0] = 0;
+      local_78[1] = 0;
+      local_78[2] = 0;
+    }
+    FUN_18051bd40(local_b8);
+    FUN_18051bd40(local_f8);
+    uVar3 = (ulonglong)bVar2;
+  }
+  return uVar3;
+}
+
+
+
+Address: 0x1801a2d00
+Function: FUN_1801a2d00
+completed=true; error=
+
+ulonglong FUN_1801a2d00(undefined8 *param_1,char *param_2,ulonglong param_3,ulonglong param_4)
+
+{
+  int iVar1;
+  undefined8 *puVar2;
+  void *_Buf1;
+  ulonglong uVar3;
+  size_t _MaxCount;
+  void *_Buf;
+  
+  if ((param_4 == 0) && (param_3 <= (ulonglong)param_1[2])) {
+    return param_3;
+  }
+  if ((param_3 < (ulonglong)param_1[2]) && (uVar3 = param_1[2] - param_3, param_4 <= uVar3)) {
+    _MaxCount = uVar3 + (1 - param_4);
+    puVar2 = param_1;
+    if (0xf < (ulonglong)param_1[3]) {
+      puVar2 = (undefined8 *)*param_1;
+    }
+    _Buf = (void *)((longlong)puVar2 + param_3);
+    while ((_MaxCount != 0 && (_Buf1 = memchr(_Buf,(int)*param_2,_MaxCount), _Buf1 != (void *)0x0)))
+    {
+      if ((param_4 == 0) || (iVar1 = memcmp(_Buf1,param_2,param_4), iVar1 == 0)) {
+        if (0xf < (ulonglong)param_1[3]) {
+          param_1 = (undefined8 *)*param_1;
+        }
+        return (longlong)_Buf1 - (longlong)param_1;
+      }
+      _MaxCount = (longlong)_Buf + _MaxCount + (-1 - (longlong)_Buf1);
+      _Buf = (void *)((longlong)_Buf1 + 1);
+    }
+  }
+  return 0xffffffffffffffff;
+}
+
+

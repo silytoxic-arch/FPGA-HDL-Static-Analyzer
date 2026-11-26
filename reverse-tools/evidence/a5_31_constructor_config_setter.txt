@@ -1,0 +1,152 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+=== 0x1805f4f60 FUN_1805f4f60 ===
+completed=true; error=
+
+undefined8 *
+FUN_1805f4f60(undefined8 *param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+  undefined1 local_30 [16];
+  undefined8 local_20;
+  undefined8 local_18;
+  
+  local_18 = 0xf;
+  local_20 = 0;
+  local_30[0] = 0;
+  FUN_180040680(local_30,"GJB9765_VHDL.4.5.f.30",0x15,param_4,0xfffffffffffffffe);
+  FUN_18062a230(param_1,local_30,8);
+  *param_1 = Yosys::GJB9765_VHDL_4_5_f_30::vftable;
+  puVar1 = param_1 + 0x2b;
+  *puVar1 = 0;
+  param_1[0x2c] = 0;
+  uVar2 = FUN_1800da120(puVar1);
+  *puVar1 = uVar2;
+  return param_1;
+}
+
+
+
+=== 0x180629290 setRuleNameConvention ===
+completed=true; error=
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* public: void __cdecl Yosys::CheckRule::setRuleNameConvention(class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >,class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >,class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >,class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >,class std::basic_string<char,struct
+   std::char_traits<char>,class std::allocator<char> >) __ptr64 */
+
+void __thiscall
+Yosys::CheckRule::setRuleNameConvention
+          (undefined8 param_1,undefined8 *param_2,undefined8 *param_3,undefined8 *param_4,
+          undefined8 *param_5,undefined8 *param_6)
+
+{
+  longlong lVar1;
+  int iVar2;
+  longlong lVar3;
+  undefined8 *puVar4;
+  undefined1 auStack_148 [32];
+  undefined1 *local_128;
+  undefined1 local_118 [16];
+  undefined8 local_108;
+  undefined8 local_100;
+  undefined1 local_f8 [16];
+  undefined8 local_e8;
+  undefined8 local_e0;
+  undefined1 local_d8 [16];
+  undefined8 local_c8;
+  undefined8 local_c0;
+  undefined1 local_b8 [16];
+  undefined8 local_a8;
+  undefined8 local_a0;
+  undefined8 local_98;
+  undefined1 *local_90;
+  undefined1 *local_88;
+  undefined1 *local_80;
+  undefined1 *local_78;
+  undefined8 *local_70;
+  undefined8 *local_68;
+  undefined8 *local_60;
+  undefined8 *local_58;
+  undefined8 *local_50;
+  ulonglong local_48;
+  
+                    /* 0x629290  24
+                       ?setRuleNameConvention@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@0000@Z
+                        */
+  lVar1 = DAT_18135b878;
+  local_98 = 0xfffffffffffffffe;
+  local_48 = DAT_18131ef10 ^ (ulonglong)auStack_148;
+  local_58 = param_5;
+  local_50 = param_6;
+  local_70 = param_2;
+  local_68 = param_3;
+  local_60 = param_4;
+  lVar3 = FUN_18052e9d0(&DAT_18135b878);
+  if ((lVar3 == DAT_18135b878) || (iVar2 = FUN_1800dc750(param_2,lVar3 + 0x20), iVar2 < 0)) {
+    lVar3 = DAT_18135b878;
+  }
+  if (lVar3 != lVar1) {
+    local_90 = local_118;
+    local_88 = local_f8;
+    local_80 = local_d8;
+    local_78 = local_b8;
+    local_100 = 0xf;
+    local_108 = 0;
+    local_118[0] = 0;
+    FUN_180040550(local_118,param_6,0,0xffffffffffffffff);
+    local_e0 = 0xf;
+    local_e8 = 0;
+    local_f8[0] = 0;
+    FUN_180040550(local_f8,param_5,0,0xffffffffffffffff);
+    local_c0 = 0xf;
+    local_c8 = 0;
+    local_d8[0] = 0;
+    FUN_180040550(local_d8,param_4,0,0xffffffffffffffff);
+    local_a0 = 0xf;
+    local_a8 = 0;
+    local_b8[0] = 0;
+    FUN_180040550(local_b8,param_3,0,0xffffffffffffffff);
+    puVar4 = (undefined8 *)FUN_180622550(&DAT_18135b878,param_2);
+    local_128 = local_118;
+    FUN_180628e70(*puVar4,local_b8,local_d8,local_f8);
+  }
+  if (0xf < (ulonglong)param_2[3]) {
+    FUN_1800409e0(param_2,*param_2,param_2[3] + 1);
+  }
+  param_2[3] = 0xf;
+  param_2[2] = 0;
+  *(undefined1 *)param_2 = 0;
+  if (0xf < (ulonglong)param_3[3]) {
+    FUN_1800409e0(param_3,*param_3,param_3[3] + 1);
+  }
+  param_3[3] = 0xf;
+  param_3[2] = 0;
+  *(undefined1 *)param_3 = 0;
+  if (0xf < (ulonglong)param_4[3]) {
+    FUN_1800409e0(param_4,*param_4,param_4[3] + 1);
+  }
+  param_4[3] = 0xf;
+  param_4[2] = 0;
+  *(undefined1 *)param_4 = 0;
+  if (0xf < (ulonglong)param_5[3]) {
+    FUN_1800409e0(param_5,*param_5,param_5[3] + 1);
+  }
+  param_5[3] = 0xf;
+  param_5[2] = 0;
+  *(undefined1 *)param_5 = 0;
+  if (0xf < (ulonglong)param_6[3]) {
+    FUN_1800409e0(param_6,*param_6,param_6[3] + 1);
+  }
+  param_6[3] = 0xf;
+  param_6[2] = 0;
+  *(undefined1 *)param_6 = 0;
+  return;
+}
+
+

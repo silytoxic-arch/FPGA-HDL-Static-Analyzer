@@ -15,3 +15,6 @@
 *.ico binary
 *.icns binary
 *.zip binary
+
+# Retained native evidence is SHA-addressed: preserve raw bytes across platforms.
+reverse-tools/evidence/** -text -whitespace

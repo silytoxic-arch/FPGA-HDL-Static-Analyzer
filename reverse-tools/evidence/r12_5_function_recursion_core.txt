@@ -1,0 +1,50 @@
+Target: T-Linter.dll
+SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Tool: Ghidra 12.1.4 static decompiler/listing
+
+Registration and dispatch
+- Constructor: FUN_180588ac0
+- Registered key: GJB10157_VLOG.9.3.5
+- Vtable: 0x180ef5d80
+- slot 0/run: FUN_180588f70
+- slot 2/selector: FUN_18058a120
+- DFS: FUN_18058a1e0
+
+Selector facts
+- node type at +4 must equal 4 (AST_FUNCTION)
+- constructs a one-element type set containing 0x1c (AST_FCALL)
+- recursively calls FUN_1804f3870
+- accepts iff the collected FCALL vector is nonempty
+
+Run facts
+- candidate function names are inserted into the ordered map at object+0x158
+- existing exact-name entries have their node pointer at map-node+0x40 overwritten
+- for each candidate, all descendant type-0x1c nodes are collected
+- each FCALL name is exact-looked-up in +0x158; absent names create no edge
+- caller-name adjacency is stored at object+0x198; callees remain in collection order
+- each caller/callee edge seeds path object+0x168 with caller, then calls DFS(callee)
+- cycle records are vectors copied to object+0x180
+
+DFS facts from FUN_18058a1e0
+- object+0x1a8 is the active-name ordered set
+- reentry records only when current name equals path[0]
+- reentry to another active name returns without a record
+- nonactive names are pushed to active set and path, adjacency is traversed, then both are popped
+- closure looks up the entire active set in object+0x1b8 using FUN_18058a970
+- absent set is inserted with FUN_180588740
+- only then FUN_1802db780 copies path +0x168 into records +0x180
+
+Set comparator facts from FUN_180588900
+- accepts two ordered-set begin/end ranges
+- compares each stored string by min length memcmp, then length
+- advances both set iterators lexicographically
+- orders by the first unequal member or by range exhaustion
+Therefore +0x1b8 is a set keyed by the complete active-name set. Cycle rotations,
+repeated call sites and different traversal paths with the same members deduplicate.
+
+Reporting facts
+- each 0x18-byte cycle vector record is copied
+- its first string resolves the report FUNCTION through +0x158
+- source path is read from function+0x1e0 and physical line from function+0x210
+- one report is emitted per retained cycle record
+- internal severity literal is Warning

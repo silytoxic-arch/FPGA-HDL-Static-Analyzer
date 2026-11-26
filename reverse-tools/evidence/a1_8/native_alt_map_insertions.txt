@@ -1,0 +1,95 @@
+Target: T-Linter.dll
+
+=== 0x18062b8a0 FUN_18062b8a0 ===
+completed=true; error=
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+void FUN_18062b8a0(longlong param_1,undefined8 *param_2,undefined8 param_3)
+
+{
+  undefined8 uVar1;
+  undefined1 auStack_58 [32];
+  longlong local_38;
+  undefined8 *puStack_30;
+  longlong local_28;
+  undefined8 local_20;
+  undefined8 *local_18;
+  ulonglong local_10;
+  
+  local_20 = 0xfffffffffffffffe;
+  local_10 = DAT_18131ef10 ^ (ulonglong)auStack_58;
+  local_38 = 0;
+  puStack_30 = (undefined8 *)0x0;
+  local_28 = 0;
+  local_18 = param_2;
+  FUN_1800daf20(&local_38,1);
+  if (puStack_30 != (undefined8 *)0x0) {
+    *puStack_30 = param_3;
+  }
+  puStack_30 = puStack_30 + 1;
+  uVar1 = FUN_18062a950(param_1 + 0x78,param_2);
+  FUN_1801ad090(uVar1,&local_38);
+  if (local_38 != 0) {
+    FUN_18043ae30(local_38,local_28 - local_38 >> 3);
+    local_38 = 0;
+    puStack_30 = (undefined8 *)0x0;
+    local_28 = 0;
+  }
+  if (0xf < (ulonglong)param_2[3]) {
+    FUN_1800409e0(param_2,*param_2,param_2[3] + 1);
+  }
+  param_2[3] = 0xf;
+  param_2[2] = 0;
+  *(undefined1 *)param_2 = 0;
+  return;
+}
+
+
+
+=== 0x18062b9a0 FUN_18062b9a0 ===
+completed=true; error=
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+void FUN_18062b9a0(longlong param_1,undefined8 *param_2,undefined8 param_3)
+
+{
+  undefined8 uVar1;
+  undefined1 auStack_58 [32];
+  longlong local_38;
+  undefined8 *puStack_30;
+  longlong local_28;
+  undefined8 local_20;
+  undefined8 *local_18;
+  ulonglong local_10;
+  
+  local_20 = 0xfffffffffffffffe;
+  local_10 = DAT_18131ef10 ^ (ulonglong)auStack_58;
+  local_38 = 0;
+  puStack_30 = (undefined8 *)0x0;
+  local_28 = 0;
+  local_18 = param_2;
+  FUN_1800daf20(&local_38,1);
+  if (puStack_30 != (undefined8 *)0x0) {
+    *puStack_30 = param_3;
+  }
+  puStack_30 = puStack_30 + 1;
+  uVar1 = FUN_18062a950(param_1 + 0x88,param_2);
+  FUN_1801ad090(uVar1,&local_38);
+  if (local_38 != 0) {
+    FUN_18043ae30(local_38,local_28 - local_38 >> 3);
+    local_38 = 0;
+    puStack_30 = (undefined8 *)0x0;
+    local_28 = 0;
+  }
+  if (0xf < (ulonglong)param_2[3]) {
+    FUN_1800409e0(param_2,*param_2,param_2[3] + 1);
+  }
+  param_2[3] = 0xf;
+  param_2[2] = 0;
+  *(undefined1 *)param_2 = 0;
+  return;
+}
+
+

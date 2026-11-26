@@ -1,0 +1,71 @@
+Target: T-Linter.dll
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB9765_VHDL.4.6.a (public R-6-1)
+Provider: Ghidra 12.1.4 static decompilation through retained REA evidence
+Entry: FUN_1805fa8a0 @ 0x1805fa8a0
+Connection builder: FUN_1804d0140 @ 0x1804d0140
+Primary retained Evidence: ev_f2d417d75228aa444f0bee46faed19340470eeea24e79afc2cfd3fff000e5ec0
+
+Observed entry boundary
+-----------------------
+FUN_1805fa8a0 copies both project/root resolver containers and invokes the
+same connection builder used by A-5-32:
+
+  FUN_1804a3db0(local_2f8, local_3d8 + 0x68, ...);
+  FUN_1804a3db0(local_2e8, local_318, ...);
+  FUN_1804d0140(local_3e0, &local_3c0, local_2e8, local_2f8);
+
+For every returned 0x70-byte connection record it reads the integer at +0x68.
+Kinds 1, 2 and 7 copy the record name into the rule object's driver-name set:
+
+  local_180 = *(int *)(record + 0x68);
+  if ((local_180 - 1U < 2) || (local_180 == 7)) {
+      ...
+      if (name is a candidate) insert(name, driver_set);
+  }
+
+The later connection pass copies a record and enters the diagnostic path only
+for kind 3 with its copied flag equal to zero:
+
+  FUN_1804a3ed0(local_a8, record);
+  if ((local_88 == 3) && (local_40 == 0)) {
+      name = local_a8.name;
+      if (name is candidate && name not in driver_set && name not reported)
+          emit(name, record source location);
+  }
+
+Observed builder direction encoding
+-----------------------------------
+FUN_1804d0140 derives a connection kind from three declaration bytes:
+
+  if (*(byte *)(formal + 0xa0) != 0) kind = 0;
+  else if (*(byte *)(formal + 0xa1) != 0) kind = 1;
+  else if (*(byte *)(formal + 0x104) != 0) kind = 2;
+  else kind = 3;
+
+Independent DLL branches plus the packaged R/A suffix examples establish:
+
+  +0xa0 = VHDL IN
+  +0xa1 = VHDL OUT
+  +0x104 = VHDL INOUT
+
+Thus OUT and INOUT connection records are admitted to the driver set. An
+internal actual has kind 3; when it is connected as a source for an input
+formal, the undriven internal-actual record reaches the kind-3 diagnostic
+branch. Kind 7 remains an unresolved/builder fallback driver class; its exact
+producer is not recovered.
+
+Product integration boundary
+----------------------------
+The product may therefore classify a direct identifier actual only when its
+formal direction is available from exactly one project entity or from a local
+component declaration:
+
+  * IN formal: actual is a hierarchy read and requires a recognized driver.
+  * OUT or INOUT formal: actual is a hierarchy driver.
+  * ambiguous entity, implicit component, OPEN, expression/selected actual,
+    configuration/generate binding: do not guess; retain ManualReviewRequired.
+
+This is a static observation/inference from the shipped binary and identity-
+bound documentation. It does not establish full frontend, elaboration,
+diagnostic ordering or complete vendor algorithm equivalence.

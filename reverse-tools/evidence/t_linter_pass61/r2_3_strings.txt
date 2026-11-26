@@ -1,0 +1,26 @@
+T-Linter.dll SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Encoding: GB18030, decoded directly from PE image bytes
+
+Candidate AST type array at 0x180eeba20:
+  02 00 00 00  06 00 00 00  09 00 00 00  0a 00 00 00
+Additional stack entries in FUN_180535e60:
+  4f 00 00 00  03 00 00 00  04 00 00 00
+Together: AST_MODULE(2), AST_WIRE(6), AST_PARAMETER(9),
+AST_LOCALPARAM(10), AST_CELL(79), AST_TASK(3), AST_FUNCTION(4).
+
+0x180eed85c  VHDL
+0x180eed868  禁止使用VHDL关键字同名的
+inline         Verilog
+0x180eed890  禁止使用Verilog关键字同名的
+inline         SystemVerilog
+0x180eed8c0  禁止使用SystemVerilog关键字同名的
+inline         SDF/EDIF
+0x180eed8f8  禁止使用SDF/EDIF关键字同名的
+0x180eed918  PSL
+0x180eed920  禁止使用PSL关键字同名的
+inline         Windows
+0x180eed940  禁止使用Windows关键字同名的
+inline         error
+
+Each diagnostic is the category-specific prefix concatenated directly with
+the original normalized candidate name. There is no separator or suffix.

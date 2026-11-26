@@ -1,0 +1,60 @@
+T-Linter.dll target
+SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Rule: GJB10157_VLOG.9.3.2 / official R-12-2
+Primary predicate: FUN_180586120
+Ordered-set insertion helper: FUN_180580440
+Message data: DAT_180ef5870
+
+Observed primary-predicate facts (Ghidra 12.1.4 static decompilation):
+
+1. An admitted loop is AST_FOR(0x5c), has exactly four children, and its
+   fourth child is AST_BLOCK(0x54).
+2. The counter name is copied only from the first child when that child is
+   AST_ASSIGN_EQ(0x55).
+3. Direct AST_PARAMETER/AST_LOCALPARAM children (types 9 and 10) of the
+   enclosing AST_MODULE are stored in a parameter-name container.
+4. The loop body is searched for AST_CASE(0x57) nodes. Arithmetic descendants
+   are selected with the exact type list 0x3c,0x3d,0x3e,0x3f,0x40,0x42:
+   AST_ADD, AST_SUB, AST_MUL, AST_DIV, AST_MOD and AST_POW. 0x41 is not present.
+5. Every AST_IDENTIFIER(0x13) descendant of each selected arithmetic node is
+   inserted into the container through FUN_180580440.
+6. A candidate is excluded when its name equals the loop-counter name or when
+   its name occurs in the stored parameter/localparam-name container.
+7. A remaining candidate reports Warning at the identifier AST source path
+   (+0x1e0) and line (+0x210), not at the arithmetic operator.
+
+FUN_180580440 recovered comparison:
+
+    if (param_3 == '\0')
+        less = *param_4 < (ulonglong)node[4];
+    else
+        less = *param_4 <= (ulonglong)node[4];
+
+The caller passes the AST pointer itself through param_4. The tree is therefore
+keyed by identifier-node address, not identifier spelling. The same identifier
+AST reached from nested parent/child arithmetic nodes is deduplicated, while
+two separate source occurrences of the same name remain separate candidates.
+
+DAT_180ef5870 bytes (GBK, before NUL):
+
+bd fb d6 b9 d4 da 66 6f 72 d3 ef be e4 d6 d0 b6 d4 d1 ad bb b7 b1 e4 c1 bf
+d6 b5 25 73 d6 ae cd e2 b5 c4 b1 e4 c1 bf 25 73 bd f8 d0 d0 cb e3 ca f5 d4
+cb cb e3 2e
+
+Decoded GBK message template:
+
+禁止在for语句中对循环变量值%s之外的变量%s进行算术运算.
+
+Evidence authorities:
+- ev_f2d4ff2f81f3ca6bb409fa6cff035938526ab406ed22aac5eff28d013db70179
+  (complete FUN_180586120 pseudo-code)
+- ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b
+  (supporting procedure evidence)
+- Fresh read-only Ghidra extraction of FUN_180580440 and DAT_180ef5870 on
+  2026-11-11 from the same DLL digest.
+
+Boundaries:
+- Static evidence only; the vendor DLL was not executed.
+- Exact frontend AST_CASE lowering, diagnostic global order, generated source
+  mapping, malformed-source behavior, macro expansion identity, and interaction
+  with other rule passes remain unresolved.

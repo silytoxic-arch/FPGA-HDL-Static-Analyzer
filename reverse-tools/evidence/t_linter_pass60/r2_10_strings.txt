@@ -1,0 +1,12 @@
+T-Linter.dll SHA-256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Encoding: GB18030, decoded directly from PE image bytes
+
+0x180eebb28  bd fb d6 b9 b6 a5 b2 e3 b5 c4 ca e4 c8 eb b9 dc bd c5
+               禁止顶层的输入管脚
+0x180eebb20  d0 fc bf d5
+               悬空
+inline         65 72 72 6f 72
+               error
+
+FUN_18052cd30 constructs:
+  禁止顶层的输入管脚 + normalized candidate name + 悬空
