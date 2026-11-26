@@ -1,0 +1,157 @@
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+Context 180e6a7f0 slot 128 -> 18017b6b0
+
+void FUN_18017b6b0(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+  
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Vhdl2008ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x00018017b6ef. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0xf08))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e802b8 + f08 -> 1801c23f0
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+void FUN_1801c23f0(undefined8 param_1,longlong *param_2)
+
+{
+  undefined8 *puVar1;
+  void *pvVar2;
+  void **ppvVar3;
+  void **ppvVar4;
+  undefined4 uVar5;
+  void *pvVar6;
+  longlong *plVar7;
+  undefined8 *puVar8;
+  longlong lVar9;
+  undefined1 auStack_88 [32];
+  undefined8 local_68;
+  undefined8 local_60;
+  void *local_58;
+  undefined8 local_50;
+  undefined1 local_48;
+  undefined7 uStack_47;
+  undefined8 local_38;
+  ulonglong local_30;
+  ulonglong local_28;
+  
+  local_50 = 0xfffffffffffffffe;
+  local_28 = DAT_18131ef10 ^ (ulonglong)auStack_88;
+  local_58 = operator_new(0x2c8);
+  pvVar6 = (void *)0x0;
+  if (local_58 != (void *)0x0) {
+    local_60 = 0;
+    local_68 = 0;
+    pvVar6 = (void *)FUN_1808d8dc0(local_58,0x9f,0,0);
+  }
+  local_58 = pvVar6;
+  plVar7 = (longlong *)FUN_180185660(param_2);
+  puVar8 = (undefined8 *)(**(code **)(*plVar7 + 0x30))(plVar7,&local_48);
+  puVar1 = (undefined8 *)((longlong)pvVar6 + 0x48);
+  if (puVar1 != puVar8) {
+    if (0xf < *(ulonglong *)((longlong)pvVar6 + 0x60)) {
+      FUN_1800409e0(puVar1,*puVar1,*(ulonglong *)((longlong)pvVar6 + 0x60) + 1);
+    }
+    *(undefined8 *)((longlong)pvVar6 + 0x60) = 0xf;
+    *(undefined8 *)((longlong)pvVar6 + 0x58) = 0;
+    *(undefined1 *)puVar1 = 0;
+    FUN_18004ad80(puVar1,puVar8);
+  }
+  if (0xf < local_30) {
+    FUN_1800409e0(&local_48,CONCAT71(uStack_47,local_48),local_30 + 1);
+  }
+  local_30 = 0xf;
+  local_38 = 0;
+  local_48 = 0;
+  plVar7 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  uVar5 = (**(code **)(*plVar7 + 0x18))(plVar7);
+  *(undefined4 *)((longlong)pvVar6 + 0x214) = uVar5;
+  plVar7 = (longlong *)(**(code **)(*param_2 + 0xa8))(param_2);
+  uVar5 = (**(code **)(*plVar7 + 0x18))(plVar7);
+  *(undefined4 *)((longlong)pvVar6 + 0x200) = uVar5;
+  pvVar2 = DAT_18133caf0[-1];
+  ppvVar3 = *(void ***)((longlong)pvVar2 + 0x10);
+  if ((&local_58 < ppvVar3) && (ppvVar4 = *(void ***)((longlong)pvVar2 + 8), ppvVar4 <= &local_58))
+  {
+    if (ppvVar3 == *(void ***)((longlong)pvVar2 + 0x18)) {
+      FUN_1800db6d0((longlong)pvVar2 + 8,1);
+    }
+    if (*(undefined8 **)((longlong)pvVar2 + 0x10) != (undefined8 *)0x0) {
+      **(undefined8 **)((longlong)pvVar2 + 0x10) =
+           *(undefined8 *)
+            (*(longlong *)((longlong)pvVar2 + 8) +
+            ((longlong)&local_58 - (longlong)ppvVar4 >> 3) * 8);
+    }
+  }
+  else {
+    if (ppvVar3 == *(void ***)((longlong)pvVar2 + 0x18)) {
+      FUN_1800db6d0((longlong)pvVar2 + 8,1);
+    }
+    if (*(undefined8 **)((longlong)pvVar2 + 0x10) != (undefined8 *)0x0) {
+      **(undefined8 **)((longlong)pvVar2 + 0x10) = pvVar6;
+    }
+  }
+  *(longlong *)((longlong)pvVar2 + 0x10) = *(longlong *)((longlong)pvVar2 + 0x10) + 8;
+  if ((&local_58 < DAT_18133caf0) && (DAT_18133cae8 <= &local_58)) {
+    lVar9 = (longlong)&local_58 - (longlong)DAT_18133cae8;
+    if (DAT_18133caf0 == DAT_18133caf8) {
+      FUN_1800db6d0(&DAT_18133cae8,1);
+    }
+    if (DAT_18133caf0 != (void **)0x0) {
+      *DAT_18133caf0 = DAT_18133cae8[lVar9 >> 3];
+    }
+  }
+  else {
+    if (DAT_18133caf0 == DAT_18133caf8) {
+      FUN_1800db6d0(&DAT_18133cae8,1);
+    }
+    if (DAT_18133caf0 != (void **)0x0) {
+      *DAT_18133caf0 = pvVar6;
+    }
+  }
+  DAT_18133caf0 = DAT_18133caf0 + 1;
+  return;
+}
+
+
+Context 180e6a7f0 slot 136 -> 180182400
+
+void FUN_180182400(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+  
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Vhdl2008ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x00018018243f. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0xf10))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e802b8 + f10 -> 1801c9d70
+
+void FUN_1801c9d70(void)
+
+{
+  DAT_18133caf0 = DAT_18133caf0 + -8;
+  return;
+}
+

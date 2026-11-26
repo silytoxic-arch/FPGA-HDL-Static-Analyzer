@@ -1,0 +1,42 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "method": "Static context/listener dispatch tracing and decompilation; no vendor execution. Source-adapter regression cases are not a vendor runtime oracle.",
+  "files": [
+    {
+      "path": "reverse-tools/evidence/t_linter_pass129/type_contexts.txt",
+      "size": 1434,
+      "sha256": "d39394bb0fefe6641e663e7c08be870b63526f574b41f608795ea530a5cde3fe",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass129/type_declaration_symbols.txt",
+      "size": 1350,
+      "sha256": "12aba38b4dbcfd19167644014dc6287077f2f59ef6db37e46c635ec10274e2a0",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass129/subtype_listener.txt",
+      "size": 4785,
+      "sha256": "3c124ea62aaca5668ef27ba9be7ff4ac45cf3ebd2ebb4920827dd07c9dc91ab1",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass129/enumeration_listener.txt",
+      "size": 1484,
+      "sha256": "d944b71d0811e3d65e67558012ca34cbd31030806e4478e258633fce0993479d",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass129/type_declaration_listener.txt",
+      "size": 8564,
+      "sha256": "556274c36f8efd1d9031c7dc131f64b64b1f2acb4a2782042fdcfe191feda1a5",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass129/subtype_indication_listener.txt",
+      "size": 23594,
+      "sha256": "6a294f24be314298f2fb7f09606b8c2950d50681cd6b9181448b496bc7605c51",
+      "role": "static-evidence"
+    }
+  ]
+}

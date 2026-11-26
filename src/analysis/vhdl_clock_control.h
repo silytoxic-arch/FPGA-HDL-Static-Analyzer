@@ -120,6 +120,44 @@ class Scanner {
         return name=="rising_edge" || name=="falling_edge" ||
             name=="std_logic" || name=="std_ulogic";
     }
+    // Only bounded declaration grammar is skipped here. Native subtype-name
+    // normalization is not recovered: these names never become IEEE aliases.
+    std::optional<std::size_t> typeDeclaration(std::size_t start,std::size_t limit,
+                                               Names& names,Bindings& bindings) const {
+        if (start+3>=limit || !basic(t[start+1]) || !word(start+2,"is")) return std::nullopt;
+        const auto name=lower(t[start+1].text);
+        if (primitiveShadow(name)) return std::nullopt;
+        std::vector<std::string> hidden{name};
+        auto i=start+3;
+        if (word(start,"subtype")) {
+            // A bare/selected type mark only; constraints/resolution indications
+            // and package visibility are not inferred from the final spelling.
+            if (!basic(t[i])) return std::nullopt;
+            ++i;
+            while (i<limit && t[i].text==".") {
+                if (++i>=limit || !basic(t[i])) return std::nullopt;
+                ++i;
+            }
+        } else {
+            if (t[i].text!="(") return std::nullopt;
+            ++i;
+            std::set<std::string> literals;
+            for (;;) {
+                if (i>=limit || !basic(t[i]) || word(i,"begin") || word(i,"end")) return std::nullopt;
+                const auto literal=lower(t[i].text);
+                if (primitiveShadow(literal) || literal==name || !literals.insert(literal).second)
+                    return std::nullopt;
+                hidden.push_back(literal);
+                if (++i>=limit) return std::nullopt;
+                if (t[i].text==")") { ++i; break; }
+                if (t[i].text!=",") return std::nullopt;
+                ++i;
+            }
+        }
+        if (i>=limit || t[i].text!=";") return std::nullopt;
+        for (const auto& identifier:hidden) { names.erase(identifier); bindings.erase(identifier); }
+        return i+1;
+    }
     // Declaration names hide outer objects before their type is considered.
     // Non-scalar objects and constants never inherit an outer scalar binding.
     std::optional<std::size_t> declarationBody(std::size_t start,std::size_t limit,
@@ -128,7 +166,14 @@ class Scanner {
         bool sawDeclaration=false;
         while (i<limit) {
             if (word(i,"begin")) return i+1;
-            if (!word(i,"signal") && !word(i,"constant")) {
+            if (word(i,"type") || word(i,"subtype")) {
+                const auto next=typeDeclaration(i,limit,names,bindings);
+                if (!next) return std::nullopt;
+                sawDeclaration=true;
+                i=*next;
+                continue;
+            }
+            if (!word(i,"signal") && !word(i,"constant") && !word(i,"variable") && !word(i,"file")) {
                 if (beginRequired || sawDeclaration || word(i,"type") || word(i,"subtype") ||
                     word(i,"function") || word(i,"procedure") || word(i,"alias") ||
                     word(i,"package") || word(i,"use") || word(i,"attribute") ||
@@ -505,25 +550,22 @@ public:
                 const auto end=unitEnd(i+5,"architecture",lower(t[i+1].text));
                 if (end==t.size()) { result.incomplete=true; break; }
                 const auto entity=entities.find(lower(t[i+3].text));
-                auto begin=i+5;
-                while (begin<end && !word(begin,"begin")) ++begin;
-                bool shadow=false;
-                for (auto j=i+5;j<begin;++j)
-                    if (word(j,"function") || word(j,"procedure") || word(j,"package") ||
-                        word(j,"alias") || word(j,"subtype") || word(j,"type")) shadow=true;
-                for (auto j=i+5;j<begin;++j) if (word(j,"use")) shadow=true;
                 bool hasInterveningUse=false;
                 for (auto j=context;j<i;++j) if (word(j,"use")) hasInterveningUse=true;
                 const auto entityName=lower(t[i+3].text);
                 const bool boundIeee=ieee(context,i) ||
                     (!hasInterveningUse && ieeeEntities.contains(entityName));
-                if (!boundIeee || entity==entities.end() || shadow || begin==end) {
+                if (!boundIeee || entity==entities.end()) {
                     result.incomplete=true;
                 } else {
-                    auto names=entity->second; declaredNames(i+5,begin,names,false);
+                    auto names=entity->second;
                     Bindings bindings;
                     for (const auto& name:names) bindings[name]=arch;
-                    concurrent(begin+1,end,arch,names,bindings);
+                    // Consume declarations in visibility order. Searching for the
+                    // first BEGIN would mistake a subprogram body for this unit.
+                    const auto begin=declarationBody(i+5,end,names,bindings,true);
+                    if (begin) concurrent(*begin,end,arch,names,bindings);
+                    else result.incomplete=true;
                 }
                 auto semi=end+1; while (semi<t.size()&&t[semi].text!=";") ++semi;
                 i=semi; context=std::min(i+1,t.size());

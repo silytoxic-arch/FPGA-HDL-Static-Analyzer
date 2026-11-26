@@ -8673,6 +8673,36 @@ int main() {
             evaluation.state == analysis::StandardRuleState::ManualReviewRequired;
     }), "partial clock detector no alarm stays manual review");
 
+    const auto clockDeclarations = [&](const std::string& declarations, const std::string& body) {
+        auto text=clockWrap(body);
+        const auto begin=text.find("architecture rtl of dut is begin");
+        text.replace(begin, std::string("architecture rtl of dut is begin").size(),
+                     "architecture rtl of dut is "+declarations+" begin");
+        return text;
+    };
+    result = analyze(clockDeclarations("type state_t is (IDLE,RUN); signal state:state_t;", clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 1,
+          "an architecture enum no longer suppresses a proven native clock/control diagnostic");
+    result = analyze(clockDeclarations("subtype clock_t is std_logic; signal clk:clock_t;", clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 0 &&
+          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+              return item.clauseId == "GJB9765.4.10.h" &&
+                     item.state == analysis::StandardRuleState::ManualReviewRequired;
+          }), "unrecovered subtype normalization remains review-required end to end");
+    result = analyze(clockWrap("b:block is type state_t is (clk,RUN); begin "+clockReuse+
+        " end block;\n"+clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB9765.4.10.h" && item.line == 6 && item.column == 1;
+          }), "an enum-literal shadow is isolated without losing the outer clock source location");
+    result = analyze(clockDeclarations("type state_t is (IDLE,RUN);",
+        "process(clk) begin if rising_edge(clk) then dout<=din; end if; end process;"), true);
+    check(count(result, "GJB9765.4.10.h") == 0 &&
+          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+              return item.clauseId == "GJB9765.4.10.h" &&
+                     item.state == analysis::StandardRuleState::ManualReviewRequired;
+          }), "accepting enum declarations does not convert absence of an alarm into compliance");
+
     result = analyze(
         "entity probe is port(clk,a,b:in bit; d:out bit); end entity;\n"
         "architecture rtl of probe is signal my_temp1,my_temp2:bit; begin\n"

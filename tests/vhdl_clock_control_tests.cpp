@@ -92,6 +92,59 @@ int main() {
             ++failures; std::cerr<<"FAIL edge-triggered data assignment boundary\n";
         }
     }
+    // Type nodes must not suppress unrelated clock/control relations. Alias
+    // normalization is deliberately not supplied by a source-spelling guess.
+    check(wrap(same,"type state_t is (IDLE,RUN); signal state:state_t;"),1,1,false,
+        "ordinary architecture enumeration no longer rejects the complete unit");
+    check(wrap(same,"TYPE state_t IS (Idle,Run);"),1,1,false,"enumeration keywords are case insensitive");
+    check(wrap(other,"type state_t is (IDLE,RUN);"),1,0,false,"an enum cannot invent a clock/control pair");
+    check(wrap(same,"subtype data_t is std_logic;"),1,1,false,"unused subtype leaves proven clocks visible");
+    check(wrap(same,"subtype data_t is work.pkg.std_logic;"),1,1,false,
+        "unused selected subtype marks do not change known signal bindings");
+    check(wrap(same,"subtype clock_t is std_logic; signal clk:clock_t;"),0,0,true,
+        "native subtype normalization is not guessed from its base spelling");
+    check(wrap(same,"subtype clock_t is work.pkg.std_logic; signal clk:clock_t;"),0,0,true,
+        "a selected type ending in std_logic is not IEEE proof");
+    check(wrap(same,"subtype first_t is std_logic; subtype second_t is first_t; signal clk:second_t;"),0,0,true,
+        "unrecovered subtype chains cannot inherit an outer object binding");
+    check(wrap(same,"subtype clock_t is unknown_t; signal clk:clock_t;"),0,0,true,
+        "a missing subtype base cannot inherit an outer object binding");
+    check(wrap(same,"subtype clk is std_logic;"),0,0,true,"a subtype name hides an outer object");
+    check(wrap(same,"type clk is (IDLE,RUN);"),0,0,true,"a type name hides an outer object");
+    check(wrap(same,"type state_t is (clk,RUN);"),0,0,true,"an enum literal cannot reuse an outer signal binding");
+    check(wrap(same,"type state_t is (IDLE,rst);"),1,1,false,"an unrelated hidden control name does not hide clk");
+    check(wrap(same,"type state_t is (rising_edge,RUN);"),0,0,true,"overloaded enum edge names remain unknown");
+    check(wrap(same,"type state_t is (std_logic,RUN);"),0,0,true,"enum literals cannot silently shadow IEEE types");
+    check(wrap(same,"type std_logic is (IDLE,RUN);"),0,0,true,"local IEEE type replacement remains unknown");
+    check(wrap(same,"type state_t is (IDLE,);"),0,0,true,"a trailing enum comma is unsupported");
+    check(wrap(same,"type state_t is ();"),0,0,true,"empty enumerations cannot establish a declaration boundary");
+    check(wrap(same,"type state_t is (IDLE,IDLE);"),0,0,true,"duplicate enum literals remain unknown");
+    check(wrap(same,"type state_t is (IDLE,RUN)"),0,0,true,"missing enum semicolon does not swallow BEGIN");
+    check(wrap(same,"subtype clock_t is ;"),0,0,true,"missing subtype mark remains unknown");
+    check(wrap(same,"subtype clock_t is work..std_logic;"),0,0,true,"empty selected-name segments remain unknown");
+    check(wrap(same,"subtype clock_t is std_logic range '0' to '1';"),0,0,true,
+        "constraints are not mistaken for a supported bare subtype mark");
+    check(wrap(same,"type state_t is record clk:std_logic; end record;"),0,0,true,
+        "record declarations are not skipped using the first inner semicolon");
+    check(wrap(same,"type state_t is ('0','1');"),0,0,true,"character enumeration lowering remains unknown");
+    check(wrap(same,"type state_t is (IDLE,RUN); signal clk:state_t;"),0,0,true,
+        "enum-typed clocks cannot inherit an outer scalar binding");
+    check(wrap("b:block is signal clk:std_logic; begin "+same+" end block;","subtype clk is std_logic;"),1,1,false,
+        "ordered declarations bind a later explicit signal independently");
+    check(wrap(same,"signal clk:std_logic; subtype clk is std_logic;"),0,0,true,
+        "a later subtype must hide an earlier signal");
+    check(wrap("b:block is type state_t is (IDLE,RUN); begin "+same+" end block;"),1,1,false,
+        "block enums preserve inherited clock bindings");
+    check(wrap("g:if true generate subtype data_t is std_logic; begin "+same+" end generate;"),1,1,false,
+        "generate subtypes preserve unrelated inherited clocks");
+    check(wrap("b:block is type state_t is (clk,RUN); begin "+same+" end block;"+same),1,1,true,
+        "local enum hiding is restored after the block");
+    check(wrap("b:block is subtype clk is std_logic; begin "+same+" end block;"+same),1,1,true,
+        "local subtype hiding is restored after the block");
+    check(wrap("b:block is type state_t is record x:integer; end record; begin "+same+" end block;"+same),1,1,true,
+        "unsupported type bodies do not erase proven outer diagnostics");
+    check(wrap(same,"type state_t is (IDLE,RUN); signal clk:state_t;")+wrap(same),1,1,true,
+        "type declarations and their unknown uses do not leak across architectures");
     const auto postponed=std::string("p: postponed ")+same.substr(0,same.find("end process;"))+"end postponed process p;";
     check(wrap(postponed),1,1,false,"named END POSTPONED PROCESS closes exactly once");
     check(wrap(postponed+same),2,4,false,"adjacent postponed and ordinary processes preserve cross pairs");

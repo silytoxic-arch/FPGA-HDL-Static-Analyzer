@@ -1,0 +1,59 @@
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+Context 180e63900 slot 128 -> 180178b40
+
+void FUN_180178b40(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+  
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Vhdl2008ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x000180178b7f. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0x608))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e802b8 + 608 -> 1800e7160
+
+void _guard_check_icall(void)
+
+{
+  return;
+}
+
+
+Context 180e63900 slot 136 -> 18017f890
+
+void FUN_18017f890(undefined8 param_1,undefined8 param_2)
+
+{
+  longlong *plVar1;
+  
+  plVar1 = (longlong *)
+           __RTDynamicCast(param_2,0,&antlr4::tree::ParseTreeListener::RTTI_Type_Descriptor,
+                           &antlrcpptest::Vhdl2008ParserListener::RTTI_Type_Descriptor,0);
+  if (plVar1 != (longlong *)0x0) {
+                    /* WARNING: Could not recover jumptable at 0x00018017f8cf. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*plVar1 + 0x610))(plVar1,param_1);
+    return;
+  }
+  return;
+}
+
+
+Listener 180e802b8 + 610 -> 1800e7160
+
+void _guard_check_icall(void)
+
+{
+  return;
+}
+

@@ -1,0 +1,14 @@
+180e6a8b0 antlrcpptest::Vhdl2008ParserParser::Subtype_indicationContext::vftable_meta_ptr
+180e6a8b8 antlrcpptest::Vhdl2008ParserParser::Subtype_indicationContext::vftable
+180e6afb8 antlrcpptest::Vhdl2008ParserParser::Type_declarationContext::vftable_meta_ptr
+180e6afc0 antlrcpptest::Vhdl2008ParserParser::Type_declarationContext::vftable
+180fedf40 antlrcpptest::Vhdl2008ParserParser::Subtype_indicationContext::RTTI_Complete_Object_Locator
+180fedf68 antlrcpptest::Vhdl2008ParserParser::Subtype_indicationContext::RTTI_Class_Hierarchy_Descriptor
+180fedf80 antlrcpptest::Vhdl2008ParserParser::Subtype_indicationContext::RTTI_Base_Class_Array
+180fedfa8 antlrcpptest::Vhdl2008ParserParser::Subtype_indicationContext::RTTI_Base_Class_Descriptor_at_(0,-1,0,64)
+180fee450 antlrcpptest::Vhdl2008ParserParser::Type_declarationContext::RTTI_Complete_Object_Locator
+180fee478 antlrcpptest::Vhdl2008ParserParser::Type_declarationContext::RTTI_Class_Hierarchy_Descriptor
+180fee490 antlrcpptest::Vhdl2008ParserParser::Type_declarationContext::RTTI_Base_Class_Array
+180fee4b8 antlrcpptest::Vhdl2008ParserParser::Type_declarationContext::RTTI_Base_Class_Descriptor_at_(0,-1,0,64)
+181327a10 antlrcpptest::Vhdl2008ParserParser::Subtype_indicationContext::RTTI_Type_Descriptor
+181328ab0 antlrcpptest::Vhdl2008ParserParser::Type_declarationContext::RTTI_Type_Descriptor
