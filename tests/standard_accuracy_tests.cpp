@@ -3612,16 +3612,17 @@ int main() {
         "p: process(a) begin case a is\n"
         "when '0' => when others => q <= a; end case;\n"
         "end process; end architecture;\n", true);
-    check(count(result, "GJB9765.4.8.e") == 1 &&
-          std::ranges::any_of(result.violations, [](const auto& item) {
-              return item.ruleId == "GJB9765.4.8.e" && item.line == 4;
-          }), "native zero-child block predicate detects an empty case alternative once");
+    check(count(result, "GJB9765.4.8.e") == 0 &&
+          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+              return item.clauseId == "GJB9765.4.8.e" &&
+                     item.state == analysis::StandardRuleState::ManualReviewRequired;
+          }), "empty CASE alternatives are COND nodes, not recovered empty BLOCK nodes");
     result = analyze("entity probe is port(a: in bit); end entity;\n"
         "architecture rtl of probe is begin\n"
         "p: process(a) begin while a = '1' loop end loop; wait; end process;\n"
         "end architecture;\n", true);
-    check(count(result, "GJB9765.4.8.e") == 1,
-          "native zero-child block predicate detects an empty loop body once");
+    check(count(result, "GJB9765.4.8.e") == 0,
+          "empty LOOP bodies retain a LOOP child and are not empty sequential BLOCKs");
     // Entry-level report fields are independently recovered, even though the
     // source-to-AST adapter and every lowered-node location remain partial.
     for (const std::string body : {
@@ -3633,7 +3634,8 @@ int main() {
             "entity probe is end entity;\narchitecture rtl of probe is begin\n"
             "p: process begin\n  " + body +
             (closesProcess ? "\n" : "\nend process;\n") + "end architecture;\n", true);
-        const auto expected = body == "null; null; wait;" ? 2 : 1;
+        const auto expected = body == "null; null; wait;" ? 2 :
+            (body.starts_with("case") || body.starts_with("while")) ? 0 : 1;
         check(count(sample, "GJB9765.4.8.e") == expected &&
               std::ranges::all_of(sample.violations, [](const auto& item) {
                   return item.ruleId != "GJB9765.4.8.e" ||
@@ -3641,6 +3643,74 @@ int main() {
                           item.column == 1 && item.severity == analysis::Severity::Warning);
               }), "VHDL empty-statement reports preserve multiplicity and fixed native fields");
     }
+    const auto checkVhdlEmptyLines = [&](const std::string& statements,
+                                          std::vector<std::size_t> expected,
+                                          const char* description) {
+        const auto sample = analyze("entity probe is end entity;\n"
+            "architecture rtl of probe is begin\n" + statements + "\nend architecture;\n", true);
+        std::vector<std::size_t> actual;
+        for (const auto& item : sample.violations) {
+            if (item.ruleId != "GJB9765.4.8.e") continue;
+            actual.push_back(item.line);
+            check(item.message == "避免在进程中出现空语句" && item.column == 1 &&
+                  item.severity == analysis::Severity::Warning,
+                  "VHDL NULL/source-block variants retain the recovered report surface");
+        }
+        std::ranges::sort(actual);
+        std::ranges::sort(expected);
+        check(actual == expected, description);
+    };
+    checkVhdlEmptyLines("process\nbegin\nend process;", {3},
+        "empty process location belongs to the PROCESS context, not BEGIN");
+    checkVhdlEmptyLines("p:\nprocess\nbegin\nend process p;", {3},
+        "a multiline process label owns the empty root location");
+    checkVhdlEmptyLines("postponed\nprocess\nbegin\nend postponed process;", {3},
+        "POSTPONED starts an unlabeled process context");
+    checkVhdlEmptyLines("p:\npostponed\nprocess is\nbegin\nend postponed process p;", {3},
+        "a label precedes POSTPONED in the native process context");
+    checkVhdlEmptyLines("p: process(all) is\nbegin\nend process;", {3},
+        "an ALL-sensitive empty process has one empty root report");
+    checkVhdlEmptyLines("p: process is\nconstant C : integer := 0;\nbegin\nend process;", {},
+        "a process declaration occupies the native BLOCK even without sequential statements");
+    checkVhdlEmptyLines("p: process begin\nn:\nnull;\nwait; end process;", {4},
+        "labeled NULL statements use the sequential context label line");
+    checkVhdlEmptyLines("p: process begin\nn1: null; n2: null;\nwait; end process;", {4,4},
+        "different NULL labels on one line preserve separate empty-node reports");
+    checkVhdlEmptyLines("p: process\ntype ptr is access integer;\nvariable v: ptr :=\nnull;\n"
+        "begin wait; end process;", {6},
+        "a NULL literal in a process declaration is admitted before BEGIN");
+    checkVhdlEmptyLines("p: process\ntype ptr is access integer;\n"
+        "type ptrs is array(0 to 1) of ptr;\nvariable v: ptrs;\n"
+        "begin v := (null, null); wait; end process;", {7,7},
+        "NULL literals in aggregates are separate native nodes without a following semicolon");
+    checkVhdlEmptyLines("p: process\ntype ptr is access integer; variable v: ptr;\n"
+        "begin if v = null then v := null; end if; wait; end process;", {5,5},
+        "condition and assignment NULL literals each report once");
+    checkVhdlEmptyLines("p: process\ntype ptr is access integer;\n"
+        "function f return ptr is begin return\nnull; end function;\n"
+        "begin wait; end process;", {6},
+        "NULL literals in a local subprogram remain under the owning process tree");
+    checkVhdlEmptyLines("p: postponed process begin wait; end postponed process;\n"
+        "b: block is type ptr is access integer; signal v: ptr := null; begin end block;", {},
+        "END POSTPONED PROCESS closes admission before subsequent concurrent declarations");
+    checkVhdlEmptyLines("p: process begin null; wait; end process;\n"
+        "q:\npostponed process\nbegin\nend postponed process q;", {3,4},
+        "separate normal and postponed processes retain independent ownership");
+    checkVhdlEmptyLines("p: process begin report \"null; end process;\";\n"
+        "-- null;\nwait; end process;", {},
+        "strings and comments do not create NULL or process boundary tokens");
+    checkVhdlEmptyLines("p: process begin\nif\n true\nthen\nend if;\nwait; end process;", {5},
+        "the initial empty IF arm inherits the condition start, not THEN or IF");
+    checkVhdlEmptyLines("p: process begin\nif true then wait for 1 ns; else end if;\n"
+        "wait; end process;", {},
+        "a plain empty ELSE node is not an empty native BLOCK");
+    checkVhdlEmptyLines("p: process begin\nif true then wait for 1 ns; elsif\n"
+        "false then\nend if; wait; end process;", {0},
+        "an empty ELSIF true BLOCK preserves the native constructor's unknown line zero");
+    checkVhdlEmptyLines("p: process begin loop null; end loop; wait; end process;", {3},
+        "a real NULL statement inside a loop still creates an empty sequential BLOCK");
+    checkVhdlEmptyLines("p: process begin null;", {},
+        "an unterminated process does not establish an admitted native root");
     result = analyze("entity very_long_entity_name_for_scope is\n"
         "port(port_01234567890123456789: out bit; short: in bit); end entity;\n"
         "architecture rtl of very_long_entity_name_for_scope is\n"

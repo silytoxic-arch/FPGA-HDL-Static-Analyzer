@@ -4473,6 +4473,23 @@ endmodule
         std::nullopt, std::nullopt});
     standardIdResult.standardAssessments.push_back(
         {"GJB9765.4.8.e", analysis::StandardRuleState::Violated});
+    auto unknownLineResult = standardIdResult;
+    unknownLineResult.violations.front().line = 0;
+    std::ostringstream unknownLineSarif, unknownLineJson;
+    report::writeSarif(unknownLineResult, unknownLineSarif);
+    report::writeJson(unknownLineResult, unknownLineJson);
+    test.check(unknownLineSarif.str().find("\"ruleId\":\"A-8-1\"") != std::string::npos &&
+                   unknownLineSarif.str().find("rtl/a.vhd") != std::string::npos &&
+                   unknownLineSarif.str().find("\"region\"") == std::string::npos &&
+                   unknownLineJson.str().find("\"line\":0") != std::string::npos,
+               "unknown native lines retain file-level SARIF diagnostics and raw JSON line zero");
+    auto unknownColumnResult = standardIdResult;
+    unknownColumnResult.violations.front().column = 0;
+    std::ostringstream unknownColumnSarif;
+    report::writeSarif(unknownColumnResult, unknownColumnSarif);
+    test.check(unknownColumnSarif.str().find("\"startLine\":4") != std::string::npos &&
+                   unknownColumnSarif.str().find("\"startColumn\"") == std::string::npos,
+               "a known SARIF line does not invent an unknown column");
     std::ostringstream standardIdJson, standardIdText, standardIdSarif, standardIdHtml;
     report::writeJson(standardIdResult, standardIdJson);
     report::writeText(standardIdResult, standardIdText);

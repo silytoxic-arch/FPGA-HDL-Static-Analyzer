@@ -17,6 +17,7 @@
 #include "analysis/verilog_index_checks.h"
 #include "analysis/verilog_naming_declarations.h"
 #include "analysis/vhdl_clock_control.h"
+#include "analysis/vhdl_empty_statement.h"
 #include "analysis/vhdl_fsm_model.h"
 #include "analysis/verilog_naming_shape.h"
 #include "analysis/verilog_name_length.h"
@@ -13773,79 +13774,11 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             }
             return false;
         };
-        // Native 4.8.e FUN_180609b30 visits only AST_ALWAYS(0x52) roots.
-        // FUN_1806097d0 recursively appends every type-0xb0 node and every
-        // zero-child AST_BLOCK(0x54), without deduplication. The entry also
-        // appends an AST_ALWAYS whose first AST_BLOCK has exactly one
-        // AST_EDGE(0x67), covering a sensitivity/event-only empty process.
-        // Retain the partial source adapter: NULL, empty process bodies,
-        // empty IF/ELSIF/ELSE arms, empty CASE alternatives and empty loops.
-        // Native entry fixes the Warning text and leaves its column empty.
-        // Use the product fallback column 1; do not invent a native column.
-        // docs/evidence/native_vhdl_empty_statement_4_8_e_findings.md
-        bool inSequentialProcess = false;
-        bool inProcessBody = false;
-        for (std::size_t index = 0; index < tokens.size(); ++index) {
-            const auto word = lower(tokens[index].text);
-            if (word == "end" && index + 1 < tokens.size() &&
-                lower(tokens[index + 1].text) == "process") {
-                inSequentialProcess = false;
-                inProcessBody = false;
-                continue;
-            }
-            if (word == "process" &&
-                (index == 0 || lower(tokens[index - 1].text) != "end")) {
-                inSequentialProcess = true;
-                inProcessBody = false;
-                continue;
-            }
-            if (!inSequentialProcess) continue;
-            if (!inProcessBody) {
-                if (word == "begin") {
-                    inProcessBody = true;
-                    if (index + 2 < tokens.size() &&
-                        lower(tokens[index + 1].text) == "end" &&
-                        lower(tokens[index + 2].text) == "process")
-                        emit(result, "GJB9765.4.8.e", source,
-                             tokens[index].line, 1,
-                             "避免在进程中出现空语句");
-                }
-                continue;
-            }
-            if (word == "null" && index + 1 < tokens.size() &&
-                tokens[index + 1].text == ";") {
-                emit(result, "GJB9765.4.8.e", source,
-                     tokens[index].line, 1,
-                     "避免在进程中出现空语句");
-                continue;
-            }
-            if ((word == "then" || word == "else") && index + 1 < tokens.size()) {
-                const auto next = lower(tokens[index + 1].text);
-                if (next == "elsif" || next == "else" ||
-                    (next == "end" && index + 2 < tokens.size() &&
-                     lower(tokens[index + 2].text) == "if"))
-                    emit(result, "GJB9765.4.8.e", source,
-                         tokens[index].line, 1,
-                         "避免在进程中出现空语句");
-            }
-            if (tokens[index].text == "=>" && index + 1 < tokens.size()) {
-                const auto next = lower(tokens[index + 1].text);
-                if (next == "when" ||
-                    (next == "end" && index + 2 < tokens.size() &&
-                     lower(tokens[index + 2].text) == "case"))
-                    emit(result, "GJB9765.4.8.e", source,
-                         tokens[index].line, 1,
-                         "避免在进程中出现空语句");
-            }
-            if (word == "loop" &&
-                (index == 0 || lower(tokens[index - 1].text) != "end") &&
-                index + 2 < tokens.size() &&
-                lower(tokens[index + 1].text) == "end" &&
-                lower(tokens[index + 2].text) == "loop")
-                emit(result, "GJB9765.4.8.e", source,
-                     tokens[index].line, 1,
-                     "避免在进程中出现空语句");
-        }
+        // Native 4.8.e appends each admitted NULL/empty BLOCK under ALWAYS.
+        // Keep multiplicity, native fixed text and fallback column 1.
+        for (const auto line : nativeVhdlEmptyStatementLines(tokens))
+            emit(result, "GJB9765.4.8.e", source, line, 1,
+                 "避免在进程中出现空语句");
         // Native 4.14.b.3 builds two bounded alignment groups from the VHDL
         // AST: an IF group containing its if/elsif/else keywords, and a CASE
         // group containing case plus its direct when alternatives. It locates

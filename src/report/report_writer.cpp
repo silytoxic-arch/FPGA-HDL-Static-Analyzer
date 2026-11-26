@@ -616,8 +616,15 @@ void writeSarif(const analysis::AnalysisResult& result, std::ostream& output) {
         output << ",\"message\":{\"text\":"; jsonString(output, violation.message);
         output << "},\"locations\":[{\"physicalLocation\":{\"artifactLocation\":{\"uri\":";
         jsonString(output, uriReference(violation.file));
-        output << "},\"region\":{\"startLine\":" << violation.line
-               << ",\"startColumn\":" << violation.column << "}}}]";
+        output << '}';
+        // A native line of zero means unknown, not SARIF's first source line.
+        // Retain the file location without inventing a region.
+        if (violation.line > 0) {
+            output << ",\"region\":{\"startLine\":" << violation.line;
+            if (violation.column > 0) output << ",\"startColumn\":" << violation.column;
+            output << '}';
+        }
+        output << "}}]";
         if (violation.module || violation.signal) {
             output << ",\"properties\":{";
             bool property = false;

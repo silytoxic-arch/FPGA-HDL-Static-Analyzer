@@ -1002,9 +1002,30 @@ for (const row of legacyConfirmedRows) {
     evidence: row.predicateEvidence, limitations: row.limitations};
 }
 confirmed['GJB9765.4.8.e'] = {
-  predicate: 'FUN_180609b30 recursively collects type-0xb0 and zero-child AST_BLOCK nodes under AST_ALWAYS and additionally an ALWAYS whose first BLOCK contains exactly one type-0x67 child. Reports preserve multiplicity. Entry FUN_1806090d0 fixes Warning, message 避免在进程中出现空语句, and the node line at +0x214; the native column string is empty, mapped to product column 1. Listener FUN_1801bfbf0 creates an independent AST_BLOCK for every Sequential_statementContext, while Sequence_of_statements callbacks are no-ops. Therefore type 0xb0 must not be equated with the source spelling null: its three direct constructor paths include nodes subsequently retagged 0x8e/4. Product retains the explicitly partial source-form detector for null and empty process/branch/loop forms; exact lowered-node location and multiplicity for every form remain unresolved.',
-  evidence: [...legacyConfirmed['GJB9765.4.8.e'].predicateEvidence, 'docs/native_rule_recovery_pass125.md', 'reverse-tools/evidence/t_linter_pass125/empty_rule.txt', 'reverse-tools/evidence/t_linter_pass125/process_listener.txt', 'reverse-tools/evidence/t_linter_pass125/sequential_listener.txt', 'reverse-tools/evidence/t_linter_pass125/null_producers.txt', 'reverse-tools/evidence/t_linter_pass125/if_listener.txt'],
-  limitations: 'Fixed report fields are statically recovered, not a runtime comparison. The source adapter does not fully reconstruct lowering: subprogram declarations, generated/invalid syntax, label ownership, sensitivity-only shapes, empty branch source lines and every frontend path remain unresolved. The three bounded direct type-0xb0 producers do not establish all producer paths. No finding remains ManualReviewRequired; no full algorithm equivalence is claimed.'
+  predicate: 'FUN_180609b30 admits ALWAYS roots; FUN_1806097d0 recursively appends every type-0xb0 and zero-child BLOCK, plus an ALWAYS whose first BLOCK has exactly one sensitivity EDGE. LiteralContext slot +0x908 creates type 0xb0 named NULL; a bare NULL statement is parsed directly in Sequential_statementContext and leaves its independent BLOCK empty. Process and sequential context locations start before optional labels; POSTPONED belongs to the process context. Process declarations occupy the root BLOCK; NULL literals there still report. IF exit creates its initial true BLOCK at ConditionContext start, while an empty ELSIF true BLOCK retains constructor line 0, preserved by cloning. Ordinary empty ELSE, CASE alternatives and LOOP nodes are not by themselves empty BLOCKs, so previous source-text heuristics for them are removed. Product admits terminated normal/postponed process spans, reports each NULL occurrence including expressions/declarations, uses label lines for bare labeled NULL, and preserves native Warning/fixed text/absent-column fallback 1. No-finding remains review-required.',
+  evidence: [...legacyConfirmed['GJB9765.4.8.e'].predicateEvidence, 'docs/native_rule_recovery_pass125.md', 'docs/native_rule_recovery_pass126.md',
+    "reverse-tools/evidence/t_linter_pass126/FindListenerContextOffsets.java#sha256=9a9bf0f35e8ab7dcaa8282688030400970b933bcdae7c2cfde50210c73f92fdf",
+    "reverse-tools/evidence/t_linter_pass126/case_alternative_listener.txt#sha256=9e7700068ccef2dd2e72380d4c90594e719c023da5519ca56f0a6e0275e4e63d",
+    "reverse-tools/evidence/t_linter_pass126/case_listener.txt#sha256=70fa2a489bc5d5c4927228c35b0e2ad3fb9f6196e74e4fc7555b649028b5581b",
+    "reverse-tools/evidence/t_linter_pass126/clone_and_alternative_parser.txt#sha256=8de4f2e3e881e1b97b49d07f6b331fc18e05be375242cf5b0adddcf3ff264de8",
+    "reverse-tools/evidence/t_linter_pass126/condition_listener.txt#sha256=a525cf9dc03693cd3f5e3b9820a2b6fe14c07ee8ebc0df35a89a260017a5df99",
+    "reverse-tools/evidence/t_linter_pass126/current_design_setter.txt#sha256=b86bb2dec7b4388bf66af964cf7bf7789bf21ea486904c3177d1f44f880b0c0b",
+    "reverse-tools/evidence/t_linter_pass126/if_final_helper.txt#sha256=aad0578c74fed2d19a9bf443310a4f1bd00d986523328d88ef438004ed839838",
+    "reverse-tools/evidence/t_linter_pass126/label_parser.txt#sha256=cac189cad1f8cfbfbbb10f8be91fa030710c3bf95bc910eed91b428fe31ed890",
+    "reverse-tools/evidence/t_linter_pass126/literal_listener.txt#sha256=397761b3ac1baaa5e1920fdcc54bb6158a2ca4b5fb3ba02c621f2271384c4289",
+    "reverse-tools/evidence/t_linter_pass126/literal_name.json#sha256=5a30e061e99b79c78a6c10b4a809fb73b6af53334831183c2e3149448dc99514",
+    "reverse-tools/evidence/t_linter_pass126/loop_listener.txt#sha256=9e60c54bef2416dc699619f9eb28ac1de6e1388fe9681d05d971af9bfc8b39f1",
+    "reverse-tools/evidence/t_linter_pass126/loop_parser.txt#sha256=52bdef2e0466813f00f6ac00ec4e0eb9139ba3c15478f74d1268d69d4e589aa6",
+    "reverse-tools/evidence/t_linter_pass126/node_and_sequence.txt#sha256=844367973b2237ca80bc0001b3541773db77a9a88842a8dc103e402e3f7502a0",
+    "reverse-tools/evidence/t_linter_pass126/null_context_offsets.txt#sha256=6e23c29b739b56f686d75855f43f30390799faacc9254a7d2f89aa84fdebb417",
+    "reverse-tools/evidence/t_linter_pass126/preclone_normalization.txt#sha256=83d3a60f392c80d2b18b69ee16cc813e56ca0ff7c973df7f0df25512825a9f7c",
+    "reverse-tools/evidence/t_linter_pass126/process_parser.txt#sha256=af91601a2d0901bae6b3da3c69ebf33bbdce5b73d6485045572b5037857db762",
+    "reverse-tools/evidence/t_linter_pass126/retained_vhdl_tree.txt#sha256=2e840ac6dc09847ec1483a200518076b1c0a8928286f92dbad5565735687e3bf",
+    "reverse-tools/evidence/t_linter_pass126/sensitivity_listener.txt#sha256=ce7fc9c674898b0617a6c9b4f7f5b4cfe3c7db68069862f8765bb84485a679a6",
+    "reverse-tools/evidence/t_linter_pass126/sequential_parser.txt#sha256=e0ad593ec259368f955d5654f5fb065aa5141b6525c3725a89188eeff91b2295",
+    "reverse-tools/evidence/t_linter_pass126/subprogram_body_listener.txt#sha256=e0fe7393f6d790fc848f3db3a62227798bc4ea8a9cca573aa5483ae44322b8f2",
+    "reverse-tools/evidence/t_linter_pass126/subprogram_declaration_listener.txt#sha256=772cc37ff11c79c80cbf6b53e380adc5af07f75950a616e0452ab0a3b7453b81"],
+  limitations: 'Static producer/consumer and retained-clone evidence is not target runtime equivalence. Source admission is bounded, not a complete VHDL grammar: malformed/error-recovery trees, simultaneous statements, complete expression/type binding, every nested ELSIF/ELSE rewrite and whole-project provenance remain unverified. Empty ELSIF line 0 is retained as an unknown native position, never replaced with an invented line. No diagnostic is not automatic compliance.'
 };
 confirmed['GJB10157.6.2.10'] = {
   predicate: 'Native FUN_180557340 visits a process group map only when its size is greater than one. For each group it copies and rehashes a byte-key container, counts that group once when any key equals 1, and emits one warning as soon as the second qualifying group is reached. Upstream Yosys assigns value 1 to active-high State::S1 and level-sensitive SyncType::ST1. Product independently maps this core to distinct explicitly edge-triggered event names used by if guards, with one separate clock event and a nonblocking assignment; always and always_ff are supported.',
@@ -1133,7 +1154,9 @@ const rules = native.rules.map(rule => {
     predicateEvidence: recovered?.evidence ?? [],
     entryObservation: clause === 'GJB10157.6.2.5' ? confirmed[clause].predicate : entryObservations[clause] ?? null,
     implementationMode: documented?.detector_mode ?? 'unknown',
-    implementationSource: integrated ? (clause === 'GJB10157.10.1' || clause === 'GJB10157.10.2' || clause === 'GJB10157.10.4' || clause === 'GJB10157.12.2' ?
+    implementationSource: integrated ? (clause === 'GJB9765.4.8.e' ?
+      'src/analysis/vhdl_empty_statement.h + src/analysis/standard_evaluator.cpp' :
+      clause === 'GJB10157.10.1' || clause === 'GJB10157.10.2' || clause === 'GJB10157.10.4' || clause === 'GJB10157.12.2' ?
       'src/analysis/verilog_fsm_state_count.h + src/analysis/standard_evaluator.cpp' :
       clause === 'GJB9765.4.2.e' ? 'src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp' :
       clause === 'GJB10157.7.2.1' || clause === 'GJB10157.7.2.2' ? 'src/analysis/verilog_gate_feedback.h + src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp' :
@@ -1163,7 +1186,8 @@ const rules = native.rules.map(rule => {
         'src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp') : null,
     regressionSource: (clause === 'GJB10157.9.1.3' || clause === 'GJB10157.9.1.4' ? 'tests/analyzer_tests.cpp' : legacyConfirmed[clause]?.regressionSource) ??
       (integrated || documentedSubpredicates[clause] ? 'tests/standard_accuracy_tests.cpp' : null),
-    additionalTests: ({'GJB10157.9.2.2': 'tests/verilog_constant_expression_tests.cpp',
+    additionalTests: ({'GJB9765.4.8.e': ['tests/standard_accuracy_tests.cpp', 'tests/analyzer_tests.cpp'],
+      'GJB10157.9.2.2': 'tests/verilog_constant_expression_tests.cpp',
       'GJB9765.4.9.c': ['tests/analyzer_tests.cpp', 'tests/standard_accuracy_tests.cpp'],
       'GJB9765.4.9.e': 'tests/standard_accuracy_tests.cpp',
       'GJB9765.4.9.j': 'tests/standard_accuracy_tests.cpp',

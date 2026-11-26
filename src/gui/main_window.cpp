@@ -1159,8 +1159,11 @@ void MainWindow::loadSourceLocation(const QString& path, int line) {
     }
     sourceEditor_->setPlainText(QString::fromUtf8(file.readAll()));
     pages_->setCurrentIndex(0);
-    sourceTitle_->setText(tr("%1 · 第 %2 行").arg(QFileInfo(path).fileName()).arg(line));
+    sourceTitle_->setText(line > 0
+        ? tr("%1 · 第 %2 行").arg(QFileInfo(path).fileName()).arg(line)
+        : tr("%1 · 行号待确认").arg(QFileInfo(path).fileName()));
     sourceTitle_->setToolTip(path);
+    if (line <= 0) return;
     const auto block = sourceEditor_->document()->findBlockByLineNumber(std::max(0, line - 1));
     if (block.isValid()) {
         QTextCursor cursor(block);

@@ -1,0 +1,111 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "method": "Static Ghidra and SHA-guarded PE byte reads; target was not executed.",
+  "files": [
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/FindListenerContextOffsets.java",
+      "size": 1909,
+      "sha256": "9a9bf0f35e8ab7dcaa8282688030400970b933bcdae7c2cfde50210c73f92fdf"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/case_alternative_listener.txt",
+      "size": 3742,
+      "sha256": "9e7700068ccef2dd2e72380d4c90594e719c023da5519ca56f0a6e0275e4e63d"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/case_listener.txt",
+      "size": 3742,
+      "sha256": "70fa2a489bc5d5c4927228c35b0e2ad3fb9f6196e74e4fc7555b649028b5581b"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/clone_and_alternative_parser.txt",
+      "size": 10969,
+      "sha256": "8de4f2e3e881e1b97b49d07f6b331fc18e05be375242cf5b0adddcf3ff264de8"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/condition_listener.txt",
+      "size": 3742,
+      "sha256": "a525cf9dc03693cd3f5e3b9820a2b6fe14c07ee8ebc0df35a89a260017a5df99"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/current_design_setter.txt",
+      "size": 226,
+      "sha256": "b86bb2dec7b4388bf66af964cf7bf7789bf21ea486904c3177d1f44f880b0c0b"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/if_final_helper.txt",
+      "size": 10434,
+      "sha256": "aad0578c74fed2d19a9bf443310a4f1bd00d986523328d88ef438004ed839838"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/label_parser.txt",
+      "size": 843,
+      "sha256": "cac189cad1f8cfbfbbb10f8be91fa030710c3bf95bc910eed91b428fe31ed890"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/literal_listener.txt",
+      "size": 10024,
+      "sha256": "397761b3ac1baaa5e1920fdcc54bb6158a2ca4b5fb3ba02c621f2271384c4289"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/literal_name.json",
+      "size": 172,
+      "sha256": "5a30e061e99b79c78a6c10b4a809fb73b6af53334831183c2e3149448dc99514"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/loop_listener.txt",
+      "size": 8623,
+      "sha256": "9e60c54bef2416dc699619f9eb28ac1de6e1388fe9681d05d971af9bfc8b39f1"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/loop_parser.txt",
+      "size": 2021,
+      "sha256": "52bdef2e0466813f00f6ac00ec4e0eb9139ba3c15478f74d1268d69d4e589aa6"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/node_and_sequence.txt",
+      "size": 6338,
+      "sha256": "844367973b2237ca80bc0001b3541773db77a9a88842a8dc103e402e3f7502a0"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/null_context_offsets.txt",
+      "size": 844,
+      "sha256": "6e23c29b739b56f686d75855f43f30390799faacc9254a7d2f89aa84fdebb417"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/preclone_normalization.txt",
+      "size": 3904,
+      "sha256": "83d3a60f392c80d2b18b69ee16cc813e56ca0ff7c973df7f0df25512825a9f7c"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/process_parser.txt",
+      "size": 3262,
+      "sha256": "af91601a2d0901bae6b3da3c69ebf33bbdce5b73d6485045572b5037857db762"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/retained_vhdl_tree.txt",
+      "size": 20887,
+      "sha256": "2e840ac6dc09847ec1483a200518076b1c0a8928286f92dbad5565735687e3bf"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/sensitivity_listener.txt",
+      "size": 4030,
+      "sha256": "ce7fc9c674898b0617a6c9b4f7f5b4cfe3c7db68069862f8765bb84485a679a6"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/sequential_parser.txt",
+      "size": 3293,
+      "sha256": "e0ad593ec259368f955d5654f5fb065aa5141b6525c3725a89188eeff91b2295"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/subprogram_body_listener.txt",
+      "size": 5501,
+      "sha256": "e0fe7393f6d790fc848f3db3a62227798bc4ea8a9cca573aa5483ae44322b8f2"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass126/subprogram_declaration_listener.txt",
+      "size": 5715,
+      "sha256": "772cc37ff11c79c80cbf6b53e380adc5af07f75950a616e0452ab0a3b7453b81"
+    }
+  ]
+}

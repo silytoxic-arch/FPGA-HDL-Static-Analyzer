@@ -17783,7 +17783,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "FUN_180609b30 recursively collects type-0xb0 and zero-child AST_BLOCK nodes under AST_ALWAYS and additionally an ALWAYS whose first BLOCK contains exactly one type-0x67 child. Reports preserve multiplicity. Entry FUN_1806090d0 fixes Warning, message 避免在进程中出现空语句, and the node line at +0x214; the native column string is empty, mapped to product column 1. Listener FUN_1801bfbf0 creates an independent AST_BLOCK for every Sequential_statementContext, while Sequence_of_statements callbacks are no-ops. Therefore type 0xb0 must not be equated with the source spelling null: its three direct constructor paths include nodes subsequently retagged 0x8e/4. Product retains the explicitly partial source-form detector for null and empty process/branch/loop forms; exact lowered-node location and multiplicity for every form remain unresolved.",
+      "predicate": "FUN_180609b30 admits ALWAYS roots; FUN_1806097d0 recursively appends every type-0xb0 and zero-child BLOCK, plus an ALWAYS whose first BLOCK has exactly one sensitivity EDGE. LiteralContext slot +0x908 creates type 0xb0 named NULL; a bare NULL statement is parsed directly in Sequential_statementContext and leaves its independent BLOCK empty. Process and sequential context locations start before optional labels; POSTPONED belongs to the process context. Process declarations occupy the root BLOCK; NULL literals there still report. IF exit creates its initial true BLOCK at ConditionContext start, while an empty ELSIF true BLOCK retains constructor line 0, preserved by cloning. Ordinary empty ELSE, CASE alternatives and LOOP nodes are not by themselves empty BLOCKs, so previous source-text heuristics for them are removed. Product admits terminated normal/postponed process spans, reports each NULL occurrence including expressions/declarations, uses label lines for bare labeled NULL, and preserves native Warning/fixed text/absent-column fallback 1. No-finding remains review-required.",
       "predicateEvidence": [
         "ev_03c2e7fc28f3ac2d6a7397346eb0e367427144af10cee275fc9e47026b833434",
         "ev_4468d660a6b85e939eed70e8d04e61d0eef84a00819bd5f8b3161edb445651e0",
@@ -17793,23 +17793,36 @@
         "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers.c#sha256=3f15f5cd445834aacef093eb3be4d18986a5d57a4ae6a87122c2613cac0c268d",
         "reverse-tools/evidence/remaining_rules/vhdl_4_8_e_helpers2.c#sha256=45a44f1c43fecd33476317bcbe43c38aaf8339376dff4226f22c63202d783dbc",
         "docs/native_rule_recovery_pass125.md",
-        "reverse-tools/evidence/t_linter_pass125/empty_rule.txt",
-        "reverse-tools/evidence/t_linter_pass125/process_listener.txt",
-        "reverse-tools/evidence/t_linter_pass125/sequential_listener.txt",
-        "reverse-tools/evidence/t_linter_pass125/null_producers.txt",
-        "reverse-tools/evidence/t_linter_pass125/if_listener.txt"
+        "docs/native_rule_recovery_pass126.md",
+        "reverse-tools/evidence/t_linter_pass126/FindListenerContextOffsets.java#sha256=9a9bf0f35e8ab7dcaa8282688030400970b933bcdae7c2cfde50210c73f92fdf",
+        "reverse-tools/evidence/t_linter_pass126/case_alternative_listener.txt#sha256=9e7700068ccef2dd2e72380d4c90594e719c023da5519ca56f0a6e0275e4e63d",
+        "reverse-tools/evidence/t_linter_pass126/case_listener.txt#sha256=70fa2a489bc5d5c4927228c35b0e2ad3fb9f6196e74e4fc7555b649028b5581b",
+        "reverse-tools/evidence/t_linter_pass126/clone_and_alternative_parser.txt#sha256=8de4f2e3e881e1b97b49d07f6b331fc18e05be375242cf5b0adddcf3ff264de8",
+        "reverse-tools/evidence/t_linter_pass126/condition_listener.txt#sha256=a525cf9dc03693cd3f5e3b9820a2b6fe14c07ee8ebc0df35a89a260017a5df99",
+        "reverse-tools/evidence/t_linter_pass126/current_design_setter.txt#sha256=b86bb2dec7b4388bf66af964cf7bf7789bf21ea486904c3177d1f44f880b0c0b",
+        "reverse-tools/evidence/t_linter_pass126/if_final_helper.txt#sha256=aad0578c74fed2d19a9bf443310a4f1bd00d986523328d88ef438004ed839838",
+        "reverse-tools/evidence/t_linter_pass126/label_parser.txt#sha256=cac189cad1f8cfbfbbb10f8be91fa030710c3bf95bc910eed91b428fe31ed890",
+        "reverse-tools/evidence/t_linter_pass126/literal_listener.txt#sha256=397761b3ac1baaa5e1920fdcc54bb6158a2ca4b5fb3ba02c621f2271384c4289",
+        "reverse-tools/evidence/t_linter_pass126/literal_name.json#sha256=5a30e061e99b79c78a6c10b4a809fb73b6af53334831183c2e3149448dc99514",
+        "reverse-tools/evidence/t_linter_pass126/loop_listener.txt#sha256=9e60c54bef2416dc699619f9eb28ac1de6e1388fe9681d05d971af9bfc8b39f1",
+        "reverse-tools/evidence/t_linter_pass126/loop_parser.txt#sha256=52bdef2e0466813f00f6ac00ec4e0eb9139ba3c15478f74d1268d69d4e589aa6",
+        "reverse-tools/evidence/t_linter_pass126/node_and_sequence.txt#sha256=844367973b2237ca80bc0001b3541773db77a9a88842a8dc103e402e3f7502a0",
+        "reverse-tools/evidence/t_linter_pass126/null_context_offsets.txt#sha256=6e23c29b739b56f686d75855f43f30390799faacc9254a7d2f89aa84fdebb417",
+        "reverse-tools/evidence/t_linter_pass126/preclone_normalization.txt#sha256=83d3a60f392c80d2b18b69ee16cc813e56ca0ff7c973df7f0df25512825a9f7c",
+        "reverse-tools/evidence/t_linter_pass126/process_parser.txt#sha256=af91601a2d0901bae6b3da3c69ebf33bbdce5b73d6485045572b5037857db762",
+        "reverse-tools/evidence/t_linter_pass126/retained_vhdl_tree.txt#sha256=2e840ac6dc09847ec1483a200518076b1c0a8928286f92dbad5565735687e3bf",
+        "reverse-tools/evidence/t_linter_pass126/sensitivity_listener.txt#sha256=ce7fc9c674898b0617a6c9b4f7f5b4cfe3c7db68069862f8765bb84485a679a6",
+        "reverse-tools/evidence/t_linter_pass126/sequential_parser.txt#sha256=e0ad593ec259368f955d5654f5fb065aa5141b6525c3725a89188eeff91b2295",
+        "reverse-tools/evidence/t_linter_pass126/subprogram_body_listener.txt#sha256=e0fe7393f6d790fc848f3db3a62227798bc4ea8a9cca573aa5483ae44322b8f2",
+        "reverse-tools/evidence/t_linter_pass126/subprogram_declaration_listener.txt#sha256=772cc37ff11c79c80cbf6b53e380adc5af07f75950a616e0452ab0a3b7453b81"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/analysis/vhdl_empty_statement.h + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
-        "empty CASE alternative",
-        "empty LOOP body",
-        "explicit NULL",
-        "empty IF arm",
-        "empty process body",
-        "populated branches"
+        "tests/standard_accuracy_tests.cpp",
+        "tests/analyzer_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB9765_VHDL.4.8.e.html",
@@ -17827,7 +17840,7 @@
           "matched": true
         }
       ],
-      "limitations": "Fixed report fields are statically recovered, not a runtime comparison. The source adapter does not fully reconstruct lowering: subprogram declarations, generated/invalid syntax, label ownership, sensitivity-only shapes, empty branch source lines and every frontend path remain unresolved. The three bounded direct type-0xb0 producers do not establish all producer paths. No finding remains ManualReviewRequired; no full algorithm equivalence is claimed."
+      "limitations": "Static producer/consumer and retained-clone evidence is not target runtime equivalence. Source admission is bounded, not a complete VHDL grammar: malformed/error-recovery trees, simultaneous statements, complete expression/type binding, every nested ELSIF/ELSE rewrite and whole-project provenance remain unverified. Empty ELSIF line 0 is retained as an unknown native position, never replaced with an invented line. No diagnostic is not automatic compliance."
     },
     {
       "publicRuleId": "R-9-1",

@@ -1,0 +1,31 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 180187b60 180187b60 FUN_180187b60 =====
+
+undefined8 FUN_180187b60(longlong *param_1)
+
+{
+  undefined8 uVar1;
+  undefined8 local_res10;
+  undefined8 uVar2;
+  undefined8 local_18;
+  char local_10;
+  
+  uVar2 = 0xfffffffffffffffe;
+  local_res10 = (**(code **)(*param_1 + 0x90))();
+  uVar1 = FUN_18014c520(param_1 + 0x1d,param_1 + 0x10,&local_res10);
+  local_res10 = uVar1;
+  (**(code **)(*param_1 + 0x178))(param_1,uVar1,0x116,0x8b,uVar2);
+  FUN_1801546b0(&local_18,param_1);
+  (**(code **)(*param_1 + 0x180))(param_1,uVar1,1);
+  FUN_1807e8b10(param_1,0x657);
+  FUN_1801856c0(param_1);
+  FUN_1807e8b10(param_1,0x658);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x93);
+  if (local_10 != '\0') {
+    FUN_1807f5f40(local_18);
+  }
+  return uVar1;
+}
+
+

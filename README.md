@@ -1,10 +1,10 @@
-# FPGA HDL Static Analyzer — V1.4.243
+# FPGA HDL Static Analyzer — V1.4.244
 
 [![Windows Build](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml/badge.svg)](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml)
 
 公开源码仓库使用 GitHub Actions 在 Windows Server 2022、Visual Studio 2022 和 Qt 6.8.3 环境中自动编译、运行全部测试并生成 Windows x64 ZIP。可在仓库的 **Actions → Windows Build** 页面手动触发，构建完成后从 `FPGA-HDL-Static-Analyzer-Windows-x64` 工件下载。
 
-V1.4.243 校准 VHDL 空语句规则 A-8-1 的固定正文、Warning 级别及缺省列号；补齐台账引用的 143 份静态证据，并验证文件摘要与仓库内引用。源代码到原生节点的完整映射继续核验。详见 [本轮记录](docs/v1_4_243_release.md)。
+V1.4.244 按原生 VHDL 语法节点修正 A-8-1：恢复 NULL 字面值、跨行标签与空进程起点，关闭 postponed 进程的边界，移除空 CASE/LOOP/普通 ELSE 的错误推断。详见 [本轮记录](docs/v1_4_244_release.md)。
 
 V1.4.214 深化官方三段式规则 `R-5-5`：恢复两条原生诊断正文、Error、赋值物理行无列定位，以及“目标名 + 物理行”的报告重数；确认启用 `initial` 时 DLL 仅登记赋值目标而不校验 RHS 固定性。复杂 default/reset 分支继续要求人工复核。详见 [本轮记录](docs/v1_4_214_release.md)。
 

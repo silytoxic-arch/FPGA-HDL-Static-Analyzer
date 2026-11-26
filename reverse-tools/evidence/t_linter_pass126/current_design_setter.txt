@@ -1,0 +1,12 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 1809144f0 1809144f0 FUN_1809144f0 =====
+
+void FUN_1809144f0(undefined8 param_1)
+
+{
+  DAT_18137cef0 = param_1;
+  return;
+}
+
+

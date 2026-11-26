@@ -1,0 +1,88 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 18018bee0 18018bee0 FUN_18018bee0 =====
+
+undefined8 FUN_18018bee0(longlong *param_1)
+
+{
+  undefined8 uVar1;
+  longlong lVar2;
+  undefined8 local_res10;
+  undefined8 uVar3;
+  undefined8 local_18;
+  char local_10;
+  
+  uVar3 = 0xfffffffffffffffe;
+  local_res10 = (**(code **)(*param_1 + 0x90))();
+  uVar1 = FUN_18014e9b0(param_1 + 0x1d,param_1 + 0x10,&local_res10);
+  local_res10 = uVar1;
+  (**(code **)(*param_1 + 0x178))(param_1,uVar1,0x170,0xb8,uVar3);
+  FUN_180153000(&local_18,param_1);
+  (**(code **)(*param_1 + 0x180))(param_1,uVar1,1);
+  FUN_1807e8b10(param_1,0x7a0);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 - 0x76U < 2) {
+    FUN_1807e8b10(param_1,0x79f);
+    FUN_180187b60(param_1);
+  }
+  FUN_1807e8b10(param_1,0x7a3);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 == 0x42) {
+    FUN_1807e8b10(param_1,0x7a2);
+    (**(code **)(*param_1 + 0xc0))(param_1,0x42);
+  }
+  FUN_1807e8b10(param_1,0x7a5);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x43);
+  FUN_1807e8b10(param_1,0x7aa);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 == 0x8f) {
+    FUN_1807e8b10(param_1,0x7a6);
+    (**(code **)(*param_1 + 0xc0))(param_1,0x8f);
+    FUN_1807e8b10(param_1,0x7a7);
+    FUN_18018e3d0(param_1);
+    FUN_1807e8b10(param_1,0x7a8);
+    (**(code **)(*param_1 + 0xc0))(param_1,0x90);
+  }
+  FUN_1807e8b10(param_1,0x7ad);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 == 0x29) {
+    FUN_1807e8b10(param_1,0x7ac);
+    (**(code **)(*param_1 + 0xc0))(param_1,0x29);
+  }
+  FUN_1807e8b10(param_1,0x7af);
+  FUN_18018bd70(param_1);
+  FUN_1807e8b10(param_1,0x7b0);
+  (**(code **)(*param_1 + 0xc0))(param_1,0xc);
+  FUN_1807e8b10(param_1,0x7b1);
+  FUN_18018c270(param_1);
+  FUN_1807e8b10(param_1,0x7b2);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x18);
+  FUN_1807e8b10(param_1,0x7b4);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 == 0x42) {
+    FUN_1807e8b10(param_1,0x7b3);
+    (**(code **)(*param_1 + 0xc0))(param_1,0x42);
+  }
+  FUN_1807e8b10(param_1,0x7b6);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x43);
+  FUN_1807e8b10(param_1,0x7b8);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 - 0x76U < 2) {
+    FUN_1807e8b10(param_1,0x7b7);
+    FUN_1801856c0(param_1);
+  }
+  FUN_1807e8b10(param_1,0x7ba);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x8c);
+  if (local_10 != '\0') {
+    FUN_1807f5f40(local_18);
+  }
+  return uVar1;
+}
+
+

@@ -1,0 +1,59 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 180188510 180188510 FUN_180188510 =====
+
+undefined8 FUN_180188510(longlong *param_1)
+
+{
+  undefined8 uVar1;
+  longlong lVar2;
+  undefined8 local_res10;
+  undefined8 uVar3;
+  undefined8 local_18;
+  char local_10;
+  
+  uVar3 = 0xfffffffffffffffe;
+  local_res10 = (**(code **)(*param_1 + 0x90))();
+  uVar1 = FUN_18014cbb0(param_1 + 0x1d,param_1 + 0x10,&local_res10);
+  local_res10 = uVar1;
+  (**(code **)(*param_1 + 0x178))(param_1,uVar1,0x124,0x92,uVar3);
+  FUN_180154290(&local_18,param_1);
+  (**(code **)(*param_1 + 0x180))(param_1,uVar1,1);
+  FUN_1807e8b10(param_1,0x676);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 - 0x76U < 2) {
+    FUN_1807e8b10(param_1,0x675);
+    FUN_180187b60(param_1);
+  }
+  FUN_1807e8b10(param_1,0x679);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if ((lVar2 == 0x1e) || (lVar2 == 0x6d)) {
+    FUN_1807e8b10(param_1,0x678);
+    FUN_180187990(param_1);
+  }
+  FUN_1807e8b10(param_1,0x67b);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x2f);
+  FUN_1807e8b10(param_1,0x67c);
+  FUN_18018e600(param_1);
+  FUN_1807e8b10(param_1,0x67d);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x18);
+  FUN_1807e8b10(param_1,0x67e);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x2f);
+  FUN_1807e8b10(param_1,0x680);
+  (**(code **)(*(longlong *)param_1[0x11] + 0x20))((longlong *)param_1[0x11],param_1);
+  lVar2 = (**(code **)(*(longlong *)param_1[0x13] + 0x10))((longlong *)param_1[0x13],1);
+  if (lVar2 - 0x76U < 2) {
+    FUN_1807e8b10(param_1,0x67f);
+    FUN_1801856c0(param_1);
+  }
+  FUN_1807e8b10(param_1,0x682);
+  (**(code **)(*param_1 + 0xc0))(param_1,0x8c);
+  if (local_10 != '\0') {
+    FUN_1807f5f40(local_18);
+  }
+  return uVar1;
+}
+
+
