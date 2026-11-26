@@ -12,10 +12,7 @@ struct VhdlClockControlModel {
     unsigned nativeClassCandidate{}; // Bounded source reconstruction, not a vendor run.
     VhdlEdgeCondition edge;
     std::vector<std::size_t> equalityIdentifierTokens;
-    // Packaged GJB9765.4.10.h example: one edge-only process whose direct
-    // assignments all force constants. This documented branch is separate
-    // from the recovered native clock/control-name intersection.
-    bool clockDrivesOnlyConstants{false};
+
 };
 struct VhdlClockControlOverlap {
     std::size_t architectureToken{}, clockToken{}, equalityIdentifierToken{};
@@ -240,13 +237,6 @@ class Scanner {
             if (outer.branches.size()!=1 || !edgeBody(first,names,false,model.equalityIdentifierTokens)) {
                 result.incomplete=true; return;
             }
-            // Deliberately narrow source adapter for the packaged violation:
-            // no nested control, at least one direct assignment, and every
-            // RHS is a literal. A normal edge-triggered data assignment stays
-            // outside this branch.
-            if (!word(first.bodyBegin,"if"))
-                model.clockDrivesOnlyConstants=
-                    assignments(first.bodyBegin,first.bodyEnd,names,true);
             model.nativeClassCandidate=2;
         } else {
             if (outer.branches.size()!=2 ||
@@ -349,10 +339,9 @@ public:
             if (clock.architectureToken!=control.architectureToken) continue;
             for (const auto index:control.equalityIdentifierTokens)
                 if (lower(t[index].text)==clock.edge.clockName) {
-                    const auto duplicate=std::any_of(result.overlaps.begin(),result.overlaps.end(),[&](const auto& x){
-                        return x.architectureToken==clock.architectureToken && x.clockToken==clock.edge.clockToken;
-                    });
-                    if (!duplicate) result.overlaps.push_back({clock.architectureToken,clock.edge.clockToken,index,clock.edge.clockName});
+                    // Native 68aaf0 appends every matching clock/control pair.
+                    // Repeated nodes remain distinct, including equal locations.
+                    result.overlaps.push_back({clock.architectureToken,clock.edge.clockToken,index,clock.edge.clockName});
                 }
         }
         if (result.models.empty()) result.incomplete=true;

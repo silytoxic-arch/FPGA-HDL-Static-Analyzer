@@ -10449,19 +10449,25 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Recovered native branch uses flat class1/2 process admission and bound scalar clock/control EQ intersection, aggregated across admitted processes. The packaged violating example adds a documented branch: a single edge-only process directly drives one or more outputs exclusively to literals. Product implements the union with architecture isolation.",
+      "predicate": "Constructor FUN_180024d60 installs vtable 0x180ef9a78; slot 0 is FUN_18068aaf0. Per admitted root it clears native clock/control/output vectors, calls FUN_18068b420 and appends the clock node for every exact length/memcmp name match in the full ordered clock/control-node cross product. No output deduplication or direct constant-assignment alarm exists in this entry. FUN_18068bd30 appends operand pairs only for direct AST_EQ(0x36) children of source IF/ELSIF COND nodes; FUN_18068c2c0 adds constant-body inner IF EQ pairs. FUN_18068bee0 extracts an edge clock. VHDL Function_call_or_indexed_name_partContext +0x9b8 delegates to FUN_1801b7610, which retags ordinary rising_edge/falling_edge calls 0x65/0x66 rather than manufacturing reset EQ nodes. Product removes the previously documentation-only pure-constant alarm, retains every matching admitted source pair and uses the fixed native Warning text 禁止时钟作为异步复位/复位, clock-node line and absent-column fallback 1. The single SHA-bound packaged violation is retained as a static implementation/documentation conflict, not counted as a match or runtime comparison.",
       "predicateEvidence": [
-        "ev_8db32876e0c5e664daa8d39b05e03aafd03e235a87160ab608419944718e1add",
-        "ev_40bdc38cce7c870f8822cf7927f459fead168625d53edf9426584962c0078234",
-        "ev_78ded7eaead89d9cd328278a0fc9eba39dcbc0365a11f5e2ba70c9a45bed2898",
-        "ev_fdb346751b22baf03c978a82a4f53b184cb84fe858389d7433f7b7316c44becc",
-        "ev_a7ecf4deb1086f79a9f4e28391ce9c34b60a85c469f7a84e6fb2596825f5221c",
-        "ev_b0b4332618f5663d135e29980a8628563161ec5fd8284ad11dba421cec958b15",
-        "docs/evidence/native_vhdl_clock_reset_set_4_10_h_findings.md#documented-constant-action-branch"
+        "docs/evidence/native_vhdl_clock_reset_set_4_10_h_findings.md",
+        "docs/native_rule_recovery_pass127.md",
+        "reverse-tools/evidence/t_linter_pass127/clock_reset_entry.txt#sha256=48d5f330615757daee48db17f7bb8d9263bd6fe68b0816feed8e011b74f6beb6",
+        "reverse-tools/evidence/t_linter_pass127/constructor_and_inner_selection.txt#sha256=90e5c1bc9a27d7e530fe5f71b5eb83c659581b0ffebfa292fabbae7123957d0f",
+        "reverse-tools/evidence/t_linter_pass127/control_helpers.txt#sha256=33377ccb6f656e05259b49d1e6e1b8eba6104beb5cb2f29875f9b939e95e7c18",
+        "reverse-tools/evidence/t_linter_pass127/edge_context.txt#sha256=8686145255889312857b512b6ed254ff98065d37964c79649e7b76355b1e6c7f",
+        "reverse-tools/evidence/t_linter_pass127/edge_listener.txt#sha256=dfe9171c3b9345e0d2a9cc14c251fa68fba7aa9606fc48eea74e2b05df6c6ece",
+        "reverse-tools/evidence/t_linter_pass127/edge_name_references.txt#sha256=366461da8df523a152e26d112c83904bcb349fe49db4c096e3baff8e802ffd9c",
+        "reverse-tools/evidence/t_linter_pass127/edge_producer_refs.txt#sha256=e67b86c1a67e9b98d7914036752bb777895177f0b27b41edf347f79679e84039",
+        "reverse-tools/evidence/t_linter_pass127/entry_identity.json#sha256=76217aaec122247507b8ac300c8c8b5c0e0d42cf368fb2a88ccd4d5c73472679",
+        "reverse-tools/evidence/t_linter_pass127/fixed_message.json#sha256=8547f95dc3c42b52749488aa5072331937ff2e70816e1442fbf0aa7327e15309",
+        "reverse-tools/evidence/t_linter_pass127/process_collector.txt#sha256=b50fce67a7347f7fd9b68bc687b4c3122890f61bcec074487f5d221640809e84",
+        "reverse-tools/evidence/t_linter_pass127/reset_pair_append.txt#sha256=2bab7c7c34927271ef0c2ad8e3e85054309cf303a324728bf924978d24fccc73"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/analysis/vhdl_clock_control.h + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/vhdl_edge_condition_tests.cpp",
@@ -10474,8 +10480,8 @@
       "exampleChecks": [
         {
           "kind": "violating",
-          "detected": true,
-          "matched": true
+          "detected": false,
+          "matched": false
         },
         {
           "kind": "compliant",
@@ -10483,7 +10489,7 @@
           "matched": true
         }
       ],
-      "limitations": "Source subset only: explicit IEEE scalar binding; additional ieee.* imports are admitted. For the packaged single-file form, a directly following architecture may inherit its entity IEEE binding only when no intervening use clause exists; non-IEEE imports and local shadowing remain review-required. Complex/generate/selected/split-file cases are unsupported. The direct constant-action branch is established by the packaged example, not yet tied to the recovered native slot path; nested constant controls and expressions are intentionally not inferred. Architecture isolation and duplicate suppression are independent safety choices. Native frontend lowering, global constants and arbitrary process grammar remain unknown; no alarm remains manual review."
+      "limitations": "Source-to-native process classification is still bounded: explicit IEEE scalar binding, adjacent entity context inheritance, shadow rejection, no generate/selected/split-file paths, and architecture isolation remain source-adapter constraints, not fully recovered native grouping semantics. Exact identifier normalization and arbitrary expression/process lowering are unverified. The removed branch conflicts with one exact documented example; static path evidence is not a vendor runtime oracle. No finding remains ManualReviewRequired; full algorithm equivalence is not claimed."
     },
     {
       "publicRuleId": "A-10-5",

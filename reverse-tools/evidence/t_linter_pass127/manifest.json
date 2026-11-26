@@ -1,0 +1,61 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "method": "Static Ghidra decompilation and SHA-guarded PE reads; target not executed.",
+  "files": [
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/clock_reset_entry.txt",
+      "size": 14492,
+      "sha256": "48d5f330615757daee48db17f7bb8d9263bd6fe68b0816feed8e011b74f6beb6"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/constructor_and_inner_selection.txt",
+      "size": 3138,
+      "sha256": "90e5c1bc9a27d7e530fe5f71b5eb83c659581b0ffebfa292fabbae7123957d0f"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/control_helpers.txt",
+      "size": 14200,
+      "sha256": "33377ccb6f656e05259b49d1e6e1b8eba6104beb5cb2f29875f9b939e95e7c18"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/edge_context.txt",
+      "size": 355,
+      "sha256": "8686145255889312857b512b6ed254ff98065d37964c79649e7b76355b1e6c7f"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/edge_listener.txt",
+      "size": 7510,
+      "sha256": "dfe9171c3b9345e0d2a9cc14c251fa68fba7aa9606fc48eea74e2b05df6c6ece"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/edge_name_references.txt",
+      "size": 56053,
+      "sha256": "366461da8df523a152e26d112c83904bcb349fe49db4c096e3baff8e802ffd9c"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/edge_producer_refs.txt",
+      "size": 265,
+      "sha256": "e67b86c1a67e9b98d7914036752bb777895177f0b27b41edf347f79679e84039"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/entry_identity.json",
+      "size": 446,
+      "sha256": "76217aaec122247507b8ac300c8c8b5c0e0d42cf368fb2a88ccd4d5c73472679"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/fixed_message.json",
+      "size": 250,
+      "sha256": "8547f95dc3c42b52749488aa5072331937ff2e70816e1442fbf0aa7327e15309"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/process_collector.txt",
+      "size": 14741,
+      "sha256": "b50fce67a7347f7fd9b68bc687b4c3122890f61bcec074487f5d221640809e84"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass127/reset_pair_append.txt",
+      "size": 879,
+      "sha256": "2bab7c7c34927271ef0c2ad8e3e85054309cf303a324728bf924978d24fccc73"
+    }
+  ]
+}

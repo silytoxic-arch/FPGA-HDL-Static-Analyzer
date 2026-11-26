@@ -8604,8 +8604,30 @@ int main() {
         "dout<=din; end if; end if; end process;"), true);
     check(count(result, "GJB9765.4.10.h") == 1, "native clock/control intersection reaches standard evaluator");
     result = analyze(clockWrap("process(clk) begin if rising_edge(clk) then dout<='0'; end if; end process;"), true);
-    check(count(result, "GJB9765.4.10.h") == 1,
-          "packaged pure-edge constant reset/set example reaches standard evaluator");
+    check(count(result, "GJB9765.4.10.h") == 0,
+          "a pure-edge constant assignment does not create a native reset/control EQ node");
+    check(std::ranges::any_of(result.standardAssessments, [](const auto& evaluation) {
+        return evaluation.clauseId == "GJB9765.4.10.h" &&
+            evaluation.state == analysis::StandardRuleState::ManualReviewRequired;
+    }), "removing the unsupported constant-action branch must not auto-clear the rule");
+    const std::string clockReuse = "process(clk) begin if rising_edge(clk) then if clk='0' then "
+        "dout<=din; end if; end if; end process;";
+    result = analyze(clockWrap(clockReuse + "\n" + clockReuse), true);
+    std::vector<std::size_t> clockReuseLines;
+    for (const auto& item : result.violations) {
+        if (item.ruleId != "GJB9765.4.10.h") continue;
+        clockReuseLines.push_back(item.line);
+        check(item.column == 1 && item.severity == analysis::Severity::Warning &&
+              item.message == "禁止时钟作为异步复位/复位",
+              "A-10-4 uses the recovered fixed diagnostic and absent-column fallback");
+    }
+    std::ranges::sort(clockReuseLines);
+    check(clockReuseLines == std::vector<std::size_t>{5,5,6,6},
+          "A-10-4 retains four clock/control pairs including identical diagnostic locations");
+    result = analyze(clockWrap("process(clk) begin if rising_edge(clk) then "
+        "if clk='0' then dout<=din; elsif clk='1' then dout<=din; end if; end if; end process;"), true);
+    check(count(result, "GJB9765.4.10.h") == 2,
+          "multiple direct EQ control nodes on one line survive final diagnostic de-duplication");
     result = analyze(clockWrap("process(clk) begin if rising_edge(clk) then dout<=din; end if; end process;"), true);
     check(count(result, "GJB9765.4.10.h") == 0,
           "ordinary edge-triggered data assignment is not reset/set misuse");

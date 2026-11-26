@@ -1,0 +1,21 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "data": [
+    {
+      "address": "0x180ef9a78",
+      "length": 8,
+      "hex": "f0aa688001000000",
+      "pointer": "0x18068aaf0"
+    },
+    {
+      "address": "0x180de47b9",
+      "length": 1,
+      "hex": "00"
+    },
+    {
+      "address": "0x180f0c238",
+      "length": 25,
+      "hex": "bdfbd6b9cab1d6d3d7f7ceaad2ecb2bdb8b4cebb2fb8b4cebb"
+    }
+  ]
+}

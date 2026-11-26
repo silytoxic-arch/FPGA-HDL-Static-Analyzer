@@ -34,6 +34,16 @@ int main() {
     const std::string otherClock="process(rst) begin if rising_edge(rst) then if clk='0' then dout<=din; end if; end if; end process;";
     check(wrap(pure+otherClock),2,1,false,"cross admitted process intersection");
     check(wrap(pure)+wrap(otherClock),2,0,false,"architectures never cross intersect");
+    check(wrap(same+same),2,4,false,"two clock and two control nodes preserve four ordered matches");
+    const std::string repeatedControl="process(clk) begin if rising_edge(clk) then "
+        "if clk='0' then dout<=din; elsif clk='1' then dout<=din; end if; end if; end process;";
+    check(wrap(repeatedControl),1,2,false,"two EQ controls in one admitted process remain distinct");
+    check(wrap(pure+repeatedControl),2,4,false,"an edge-only clock combines with both other control nodes");
+    check(wrap("process(clk,rst) begin if clk='0' then dout<='0'; elsif rising_edge(clk) then "
+        "if clk='1' then dout<='0'; end if; end if; end process;"),1,2,false,
+        "outer class1 reset and direct constant inner reset both contribute");
+    check(wrap("process(clk) begin if rising_edge(clk) then if clk=clk then dout<=din; "
+        "end if; end if; end process;"),1,1,false,"two identifier operands still select only the first");
     check(wrap(same,"","end rtl;"),1,1,false,"named architecture end");
     check(wrap(same,"","end;"),1,1,false,"bare architecture end balanced process");
     check(wrap(same,"signal enable : std_logic;"),1,1,false,"scalar signal declaration");
@@ -69,8 +79,8 @@ int main() {
         ++tests;
         core::SourceFile src("probe.vhd", core::HdlLanguage::Vhdl, wrap(pure));
         const auto out=analysis::scanVhdlClockControl(src,parser::tokenize(src));
-        if(out.models.size()!=1||!out.models.front().clockDrivesOnlyConstants) {
-            ++failures; std::cerr<<"FAIL packaged pure-edge constant action\n";
+        if(out.models.size()!=1||!out.overlaps.empty()) {
+            ++failures; std::cerr<<"FAIL pure-edge constant action must not invent a control node\n";
         }
     }
     {
@@ -78,7 +88,7 @@ int main() {
         core::SourceFile src("probe.vhd", core::HdlLanguage::Vhdl,
             wrap("process(clk) begin if rising_edge(clk) then dout<=din; end if; end process;"));
         const auto out=analysis::scanVhdlClockControl(src,parser::tokenize(src));
-        if(out.models.size()!=1||out.models.front().clockDrivesOnlyConstants) {
+        if(out.models.size()!=1||!out.overlaps.empty()) {
             ++failures; std::cerr<<"FAIL edge-triggered data assignment boundary\n";
         }
     }

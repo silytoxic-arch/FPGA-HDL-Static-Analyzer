@@ -215,13 +215,15 @@ def recover_packaged_example_context(examples_root, clause, code):
         examples_root / specification['page'], specification['sha256'], unresolved)
 
 
-def documented_native_conflict(clause, kind, code, detected):
+def documented_native_conflict(clause, kind, code, detected, target_sha256):
     """Identify only evidence-backed conflicts between a page label and DLL defaults.
 
     This does not change the expected page result or suppress diagnostics.  It
     prevents a recovered binary/documentation contradiction from being counted
     as an unexplained product mismatch.
     """
+    if target_sha256 != '60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0':
+        return None
     if (clause == 'GJB10157.5.2.15' and kind == 'compliant' and detected and
             re.search(r'\bparameter\s+Data\b', code)):
         return ('附件把 parameter Data 标为正确，但 DLL 构造函数固定启用 parameter/localparam '
@@ -233,6 +235,13 @@ def documented_native_conflict(clause, kind, code, detected):
         return ('附件把超过 20 字符的实体/结构体名称标为正确，但 DLL 的递归候选集明确包含 '
                 'AST_ENTITY 与 AST_ARCHITECTURE，且统一采用 20 字节上限；见 '
                 'native_vhdl_signal_name_length_4_5_f_1_findings.md')
+    if (clause == 'GJB9765.4.10.h' and kind == 'violating' and not detected and
+            hashlib.sha256(code.encode('utf-8')).hexdigest() ==
+            '192b5b175afb84bf969b23512b510942a1bb6367244b80cb87088af20969cb18'):
+        return ('该特定附件例把 rising_edge(clk) 下的纯常量赋值标为违反；已恢复的 VHDL '
+                '前端产生边沿节点，原生入口只输出时钟/条件 EQ 名称交集，没有独立常量赋值路径。'
+                '仅记录此精确示例的静态实现/文档差异，不改示例预期，也不代表运行厂商工具；见 '
+                'native_vhdl_clock_reset_set_4_10_h_findings.md')
     return None
 
 
@@ -252,9 +261,12 @@ def main():
         parser.error('Expected exactly one packaged examples_html directory')
     profiles = {}
     evidence = []
+    native_target_sha256 = None
     for name in ('T-Linter.dll', 'T-Linter-Console.exe', 'LinterDB.db'):
         path = roots[0].parent / name
         if path.is_file():
+            if name == 'T-Linter.dll':
+                native_target_sha256 = digest(path)
             evidence.append({'path': str(path), 'sha256': digest(path),
                              'kind': ('identity-only for this example audit; not executed here; '
                                       'native static recovery is tracked separately')})
@@ -405,7 +417,8 @@ def main():
                                 'probe_file_name': context_path.name,
                             } for context, context_path in zip(recovered_context, context_paths)]
                         conflict = documented_native_conflict(
-                            record['clause'], example['kind'], example['code'], bool(flags))
+                            record['clause'], example['kind'], example['code'], bool(flags),
+                            native_target_sha256)
                         if conflict and not example['probe']['matches_documented_example']:
                             example['probe']['native_documentation_conflict'] = conflict
                     except (subprocess.TimeoutExpired, json.JSONDecodeError) as error:

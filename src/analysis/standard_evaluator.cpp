@@ -14302,22 +14302,13 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
         }
         const auto rawTokens = parser::tokenize(source);
         const auto control = scanVhdlClockControl(source, rawTokens);
+        // Native A-10-4 emits once per clock/control pair, with fixed Warning
+        // text and no native column. No separate constant-action rule exists
+        // in the recovered producer/consumer chain (pass127).
         for (const auto& overlap : control.overlaps) {
             const auto& token = rawTokens[overlap.clockToken];
-            emit(result, "GJB9765.4.10.h", source, token.line, token.column,
-                 "时钟信号同时作为已识别时序进程的条件控制信号：" + overlap.name);
-        }
-        for (const auto& model : control.models) {
-            if (!model.clockDrivesOnlyConstants) continue;
-            const auto duplicate = std::ranges::any_of(control.overlaps,
-                [&](const auto& overlap) {
-                    return overlap.architectureToken == model.architectureToken &&
-                        overlap.clockToken == model.edge.clockToken;
-                });
-            if (duplicate) continue;
-            const auto& token = rawTokens[model.edge.clockToken];
-            emit(result, "GJB9765.4.10.h", source, token.line, token.column,
-                 "时钟沿进程仅执行常量复位或置位赋值：" + model.edge.clockName);
+            emit(result, "GJB9765.4.10.h", source, token.line, 1,
+                 "禁止时钟作为异步复位/复位");
         }
         const auto fsmExtraction = extractBoundedVhdlFsmModels(source, rawTokens);
         for (const auto& model : fsmExtraction.models) {
@@ -17674,7 +17665,9 @@ void applyStandardProfile(AnalysisResult& result,
         [](const auto& left, const auto& right) {
             // These native rules emit once per admitted AST object/pair. Their
             // byte-for-byte identical diagnostics therefore carry multiplicity.
-            if ((left.ruleId == "GJB9765.4.8.e" &&
+            if ((left.ruleId == "GJB9765.4.10.h" &&
+                 right.ruleId == "GJB9765.4.10.h") ||
+                (left.ruleId == "GJB9765.4.8.e" &&
                  right.ruleId == "GJB9765.4.8.e") ||
                 (left.ruleId == "GJB10157.7.1.3" &&
                  right.ruleId == "GJB10157.7.1.3") ||
