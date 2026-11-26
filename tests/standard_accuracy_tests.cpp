@@ -8628,6 +8628,43 @@ int main() {
         "if clk='0' then dout<=din; elsif clk='1' then dout<=din; end if; end if; end process;"), true);
     check(count(result, "GJB9765.4.10.h") == 2,
           "multiple direct EQ control nodes on one line survive final diagnostic de-duplication");
+    result = analyze(clockWrap("g: if true generate\np: postponed\n"
+        "process(clk) begin if rising_edge(\nclk) then if clk='0' then dout<=din; "
+        "end if; end if;\nend postponed process p;\nend generate g;"), true);
+    check(count(result, "GJB9765.4.10.h") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB9765.4.10.h" && item.line == 8 && item.column == 1 &&
+                     item.message == "禁止时钟作为异步复位/复位";
+          }), "generated postponed processes retain the actual multiline clock identifier location");
+    result = analyze(clockWrap("g: for i in 0 to 7 generate b: block begin " + clockReuse +
+        " end block b; end generate g;\n" + clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 4,
+          "retained generate bodies and outer processes share proven inherited clock bindings");
+    result = analyze(clockWrap("b: block is signal clk: bit; begin " + clockReuse +
+        " end block;\n" + clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB9765.4.10.h" && item.line == 6;
+          }), "an unresolved local scalar type does not erase a proven outer diagnostic");
+    result = analyze(clockWrap("b: block is signal clk: std_logic; begin " + clockReuse +
+        " end block;\n" + clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 2,
+          "proven local matches survive without guessing same-name cross-owner qualification");
+    result = analyze(clockWrap("g: for clk in 0 to 1 generate " + clockReuse +
+        " end generate;"), true);
+    check(count(result, "GJB9765.4.10.h") == 0 &&
+          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+              return item.clauseId == "GJB9765.4.10.h" &&
+                     item.state == analysis::StandardRuleState::ManualReviewRequired;
+          }), "a shadowed iterator cannot be guessed as a clock and remains review-required");
+    result = analyze(clockWrap("g: if true generate b: block begin "
+        "p: postponed process(clk) begin if rising_edge(clk) then dout<=din; "
+        "end if; end postponed process p; end block; end generate;"), true);
+    check(count(result, "GJB9765.4.10.h") == 0 &&
+          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+              return item.clauseId == "GJB9765.4.10.h" &&
+                     item.state == analysis::StandardRuleState::ManualReviewRequired;
+          }), "generated/postponed scope support does not auto-clear a no-diagnostic result");
     result = analyze(clockWrap("process(clk) begin if rising_edge(clk) then dout<=din; end if; end process;"), true);
     check(count(result, "GJB9765.4.10.h") == 0,
           "ordinary edge-triggered data assignment is not reset/set misuse");

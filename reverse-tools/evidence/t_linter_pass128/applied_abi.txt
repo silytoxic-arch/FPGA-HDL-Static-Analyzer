@@ -1,0 +1,8 @@
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+ABI annotations inferred from retained instruction operands, not vendor debug symbols.
+1804c5070 void __fastcall FUN_1804c5070(pointer root, pointer source_if_nodes)
+root storage=RCX:8
+source_if_nodes storage=RDX:8
+1804d5520 uint __fastcall FUN_1804d5520(pointer root, pointer classification)
+root storage=RCX:8
+classification storage=RDX:8

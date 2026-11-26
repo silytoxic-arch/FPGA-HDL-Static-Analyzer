@@ -10449,10 +10449,28 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Constructor FUN_180024d60 installs vtable 0x180ef9a78; slot 0 is FUN_18068aaf0. Per admitted root it clears native clock/control/output vectors, calls FUN_18068b420 and appends the clock node for every exact length/memcmp name match in the full ordered clock/control-node cross product. No output deduplication or direct constant-assignment alarm exists in this entry. FUN_18068bd30 appends operand pairs only for direct AST_EQ(0x36) children of source IF/ELSIF COND nodes; FUN_18068c2c0 adds constant-body inner IF EQ pairs. FUN_18068bee0 extracts an edge clock. VHDL Function_call_or_indexed_name_partContext +0x9b8 delegates to FUN_1801b7610, which retags ordinary rising_edge/falling_edge calls 0x65/0x66 rather than manufacturing reset EQ nodes. Product removes the previously documentation-only pure-constant alarm, retains every matching admitted source pair and uses the fixed native Warning text 禁止时钟作为异步复位/复位, clock-node line and absent-column fallback 1. The single SHA-bound packaged violation is retained as a static implementation/documentation conflict, not counted as a match or runtime comparison.",
+      "predicate": "Constructor FUN_180024d60 installs vtable 0x180ef9a78; slot 0 is FUN_18068aaf0. Per admitted root it clears native clock/control/output vectors, calls FUN_18068b420 and appends the clock node for every exact length/memcmp name match in the full ordered clock/control-node cross product. No output deduplication or direct constant-assignment alarm exists in this entry. FUN_18068bd30 appends operand pairs only for direct AST_EQ(0x36) children of source IF/ELSIF COND nodes; FUN_18068c2c0 adds constant-body inner IF EQ pairs. FUN_18068bee0 extracts an edge clock. VHDL Function_call_or_indexed_name_partContext +0x9b8 delegates to FUN_1801b7610, which retags ordinary rising_edge/falling_edge calls 0x65/0x66 rather than manufacturing reset EQ nodes. Product removes the previously documentation-only pure-constant alarm, admits ordinary/postponed processes below bounded IF/FOR GENERATE and BLOCK containers, and tracks local scalar declarations and iterator shadows without leaking outer types. Per-owner matched source pairs preserve multiplicity; equal spellings with different lexical owners remain unverified cross-scope pairs and set incomplete. It uses the fixed native Warning text 禁止时钟作为异步复位/复位, clock-node line and absent-column fallback 1. The single SHA-bound packaged violation is retained as a static implementation/documentation conflict, not counted as a match or runtime comparison.",
       "predicateEvidence": [
         "docs/evidence/native_vhdl_clock_reset_set_4_10_h_findings.md",
         "docs/native_rule_recovery_pass127.md",
+        "docs/native_rule_recovery_pass128.md",
+        "reverse-tools/evidence/t_linter_pass128/AnnotateProcessClassifierAbi.java#sha256=463cae9d5b044f4743655502120ae699480794f2770c281aad4962e73d440a52",
+        "reverse-tools/evidence/t_linter_pass128/DumpFunctionParameterStorage.java#sha256=db1be6bca3163ee90d89ab6703b69c453adf853b2b24cc291ca64e9112426e08",
+        "reverse-tools/evidence/t_linter_pass128/abi_classifier.txt#sha256=f59ccf24eab714066fd8727609fd18fe5fdb3a3eabecc29ef7714a1b644eb7e6",
+        "reverse-tools/evidence/t_linter_pass128/applied_abi.txt#sha256=44d8c4f75f94668d47481f926746049374c66940a53f578393b73bbbdd641c4b",
+        "reverse-tools/evidence/t_linter_pass128/base_listener_slots.json#sha256=7c27ff3320a0d0d7c83f7a64e13fae26c43c992dc952101f47815152e79234df",
+        "reverse-tools/evidence/t_linter_pass128/base_noop.txt#sha256=3f6d7149f875954e2b69349b0e6a521031d70eebba78d70a593f392a71506dd0",
+        "reverse-tools/evidence/t_linter_pass128/block_listener.txt#sha256=742e1170282d9a6bbe5a1219ccdf2edea88a8badc1acc5a3bce9fdfe4c621e70",
+        "reverse-tools/evidence/t_linter_pass128/classifier_call.asm#sha256=d60ab2ef180684acabb869e3f3eef0ae9bd25289c59be786c8742c269832b4cb",
+        "reverse-tools/evidence/t_linter_pass128/generate_listener.txt#sha256=19f3eafa9235e17a0b40ad22379d1f9e587b6c95de74186398f10c0dcf65f27e",
+        "reverse-tools/evidence/t_linter_pass128/generate_parser.txt#sha256=2c7d302cb18c97890106b438c64fab877cb82df840403744614117cc385eb928",
+        "reverse-tools/evidence/t_linter_pass128/generate_scheme.txt#sha256=c959c45f893ce56fcf36439a92b49a745f3a16eedffac49477d3941cef9d130d",
+        "reverse-tools/evidence/t_linter_pass128/name_listener.txt#sha256=4a5ccee64a7cbebc977bf3d160dcc5e80feaefdf3d2982fb06cf8af4071de1ea",
+        "reverse-tools/evidence/t_linter_pass128/parameter_storage_before.txt#sha256=d32a26922e71bb7dc39973631f06a5b390b638b20c24bc810e587e25926185f6",
+        "reverse-tools/evidence/t_linter_pass128/root_walker.asm#sha256=8fb7a95a7af0c181b0b0c306bf6f2307be3f565b5a7f5aa6a0465f93c691babe",
+        "reverse-tools/evidence/t_linter_pass128/scope_contexts.txt#sha256=0840390c19500d7bb569fe0f501671722a43c23c5b5c9b5925980259ac3879f7",
+        "reverse-tools/evidence/t_linter_pass128/signal_listener.txt#sha256=90ecc60e16a6fa34ed5f99840d3aa5090b4b20a73c018ffcaab80530634a72d6",
+        "reverse-tools/evidence/t_linter_pass128/untyped_classifier.txt#sha256=a2bb1c2d110de8126c377fddab7f4f14308a5e61ed480dd2e1ba5b461861f674",
         "reverse-tools/evidence/t_linter_pass127/clock_reset_entry.txt#sha256=48d5f330615757daee48db17f7bb8d9263bd6fe68b0816feed8e011b74f6beb6",
         "reverse-tools/evidence/t_linter_pass127/constructor_and_inner_selection.txt#sha256=90e5c1bc9a27d7e530fe5f71b5eb83c659581b0ffebfa292fabbae7123957d0f",
         "reverse-tools/evidence/t_linter_pass127/control_helpers.txt#sha256=33377ccb6f656e05259b49d1e6e1b8eba6104beb5cb2f29875f9b939e95e7c18",
@@ -10491,7 +10509,7 @@
           "matched": true
         }
       ],
-      "limitations": "Source-to-native process classification is still bounded: explicit IEEE scalar binding, adjacent entity context inheritance, shadow rejection, no generate/selected/split-file paths, and architecture isolation remain source-adapter constraints, not fully recovered native grouping semantics. Exact identifier normalization and arbitrary expression/process lowering are unverified. The removed branch conflicts with one exact documented example; static path evidence is not a vendor runtime oracle. No finding remains ManualReviewRequired; full algorithm equivalence is not claimed."
+      "limitations": "Source-to-native process classification remains bounded: explicit IEEE scalar binding, adjacent entity context inheritance and architecture isolation are source-adapter constraints. IF/FOR generate and block descendants are admitted with scoped simple object declarations; aliases, local type/subprogram/import ambiguity, block interfaces, case/alternative-generate grammar, selected/split-file paths and arbitrary expressions remain unverified. Inherited lexical owners are preserved; cross-owner same-name native qualification/grouping remains unknown and does not add speculative matches. Incorrect untyped decompiler call arguments were corrected only through register-verified ABI annotations, not treated as source truth. The removed branch conflicts with one exact documented example; static path evidence is not a vendor runtime oracle. No finding remains ManualReviewRequired; full algorithm equivalence is not claimed."
     },
     {
       "publicRuleId": "A-10-5",

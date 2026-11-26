@@ -3,6 +3,7 @@
 #include "analysis/vhdl_edge_condition.h"
 #include <algorithm>
 #include <map>
+#include <optional>
 #include <set>
 
 namespace fpga::analysis {
@@ -12,7 +13,10 @@ struct VhdlClockControlModel {
     unsigned nativeClassCandidate{}; // Bounded source reconstruction, not a vendor run.
     VhdlEdgeCondition edge;
     std::vector<std::size_t> equalityIdentifierTokens;
-
+    // Lexical owners bound by this source adapter. Native normalization for
+    // equal-spelling objects in distinct local scopes remains unverified.
+    std::size_t clockBindingOwner{};
+    std::vector<std::size_t> equalityBindingOwners;
 };
 struct VhdlClockControlOverlap {
     std::size_t architectureToken{}, clockToken{}, equalityIdentifierToken{};
@@ -51,21 +55,196 @@ class Scanner {
     const std::vector<parser::HdlToken>& t;
     VhdlClockControlScan result;
     using Names=std::set<std::string>;
+    using Bindings=std::map<std::string,std::size_t>;
     bool word(std::size_t i,std::string_view w) const {
         return i<t.size() && t[i].kind==parser::HdlTokenKind::Identifier && lower(t[i].text)==w;
     }
     bool scalar(std::size_t i) const { return word(i,"std_logic")||word(i,"std_ulogic"); }
+    struct StatementEnd { std::size_t end{}, keyword{}, after{}; };
+    bool closingKeyword(std::size_t i) const {
+        return (i>0 && word(i-1,"end")) ||
+            (i>1 && word(i-1,"postponed") && word(i-2,"end"));
+    }
+    std::optional<std::size_t> generateControl(std::size_t generate) const {
+        for (auto i=generate;i>0;) {
+            --i;
+            if (word(i,"if") || word(i,"for") || word(i,"case")) {
+                if (i>=2 && t[i-1].text==":" && basic(t[i-2])) return i;
+                return std::nullopt;
+            }
+            if (t[i].text==";" || word(i,"generate") || word(i,"begin") ||
+                word(i,"end") || word(i,"elsif") || word(i,"else")) break;
+        }
+        return std::nullopt;
+    }
+    std::optional<StatementEnd> statementEnd(std::size_t opening,
+                                            std::string_view kind,std::size_t limit) const {
+        unsigned depth=1;
+        for (auto i=opening+1;i<limit;++i) {
+            if (word(i,"end")) {
+                auto keyword=i+1;
+                if (kind=="process" && word(keyword,"postponed")) ++keyword;
+                if (word(keyword,kind)) {
+                    if (--depth==0) {
+                        auto semi=keyword+1;
+                        if (semi<limit && basic(t[semi])) ++semi;
+                        if (semi>=limit || t[semi].text!=";") return std::nullopt;
+                        return StatementEnd{i,keyword,semi+1};
+                    }
+                    i=keyword;
+                    continue;
+                }
+            }
+            if (word(i,kind) && !closingKeyword(i) &&
+                (kind!="generate" || generateControl(i))) ++depth;
+        }
+        return std::nullopt;
+    }
     std::size_t unitEnd(std::size_t start,std::string_view kind,const std::string& name) const {
         for (auto i=start;i+1<t.size();++i) {
-            if (kind=="architecture" && word(i,"process") && (i==0 || !word(i-1,"end"))) {
-                auto stop=i+1;
-                while (stop+1<t.size() && !(word(stop,"end")&&word(stop+1,"process"))) ++stop;
-                if (stop+1==t.size()) return t.size();
-                i=stop+1; continue;
+            if (kind=="architecture" && !closingKeyword(i)) {
+                const auto nested=word(i,"process")?"process":word(i,"block")?"block":
+                    (word(i,"generate") && generateControl(i))?"generate":"";
+                if (*nested) {
+                    const auto end=statementEnd(i,nested,t.size());
+                    if (!end) return t.size();
+                    i=end->after-1;
+                    continue;
+                }
             }
             if (word(i,"end") && (word(i+1,kind)||word(i+1,name)||t[i+1].text==";")) return i;
         }
         return t.size();
+    }
+    bool primitiveShadow(const std::string& name) const {
+        return name=="rising_edge" || name=="falling_edge" ||
+            name=="std_logic" || name=="std_ulogic";
+    }
+    // Declaration names hide outer objects before their type is considered.
+    // Non-scalar objects and constants never inherit an outer scalar binding.
+    std::optional<std::size_t> declarationBody(std::size_t start,std::size_t limit,
+                                              Names& names,Bindings& bindings,bool beginRequired) const {
+        auto i=start;
+        bool sawDeclaration=false;
+        while (i<limit) {
+            if (word(i,"begin")) return i+1;
+            if (!word(i,"signal") && !word(i,"constant")) {
+                if (beginRequired || sawDeclaration || word(i,"type") || word(i,"subtype") ||
+                    word(i,"function") || word(i,"procedure") || word(i,"alias") ||
+                    word(i,"package") || word(i,"use") || word(i,"attribute") ||
+                    word(i,"generic") || word(i,"port")) return std::nullopt;
+                return i; // Optional declaration part omitted in GENERATE.
+            }
+            sawDeclaration=true;
+            const bool signal=word(i,"signal");
+            ++i;
+            std::vector<std::string> declared;
+            while (i<limit && basic(t[i])) {
+                const auto name=lower(t[i].text);
+                if (primitiveShadow(name)) return std::nullopt;
+                declared.push_back(name);
+                ++i;
+                if (i>=limit || t[i].text!=",") break;
+                ++i;
+            }
+            if (declared.empty() || i>=limit || t[i].text!=":" || i+1>=limit)
+                return std::nullopt;
+            ++i;
+            const bool scalarType=scalar(i);
+            auto tail=i+1;
+            if (word(tail,"register") || word(tail,"bus")) ++tail;
+            const bool initializer=tail+1<limit && t[tail].text==":" && t[tail+1].text=="=" &&
+                t[tail+1].offset==t[tail].offset+1;
+            const bool boundScalar=signal && scalarType && tail<limit &&
+                (t[tail].text==";" || initializer);
+            for (const auto& name:declared) {
+                names.erase(name);
+                bindings.erase(name);
+                if (boundScalar) { names.insert(name); bindings[name]=i; }
+            }
+            unsigned parentheses=0;
+            for (;i<limit;++i) {
+                if (t[i].text=="(") ++parentheses;
+                else if (t[i].text==")") {
+                    if (!parentheses) return std::nullopt;
+                    --parentheses;
+                } else if (t[i].text==";" && !parentheses) break;
+                if (word(i,"begin") || word(i,"end")) return std::nullopt;
+            }
+            if (i==limit) return std::nullopt;
+            ++i;
+        }
+        if (!beginRequired && !sawDeclaration) return limit;
+        return std::nullopt;
+    }
+    bool supportedGenerateBody(std::size_t start,std::size_t limit) const {
+        for (auto i=start;i<limit;++i) {
+            const auto nested=word(i,"process")?"process":word(i,"block")?"block":
+                (word(i,"generate") && generateControl(i))?"generate":"";
+            if (*nested && !closingKeyword(i)) {
+                const auto end=statementEnd(i,nested,limit);
+                if (!end) return false;
+                i=end->after-1;
+            } else if (word(i,"generate") && !closingKeyword(i)) {
+                return false; // Alternative-generate grammar not established.
+            }
+        }
+        return true;
+    }
+    void concurrent(std::size_t start,std::size_t limit,std::size_t architecture,
+                    const Names& names,const Bindings& bindings) {
+        for (auto i=start;i<limit;++i) {
+            if (closingKeyword(i)) continue;
+            if (word(i,"process")) {
+                const auto end=statementEnd(i,"process",limit);
+                if (!end) { result.incomplete=true; return; }
+                process(i,end->end,architecture,names,bindings);
+                i=end->after-1;
+            } else if (word(i,"block") || word(i,"generate")) {
+                const bool block=word(i,"block");
+                const auto end=statementEnd(i,block?"block":"generate",limit);
+                if (!end) { result.incomplete=true; return; }
+                auto local=names;
+                auto localBindings=bindings;
+                auto body=i+1;
+                bool admitted=true;
+                if (block) {
+                    admitted=i>=2 && t[i-1].text==":" && basic(t[i-2]);
+                    if (body<end->end && t[body].text=="(") {
+                        unsigned depth=1;
+                        while (++body<end->end && depth) {
+                            if (t[body].text=="(") ++depth;
+                            else if (t[body].text==")") --depth;
+                        }
+                        if (depth) admitted=false;
+                    }
+                    if (word(body,"is")) ++body;
+                } else {
+                    const auto control=generateControl(i);
+                    admitted=control && *control+1<i &&
+                        (word(*control,"if") || word(*control,"for")) &&
+                        supportedGenerateBody(body,end->end);
+                    if (admitted && word(*control,"for")) {
+                        const auto index=*control+1;
+                        if (index+2>=i || !basic(t[index]) || !word(index+1,"in") ||
+                            primitiveShadow(lower(t[index].text))) admitted=false;
+                        else { // A generate iterator cannot inherit an outer signal binding.
+                            local.erase(lower(t[index].text));
+                            localBindings.erase(lower(t[index].text));
+                        }
+                    }
+                }
+                const auto begin=admitted?declarationBody(body,end->end,local,localBindings,block):std::nullopt;
+                if (begin) concurrent(*begin,end->end,architecture,local,localBindings);
+                else result.incomplete=true;
+                i=end->after-1;
+            } else if (word(i,"signal") || word(i,"constant") || word(i,"type") ||
+                       word(i,"subtype") || word(i,"function") || word(i,"procedure") ||
+                       word(i,"alias") || word(i,"package") || word(i,"use")) {
+                result.incomplete=true;
+                return;
+            }
+        }
     }
     bool bound(std::size_t i,const Names& names) const {
         return i<t.size() && basic(t[i]) && names.contains(lower(t[i].text));
@@ -209,8 +388,8 @@ class Scanner {
         return control.branches.size()==1 || assignments(control.branches[1].bodyBegin,
             control.branches[1].bodyEnd,names,false);
     }
-    void process(std::size_t p,std::size_t stop,std::size_t architecture,const Names& names) {
-        if (p>0 && word(p-1,"postponed")) { result.incomplete=true; return; }
+    void process(std::size_t p,std::size_t stop,std::size_t architecture,const Names& names,
+                 const Bindings& bindings) {
         auto begin=p+1;
         if (begin<stop && t[begin].text=="(") {
             ++begin;
@@ -250,25 +429,42 @@ class Scanner {
             if (eq(first.conditionBegin,first.conditionEnd,names,index)) model.equalityIdentifierTokens.push_back(index);
             model.nativeClassCandidate=1;
         }
+        const auto clockOwner=bindings.find(model.edge.clockName);
+        if (clockOwner==bindings.end()) { result.incomplete=true; return; }
+        model.clockBindingOwner=clockOwner->second;
+        for (const auto token:model.equalityIdentifierTokens) {
+            const auto owner=bindings.find(lower(t[token].text));
+            if (owner==bindings.end()) { result.incomplete=true; return; }
+            model.equalityBindingOwners.push_back(owner->second);
+        }
         result.models.push_back(std::move(model));
     }
     void declaredNames(std::size_t a,std::size_t b,Names& names,bool ports) const {
-        // Restrict signal/port declarations to bare scalar IEEE types. Reject
-        // selected/indexed names later, and do not bind subtype aliases.
         for (auto i=a;i<b;++i) {
-            if (!ports && !word(i,"signal")) continue;
+            const bool signal=ports || word(i,"signal");
+            if (!ports && !signal && !word(i,"constant") && !word(i,"file") &&
+                !word(i,"variable")) continue;
             auto start=ports?i:i+1;
-            if (!basic(t[start])) continue;
+            if (start>=b || !basic(t[start])) continue;
             auto colon=start+1;
             while (colon<b && t[colon].text==",") colon+=2;
             if (colon>=b || t[colon].text!=":") continue;
+            // Any declaration hides a visible object, even if its new type
+            // is outside this bounded IEEE scalar model.
+            for (auto n=start;n<colon;n+=2)
+                if (basic(t[n])) names.erase(lower(t[n].text));
             auto type=colon+1;
             if (ports && (word(type,"in")||word(type,"out")||word(type,"inout")||word(type,"buffer"))) ++type;
-            if (type>=b || !scalar(type)) continue;
-            if (type+1<b && t[type+1].text!=";" && t[type+1].text!=")") continue;
+            if (!signal || type>=b || !scalar(type)) continue;
+            auto tail=type+1;
+            if (word(tail,"register") || word(tail,"bus")) ++tail;
+            const bool initializer=tail+1<b && t[tail].text==":" && t[tail+1].text=="=" &&
+                t[tail+1].offset==t[tail].offset+1;
+            if (tail<b && t[tail].text!=";" && t[tail].text!=")" && !initializer) continue;
             for (auto n=start;n<colon;n+=2) if (basic(t[n])) names.insert(lower(t[n].text));
         }
     }
+
 public:
     Scanner(const core::SourceFile& s,const std::vector<parser::HdlToken>& tokens):source(s),t(tokens){}
     VhdlClockControlScan run() {
@@ -288,7 +484,13 @@ public:
                 const auto entityIeee=ieee(context,i);
                 if (entityIeee && !shadow) {
                     for (auto p=i+3;p<end;++p) if (word(p,"port") && p+1<end && t[p+1].text=="(") {
-                        auto stop=p+2; while (stop<end && t[stop].text!=")") ++stop;
+                        auto stop=p+2;
+                        unsigned depth=1;
+                        for (;stop<end;++stop) {
+                            if (t[stop].text=="(") ++depth;
+                            else if (t[stop].text==")" && --depth==0) break;
+                        }
+                        if (stop==end) { result.incomplete=true; break; }
                         declaredNames(p+2,stop,names,true); break;
                     }
                 }
@@ -310,8 +512,6 @@ public:
                     if (word(j,"function") || word(j,"procedure") || word(j,"package") ||
                         word(j,"alias") || word(j,"subtype") || word(j,"type")) shadow=true;
                 for (auto j=i+5;j<begin;++j) if (word(j,"use")) shadow=true;
-                for (auto j=begin;j<end;++j)
-                    if (word(j,"generate")||word(j,"block")) shadow=true;
                 bool hasInterveningUse=false;
                 for (auto j=context;j<i;++j) if (word(j,"use")) hasInterveningUse=true;
                 const auto entityName=lower(t[i+3].text);
@@ -321,15 +521,9 @@ public:
                     result.incomplete=true;
                 } else {
                     auto names=entity->second; declaredNames(i+5,begin,names,false);
-                    for (auto p=begin+1;p<end;++p) if (word(p,"process") && !word(p-1,"end")) {
-                        auto stop=p+1;
-                        while (stop+1<end && !(word(stop,"end")&&word(stop+1,"process"))) ++stop;
-                        if (stop+1==end) { result.incomplete=true; break; }
-                        process(p,stop,arch,names);
-                        auto semi=stop+2;
-                        while (semi<end&&t[semi].text!=";") ++semi;
-                        p=semi;
-                    }
+                    Bindings bindings;
+                    for (const auto& name:names) bindings[name]=arch;
+                    concurrent(begin+1,end,arch,names,bindings);
                 }
                 auto semi=end+1; while (semi<t.size()&&t[semi].text!=";") ++semi;
                 i=semi; context=std::min(i+1,t.size());
@@ -337,12 +531,18 @@ public:
         }
         for (const auto& clock:result.models) for (const auto& control:result.models) {
             if (clock.architectureToken!=control.architectureToken) continue;
-            for (const auto index:control.equalityIdentifierTokens)
+            for (std::size_t n=0;n<control.equalityIdentifierTokens.size();++n) {
+                const auto index=control.equalityIdentifierTokens[n];
                 if (lower(t[index].text)==clock.edge.clockName) {
+                    if (clock.clockBindingOwner!=control.equalityBindingOwners[n]) {
+                        result.incomplete=true; // Distinct local objects: native qualification unresolved.
+                        continue;
+                    }
                     // Native 68aaf0 appends every matching clock/control pair.
                     // Repeated nodes remain distinct, including equal locations.
                     result.overlaps.push_back({clock.architectureToken,clock.edge.clockToken,index,clock.edge.clockName});
                 }
+            }
         }
         if (result.models.empty()) result.incomplete=true;
         return std::move(result);
@@ -353,8 +553,9 @@ public:
 // Native run ev_8db32876e0c5e664daa8d39b05e03aafd03e235a87160ab608419944718e1add;
 // classifier assembly ev_78ded7eaead89d9cd328278a0fc9eba39dcbc0365a11f5e2ba70c9a45bed2898.
 // Actual bounded source parsing and declaration binding; no metadata-only claim.
-// Deliberate safety differences: IEEE context, scalar declarations, architecture
-// isolation, local shadow rejection, and unsupported => incomplete/ManualReview.
+// Source constraints remain explicit IEEE scalar binding and architecture
+// isolation. Local owners are tracked; unverified cross-owner qualification
+// and unsupported syntax stay incomplete/ManualReview.
 [[nodiscard]] inline VhdlClockControlScan scanVhdlClockControl(
     const core::SourceFile& source,const std::vector<parser::HdlToken>& tokens) {
     return vhdl_clock_detail::Scanner(source,tokens).run();

@@ -1,0 +1,108 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "method": "Static decompilation, instruction and PE-data reads. ABI annotations are inferred from observed registers, not vendor debug symbols. Target not executed.",
+  "files": [
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/AnnotateProcessClassifierAbi.java",
+      "size": 2172,
+      "sha256": "463cae9d5b044f4743655502120ae699480794f2770c281aad4962e73d440a52",
+      "role": "analysis-utility; not part of the product or vendor source"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/DumpFunctionParameterStorage.java",
+      "size": 1014,
+      "sha256": "db1be6bca3163ee90d89ab6703b69c453adf853b2b24cc291ca64e9112426e08",
+      "role": "analysis-utility; not part of the product or vendor source"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/abi_classifier.txt",
+      "size": 4508,
+      "sha256": "f59ccf24eab714066fd8727609fd18fe5fdb3a3eabecc29ef7714a1b644eb7e6",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/applied_abi.txt",
+      "size": 421,
+      "sha256": "44d8c4f75f94668d47481f926746049374c66940a53f578393b73bbbdd641c4b",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/base_listener_slots.json",
+      "size": 571,
+      "sha256": "7c27ff3320a0d0d7c83f7a64e13fae26c43c992dc952101f47815152e79234df",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/base_noop.txt",
+      "size": 195,
+      "sha256": "3f6d7149f875954e2b69349b0e6a521031d70eebba78d70a593f392a71506dd0",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/block_listener.txt",
+      "size": 4840,
+      "sha256": "742e1170282d9a6bbe5a1219ccdf2edea88a8badc1acc5a3bce9fdfe4c621e70",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/classifier_call.asm",
+      "size": 1294,
+      "sha256": "d60ab2ef180684acabb869e3f3eef0ae9bd25289c59be786c8742c269832b4cb",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/generate_listener.txt",
+      "size": 4929,
+      "sha256": "19f3eafa9235e17a0b40ad22379d1f9e587b6c95de74186398f10c0dcf65f27e",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/generate_parser.txt",
+      "size": 3575,
+      "sha256": "2c7d302cb18c97890106b438c64fab877cb82df840403744614117cc385eb928",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/generate_scheme.txt",
+      "size": 1771,
+      "sha256": "c959c45f893ce56fcf36439a92b49a745f3a16eedffac49477d3941cef9d130d",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/name_listener.txt",
+      "size": 6965,
+      "sha256": "4a5ccee64a7cbebc977bf3d160dcc5e80feaefdf3d2982fb06cf8af4071de1ea",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/parameter_storage_before.txt",
+      "size": 320,
+      "sha256": "d32a26922e71bb7dc39973631f06a5b390b638b20c24bc810e587e25926185f6",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/root_walker.asm",
+      "size": 4186,
+      "sha256": "8fb7a95a7af0c181b0b0c306bf6f2307be3f565b5a7f5aa6a0465f93c691babe",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/scope_contexts.txt",
+      "size": 2609,
+      "sha256": "0840390c19500d7bb569fe0f501671722a43c23c5b5c9b5925980259ac3879f7",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/signal_listener.txt",
+      "size": 23650,
+      "sha256": "90ecc60e16a6fa34ed5f99840d3aa5090b4b20a73c018ffcaab80530634a72d6",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass128/untyped_classifier.txt",
+      "size": 2444,
+      "sha256": "a2bb1c2d110de8126c377fddab7f4f14308a5e61ed480dd2e1ba5b461861f674",
+      "role": "known-inaccurate-call-argument: use retained assembly and ABI-annotated output"
+    }
+  ]
+}
