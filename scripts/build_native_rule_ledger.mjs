@@ -1214,6 +1214,15 @@ for(const clause of expandedExpressionClauses) {
   confirmed[clause].evidence.push('docs/native_rule_recovery_pass137.md', ...["reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505", "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694", "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088", "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13", "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e", "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"]);
   confirmed[clause].limitations += ' This input migration is not full proprietary AST elaboration or runtime equivalence. Override collection is limited to parser-recognized instances, and does not solve actual overridden values, defparam, external elaboration configuration, generated scopes or malformed recovery. Missing precision maps to column one; no alarm remains review-required.';
 }
+// Pass 138: native if/ternary lowering is tied to concrete grammar reductions.
+{
+  const row=confirmed['GJB10157.9.2.10'];
+  row.predicate=row.predicate.replace('the exact frontend lowering that relates source if to AST_CASE is not yet established.', 'Pass 138 native table replay ties ordinary source if to reductions 563/565; the corresponding semantic action creates CASE, marks +0x183, and adds REDUCE_BOOL wrapping the original condition. Reduction 641 constructs TERNARY with condition/true/false children.');
+  row.predicate += ' V1.4.256 evaluates the bounded condition predicate using matching expanded module/token/width coordinates and maps only report locations to origins. Literal, macro, nested function macro and consumed include forms share regression coverage. Table replay uses predefined token kinds and does not execute the target lexer or semantic actions; action behavior is independently statically decompiled.';
+  row.limitations=row.limitations.replace('Source if-to-AST_CASE/AST_REDUCE_BOOL lowering, ', 'Alternative frontend/generated lowering, ');
+  row.limitations += ' Full expression precedence, elaboration and proprietary runtime equivalence are unproved. The expanded adapter preserves the existing bounded expression subset and review-required no-finding state.';
+  row.evidence.push('docs/native_rule_recovery_pass138.md', ...["reverse-tools/evidence/t_linter_pass138/condition_rule.txt#sha256=94a3d875c3e5c7410be92c6794f92cf9162ebff389bc6c37f2fc98f6c08d5413", "reverse-tools/evidence/t_linter_pass138/expanded_condition_input.patch#sha256=64eff88dec60c7b8a4a89786f8c1e16bd0f941e2806aa6b157f9f035a6553fbf", "reverse-tools/evidence/t_linter_pass138/if_ternary_lowering.txt#sha256=38c0410de12ee9383c815563915908ccd6fb81abb107b011f9c4c0db6976c51d", "reverse-tools/evidence/t_linter_pass138/if_ternary_replay.json#sha256=8b712c6853baf0b5e9b51dd7e4bfc5467b5384d7cba09f7c4e883e80755cfca7", "reverse-tools/evidence/t_linter_pass138/public_parser_excerpt.txt#sha256=af8986005b4aa462ec8506b7f79f8295a6d16d808022bdf21d3e02872ccfa5eb", "reverse-tools/evidence/t_linter_pass138/replay_if_grammar.py#sha256=a6a1864ce3bceecee637fb6da60da2e810109d7067ededa2d37b41e1b51e41a0", "reverse-tools/evidence/t_linter_pass138/repro/comparison.json#sha256=23251bca9b0cbd0b6498fa9d34d920ee667e9e5b7024004aedef98f878186e11", "reverse-tools/evidence/t_linter_pass138/repro/literal.sv#sha256=f321bf0dc4ae3ee1d2ff6854caf72845cdaff7889fd57f91336e87c1c809b044", "reverse-tools/evidence/t_linter_pass138/repro/macro.sv#sha256=f8764142ba76b316a875c74f5daf13fefad92d7245a00e5151958860c0638e70"]);
+}
 const rules = native.rules.map(rule => {
   // Accept both the raw REA entry inventory and the previously generated
   // ledger as the stable native-entry source. This keeps checkpoint rebuilds
@@ -1642,6 +1651,11 @@ for(const row of rules) if(expandedExpressionClauses.includes(row.clause)) {
   const tests=Array.isArray(row.additionalTests)?row.additionalTests:row.additionalTests?[row.additionalTests]:[];
   row.additionalTests=[...new Set([...tests,'tests/frontend_preprocessor_tests.cpp'])];
   row.expandedExpressionInputRelease='docs/v1_4_255_release.md';
+}
+for(const row of rules) if(row.clause==='GJB10157.9.2.10') {
+  const tests=Array.isArray(row.additionalTests)?row.additionalTests:row.additionalTests?[row.additionalTests]:[];
+  row.additionalTests=[...new Set([...tests,'tests/frontend_preprocessor_tests.cpp'])];
+  row.expandedConditionInputRelease='docs/v1_4_256_release.md';
 }
 if (rules.length !== 209 || new Set(rules.map(rule => rule.clause)).size !== 209)
   throw new Error('Expected 209 unique GJB rules');

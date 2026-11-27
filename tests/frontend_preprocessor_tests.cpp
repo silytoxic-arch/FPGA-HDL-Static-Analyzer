@@ -505,6 +505,44 @@ int main() {
     linted=lint("`define MAKE module vec(input [3:0] a,b,output reg y);always @* y=a&&b;endmodule\n`line 73 \"logical.sv\" 0\n`MAKE\n");
     check(std::ranges::any_of(linted.violations,[](const auto& v){return v.ruleId=="GJB10157.8.8"&&v.file=="logical.sv"&&v.line==73&&v.column==1;}),
         "line directive uses logical report origin for expanded rule diagnostics");
+
+    const std::vector<std::pair<std::string,int>> conditionCases{
+        {"if(cond) y=1'b1;else y=1'b0;",1},
+        {"y=cond?1'b1:1'b0;",1},
+        {"if(cond[0]) y=1'b1;else y=1'b0;",0},
+        {"if(cond==4'b0000) y=1'b1;else y=1'b0;",0},
+        {"if(!cond) y=1'b1;else y=1'b0;",0},
+        {"if(cond[2:1]) y=1'b1;else y=1'b0;",1},
+        {"if({cond[0],cond[1]}) y=1'b1;else y=1'b0;",1},
+        {"if((cond)) y=1'b1;else y=1'b0;",1},
+        {"if(unknown_width) y=1'b1;else y=1'b0;",0}
+    };
+    for(const auto& [body,expected]:conditionCases) {
+        const auto text="module condition_owner(input [3:0] cond,output reg y);always @* "+body+"endmodule";
+        const auto literal=lint(text+"\n");
+        const auto macro=lint("`define MAKE "+text+"\n`MAKE\n");
+        const auto nested=lint("`define ID(x) x\n`define MAKE "+text+"\n`ID(`MAKE)\n");
+        check(count(literal,"GJB10157.9.2.10")==expected,"condition literal fixture retains bounded predicate");
+        check(count(macro,"GJB10157.9.2.10")==expected,"condition macro fixture matches literal behavior");
+        check(count(nested,"GJB10157.9.2.10")==expected,"condition nested function macro matches literal behavior");
+        {std::ofstream f(base/"condition_input.vh");f<<text<<'\n';}
+        const auto included=lint("`include \"condition_input.vh\"\n");
+        check(count(included,"GJB10157.9.2.10")==expected,"condition header fixture matches literal behavior");
+        for(const auto& v:macro.violations) if(v.ruleId=="GJB10157.9.2.10")
+            check(v.file==root&&v.line==2&&v.column==1,"condition diagnostic maps to macro invocation");
+        for(const auto& v:included.violations) if(v.ruleId=="GJB10157.9.2.10")
+            check(v.file==base/"condition_input.vh"&&v.line==1,"condition diagnostic maps to consumed header");
+        check(count(lint("`ifdef NEVER_DEFINED\n"+text+"\n`endif\n"),"GJB10157.9.2.10")==0,
+            "inactive condition fixture stays excluded");
+    }
+    linted=lint("`define MAKE module condline(input [3:0] c,output reg y);always @* if(c)y=1;else y=0;endmodule\n`line 88 \"condition_logical.sv\" 0\n`MAKE\n");
+    check(std::ranges::any_of(linted.violations,[](const auto& v){return v.ruleId=="GJB10157.9.2.10"&&v.file=="condition_logical.sv"&&v.line==88&&v.column==1;}),
+        "condition diagnostic respects logical line filename and line");
+    linted=lint("`define MAKE module unknownparam #(parameter W=4)(input [W-1:0] c,output reg y);always @* if(c)y=1;else y=0;endmodule\n`MAKE\n");
+    check(count(linted,"GJB10157.9.2.10")==0,"expanded parameter-dependent condition stays unresolved");
+    linted=lint("`define MAKE module broken(input [3:0] c,output reg y);always @* if(c)y=1;else y=0;endmodule\n`MAKE\n`UNDEFINED\n");
+    check(count(linted,"GJB10157.9.2.10")==0&&count(linted,"PP-FRONTEND-DIRECTIVE")>0,
+        "failed root expansion does not fall back to raw condition diagnostics");
     std::cout<<checks<<" checks, "<<failures<<" failures\n";
     return failures?1:0;
 }

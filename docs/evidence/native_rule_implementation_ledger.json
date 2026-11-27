@@ -7711,16 +7711,28 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 has an AST_CASE(0x57) path with an AST_REDUCE_BOOL(0x2d) child and an AST_TERNARY(0x48) path. Both invoke FUN_1808f4650 with fifth argument zero and emit Warning when the inferred width is not 1. The packaged examples exercise source if and ?: conditions; the exact frontend lowering that relates source if to AST_CASE is not yet established. Product applies the recovered bounded flag-zero width model to fixed signals/selections/literals, concatenation/static replication, bitwise and arithmetic trees, while comparison and logical roots yield one bit.",
+      "predicate": "Native slot 0 has an AST_CASE(0x57) path with an AST_REDUCE_BOOL(0x2d) child and an AST_TERNARY(0x48) path. Both invoke FUN_1808f4650 with fifth argument zero and emit Warning when the inferred width is not 1. The packaged examples exercise source if and ?: conditions; Pass 138 native table replay ties ordinary source if to reductions 563/565; the corresponding semantic action creates CASE, marks +0x183, and adds REDUCE_BOOL wrapping the original condition. Reduction 641 constructs TERNARY with condition/true/false children. Product applies the recovered bounded flag-zero width model to fixed signals/selections/literals, concatenation/static replication, bitwise and arithmetic trees, while comparison and logical roots yield one bit. V1.4.256 evaluates the bounded condition predicate using matching expanded module/token/width coordinates and maps only report locations to origins. Literal, macro, nested function macro and consumed include forms share regression coverage. Table replay uses predefined token kinds and does not execute the target lexer or semantic actions; action behavior is independently statically decompiled.",
       "predicateEvidence": [
         "ev_e0082122fcb1468be95b5422fb45284bdf8fa25597cb3114b809da50443e7a94",
-        "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b"
+        "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
+        "docs/native_rule_recovery_pass138.md",
+        "reverse-tools/evidence/t_linter_pass138/condition_rule.txt#sha256=94a3d875c3e5c7410be92c6794f92cf9162ebff389bc6c37f2fc98f6c08d5413",
+        "reverse-tools/evidence/t_linter_pass138/expanded_condition_input.patch#sha256=64eff88dec60c7b8a4a89786f8c1e16bd0f941e2806aa6b157f9f035a6553fbf",
+        "reverse-tools/evidence/t_linter_pass138/if_ternary_lowering.txt#sha256=38c0410de12ee9383c815563915908ccd6fb81abb107b011f9c4c0db6976c51d",
+        "reverse-tools/evidence/t_linter_pass138/if_ternary_replay.json#sha256=8b712c6853baf0b5e9b51dd7e4bfc5467b5384d7cba09f7c4e883e80755cfca7",
+        "reverse-tools/evidence/t_linter_pass138/public_parser_excerpt.txt#sha256=af8986005b4aa462ec8506b7f79f8295a6d16d808022bdf21d3e02872ccfa5eb",
+        "reverse-tools/evidence/t_linter_pass138/replay_if_grammar.py#sha256=a6a1864ce3bceecee637fb6da60da2e810109d7067ededa2d37b41e1b51e41a0",
+        "reverse-tools/evidence/t_linter_pass138/repro/comparison.json#sha256=23251bca9b0cbd0b6498fa9d34d920ee667e9e5b7024004aedef98f878186e11",
+        "reverse-tools/evidence/t_linter_pass138/repro/literal.sv#sha256=f321bf0dc4ae3ee1d2ff6854caf72845cdaff7889fd57f91336e87c1c809b044",
+        "reverse-tools/evidence/t_linter_pass138/repro/macro.sv#sha256=f8764142ba76b316a875c74f5daf13fefad92d7245a00e5151958860c0638e70"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": null,
+      "additionalTests": [
+        "tests/frontend_preprocessor_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.9.2.10.html",
         "sha256": "63e322cf47c075e05faa9abd360dab42dbf3dedb0f30630a7f59b9dde5090ba3"
@@ -7737,7 +7749,8 @@
           "matched": true
         }
       ],
-      "limitations": "Source if-to-AST_CASE/AST_REDUCE_BOOL lowering, unknown-width -1 handling, function calls, casts, dynamic selections, parameterized widths, macro/generated source, nonblocking-assignment ternary boundaries, frontend normalization, locations and diagnostic multiplicity are not fully recovered. Product does not flag unknown widths and leaves no-alarm results ManualReviewRequired; no full native equivalence is claimed."
+      "limitations": "Alternative frontend/generated lowering, unknown-width -1 handling, function calls, casts, dynamic selections, parameterized widths, macro/generated source, nonblocking-assignment ternary boundaries, frontend normalization, locations and diagnostic multiplicity are not fully recovered. Product does not flag unknown widths and leaves no-alarm results ManualReviewRequired; no full native equivalence is claimed. Full expression precedence, elaboration and proprietary runtime equivalence are unproved. The expanded adapter preserves the existing bounded expression subset and review-required no-finding state.",
+      "expandedConditionInputRelease": "docs/v1_4_256_release.md"
     },
     {
       "publicRuleId": "A-11-5",

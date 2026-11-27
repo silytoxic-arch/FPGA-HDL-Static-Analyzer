@@ -16360,117 +16360,112 @@ void checkNativeVerilogVectorLogical(AnalysisResult& result,
 }
 
 void checkNativeVerilogConditionWidths(AnalysisResult& result,
-                                        std::span<const core::SourceFile> sources) {
+                                        std::span<const core::SourceFile> sources,
+                                        const FrontendInputMap& frontendInputs) {
     // Native 9.2.10 slot 0 infers the condition width for AST 0x57/0x2d
     // (if branch) and AST 0x48 (conditional operator); width != 1 warns.
+    // Pass 138 native grammar replay ties reductions 563/565 to if lowering
+    // (CASE + REDUCE_BOOL); reduction 641 constructs the TERNARY child order.
     // Both recovered helper calls pass fifth argument zero. This source
     // adapter therefore admits the same bounded flag-zero expression subset
     // used by 8.8, while unknown expressions remain review-required.
     // ev_e0082122fcb1468be95b5422fb45284bdf8fa25597cb3114b809da50443e7a94
-    std::map<std::string, std::vector<parser::HdlToken>> tokenCache;
-    for (const auto& source : sources)
-        if (applicable(source, "GJB10157-2021"))
-            tokenCache[source.path().lexically_normal().generic_string()] = standardTokens(source);
-    for (const auto& unit : result.structure) {
-        if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
-        const auto source = std::ranges::find_if(sources, [&](const auto& candidate) {
-            return candidate.path().lexically_normal() == unit.location.file.lexically_normal();
-        });
-        if (source == sources.end()) continue;
-        const auto cached = tokenCache.find(source->path().lexically_normal().generic_string());
-        if (cached == tokenCache.end()) continue;
-        const auto model = fixedVerilogModuleWidthModel(unit, *source, cached->second);
-        if (!model) continue;
-        const auto& tokens = cached->second;
-        const auto conditionWidth = [&](std::size_t begin, std::size_t end)
-                -> std::optional<std::size_t> {
-            while (end > begin + 1 && tokens[begin].text == "(" &&
-                   tokens[end - 1].text == ")") {
-                int depth = 0;
-                bool enclosesAll = true;
+    forExpandedRuleRoots(result,sources,frontendInputs,[&](const core::SourceFile& source) {
+        const auto tokens=standardTokens(source);
+        for (const auto& unit : parser::parseDesignUnits(source)) {
+            if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
+            const auto model = fixedVerilogModuleWidthModel(unit, source, tokens);
+            if (!model) continue;
+            const auto conditionWidth = [&](std::size_t begin, std::size_t end)
+                    -> std::optional<std::size_t> {
+                while (end > begin + 1 && tokens[begin].text == "(" &&
+                       tokens[end - 1].text == ")") {
+                    int depth = 0;
+                    bool enclosesAll = true;
+                    for (auto at = begin; at < end; ++at) {
+                        if (tokens[at].text == "(") ++depth;
+                        else if (tokens[at].text == ")") --depth;
+                        if (depth == 0 && at + 1 != end) { enclosesAll = false; break; }
+                        if (depth < 0) return std::nullopt;
+                    }
+                    if (!enclosesAll || depth != 0) break;
+                    ++begin;
+                    --end;
+                }
+                if (begin >= end) return std::nullopt;
+                if (tokens[begin].text == "!") return std::size_t{1};
+                int parens = 0, brackets = 0, braces = 0;
                 for (auto at = begin; at < end; ++at) {
-                    if (tokens[at].text == "(") ++depth;
-                    else if (tokens[at].text == ")") --depth;
-                    if (depth == 0 && at + 1 != end) { enclosesAll = false; break; }
-                    if (depth < 0) return std::nullopt;
+                    const auto& text = tokens[at].text;
+                    if (text == "(") ++parens;
+                    else if (text == ")") --parens;
+                    else if (text == "[") ++brackets;
+                    else if (text == "]") --brackets;
+                    else if (text == "{") ++braces;
+                    else if (text == "}") --braces;
+                    else if (parens == 0 && brackets == 0 && braces == 0 &&
+                             (text == "&&" || text == "||" || text == "==" ||
+                              text == "!=" || text == "===" || text == "!==" ||
+                              text == "<" || text == "<=" || text == ">" ||
+                              text == ">=")) {
+                        return std::size_t{1};
+                    }
                 }
-                if (!enclosesAll || depth != 0) break;
-                ++begin;
-                --end;
-            }
-            if (begin >= end) return std::nullopt;
-            if (tokens[begin].text == "!") return std::size_t{1};
-            int parens = 0, brackets = 0, braces = 0;
-            for (auto at = begin; at < end; ++at) {
-                const auto& text = tokens[at].text;
-                if (text == "(") ++parens;
-                else if (text == ")") --parens;
-                else if (text == "[") ++brackets;
-                else if (text == "]") --brackets;
-                else if (text == "{") ++braces;
-                else if (text == "}") --braces;
-                else if (parens == 0 && brackets == 0 && braces == 0 &&
-                         (text == "&&" || text == "||" || text == "==" ||
-                          text == "!=" || text == "===" || text == "!==" ||
-                          text == "<" || text == "<=" || text == ">" ||
-                          text == ">=")) {
-                    return std::size_t{1};
+                return fixedBoundedLogicalOperandWidth(*model, begin, end);
+            };
+            for (auto i = model->begin + 1; i + 2 < model->end; ++i) {
+                if (tokens[i].text == "if" && tokens[i + 1].text == "(") {
+                    int depth = 1;
+                    auto close = i + 2;
+                    for (; close < model->end && depth != 0; ++close) {
+                        if (tokens[close].text == "(") ++depth;
+                        else if (tokens[close].text == ")") --depth;
+                    }
+                    if (close == model->end) continue;
+                    const auto width = conditionWidth(i + 2, close - 1);
+                    if (width && *width != 1)
+                        emit(result, "GJB10157.9.2.10", source,
+                             tokens[i].line, tokens[i].column,
+                             "if 条件为 " + std::to_string(*width) + " 位向量，应使用 1 位条件");
                 }
-            }
-            return fixedBoundedLogicalOperandWidth(*model, begin, end);
-        };
-        for (auto i = model->begin + 1; i + 2 < model->end; ++i) {
-            if (tokens[i].text == "if" && tokens[i + 1].text == "(") {
-                int depth = 1;
-                auto close = i + 2;
-                for (; close < model->end && depth != 0; ++close) {
-                    if (tokens[close].text == "(") ++depth;
-                    else if (tokens[close].text == ")") --depth;
+                if (tokens[i].text != "?" || i <= model->begin + 1) continue;
+                auto begin = i;
+                int parens = 0, brackets = 0, braces = 0;
+                while (begin > model->begin + 1) {
+                    const auto candidate = begin - 1;
+                    const auto& text = tokens[candidate].text;
+                    if (text == ")") ++parens;
+                    else if (text == "]") ++brackets;
+                    else if (text == "}") ++braces;
+                    else if (text == "(") {
+                        if (parens == 0) break;
+                        --parens;
+                    } else if (text == "[") {
+                        if (brackets == 0) break;
+                        --brackets;
+                    } else if (text == "{") {
+                        if (braces == 0) break;
+                        --braces;
+                    } else if (parens == 0 && brackets == 0 && braces == 0 &&
+                               (text == "=" || text == "," || text == ":" ||
+                                text == "?" || text == ";")) {
+                        break;
+                    }
+                    begin = candidate;
                 }
-                if (close == model->end) continue;
-                const auto width = conditionWidth(i + 2, close - 1);
+                if (begin <= model->begin) continue;
+                const auto& before = tokens[begin - 1].text;
+                if (before != "=" && before != "(" && before != "," &&
+                    before != ":" && before != "?") continue;
+                const auto width = conditionWidth(begin, i);
                 if (width && *width != 1)
-                    emit(result, "GJB10157.9.2.10", *source,
-                         tokens[i].line, tokens[i].column,
-                         "if 条件为 " + std::to_string(*width) + " 位向量，应使用 1 位条件");
+                    emit(result, "GJB10157.9.2.10", source,
+                         tokens[begin].line, tokens[begin].column,
+                         "条件运算符条件为 " + std::to_string(*width) +
+                         " 位向量，应使用 1 位条件");
             }
-            if (tokens[i].text != "?" || i <= model->begin + 1) continue;
-            auto begin = i;
-            int parens = 0, brackets = 0, braces = 0;
-            while (begin > model->begin + 1) {
-                const auto candidate = begin - 1;
-                const auto& text = tokens[candidate].text;
-                if (text == ")") ++parens;
-                else if (text == "]") ++brackets;
-                else if (text == "}") ++braces;
-                else if (text == "(") {
-                    if (parens == 0) break;
-                    --parens;
-                } else if (text == "[") {
-                    if (brackets == 0) break;
-                    --brackets;
-                } else if (text == "{") {
-                    if (braces == 0) break;
-                    --braces;
-                } else if (parens == 0 && brackets == 0 && braces == 0 &&
-                           (text == "=" || text == "," || text == ":" ||
-                            text == "?" || text == ";")) {
-                    break;
-                }
-                begin = candidate;
-            }
-            if (begin <= model->begin) continue;
-            const auto& before = tokens[begin - 1].text;
-            if (before != "=" && before != "(" && before != "," &&
-                before != ":" && before != "?") continue;
-            const auto width = conditionWidth(begin, i);
-            if (width && *width != 1)
-                emit(result, "GJB10157.9.2.10", *source,
-                     tokens[begin].line, tokens[begin].column,
-                     "条件运算符条件为 " + std::to_string(*width) +
-                     " 位向量，应使用 1 位条件");
         }
-    }
+    });
 }
 
 void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
@@ -17596,7 +17591,7 @@ static void evaluateStandardProfile(AnalysisResult& result,
     if (profile->id == "GJB10157-2021")
         checkNativeVerilogCaseItemWidths(result, sources, options,frontendBySource);
     if (profile->id == "GJB10157-2021")
-        checkNativeVerilogConditionWidths(result, sources);
+        checkNativeVerilogConditionWidths(result, sources, frontendBySource);
     if (profile->id == "GJB10157-2021")
         checkNativeVerilogVectorLogical(result, sources, options,frontendBySource);
     if (!hasApplicableSource && !sources.empty()) {

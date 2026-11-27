@@ -1,0 +1,92 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Retained excerpt of FUN_180950990 static decompilation; no target execution.
+Full retained decompilation SHA256: 0ba7773e5a02abc7aaa247998d159320226c8042b23bbf886113991ae19af382
+
+===== original lines 5201..5265 =====
+    case 0x233:
+      pvStack_1bb8 = operator_new(0x2c8);
+      ppppppplVar33 = (longlong *******)0x0;
+      ppppppplVar29 = ppppppplVar33;
+      if (pvStack_1bb8 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvStack_1bb8,0x57,0);
+      }
+      *(char *)((longlong)ppppppplVar29 + 0x183) = '\x01';
+      local_2248 = ppppppplVar29;
+      pvStack_1bb0 = operator_new(0x2c8);
+      ppppppplVar29 = ppppppplVar33;
+      if (pvStack_1bb0 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvStack_1bb0,0x54,0);
+      }
+      ppppppplStack_21e0 = ppppppplVar29;
+      pvVar30 = operator_new(0x2c8);
+      ppppppplVar29 = ppppppplVar33;
+      pvStack_1ba8 = pvVar30;
+      if (pvVar30 != (void *)0x0) {
+        uVar11 = FUN_1808e3a40(1,0,1);
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar29 = (longlong *******)FUN_1808d8dc0(pvVar30,0x58,uVar11);
+      }
+      piVar46 = local_2268;
+      *(int *)(ppppppplVar29 + 0x40) = local_2268[-4];
+      *(int *)(ppppppplVar29 + 0x41) = local_2268[-3];
+      *(int *)((longlong)ppppppplVar29 + 0x204) = local_2268[-2];
+      *(int *)((longlong)ppppppplVar29 + 0x20c) = local_2268[-1];
+      ppppppplStack_2210 = ppppppplVar29;
+      plVar25 = (longlong *)FUN_180a23380(&DAT_18137d4d8);
+      FUN_180132830(*plVar25 + 8,&local_2248);
+      pvStack_1ba0 = operator_new(0x2c8);
+      if (pvStack_1ba0 != (void *)0x0) {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar33 = (longlong *******)FUN_1808d8dc0(pvStack_1ba0,0x2d,ppppppplVar20[-1]);
+      }
+      ppppppplVar29 = local_2248;
+      ppppppplStack_2250 = ppppppplVar33;
+      FUN_180132830(local_2248 + 1,&ppppppplStack_2250);
+      FUN_180132830(ppppppplVar29 + 1,&ppppppplStack_2210);
+      FUN_180132830(&DAT_18137d4d8,&local_2248);
+      FUN_180132830(&DAT_18137d4d8,&ppppppplStack_21e0);
+      ppppppplVar29 = local_2248;
+code_r0x00018095845a:
+      pppppplVar45 = ppppppplVar20[-4];
+      goto code_r0x00018095845e;
+    case 0x234:
+    case 0x245:
+      goto code_r0x000180959c1f;
+    case 0x235:
+      FUN_1801a87c0(&DAT_18137d4d8);
+      plVar25 = (longlong *)FUN_180a23380(&DAT_18137d4d8);
+      piVar46 = local_2268;
+      *(int *)(*plVar25 + 0x200) = local_2268[-0x1c];
+      plVar25 = (longlong *)FUN_180a23380(&DAT_18137d4d8);
+      lVar39 = *plVar25;
+      iVar10 = piVar46[-0x1b];
+      goto code_r0x00018095917b;
+    case 0x236:
+
+===== original lines 5869..5888 =====
+    case 0x281:
+      pvStack_1ae0 = operator_new(0x2c8);
+      if (pvStack_1ae0 == (void *)0x0) {
+        ppppppplVar31 = (longlong *******)0x0;
+      }
+      else {
+        local_2280 = (short *)0x0;
+        local_2288 = (undefined8 *)0x0;
+        ppppppplVar31 = (longlong *******)FUN_1808d8dc0(pvStack_1ae0,0x48,0);
+      }
+      FUN_180132830(ppppppplVar31 + 1,ppppppplVar20 + -5);
+      FUN_180132830(ppppppplVar31 + 1,ppppppplVar20 + -2);
+      FUN_180132830(ppppppplVar31 + 1,ppppppplVar20);
+      *(int *)(ppppppplVar31 + 0x40) = local_2268[-0x14];
+      *(int *)(ppppppplVar31 + 0x41) = local_2268[-0x13];
+      *(int *)((longlong)ppppppplVar31 + 0x204) = iVar10;
+      *(int *)((longlong)ppppppplVar31 + 0x20c) = iVar49;
+      pppppplVar45 = ppppppplVar20[-3];
+      ppppppplVar29 = ppppppplVar31;
+      goto code_r0x000180951fdf;

@@ -1,0 +1,64 @@
+Public Yosys source corroboration only; not vendor source equivalence.
+Repository: https://github.com/YosysHQ/yosys/blob/6f9602b4cfedc6441f55272f6c025d64620cd24f/frontends/verilog/verilog_parser.y
+Full source SHA256: f53f988dad824953be192ce99148f917ed224e7e35a6a99e7316fb5a17a1129a
+
+/*
+ *  yosys -- Yosys Open SYnthesis Suite
+ *
+ *  Copyright (C) 2012  Claire Xenia Wolf <claire@yosyshq.com>
+ *
+ *  Permission to use, copy, modify, and/or distribute this software for any
+ *  purpose with or without fee is hereby granted, provided that the above
+ *  copyright notice and this permission notice appear in all copies.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ *  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ *  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ *  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ *  ---
+ *
+ *  The Verilog frontend.
+ *
+ *  This frontend is using the AST frontend library (see frontends/ast/).
+
+===== public source lines 2827..2846 =====
+	attr TOK_IF '(' expr ')' {
+		AstNode *node = new AstNode(AST_CASE);
+		AstNode *block = new AstNode(AST_BLOCK);
+		AstNode *cond = new AstNode(AST_COND, AstNode::mkconst_int(1, false, 1), block);
+		SET_AST_NODE_LOC(cond, @4, @4);
+		ast_stack.back()->children.push_back(node);
+		node->children.push_back(new AstNode(AST_REDUCE_BOOL, $4));
+		node->children.push_back(cond);
+		ast_stack.push_back(node);
+		ast_stack.push_back(block);
+		append_attr(node, $1);
+	} behavioral_stmt {
+		SET_AST_NODE_LOC(ast_stack.back(), @7, @7);
+	} optional_else {
+		ast_stack.pop_back();
+		SET_AST_NODE_LOC(ast_stack.back(), @2, @9);
+		ast_stack.pop_back();
+	} |
+	case_attr case_type '(' expr ')' {
+		AstNode *node = new AstNode(AST_CASE, $4);
+
+===== public source lines 3156..3169 =====
+
+expr:
+	basic_expr {
+		$$ = $1;
+	} |
+	basic_expr '?' attr expr ':' expr {
+		$$ = new AstNode(AST_TERNARY);
+		$$->children.push_back($1);
+		$$->children.push_back($4);
+		$$->children.push_back($6);
+		SET_AST_NODE_LOC($$, @1, @$);
+		append_attr($$, $3);
+	};
+

@@ -1,0 +1,126 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "scope": "Offline LALR table replay with predefined token kinds; no target execution, lexical execution, semantic execution or runtime oracle",
+  "fixtures": [
+    {
+      "name": "if_else",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_ALWAYS",
+        "'@'",
+        "'*'",
+        "TOK_IF",
+        "'('",
+        "TOK_ID",
+        "')'",
+        "TOK_ID",
+        "'='",
+        "TOK_CONSTVAL",
+        "';'",
+        "TOK_ELSE",
+        "TOK_ID",
+        "'='",
+        "TOK_CONSTVAL",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "relevantReductions": [
+        {
+          "rule": 563,
+          "hex": "0x233",
+          "lhs": "$@67",
+          "rhs": [],
+          "lastReadTokenIndex": 9,
+          "lastReadToken": "')'"
+        },
+        {
+          "rule": 564,
+          "hex": "0x234",
+          "lhs": "$@68",
+          "rhs": [],
+          "lastReadTokenIndex": 13,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 580,
+          "hex": "0x244",
+          "lhs": "$@70",
+          "rhs": [],
+          "lastReadTokenIndex": 14,
+          "lastReadToken": "TOK_ELSE"
+        },
+        {
+          "rule": 581,
+          "hex": "0x245",
+          "lhs": "optional_else",
+          "rhs": [
+            "TOK_ELSE",
+            "$@70",
+            "behavioral_stmt"
+          ],
+          "lastReadTokenIndex": 18,
+          "lastReadToken": "';'"
+        },
+        {
+          "rule": 565,
+          "hex": "0x235",
+          "lhs": "behavioral_stmt",
+          "rhs": [
+            "attr",
+            "TOK_IF",
+            "'('",
+            "expr",
+            "')'",
+            "$@67",
+            "behavioral_stmt",
+            "$@68",
+            "optional_else"
+          ],
+          "lastReadTokenIndex": 18,
+          "lastReadToken": "';'"
+        }
+      ]
+    },
+    {
+      "name": "ternary",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_ASSIGN",
+        "TOK_ID",
+        "'='",
+        "TOK_ID",
+        "'?'",
+        "TOK_CONSTVAL",
+        "':'",
+        "TOK_CONSTVAL",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "relevantReductions": [
+        {
+          "rule": 641,
+          "hex": "0x281",
+          "lhs": "expr",
+          "rhs": [
+            "basic_expr",
+            "'?'",
+            "attr",
+            "expr",
+            "':'",
+            "expr"
+          ],
+          "lastReadTokenIndex": 11,
+          "lastReadToken": "';'"
+        }
+      ]
+    }
+  ]
+}
