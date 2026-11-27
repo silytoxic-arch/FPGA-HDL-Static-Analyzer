@@ -112,24 +112,34 @@ void mapExpanded(FrontendPreprocessorResult& result,std::string text) {
     FrontendLineOrigin current{raw.path(),1};
     std::vector<FrontendLineOrigin> stack;
     result.origins.push_back(current);
+    auto physical=current;
+    std::vector<FrontendLineOrigin> physicalOrigins{physical},physicalStack;
+    const auto newline=[&] {
+        ++current.line;result.origins.push_back(current);
+        ++physical.line;physicalOrigins.push_back(physical);
+    };
     std::size_t marker=0, virtualLine=0;
     for(std::size_t pos=0;pos<text.size();) {
         if(marker<markers.size() && pos==markers[marker].begin) {
             const auto& item=markers[marker++];
-            if(item.kind==Marker::Push) { stack.push_back(current);current={vendorpp::path_from_utf8(item.file),0}; }
+            if(item.kind==Marker::Push) {
+                stack.push_back(current);current={vendorpp::path_from_utf8(item.file),0};
+                physicalStack.push_back(physical);physical={vendorpp::path_from_utf8(item.file),0};
+            }
             for(;pos<item.end;++pos) {
-                if(text[pos]=='\n') { ++current.line;result.origins.push_back(current);++virtualLine; }
+                if(text[pos]=='\n') { newline();++virtualLine; }
                 else if(text[pos]!='\r') text[pos]=' ';
             }
             if(item.kind==Marker::Pop) {
                 if(stack.empty()) { issue("PP-FRONTEND-DIRECTIVE","展开后的文件来源栈无法恢复。",virtualLine+1);break; }
                 current=stack.back();stack.pop_back();result.origins.back()=current;
+                physical=physicalStack.back();physicalStack.pop_back();physicalOrigins.back()=physical;
             } else if(item.kind==Marker::Line) {
                 current={vendorpp::path_from_utf8(item.file),item.line};result.origins.back()=current;
             }
             continue;
         }
-        if(text[pos++]=='\n') { ++current.line;result.origins.push_back(current);++virtualLine; }
+        if(text[pos++]=='\n') { newline();++virtualLine; }
     }
     if(!stack.empty()) issue("PP-FRONTEND-DIRECTIVE","展开后的文件来源栈未闭合。",virtualLine+1);
     // Resolve issues recorded at virtual output lines after building the map.
@@ -137,6 +147,13 @@ void mapExpanded(FrontendPreprocessorResult& result,std::string text) {
         if(entry.location.line>0 && entry.location.line<=result.origins.size()) {
             const auto& at=result.origins[entry.location.line-1];entry.location.file=at.file;entry.location.line=at.line;
         }
+    }
+    std::vector<std::size_t> lineStarts{0};
+    for(std::size_t pos=0;pos<text.size();++pos) if(text[pos]=='\n') lineStarts.push_back(pos+1);
+    for(const auto& event:vendorpp::budget.conditionalEvents) {
+        const auto line=static_cast<std::size_t>(std::upper_bound(lineStarts.begin(),lineStarts.end(),event.outputOffset)-lineStarts.begin()-1);
+        if(line<physicalOrigins.size())
+            result.conditionalDecisions.push_back({physicalOrigins[line],event.directive,event.active});
     }
     result.source=core::SourceFile(raw.path(),raw.language(),std::move(text));
 }
@@ -163,7 +180,7 @@ core::SourceLocation FrontendPreprocessorResult::origin(std::size_t virtualLine)
 }
 FrontendPreprocessorResult FrontendPreprocessorSession::expand(
     const core::SourceFile& source,const PreprocessorOptions& options,const FrontendPreprocessorLimits& limits) {
-    FrontendPreprocessorResult result{source,{},{},{},{}};
+    FrontendPreprocessorResult result{source,{},{},{},{},{}};
     if(source.language()==core::HdlLanguage::Vhdl || source.language()==core::HdlLanguage::Unknown) {
         result.issues.push_back({"PP-FRONTEND-LANGUAGE","该展开器仅接受 Verilog/SystemVerilog。",{source.path(),0,1,0}});return result;
     }

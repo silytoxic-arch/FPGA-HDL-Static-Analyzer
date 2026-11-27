@@ -789,6 +789,7 @@ frontend_verilog_preproc(std::istream                 &f,
 	while (!input_buffer.empty())
 	{
 		std::string tok = next_token();
+		const auto conditionalOutputOffset = budget.outputBytes;
 		// printf("token: >>%s<<\n", tok != "\n" ? tok.c_str() : "NEWLINE");
 
 		if (tok == "`endif") {
@@ -798,6 +799,7 @@ frontend_verilog_preproc(std::istream                 &f,
 				ifdef_pass_level--;
 			else
 				log_error("Found %s outside of macro conditional branch!\n", tok.c_str());
+			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
 			continue;
 		}
 
@@ -813,6 +815,7 @@ frontend_verilog_preproc(std::istream                 &f,
 				ifdef_pass_level++;
 				ifdef_already_satisfied = true;
 			}
+			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
 			continue;
 		}
 
@@ -830,6 +833,7 @@ frontend_verilog_preproc(std::istream                 &f,
 				ifdef_pass_level++;
 				ifdef_already_satisfied = true;
 			}
+			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
 			continue;
 		}
 
@@ -844,6 +848,7 @@ frontend_verilog_preproc(std::istream                 &f,
 			}
 			if (ifdef_fail_level == 1)
 				ifdef_already_satisfied = false;
+			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
 			continue;
 		}
 
@@ -858,6 +863,7 @@ frontend_verilog_preproc(std::istream                 &f,
 			}
 			if (ifdef_fail_level == 1)
 				ifdef_already_satisfied = false;
+			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
 			continue;
 		}
 

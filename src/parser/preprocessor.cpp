@@ -7,6 +7,7 @@
 #include <cctype>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <optional>
 #include <sstream>
 #include <unordered_map>
@@ -99,6 +100,11 @@ PreprocessorResult preprocess(const core::SourceFile& source,
         macros.clear();
         for(const auto& name:validatedFrontend->initialMacroNames) macros[name]="1";
     }
+    std::map<std::size_t,std::vector<const FrontendConditionalDecision*>> decisions;
+    if(validatedFrontend) for(const auto& item:validatedFrontend->conditionalDecisions)
+        if(item.physical.file.lexically_normal()==source.path().lexically_normal())
+            decisions[item.physical.line].push_back(&item);
+    bool projectionUnproved=false;
 
     std::unordered_set<std::size_t> directiveOffsets;
     for (const auto& token:tokenize(source))
@@ -185,6 +191,15 @@ PreprocessorResult preprocess(const core::SourceFile& source,
                                   "Included file was not found: " + *requested, location});
             }
         }
+        if(validatedFrontend && (directive=="ifdef" || directive=="ifndef" ||
+            directive=="elsif" || directive=="else" || directive=="endif")) {
+            const auto found=decisions.find(lineNumber);
+            if(found!=decisions.end() && found->second.size()==1 &&
+               found->second.front()->directive==directive) {
+                active=found->second.front()->active;
+                decisions.erase(found);
+            } else projectionUnproved=true;
+        }
         output += blank(std::move(line));
         offset += length;
         ++lineNumber;
@@ -197,6 +212,11 @@ PreprocessorResult preprocess(const core::SourceFile& source,
         // Native expansion is authoritative for directive/include validity;
         // do not run an isolated second engine with a different macro cache.
         issues=validatedFrontend->issues;
+        if(issues.empty() && (projectionUnproved || !decisions.empty())) {
+            issues.push_back({"PP-FRONTEND-DIRECTIVE",
+                "条件编译位置无法可靠对应原文件，请复核设计结构。",{source.path(),0,1,0}});
+            output=blank(std::move(output));
+        }
     } else if (frontendIncludeValidation) {
         const auto expanded=expandFrontendSource(source,options);
         issues.insert(issues.end(),expanded.issues.begin(),expanded.issues.end());

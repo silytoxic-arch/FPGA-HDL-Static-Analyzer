@@ -1,0 +1,512 @@
+diff --git a/src/analysis/standard_evaluator.cpp b/src/analysis/standard_evaluator.cpp
+index e43051c..e714ac1 100644
+--- a/src/analysis/standard_evaluator.cpp
++++ b/src/analysis/standard_evaluator.cpp
+@@ -59,6 +59,14 @@ static std::map<std::string, std::size_t> nativeResetSignalWidths(
+     const std::vector<parser::HdlToken>& tokens);
+ namespace {
+ 
++using FrontendInputMap=std::map<const core::SourceFile*,const parser::FrontendPreprocessorResult*>;
++parser::PreprocessorResult projectPreprocess(const core::SourceFile& source,
++    const AnalysisOptions& options,const FrontendInputMap& inputs) {
++    const auto found=inputs.find(&source);
++    return parser::preprocess(source,{options.includeDirectories,options.defines},
++        found==inputs.end() ? nullptr : found->second);
++}
++
+ struct DiagnosticMapping {
+     std::string_view standardId;
+     std::string_view analyzerRuleId;
+@@ -16150,7 +16158,8 @@ std::optional<std::size_t> fixedBoundedLogicalOperandWidth(
+ 
+ void checkNativeVerilogVectorLogical(AnalysisResult& result,
+                                      std::span<const core::SourceFile> sources,
+-                                     const AnalysisOptions& options) {
++                                     const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // Native 8.8 run selects AST_ALWAYS/assignment roots, then AST logical
+     // operator kinds 0x45/0x46/0x47; any child with inferred width > 1 warns
+     // once for that operator. The call at 0x18057a157 passes fifth argument
+@@ -16159,8 +16168,7 @@ void checkNativeVerilogVectorLogical(AnalysisResult& result,
+     // ev_025e8620d4259b128b7931578411d267230b470f26259611fa352340b7fd16b4
+     for (const auto& source : sources) {
+         if (!applicable(source, "GJB10157-2021")) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) continue;
+         const auto tokens = standardTokens(preprocessed.source);
+         const auto units = parser::parseDesignUnits(preprocessed.source);
+@@ -16425,7 +16433,8 @@ void checkNativeVerilogConditionWidths(AnalysisResult& result,
+ 
+ void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
+                                          std::span<const core::SourceFile> sources,
+-                                         const AnalysisOptions& options) {
++                                         const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // Native 9.1.2 slot 0 infers the LHS with flag zero. A non-ternary RHS is
+     // first inferred with flag zero; on mismatch it is inferred again with
+     // flag one, and a warning survives only when both widths differ from the
+@@ -16435,8 +16444,7 @@ void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
+     // ev_ba7c5d2230d301bad7129b407ba296b167e5e1bd805b43f7d517d5fb85be2c25
+     for (const auto& source : sources) {
+         if (!applicable(source, "GJB10157-2021")) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) continue;
+         const auto tokens = standardTokens(preprocessed.source);
+         for (const auto& unit : parser::parseDesignUnits(preprocessed.source)) {
+@@ -16589,7 +16597,8 @@ void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
+ 
+ void checkNativeVerilogCaseFallback(AnalysisResult& result,
+                                     std::span<const core::SourceFile> sources,
+-                                    const AnalysisOptions& options) {
++                                    const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // Native collector FUN_180716130 admits nonempty AST_CASE(0x57) nodes only
+     // when byte +0x183 is zero, excluding the frontend's if-lowered CASE form.
+     // FUN_1806df3d0 accepts a COND/CONDX/CONDZ(0x58..0x5a) child when its first
+@@ -16601,8 +16610,7 @@ void checkNativeVerilogCaseFallback(AnalysisResult& result,
+     // ev_8e1f2c6a9a8140cca8d40a38d0ea81fab5d70826fe87a63eb8e495f0b446e2ae
+     for (const auto& source : sources) {
+         if (!applicable(source, "GJB10157-2021")) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) continue;
+         const auto tokens = standardTokens(preprocessed.source);
+         for (std::size_t caseToken = 0; caseToken + 2 < tokens.size(); ++caseToken) {
+@@ -16777,7 +16785,8 @@ bool nativeCaseLabelsOverlap(const NativeCaseOverlapLabel& left,
+ 
+ void checkNativeVerilogCaseOverlap(AnalysisResult& result,
+                                    std::span<const core::SourceFile> sources,
+-                                   const AnalysisOptions& options) {
++                                   const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // Native FUN_180714dd0 gathers every label child before AST_BLOCK/DEFAULT
+     // from AST_COND/CONDX/CONDZ groups, then compares every ordered pair. For
+     // constants, encoded state 4 is a wildcard. Unequal widths compare their
+@@ -16787,8 +16796,7 @@ void checkNativeVerilogCaseOverlap(AnalysisResult& result,
+     // ev_2df0538f0bc68b70437ba5da70a47c50a5c70f900c63bb943a806baf7392318f
+     for (const auto& source : sources) {
+         if (!applicable(source, "GJB10157-2021")) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) continue;
+         const auto tokens = standardTokens(preprocessed.source);
+         for (std::size_t caseToken = 0; caseToken + 2 < tokens.size(); ++caseToken) {
+@@ -16875,7 +16883,8 @@ void checkNativeVerilogCaseOverlap(AnalysisResult& result,
+ 
+ void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
+                                       std::span<const core::SourceFile> sources,
+-                                      const AnalysisOptions& options) {
++                                      const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // Native 9.2.3 FUN_180581c20 admits AST_CASE(0x57), infers the selector
+     // and each non-block AST_COND(0x58) child through FUN_1808f4650 with the
+     // fifth argument zero, and emits once for every inferable unequal item.
+@@ -16886,8 +16895,7 @@ void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
+     // 0x180581f83-0x180581fbd.
+     for (const auto& source : sources) {
+         if (!applicable(source, "GJB10157-2021")) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) continue;
+         const auto tokens = standardTokens(preprocessed.source);
+         const auto units = parser::parseDesignUnits(preprocessed.source);
+@@ -17089,7 +17097,8 @@ void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
+ 
+ void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,
+                                              std::span<const core::SourceFile> sources,
+-                                             const AnalysisOptions& options) {
++                                             const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // Native slot 0 records a formal width and calls FUN_1808f4650 on the
+     // bound actual with fifth argument zero; width -1 is skipped and a known
+     // unequal width emits Warning. This adapter applies the recovered bounded
+@@ -17099,8 +17108,7 @@ void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,
+     std::map<std::string, core::SourceFile> activeSources;
+     for (const auto& source : sources) {
+         if (!applicable(source, "GJB10157-2021")) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) continue;
+         const auto key = source.path().lexically_normal().generic_string();
+         activeSources.emplace(key, preprocessed.source);
+@@ -17257,7 +17265,8 @@ void checkNativeVerilogInoutToUnidirectionalPorts(
+ 
+ void checkNativeVerilogParameterReuse(AnalysisResult& result,
+                                       std::span<const core::SourceFile> sources,
+-                                      const AnalysisOptions& options) {
++                                      const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // Native 5.2.17 walks the ordered AST_MODULE map, inserts AST_PARAMETER(9)
+     // names into one map for the run and reports every later duplicate.  The
+     // mapped value retains the first module/name pair used by the fixed native
+@@ -17280,8 +17289,7 @@ void checkNativeVerilogParameterReuse(AnalysisResult& result,
+         // compilation has already selected one source branch before the name
+         // map is built. Mirror that boundary with the project macro set. If
+         // preprocessing is unresolved, do not guess which declarations exist.
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) continue;
+         activeSources.push_back(preprocessed.source);
+         const auto sourceIndex = activeSources.size() - 1;
+@@ -17348,7 +17356,8 @@ std::optional<std::size_t> nativeWindowsAcpLineLength(std::string_view line) {
+ 
+ void checkNativeVerilogLineLength(AnalysisResult& result,
+                                   std::span<const core::SourceFile> sources,
+-                                  const AnalysisOptions& options) {
++                                  const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // GJB10157.5.1.4 FUN_180528fc0 walks the module-name map at +0x68,
+     // admits only vectors containing exactly one nonnull AST_MODULE(2), and
+     // reopens that root's +0x1e0 source path. Therefore one source containing
+@@ -17363,8 +17372,7 @@ void checkNativeVerilogLineLength(AnalysisResult& result,
+     for (const auto& source : sources) {
+         if (source.language() != core::HdlLanguage::Verilog &&
+             source.language() != core::HdlLanguage::SystemVerilog) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) return;
+         sourceByPath.emplace(source.path().lexically_normal(), &source);
+     }
+@@ -17418,7 +17426,8 @@ NativeVerilogCommentCounts nativeVerilogCommentCounts(std::string_view content)
+ 
+ void checkNativeVerilogCommentRatio(AnalysisResult& result,
+                                     std::span<const core::SourceFile> sources,
+-                                    const AnalysisOptions& options) {
++                                    const AnalysisOptions& options,
++    const FrontendInputMap& frontendInputs) {
+     // GJB10157.5.1.8 FUN_18052b5d0 clears the project total, then calls
+     // FUN_18052bd10 for each uniquely owned AST_MODULE source path and makes
+     // one project-level comparison. The helper removes only spaces and Tabs,
+@@ -17444,8 +17453,7 @@ void checkNativeVerilogCommentRatio(AnalysisResult& result,
+     for (const auto& source : sources) {
+         if (source.language() != core::HdlLanguage::Verilog &&
+             source.language() != core::HdlLanguage::SystemVerilog) continue;
+-        const auto preprocessed = parser::preprocess(
+-            source, {options.includeDirectories, options.defines});
++        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+         if (!preprocessed.issues.empty()) return;
+     }
+     for (const auto& unit : result.structure) {
+@@ -17485,6 +17493,23 @@ void applyStandardProfile(AnalysisResult& result,
+         return;
+     }
+ 
++    FrontendInputMap frontendBySource;
++    for(std::size_t i=0;i<sources.size();++i)
++        frontendBySource.emplace(&sources[i],i<frontendInputs.size() ? frontendInputs[i] : nullptr);
++    // Reuse the analyzer's import session, including its exact source order and
++    // clear boundary. Never independently expand the same project twice.
++    std::map<std::string,std::size_t> frontendModules;
++    bool frontendModuleIndexKnown=true;
++    if (profile->id == "GJB10157-2021") {
++        for(std::size_t i=0;i<sources.size();++i) {
++            if(!applicable(sources[i],profile->id)) continue;
++            const auto* input=i<frontendInputs.size() ? frontendInputs[i] : nullptr;
++            if(!input || !input->issues.empty()) { frontendModuleIndexKnown=false;continue; }
++            for(const auto& unit:parser::parseDesignUnits(input->source))
++                if(unit.kind==parser::DesignUnitKind::VerilogModule) ++frontendModules[unit.name];
++        }
++    }
++
+     // Exported native setTopModule() returns failure unless the canonical name
+     // resolves to exactly one parsed design record. Do not fall back to an
+     // inferred graph root after the user explicitly selected a missing or
+@@ -17493,9 +17518,19 @@ void applyStandardProfile(AnalysisResult& result,
+         const auto expectedKind = profile->id == "GJB9765-2020"
+             ? parser::DesignUnitKind::VhdlEntity
+             : parser::DesignUnitKind::VerilogModule;
+-        const auto matches = std::ranges::count_if(result.structure, [&](const auto& unit) {
+-            return unit.kind == expectedKind && selectedTop(unit, options);
+-        });
++        std::size_t matches{};
++        if(profile->id=="GJB10157-2021") {
++            if(!frontendModuleIndexKnown) {
++                result.errors.push_back("顶层设计无法可靠确认，请先处理宏或包含文件问题："+*options.topModule);
++                return;
++            }
++            const auto found=frontendModules.find(std::string(configuredVerilogTop(*options.topModule)));
++            if(found!=frontendModules.end()) matches=found->second;
++        } else {
++            matches=static_cast<std::size_t>(std::ranges::count_if(result.structure,[&](const auto& unit) {
++                return unit.kind==expectedKind && selectedTop(unit,options);
++            }));
++        }
+         if (matches != 1) {
+             result.errors.push_back(matches == 0
+                 ? "指定的顶层设计不存在：" + *options.topModule
+@@ -17504,19 +17539,6 @@ void applyStandardProfile(AnalysisResult& result,
+         }
+     }
+ 
+-    // Reuse the analyzer's import session, including its exact source order and
+-    // clear boundary. Never independently expand the same project twice.
+-    std::map<std::string,std::size_t> frontendModules;
+-    bool frontendModuleIndexKnown=true;
+-    if (profile->id == "GJB10157-2021") {
+-        for(std::size_t i=0;i<sources.size();++i) {
+-            if(!applicable(sources[i],profile->id)) continue;
+-            const auto* input=i<frontendInputs.size() ? frontendInputs[i] : nullptr;
+-            if(!input || !input->issues.empty()) { frontendModuleIndexKnown=false;continue; }
+-            for(const auto& unit:parser::parseDesignUnits(input->source))
+-                if(unit.kind==parser::DesignUnitKind::VerilogModule) ++frontendModules[unit.name];
+-        }
+-    }
+     bool hasApplicableSource = false;
+     for (std::size_t i=0;i<sources.size();++i) {
+         const auto& source=sources[i];
+@@ -17527,27 +17549,27 @@ void applyStandardProfile(AnalysisResult& result,
+             frontendModules,frontendModuleIndexKnown);
+     }
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogParameterReuse(result, sources, options);
++        checkNativeVerilogParameterReuse(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogLineLength(result, sources, options);
++        checkNativeVerilogLineLength(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogCommentRatio(result, sources, options);
++        checkNativeVerilogCommentRatio(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogPortConnectionWidths(result, sources, options);
++        checkNativeVerilogPortConnectionWidths(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+         checkNativeVerilogInoutToUnidirectionalPorts(result, sources);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogAssignmentWidths(result, sources, options);
++        checkNativeVerilogAssignmentWidths(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogCaseFallback(result, sources, options);
++        checkNativeVerilogCaseFallback(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogCaseOverlap(result, sources, options);
++        checkNativeVerilogCaseOverlap(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogCaseItemWidths(result, sources, options);
++        checkNativeVerilogCaseItemWidths(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+         checkNativeVerilogConditionWidths(result, sources);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogVectorLogical(result, sources, options);
++        checkNativeVerilogVectorLogical(result, sources, options,frontendBySource);
+     if (!hasApplicableSource && !sources.empty()) {
+         result.errors.push_back("Selected standard " + std::string(profile->id) +
+             " does not apply to the provided HDL language.");
+diff --git a/src/parser/frontend_preprocessor.cpp b/src/parser/frontend_preprocessor.cpp
+index ddb41ff..da3a086 100644
+--- a/src/parser/frontend_preprocessor.cpp
++++ b/src/parser/frontend_preprocessor.cpp
+@@ -112,24 +112,34 @@ void mapExpanded(FrontendPreprocessorResult& result,std::string text) {
+     FrontendLineOrigin current{raw.path(),1};
+     std::vector<FrontendLineOrigin> stack;
+     result.origins.push_back(current);
++    auto physical=current;
++    std::vector<FrontendLineOrigin> physicalOrigins{physical},physicalStack;
++    const auto newline=[&] {
++        ++current.line;result.origins.push_back(current);
++        ++physical.line;physicalOrigins.push_back(physical);
++    };
+     std::size_t marker=0, virtualLine=0;
+     for(std::size_t pos=0;pos<text.size();) {
+         if(marker<markers.size() && pos==markers[marker].begin) {
+             const auto& item=markers[marker++];
+-            if(item.kind==Marker::Push) { stack.push_back(current);current={vendorpp::path_from_utf8(item.file),0}; }
++            if(item.kind==Marker::Push) {
++                stack.push_back(current);current={vendorpp::path_from_utf8(item.file),0};
++                physicalStack.push_back(physical);physical={vendorpp::path_from_utf8(item.file),0};
++            }
+             for(;pos<item.end;++pos) {
+-                if(text[pos]=='\n') { ++current.line;result.origins.push_back(current);++virtualLine; }
++                if(text[pos]=='\n') { newline();++virtualLine; }
+                 else if(text[pos]!='\r') text[pos]=' ';
+             }
+             if(item.kind==Marker::Pop) {
+                 if(stack.empty()) { issue("PP-FRONTEND-DIRECTIVE","展开后的文件来源栈无法恢复。",virtualLine+1);break; }
+                 current=stack.back();stack.pop_back();result.origins.back()=current;
++                physical=physicalStack.back();physicalStack.pop_back();physicalOrigins.back()=physical;
+             } else if(item.kind==Marker::Line) {
+                 current={vendorpp::path_from_utf8(item.file),item.line};result.origins.back()=current;
+             }
+             continue;
+         }
+-        if(text[pos++]=='\n') { ++current.line;result.origins.push_back(current);++virtualLine; }
++        if(text[pos++]=='\n') { newline();++virtualLine; }
+     }
+     if(!stack.empty()) issue("PP-FRONTEND-DIRECTIVE","展开后的文件来源栈未闭合。",virtualLine+1);
+     // Resolve issues recorded at virtual output lines after building the map.
+@@ -138,6 +148,13 @@ void mapExpanded(FrontendPreprocessorResult& result,std::string text) {
+             const auto& at=result.origins[entry.location.line-1];entry.location.file=at.file;entry.location.line=at.line;
+         }
+     }
++    std::vector<std::size_t> lineStarts{0};
++    for(std::size_t pos=0;pos<text.size();++pos) if(text[pos]=='\n') lineStarts.push_back(pos+1);
++    for(const auto& event:vendorpp::budget.conditionalEvents) {
++        const auto line=static_cast<std::size_t>(std::upper_bound(lineStarts.begin(),lineStarts.end(),event.outputOffset)-lineStarts.begin()-1);
++        if(line<physicalOrigins.size())
++            result.conditionalDecisions.push_back({physicalOrigins[line],event.directive,event.active});
++    }
+     result.source=core::SourceFile(raw.path(),raw.language(),std::move(text));
+ }
+ } // namespace
+@@ -163,7 +180,7 @@ core::SourceLocation FrontendPreprocessorResult::origin(std::size_t virtualLine)
+ }
+ FrontendPreprocessorResult FrontendPreprocessorSession::expand(
+     const core::SourceFile& source,const PreprocessorOptions& options,const FrontendPreprocessorLimits& limits) {
+-    FrontendPreprocessorResult result{source,{},{},{},{}};
++    FrontendPreprocessorResult result{source,{},{},{},{},{}};
+     if(source.language()==core::HdlLanguage::Vhdl || source.language()==core::HdlLanguage::Unknown) {
+         result.issues.push_back({"PP-FRONTEND-LANGUAGE","该展开器仅接受 Verilog/SystemVerilog。",{source.path(),0,1,0}});return result;
+     }
+diff --git a/src/parser/frontend_preprocessor.h b/src/parser/frontend_preprocessor.h
+index 82c103d..26b4466 100644
+--- a/src/parser/frontend_preprocessor.h
++++ b/src/parser/frontend_preprocessor.h
+@@ -14,6 +14,11 @@ struct FrontendLineOrigin {
+     std::filesystem::path file;
+     std::size_t line{};
+ };
++struct FrontendConditionalDecision {
++    FrontendLineOrigin physical;
++    std::string directive;
++    bool active{};
++};
+ struct FrontendPreprocessorResult {
+     core::SourceFile source;
+     // One origin per virtual line, using the recovered lexer file-stack/line
+@@ -24,6 +29,7 @@ struct FrontendPreprocessorResult {
+     // Exact initial defined-name set after configured/cache merge. The legacy
+     // physical-position projection uses presence only, never guessed bodies.
+     std::vector<std::string> initialMacroNames;
++    std::vector<FrontendConditionalDecision> conditionalDecisions;
+     [[nodiscard]] core::SourceLocation origin(std::size_t virtualLine) const;
+ };
+ // One native-style design import session. Source defines/undef/resetall update
+diff --git a/src/parser/preprocessor.cpp b/src/parser/preprocessor.cpp
+index 2eac31d..7079d0f 100644
+--- a/src/parser/preprocessor.cpp
++++ b/src/parser/preprocessor.cpp
+@@ -7,6 +7,7 @@
+ #include <cctype>
+ #include <filesystem>
+ #include <fstream>
++#include <map>
+ #include <optional>
+ #include <sstream>
+ #include <unordered_map>
+@@ -99,6 +100,11 @@ PreprocessorResult preprocess(const core::SourceFile& source,
+         macros.clear();
+         for(const auto& name:validatedFrontend->initialMacroNames) macros[name]="1";
+     }
++    std::map<std::size_t,std::vector<const FrontendConditionalDecision*>> decisions;
++    if(validatedFrontend) for(const auto& item:validatedFrontend->conditionalDecisions)
++        if(item.physical.file.lexically_normal()==source.path().lexically_normal())
++            decisions[item.physical.line].push_back(&item);
++    bool projectionUnproved=false;
+ 
+     std::unordered_set<std::size_t> directiveOffsets;
+     for (const auto& token:tokenize(source))
+@@ -185,6 +191,15 @@ PreprocessorResult preprocess(const core::SourceFile& source,
+                                   "Included file was not found: " + *requested, location});
+             }
+         }
++        if(validatedFrontend && (directive=="ifdef" || directive=="ifndef" ||
++            directive=="elsif" || directive=="else" || directive=="endif")) {
++            const auto found=decisions.find(lineNumber);
++            if(found!=decisions.end() && found->second.size()==1 &&
++               found->second.front()->directive==directive) {
++                active=found->second.front()->active;
++                decisions.erase(found);
++            } else projectionUnproved=true;
++        }
+         output += blank(std::move(line));
+         offset += length;
+         ++lineNumber;
+@@ -197,6 +212,11 @@ PreprocessorResult preprocess(const core::SourceFile& source,
+         // Native expansion is authoritative for directive/include validity;
+         // do not run an isolated second engine with a different macro cache.
+         issues=validatedFrontend->issues;
++        if(issues.empty() && (projectionUnproved || !decisions.empty())) {
++            issues.push_back({"PP-FRONTEND-DIRECTIVE",
++                "条件编译位置无法可靠对应原文件，请复核设计结构。",{source.path(),0,1,0}});
++            output=blank(std::move(output));
++        }
+     } else if (frontendIncludeValidation) {
+         const auto expanded=expandFrontendSource(source,options);
+         issues.insert(issues.end(),expanded.issues.begin(),expanded.issues.end());
+diff --git a/src/parser/vendor/preprocessor_support.h b/src/parser/vendor/preprocessor_support.h
+index b564f4a..667a767 100644
+--- a/src/parser/vendor/preprocessor_support.h
++++ b/src/parser/vendor/preprocessor_support.h
+@@ -25,9 +25,11 @@ struct Failure : std::runtime_error {
+     explicit Failure(std::string text,std::string source):std::runtime_error(std::move(text)),file(std::move(source)){}
+ };
+ struct Budget {
++    struct ConditionalEvent { std::size_t outputOffset; std::string directive; bool active; };
+     std::size_t operations{}, inputBytes{}, outputBytes{}, maxOperations{256*1024*1024},
+         maxOutputBytes{64*1024*1024}, maxInputBytes{64*1024*1024}, maxIncludeDepth{128}, maxMacroRestoreDepth{256};
+     std::string current_file;
++    std::vector<ConditionalEvent> conditionalEvents;
+ };
+ inline thread_local Budget budget;
+ inline thread_local std::set<std::string> yosys_input_files;
+diff --git a/src/parser/vendor/yosys_preproc.cpp b/src/parser/vendor/yosys_preproc.cpp
+index 6c13790..ab8fbc9 100644
+--- a/src/parser/vendor/yosys_preproc.cpp
++++ b/src/parser/vendor/yosys_preproc.cpp
+@@ -789,6 +789,7 @@ frontend_verilog_preproc(std::istream                 &f,
+ 	while (!input_buffer.empty())
+ 	{
+ 		std::string tok = next_token();
++		const auto conditionalOutputOffset = budget.outputBytes;
+ 		// printf("token: >>%s<<\n", tok != "\n" ? tok.c_str() : "NEWLINE");
+ 
+ 		if (tok == "`endif") {
+@@ -798,6 +799,7 @@ frontend_verilog_preproc(std::istream                 &f,
+ 				ifdef_pass_level--;
+ 			else
+ 				log_error("Found %s outside of macro conditional branch!\n", tok.c_str());
++			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
+ 			continue;
+ 		}
+ 
+@@ -813,6 +815,7 @@ frontend_verilog_preproc(std::istream                 &f,
+ 				ifdef_pass_level++;
+ 				ifdef_already_satisfied = true;
+ 			}
++			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
+ 			continue;
+ 		}
+ 
+@@ -830,6 +833,7 @@ frontend_verilog_preproc(std::istream                 &f,
+ 				ifdef_pass_level++;
+ 				ifdef_already_satisfied = true;
+ 			}
++			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
+ 			continue;
+ 		}
+ 
+@@ -844,6 +848,7 @@ frontend_verilog_preproc(std::istream                 &f,
+ 			}
+ 			if (ifdef_fail_level == 1)
+ 				ifdef_already_satisfied = false;
++			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
+ 			continue;
+ 		}
+ 
+@@ -858,6 +863,7 @@ frontend_verilog_preproc(std::istream                 &f,
+ 			}
+ 			if (ifdef_fail_level == 1)
+ 				ifdef_already_satisfied = false;
++			budget.conditionalEvents.push_back({conditionalOutputOffset, tok.substr(1), ifdef_fail_level == 0});
+ 			continue;
+ 		}
+ 

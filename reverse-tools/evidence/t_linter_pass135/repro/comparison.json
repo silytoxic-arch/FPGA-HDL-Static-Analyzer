@@ -1,0 +1,36 @@
+{
+  "baselineCommit": "363be235322a4546ae8465e5df99074c12803d7f",
+  "command": "fpga_analyzer_cli --standard gjb10157 --top-module active_owner --format json -o REPORT /private/tmp/fpga-pass135-include-repro/top.sv",
+  "beforeExitCode": 2,
+  "afterExitCode": 1,
+  "before": {
+    "reportSha256": "6e9195c9d6691964963e528857326cfa73f17796b3aab8197c2583069a351f68",
+    "errors": [
+      "指定的顶层设计不存在：active_owner"
+    ],
+    "units": [
+      {
+        "name": "inactive_owner",
+        "line": 5
+      }
+    ],
+    "R-2-2": []
+  },
+  "after": {
+    "reportSha256": "619128211d8bc93b9869aa345fe17dc608c384649c82bf1062b9662f9cb8bb1b",
+    "errors": [],
+    "units": [
+      {
+        "name": "active_owner",
+        "line": 3
+      }
+    ],
+    "R-2-2": [
+      {
+        "line": 3,
+        "message": "bad__:禁止命名中使用连续的\"__\""
+      }
+    ]
+  },
+  "boundary": "Product reproduction only, not T-Linter execution. After report was generated from the repaired worktree before version metadata bump."
+}

@@ -31,8 +31,13 @@ in pass 134 evidence. Independent analyzer calls never share caches.
 Default read_hdl defines YOSYS and SYNTHESIS; alternate formal/nosynthesis modes
 are not exposed. Naming clauses 5.2.1/.2/.3/.4/.6/.12/.15 consume expanded input.
 Generic physical-position projection receives the same initial defined-name
-snapshot and directive validation. Its within-file include effects, remaining
-structural/semantic models, full AST/lowering, optional frontends and vendor
+snapshot, directive validation, and observed post-conditional state. Host-only
+conditional events record the output cursor without changing emitted HDL.
+A parallel physical file/line stack ignores logical line renaming when binding
+these events back to root directives. Ambiguous/macro-generated control
+bindings defer physical structure instead of choosing an unproved branch.
+The nine standard helpers that preprocess roots reuse the same import context.
+Full textually generated structural/semantic AST, optional frontends and vendor
 changes outside recovered paths remain unresolved.
 
-See `docs/native_rule_recovery_pass134.md` and `THIRD_PARTY_NOTICES.md`.
+See `docs/native_rule_recovery_pass135.md` and `THIRD_PARTY_NOTICES.md`.

@@ -1051,7 +1051,14 @@ for (const clause of ["GJB10157.5.2.1", "GJB10157.5.2.2", "GJB10157.5.2.3", "GJB
 for (const clause of ["GJB10157.5.2.1", "GJB10157.5.2.2", "GJB10157.5.2.3", "GJB10157.5.2.4", "GJB10157.5.2.6", "GJB10157.5.2.12", "GJB10157.5.2.15"]) {
   confirmed[clause].predicate += ' V1.4.252 recovers exported parserVerilogCode 180624370 forwarding commands into the shared design and exported clear 180622e60 clearing its +0x168 macro cache through 180942fc0. Phase1 saves the original design for scratch work; Phase2 restores it. Product maps each GJB10157 Analyzer call to one isolated import session, retaining explicit root/file-list order and source define/undef/resetall state across roots. Configured pre-defines are reapplied per root, then source cache entries take precedence. Generic projection receives the same initial defined-name set and authoritative directive issues; naming checks reuse the exact same expansions.';
   confirmed[clause].evidence.push('docs/native_rule_recovery_pass134.md', ...["reverse-tools/evidence/t_linter_pass134/cache_clear.txt#sha256=8c3f49b75a63fbff80f504a8d103f8b24471fe4f8c2704c2877587067b1cc720", "reverse-tools/evidence/t_linter_pass134/design_refs.txt#sha256=c9ab3daa3746bdb98a49a9cba1e8f90f36438ea942ef88273a5ce8f61889ee31", "reverse-tools/evidence/t_linter_pass134/exports.json#sha256=3164318a4728ad4dfa2191b25747bffeec1d81728a66feccbadd722454fe750f", "reverse-tools/evidence/t_linter_pass134/extract_exports.py#sha256=d0ac7670c56b50db7c8d6b81d1c7e76c96e0faa16191130960c297170d04d7a4", "reverse-tools/evidence/t_linter_pass134/phase_designs.txt#sha256=720fd301ce651f9feaa35832adf7b0302c2911dda5fdcb4e2e94f453c7da8747", "reverse-tools/evidence/t_linter_pass134/public_clear.txt#sha256=a4d34797b4692dd18ac0d962a93f75768b5a43e1fcecf91d35e2f279b5ccd8db", "reverse-tools/evidence/t_linter_pass134/public_parser.txt#sha256=4ab037afc5903c339e9ea72ab5500251ee056e4f09b9d72e860486f1685e34d9"]);
-  confirmed[clause].limitations += ' Shared import-session cache and initial projection state are now integrated for the seven naming consumers. Remaining project helpers still construct independent legacy projections; within-file include macro effects in that projection, full structural/semantic AST, optional frontend modes, original GUI ordering, native error recovery and runtime parity are not complete. No finding remains review-required.';
+  confirmed[clause].limitations += ' Shared import-session cache and initial projection state are now integrated for the seven naming consumers. V1.4.252 still had independent project projections; pass135 supplies shared conditional decisions. Full structural/semantic AST, optional frontend modes, original GUI ordering, native error recovery and runtime parity are not complete. No finding remains review-required.';
+}
+// Pass 135: shared conditional input; collectors/predicates remain bounded.
+const conditionalInputClauses = ["GJB10157.5.2.1", "GJB10157.5.2.2", "GJB10157.5.2.3", "GJB10157.5.2.4", "GJB10157.5.2.6", "GJB10157.5.2.12", "GJB10157.5.2.15", "GJB10157.8.8", "GJB10157.9.1.2", "GJB10157.9.2.1", "GJB10157.9.2.7", "GJB10157.9.2.3", "GJB10157.9.1.1", "GJB10157.5.2.17", "GJB10157.5.1.4", "GJB10157.5.1.8"];
+for (const clause of conditionalInputClauses) {
+  confirmed[clause].predicate += ' V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing.';
+  confirmed[clause].evidence.push('docs/native_rule_recovery_pass135.md', ...["reverse-tools/evidence/t_linter_pass135/conditional_input_integration.patch#sha256=f98c9392940c48658d60913ce57e7106aecb208cdd5ef192fdd2157246ad86f9", "reverse-tools/evidence/t_linter_pass135/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf", "reverse-tools/evidence/t_linter_pass135/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc", "reverse-tools/evidence/t_linter_pass135/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425", "reverse-tools/evidence/t_linter_pass135/parity/parity.json#sha256=84d95ff140e88a6d5c51d5cdd4b4cc87e127df3988af347949f53e53c96264de", "reverse-tools/evidence/t_linter_pass135/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e", "reverse-tools/evidence/t_linter_pass135/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971", "reverse-tools/evidence/t_linter_pass135/repro/comparison.json#sha256=a61bce044edf7f6a9bb2d49c018b74e073b92fd73dee1c0b171ce29c5b43faad", "reverse-tools/evidence/t_linter_pass135/repro/flags.vh#sha256=d08c6ee585ca128540fe5b001fec21ba10ab737d6c9400c72b4170bb88eafa5f", "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172"]);
+  confirmed[clause].limitations += ' This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required.';
 }
 // Preserve 14 previously verified native-core entries that predate this
 // generator's inline confirmed map. The baseline is a checked-in, SHA-bound
@@ -1499,13 +1506,13 @@ const rules = native.rules.map(rule => {
         release: 'docs/v1_4_87_release.md'
       }, 'GJB10157.5.2.15': {
         nativeFindings: 'docs/evidence/native_verilog_naming_case_5_2_15_configuration_findings.md',
-        release: 'docs/v1_4_252_release.md'
+        release: 'docs/v1_4_253_release.md'
       }, 'GJB10157.5.2.6': {
         nativeFindings: 'docs/evidence/native_verilog_case_only_names_5_2_6_findings.md',
-        release: 'docs/v1_4_252_release.md'
+        release: 'docs/v1_4_253_release.md'
       }, 'GJB10157.5.2.3': {
         nativeFindings: 'docs/evidence/native_verilog_keyword_5_2_3_findings.md',
-        release: 'docs/v1_4_252_release.md'
+        release: 'docs/v1_4_253_release.md'
       }, 'GJB10157.5.2.9': {
         nativeFindings: 'docs/evidence/native_verilog_positional_ports_5_2_9_findings.md',
         release: 'docs/v1_4_198_release.md'
@@ -1541,19 +1548,19 @@ const rules = native.rules.map(rule => {
         release: 'docs/v1_4_209_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
-        release: 'docs/v1_4_252_release.md'
+        release: 'docs/v1_4_253_release.md'
       }, 'GJB10157.5.2.2': {
         nativeFindings: 'docs/evidence/native_verilog_underscore_5_2_2_findings.md',
-        release: 'docs/v1_4_252_release.md'
+        release: 'docs/v1_4_253_release.md'
       }, 'GJB10157.5.2.4': {
         nativeFindings: 'docs/evidence/native_verilog_power_names_5_2_4_findings.md',
-        release: 'docs/v1_4_252_release.md'
+        release: 'docs/v1_4_253_release.md'
       }, 'GJB10157.5.2.5': {
         nativeFindings: 'docs/evidence/native_verilog_module_per_file_5_2_5_findings.md',
         release: 'docs/v1_4_193_release.md'
       }, 'GJB10157.5.2.12': {
         nativeFindings: 'docs/evidence/native_verilog_name_length_5_2_12_findings.md',
-        release: 'docs/v1_4_252_release.md'
+        release: 'docs/v1_4_253_release.md'
       }, 'GJB10157.9.1.5': {
         nativeFindings: 'docs/evidence/native_verilog_structural_preprocessing_findings.md',
         release: 'docs/v1_4_14_release.md'
@@ -1606,6 +1613,11 @@ const rules = native.rules.map(rule => {
     limitations: recovered?.limitations ?? 'Native helpers, full triggering/exclusion conditions and implementation equivalence remain unverified. Existing detector mode is not proof of native recovery.'
   };
 });
+for (const row of rules) if (conditionalInputClauses.includes(row.clause)) {
+  const tests = Array.isArray(row.additionalTests) ? row.additionalTests : row.additionalTests ? [row.additionalTests] : [];
+  row.additionalTests = [...new Set([...tests, 'tests/frontend_preprocessor_tests.cpp'])];
+  row.sharedInputRelease = 'docs/v1_4_253_release.md';
+}
 if (rules.length !== 209 || new Set(rules.map(rule => rule.clause)).size !== 209)
   throw new Error('Expected 209 unique GJB rules');
 const output = {target: native.target, digest: native.digest,

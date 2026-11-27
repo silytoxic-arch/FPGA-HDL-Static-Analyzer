@@ -25,9 +25,11 @@ struct Failure : std::runtime_error {
     explicit Failure(std::string text,std::string source):std::runtime_error(std::move(text)),file(std::move(source)){}
 };
 struct Budget {
+    struct ConditionalEvent { std::size_t outputOffset; std::string directive; bool active; };
     std::size_t operations{}, inputBytes{}, outputBytes{}, maxOperations{256*1024*1024},
         maxOutputBytes{64*1024*1024}, maxInputBytes{64*1024*1024}, maxIncludeDepth{128}, maxMacroRestoreDepth{256};
     std::string current_file;
+    std::vector<ConditionalEvent> conditionalEvents;
 };
 inline thread_local Budget budget;
 inline thread_local std::set<std::string> yosys_input_files;

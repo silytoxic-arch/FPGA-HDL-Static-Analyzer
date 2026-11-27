@@ -1,0 +1,38 @@
+`file_push "/private/tmp/fpga-pass135-stream-parity/first.sv"
+`file_push "/private/tmp/fpga-pass135-stream-parity/flags.vh"
+
+
+
+
+
+
+`file_pop
+
+
+
+module m;wire first_name;endmodule
+
+
+
+
+
+
+`file_pop
+`file_push "/private/tmp/fpga-pass135-stream-parity/second.sv"
+`file_push "/private/tmp/fpga-pass135-stream-parity/flags.vh"
+
+
+
+
+
+
+`file_pop
+
+`line 100 "virtual.sv" 0
+
+module n;wire 
+
+second_name;endmodule
+
+
+`file_pop

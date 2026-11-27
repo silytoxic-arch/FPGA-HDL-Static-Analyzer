@@ -14,6 +14,11 @@ struct FrontendLineOrigin {
     std::filesystem::path file;
     std::size_t line{};
 };
+struct FrontendConditionalDecision {
+    FrontendLineOrigin physical;
+    std::string directive;
+    bool active{};
+};
 struct FrontendPreprocessorResult {
     core::SourceFile source;
     // One origin per virtual line, using the recovered lexer file-stack/line
@@ -24,6 +29,7 @@ struct FrontendPreprocessorResult {
     // Exact initial defined-name set after configured/cache merge. The legacy
     // physical-position projection uses presence only, never guessed bodies.
     std::vector<std::string> initialMacroNames;
+    std::vector<FrontendConditionalDecision> conditionalDecisions;
     [[nodiscard]] core::SourceLocation origin(std::size_t virtualLine) const;
 };
 // One native-style design import session. Source defines/undef/resetall update

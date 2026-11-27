@@ -380,6 +380,63 @@ int main() {
     linted=reusedAnalyzer.analyzeSource({root,core::HdlLanguage::SystemVerilog,"module standalone;wire `SHOULD_NOT_LEAK;endmodule\n"});
     check(count(linted,"PP-FRONTEND-DIRECTIVE")>0&&count(linted,"GJB10157.5.2.3")==0,
         "even reuse of the same Analyzer object starts a fresh import session per call");
+    {std::ofstream f(base/"flags.vh");f<<"`define FROM_HEADER\n";}
+    const std::string includeBranch="`include \"flags.vh\"\n`ifdef FROM_HEADER\nmodule active_owner;wire bad__;endmodule\n`else\nmodule inactive_owner;wire clean_name;endmodule\n`endif\n";
+    linted=lint(includeBranch);
+    check(count(linted,"GJB10157.5.2.2")==1&&linted.structure.size()==1&&linted.structure.front().name=="active_owner"&&
+        linted.structure.front().location.line==3,
+        "same-root include definitions select the same physical structure and expanded naming branch");
+    analysis::AnalysisOptions topOptions;topOptions.standardId="GJB10157-2021";topOptions.topModule="active_owner";
+    linted=analysis::Analyzer(topOptions).analyzeSource({root,core::HdlLanguage::SystemVerilog,includeBranch});
+    check(linted.errors.empty()&&count(linted,"GJB10157.5.2.2")==1,"explicit active top is admitted after include-defined conditional compilation");
+    topOptions.topModule="inactive_owner";
+    linted=analysis::Analyzer(topOptions).analyzeSource({root,core::HdlLanguage::SystemVerilog,includeBranch});
+    check(!linted.errors.empty(),"inactive conditional roots cannot become an explicitly selected top");
+    {std::ofstream f(base/"undo.vh");f<<"`undef CHOICE\n";}
+    linted=lint("`define CHOICE\n`include \"undo.vh\"\n`ifdef CHOICE\nmodule wrong;endmodule\n`else\nmodule correct;wire bad__;endmodule\n`endif\n");
+    check(linted.structure.size()==1&&linted.structure.front().name=="correct"&&count(linted,"GJB10157.5.2.2")==1,
+        "included undef changes the later physical conditional branch");
+    {std::ofstream f(base/"branch_flags.vh");f<<"`ifdef SYNTHESIS\n`define SECOND_CHOICE\n`endif\n";}
+    linted=lint("`include \"branch_flags.vh\"\n`ifdef FIRST_CHOICE\nmodule wrong_first;endmodule\n`elsif SECOND_CHOICE\n`ifndef NEVER_DEFINED\nmodule correct;wire bad__;endmodule\n`endif\n`else\nmodule wrong_last;endmodule\n`endif\n");
+    check(linted.structure.size()==1&&linted.structure.front().name=="correct"&&count(linted,"GJB10157.5.2.2")==1,
+        "included conditional definitions propagate through root elsif and nested ifndef");
+    linted=lint("`ifdef NEVER_DEFINED\n`include \"flags.vh\"\n`endif\n`ifdef FROM_HEADER\nmodule wrong;endmodule\n`else\nmodule correct;endmodule\n`endif\n");
+    check(linted.structure.size()==1&&linted.structure.front().name=="correct","inactive includes do not manufacture a macro definition");
+    out=run(includeBranch);
+    check(out.conditionalDecisions.size()==3&&out.conditionalDecisions[0].physical.file==root&&
+        out.conditionalDecisions[0].physical.line==2&&out.conditionalDecisions[0].active&&
+        !out.conditionalDecisions[1].active&&out.conditionalDecisions[2].active,
+        "native branch observations record post-directive activity at physical root lines");
+    const std::string aliased="`line 200 \"logical.sv\" 0\n"+includeBranch;
+    out=run(aliased);
+    check(out.issues.empty()&&out.conditionalDecisions[0].physical.file==root&&out.conditionalDecisions[0].physical.line==3,
+        "line directives do not replace the physical identity used by conditional projection");
+    linted=lint(aliased);
+    check(linted.structure.size()==1&&linted.structure.front().location.file==root&&linted.structure.front().location.line==4&&
+        std::any_of(linted.violations.begin(),linted.violations.end(),[](const auto& item){
+            return item.ruleId=="GJB10157.5.2.2"&&item.file=="logical.sv"&&item.line==202;
+        }),"physical structure and logical lexer report locations remain distinct after line directives");
+    out=run("`define ID(x) x\nmodule m;\nwire `ID(\nname\n);\n`ifdef SYNTHESIS\nwire other;\n`endif\nendmodule\n");
+    check(out.issues.empty()&&out.conditionalDecisions.size()==2&&out.conditionalDecisions[0].physical.line==6&&
+        out.conditionalDecisions[1].physical.line==8,"multiline macro arguments do not shift later physical conditional decisions");
+    out=run("`include \"branch_flags.vh\"\n`ifdef SECOND_CHOICE\nmodule m;endmodule\n`endif\n");
+    check(out.issues.empty()&&out.conditionalDecisions.size()==4&&out.conditionalDecisions[0].physical.file==base/"branch_flags.vh"&&
+        out.conditionalDecisions[2].physical.file==root&&out.conditionalDecisions[2].physical.line==2,
+        "include decisions and parent decisions retain separate file-stack identities");
+    linted=lint("`include \"flags.vh\"\n`ifdef FROM_HEADER\nmodule logical_owner(input [3:0] a,b,output reg y);always @* y=a&&b;endmodule\n`else\nmodule logical_owner(input a,b,output reg y);always @* y=a&&b;endmodule\n`endif\n");
+    check(count(linted,"GJB10157.8.8")==1,"project vector-logical helper consumes the same include-selected input as core structure");
+    topOptions.topModule="macro_owner";
+    linted=analysis::Analyzer(topOptions).analyzeSource({root,core::HdlLanguage::SystemVerilog,
+        "`define MAKE module macro_owner;wire bad__;endmodule\n`MAKE\n"});
+    check(linted.errors.empty()&&count(linted,"GJB10157.5.2.2")==1,
+        "top admission uses the expanded owner index for a macro-created root");
+    linted=analysis::Analyzer(topOptions).analyzeSource({root,core::HdlLanguage::SystemVerilog,
+        "`define MAKE module macro_owner;wire bad__;endmodule\n`MAKE\n`MAKE\n"});
+    check(!linted.errors.empty()&&count(linted,"GJB10157.5.2.2")==0,
+        "macro-created duplicate tops retain exact-one admission");
+    linted=lint("`define OPEN `ifdef NEVER_DEFINED\n`OPEN\nmodule should_not_appear;wire bad__;endmodule\n`endif\n");
+    check(linted.structure.empty()&&count(linted,"PP-FRONTEND-DIRECTIVE")>0,
+        "a macro-generated conditional with no unique physical directive binding defers structure instead of selecting a guessed branch");
     std::cout<<checks<<" checks, "<<failures<<" failures\n";
     return failures?1:0;
 }

@@ -1,0 +1,12 @@
+{
+  "baselineCommit": "363be235322a4546ae8465e5df99074c12803d7f",
+  "inputs": [
+    "first.sv",
+    "second.sv",
+    "flags.vh"
+  ],
+  "equal": true,
+  "outputBytes": 412,
+  "outputSha256": "d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+  "boundary": "Mac-host comparison against previous product engine, not vendor runtime oracle; two ordered roots with guarded includes, cached/default/function macros, token pasting, conditionals, multiline actuals and line directives."
+}
