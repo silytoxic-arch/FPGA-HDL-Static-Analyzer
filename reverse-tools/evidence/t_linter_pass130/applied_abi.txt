@@ -1,0 +1,6 @@
+Target SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Inferred from class2 call-site RCX/RDX/R8 and AL use, not vendor debug symbols. Only analysis database updated.
+uchar __fastcall FUN_1804c4430(pointer condition, pointer clock_name, pointer direction)
+condition storage=RCX:8
+clock_name storage=RDX:8
+direction storage=R8:8

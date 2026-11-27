@@ -101,12 +101,12 @@ int main() {
     check(wrap(same,"subtype data_t is std_logic;"),1,1,false,"unused subtype leaves proven clocks visible");
     check(wrap(same,"subtype data_t is work.pkg.std_logic;"),1,1,false,
         "unused selected subtype marks do not change known signal bindings");
-    check(wrap(same,"subtype clock_t is std_logic; signal clk:clock_t;"),0,0,true,
-        "native subtype normalization is not guessed from its base spelling");
+    check(wrap(same,"subtype clock_t is std_logic; signal clk:clock_t;"),1,1,false,
+        "a previously bound unqualified IEEE subtype preserves identifier nodes");
     check(wrap(same,"subtype clock_t is work.pkg.std_logic; signal clk:clock_t;"),0,0,true,
         "a selected type ending in std_logic is not IEEE proof");
-    check(wrap(same,"subtype first_t is std_logic; subtype second_t is first_t; signal clk:second_t;"),0,0,true,
-        "unrecovered subtype chains cannot inherit an outer object binding");
+    check(wrap(same,"subtype first_t is std_logic; subtype second_t is first_t; signal clk:second_t;"),1,1,false,
+        "ordered scalar subtype chains preserve the bound clock");
     check(wrap(same,"subtype clock_t is unknown_t; signal clk:clock_t;"),0,0,true,
         "a missing subtype base cannot inherit an outer object binding");
     check(wrap(same,"subtype clk is std_logic;"),0,0,true,"a subtype name hides an outer object");
@@ -145,6 +145,64 @@ int main() {
         "unsupported type bodies do not erase proven outer diagnostics");
     check(wrap(same,"type state_t is (IDLE,RUN); signal clk:state_t;")+wrap(same),1,1,true,
         "type declarations and their unknown uses do not leak across architectures");
+    check(wrap(same,"subtype clock_t is std_ulogic; signal clk:clock_t;"),1,1,false,
+        "std_ulogic subtypes bind to the same source scalar subset");
+    check(wrap(same,"SUBTYPE Clock_T IS STD_LOGIC; SIGNAL CLK:clock_t;"),1,1,false,
+        "subtype visibility and uses are case insensitive");
+    check(wrap(same,"subtype clock_t is std_logic; signal clk:clock_t := '0';"),1,1,false,
+        "scalar subtype signals retain default initializers");
+    check(wrap(same,"subtype clock_t is std_logic; signal clk:clock_t register;"),1,1,false,
+        "scalar subtype signals retain signal kinds");
+    check(wrap(other,"subtype clock_t is std_logic; signal clk:clock_t;"),1,0,false,
+        "a subtype clock does not invent equality reuse with another reset");
+    check(wrap(same,"subtype clock_t is bit; signal clk:clock_t;"),0,0,true,
+        "a bit subtype cannot inherit the hidden IEEE port type");
+    check(wrap(same,"subtype clock_t is std_logic_vector; signal clk:clock_t;"),0,0,true,
+        "a vector subtype is not guessed to be scalar");
+    check(wrap(same,"subtype clock_t is ieee.std_logic_1164.std_logic; signal clk:clock_t;"),0,0,true,
+        "selected type visibility remains outside this unqualified source adapter");
+    check(wrap(same,"subtype first_t is second_t; subtype second_t is std_logic; signal clk:first_t;"),0,0,true,
+        "a later alias cannot retroactively bind an earlier forward mark");
+    check(wrap(same,"subtype first_t is second_t; subtype second_t is first_t; signal clk:second_t;"),0,0,true,
+        "cyclic aliases cannot manufacture a scalar base");
+    check(wrap(same,"subtype clock_t is clock_t; signal clk:clock_t;"),0,0,true,
+        "a self alias without a proven distinct base remains unknown");
+    check(wrap(same,"signal clk:clock_t; subtype clock_t is std_logic;"),0,0,true,
+        "object types are bound at the declaration point rather than after a full-file scan");
+    check(wrap(same,"subtype clock_t is std_logic; subtype clock_t is std_ulogic; signal clk:clock_t;"),0,0,true,
+        "duplicate same-frame subtype declarations cannot silently overwrite type bindings");
+    check(wrap("b:block is signal clk:clock_t; begin "+same+" end block;",
+        "subtype clock_t is std_logic;"),1,1,false,"blocks inherit an outer subtype binding");
+    check(wrap("g:for i in 0 to 1 generate signal clk:clock_t; begin "+same+" end generate;",
+        "subtype clock_t is std_logic;"),1,1,false,"generate bodies inherit an outer subtype binding once");
+    check(wrap("b:block is subtype local_t is clock_t; signal clk:local_t; begin "+same+" end block;",
+        "subtype clock_t is std_logic;"),1,1,false,"child subtype chains resolve a previously visible outer base");
+    check(wrap("b:block is subtype clock_t is bit; signal clk:clock_t; begin "+same+" end block;"
+        " c:block is signal clk:clock_t; begin "+same+" end block;",
+        "subtype clock_t is std_logic;"),1,1,true,
+        "a child non-scalar subtype cannot leak into its sibling frame");
+    check(wrap("b:block is constant clock_t:integer:=0; signal clk:clock_t; begin "+same+" end block;"
+        " c:block is signal clk:clock_t; begin "+same+" end block;",
+        "subtype clock_t is std_logic;"),1,1,true,
+        "an object hides a subtype locally and the sibling restores the alias");
+    check(wrap("g:for clock_t in 0 to 1 generate signal clk:clock_t; begin "+same+" end generate;"+same,
+        "subtype clock_t is std_logic;"),1,1,true,
+        "a generate iterator hides an outer type binding only inside its own frame");
+    check(wrap("b:block is type state_t is (clock_t,RUN); signal clk:clock_t; begin "+same+" end block;"+same,
+        "subtype clock_t is std_logic;"),1,1,true,
+        "an enum literal cannot retain an outer same-spelling subtype binding");
+    check(wrap("b:block is type clock_t is (IDLE,RUN); signal clk:clock_t; begin "+same+" end block;"+same,
+        "subtype clock_t is std_logic;"),1,1,true,
+        "a derived type replacement hides the outer scalar subtype");
+    check(wrap("b:block is signal clk:clock_t; begin "+same+" end block;"
+        " c:block is signal clk:clock_t; begin "+same+" end block;",
+        "subtype clock_t is std_logic;"),2,2,true,
+        "equal subtype bases do not identify distinct local clock objects");
+    check(wrap("b:block is signal clk:clock_t; begin "+same+same+" end block;",
+        "subtype clock_t is std_logic;"),2,4,false,
+        "same-owner subtype clocks preserve the complete ordered pair multiplicity");
+    check(wrap(same,"subtype clock_t is std_logic; signal clk:clock_t;")+wrap(same,"signal clk:clock_t;"),1,1,true,
+        "an architecture scalar alias never leaks into a later design unit");
     const auto postponed=std::string("p: postponed ")+same.substr(0,same.find("end process;"))+"end postponed process p;";
     check(wrap(postponed),1,1,false,"named END POSTPONED PROCESS closes exactly once");
     check(wrap(postponed+same),2,4,false,"adjacent postponed and ordinary processes preserve cross pairs");

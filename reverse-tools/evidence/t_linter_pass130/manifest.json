@@ -1,0 +1,54 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "method": "Static helper decompilation and instruction reads. ABI annotations inferred from register operands, not vendor debug symbols. No vendor execution or full type-engine equivalence.",
+  "files": [
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/type_registry_refs.txt",
+      "size": 14040,
+      "sha256": "7d9fb1f38f82923ccb47516379eddcbc3c5674697b6f427dd398c6679646229f",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/classification_helpers.txt",
+      "size": 41560,
+      "sha256": "204289929761f7796c312becb084456c93eaca9f8a149a3b26c6746f295e8fcc",
+      "role": "static-evidence; unannotated helper-call argument lists remain incomplete; machine instructions take precedence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/clock_name_helpers.txt",
+      "size": 18684,
+      "sha256": "9bbac246afe4ba58f84cb93f1c444493330eb796a72472933d637881a1e5cc4b",
+      "role": "static-evidence; unannotated helper-call argument lists remain incomplete; machine instructions take precedence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/edge_classifier_refs.txt",
+      "size": 1311,
+      "sha256": "1f4e8488e6c794b3b8ab188d1d2ddefeba2292a57facf027336fa526e3625529",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/class2_edge_call.asm",
+      "size": 774,
+      "sha256": "8bfb6dea6828770d58d5291d4bfc6d48ca0a84b8b7a8859b51ecaf50c3a2257c",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/applied_abi.txt",
+      "size": 353,
+      "sha256": "968a6f384eac59218a112e4a1a86f5a6c8482ac62d7c4671ed4b4fbeb1dd407d",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/class2_after_abi.txt",
+      "size": 8577,
+      "sha256": "eb7182aa82fcda3027a6aac73fee5dc5d28cb74b06c6f726d78a2d7a52ba0fe0",
+      "role": "static-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass130/AnnotateClockConditionAbi.java",
+      "size": 2158,
+      "sha256": "e24e98ff4596067ef6f10701914784d3a31f9e80585e18a804b935077a67f567",
+      "role": "analysis-utility; analysis database annotations only, not vendor source"
+    }
+  ]
+}

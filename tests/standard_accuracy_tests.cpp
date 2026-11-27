@@ -8684,11 +8684,8 @@ int main() {
     check(count(result, "GJB9765.4.10.h") == 1,
           "an architecture enum no longer suppresses a proven native clock/control diagnostic");
     result = analyze(clockDeclarations("subtype clock_t is std_logic; signal clk:clock_t;", clockReuse), true);
-    check(count(result, "GJB9765.4.10.h") == 0 &&
-          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
-              return item.clauseId == "GJB9765.4.10.h" &&
-                     item.state == analysis::StandardRuleState::ManualReviewRequired;
-          }), "unrecovered subtype normalization remains review-required end to end");
+    check(count(result, "GJB9765.4.10.h") == 1,
+          "a source-bound unqualified scalar subtype reaches the recovered name-pair predicate");
     result = analyze(clockWrap("b:block is type state_t is (clk,RUN); begin "+clockReuse+
         " end block;\n"+clockReuse), true);
     check(count(result, "GJB9765.4.10.h") == 1 &&
@@ -8702,6 +8699,31 @@ int main() {
               return item.clauseId == "GJB9765.4.10.h" &&
                      item.state == analysis::StandardRuleState::ManualReviewRequired;
           }), "accepting enum declarations does not convert absence of an alarm into compliance");
+
+    result = analyze(clockDeclarations("subtype first_t is std_logic; subtype clock_t is first_t; signal clk:clock_t;",
+        clockReuse+"\n"+clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 4,
+          "a source-bound subtype chain preserves all clock/control pair diagnostics");
+    result = analyze(clockDeclarations("subtype clock_t is work.pkg.std_logic; signal clk:clock_t;",clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 0 &&
+          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+              return item.clauseId == "GJB9765.4.10.h" &&
+                     item.state == analysis::StandardRuleState::ManualReviewRequired;
+          }), "selected package marks do not become IEEE types through their last name");
+    result = analyze(clockDeclarations("subtype clock_t is std_logic;",
+        "b:block is constant clock_t:integer:=0; signal clk:clock_t; begin "+clockReuse+
+        " end block;\n"+clockReuse), true);
+    check(count(result, "GJB9765.4.10.h") == 1 &&
+          std::ranges::any_of(result.violations, [](const auto& item) {
+              return item.ruleId == "GJB9765.4.10.h" && item.line == 6 && item.column == 1;
+          }), "a locally hidden subtype preserves the proven outer source location");
+    result = analyze(clockDeclarations("subtype clock_t is std_logic; signal clk:clock_t;",
+        "process(clk) begin if rising_edge(clk) then dout<=din; end if; end process;"), true);
+    check(count(result, "GJB9765.4.10.h") == 0 &&
+          std::ranges::any_of(result.standardAssessments, [](const auto& item) {
+              return item.clauseId == "GJB9765.4.10.h" &&
+                     item.state == analysis::StandardRuleState::ManualReviewRequired;
+          }), "admitting a scalar subtype clock never marks an alarm-free partial rule compliant");
 
     result = analyze(
         "entity probe is port(clk,a,b:in bit; d:out bit); end entity;\n"

@@ -56,6 +56,7 @@ class Scanner {
     VhdlClockControlScan result;
     using Names=std::set<std::string>;
     using Bindings=std::map<std::string,std::size_t>;
+    using ScalarTypes=std::set<std::string>; // Source visibility, not vendor type IDs.
     bool word(std::size_t i,std::string_view w) const {
         return i<t.size() && t[i].kind==parser::HdlTokenKind::Identifier && lower(t[i].text)==w;
     }
@@ -120,21 +121,26 @@ class Scanner {
         return name=="rising_edge" || name=="falling_edge" ||
             name=="std_logic" || name=="std_ulogic";
     }
-    // Only bounded declaration grammar is skipped here. Native subtype-name
-    // normalization is not recovered: these names never become IEEE aliases.
+    // Source binding for unconstrained, unqualified IEEE subtype chains. The
+    // recovered edge/condition helpers consume identifier nodes, not type marks.
+    // This is not a reconstruction of the vendor's complete type engine.
     std::optional<std::size_t> typeDeclaration(std::size_t start,std::size_t limit,
-                                               Names& names,Bindings& bindings) const {
+                                               Names& names,Bindings& bindings,ScalarTypes& types) const {
         if (start+3>=limit || !basic(t[start+1]) || !word(start+2,"is")) return std::nullopt;
         const auto name=lower(t[start+1].text);
         if (primitiveShadow(name)) return std::nullopt;
         std::vector<std::string> hidden{name};
         auto i=start+3;
+        bool scalarAlias=false;
         if (word(start,"subtype")) {
-            // A bare/selected type mark only; constraints/resolution indications
-            // and package visibility are not inferred from the final spelling.
+            // Resolve the previously visible bare mark only. Selected package
+            // names, constraints and resolution functions are not guessed.
             if (!basic(t[i])) return std::nullopt;
+            const auto base=lower(t[i].text);
+            scalarAlias=base!=name && types.contains(base);
             ++i;
             while (i<limit && t[i].text==".") {
+                scalarAlias=false;
                 if (++i>=limit || !basic(t[i])) return std::nullopt;
                 ++i;
             }
@@ -155,19 +161,25 @@ class Scanner {
             }
         }
         if (i>=limit || t[i].text!=";") return std::nullopt;
-        for (const auto& identifier:hidden) { names.erase(identifier); bindings.erase(identifier); }
+        for (const auto& identifier:hidden) {
+            names.erase(identifier); bindings.erase(identifier); types.erase(identifier);
+        }
+        if (scalarAlias) types.insert(name);
         return i+1;
     }
     // Declaration names hide outer objects before their type is considered.
     // Non-scalar objects and constants never inherit an outer scalar binding.
     std::optional<std::size_t> declarationBody(std::size_t start,std::size_t limit,
-                                              Names& names,Bindings& bindings,bool beginRequired) const {
+                                              Names& names,Bindings& bindings,ScalarTypes& types,
+                                              bool beginRequired) const {
         auto i=start;
         bool sawDeclaration=false;
+        Names declaredHere;
         while (i<limit) {
             if (word(i,"begin")) return i+1;
             if (word(i,"type") || word(i,"subtype")) {
-                const auto next=typeDeclaration(i,limit,names,bindings);
+                if (i+1>=limit || !declaredHere.insert(lower(t[i+1].text)).second) return std::nullopt;
+                const auto next=typeDeclaration(i,limit,names,bindings,types);
                 if (!next) return std::nullopt;
                 sawDeclaration=true;
                 i=*next;
@@ -186,7 +198,7 @@ class Scanner {
             std::vector<std::string> declared;
             while (i<limit && basic(t[i])) {
                 const auto name=lower(t[i].text);
-                if (primitiveShadow(name)) return std::nullopt;
+                if (primitiveShadow(name) || !declaredHere.insert(name).second) return std::nullopt;
                 declared.push_back(name);
                 ++i;
                 if (i>=limit || t[i].text!=",") break;
@@ -195,7 +207,7 @@ class Scanner {
             if (declared.empty() || i>=limit || t[i].text!=":" || i+1>=limit)
                 return std::nullopt;
             ++i;
-            const bool scalarType=scalar(i);
+            const bool scalarType=basic(t[i]) && types.contains(lower(t[i].text));
             auto tail=i+1;
             if (word(tail,"register") || word(tail,"bus")) ++tail;
             const bool initializer=tail+1<limit && t[tail].text==":" && t[tail+1].text=="=" &&
@@ -205,6 +217,7 @@ class Scanner {
             for (const auto& name:declared) {
                 names.erase(name);
                 bindings.erase(name);
+                types.erase(name);
                 if (boundScalar) { names.insert(name); bindings[name]=i; }
             }
             unsigned parentheses=0;
@@ -237,7 +250,7 @@ class Scanner {
         return true;
     }
     void concurrent(std::size_t start,std::size_t limit,std::size_t architecture,
-                    const Names& names,const Bindings& bindings) {
+                    const Names& names,const Bindings& bindings,const ScalarTypes& types) {
         for (auto i=start;i<limit;++i) {
             if (closingKeyword(i)) continue;
             if (word(i,"process")) {
@@ -251,6 +264,7 @@ class Scanner {
                 if (!end) { result.incomplete=true; return; }
                 auto local=names;
                 auto localBindings=bindings;
+                auto localTypes=types;
                 auto body=i+1;
                 bool admitted=true;
                 if (block) {
@@ -276,11 +290,12 @@ class Scanner {
                         else { // A generate iterator cannot inherit an outer signal binding.
                             local.erase(lower(t[index].text));
                             localBindings.erase(lower(t[index].text));
+                            localTypes.erase(lower(t[index].text));
                         }
                     }
                 }
-                const auto begin=admitted?declarationBody(body,end->end,local,localBindings,block):std::nullopt;
-                if (begin) concurrent(*begin,end->end,architecture,local,localBindings);
+                const auto begin=admitted?declarationBody(body,end->end,local,localBindings,localTypes,block):std::nullopt;
+                if (begin) concurrent(*begin,end->end,architecture,local,localBindings,localTypes);
                 else result.incomplete=true;
                 i=end->after-1;
             } else if (word(i,"signal") || word(i,"constant") || word(i,"type") ||
@@ -563,8 +578,9 @@ public:
                     for (const auto& name:names) bindings[name]=arch;
                     // Consume declarations in visibility order. Searching for the
                     // first BEGIN would mistake a subprogram body for this unit.
-                    const auto begin=declarationBody(i+5,end,names,bindings,true);
-                    if (begin) concurrent(*begin,end,arch,names,bindings);
+                    ScalarTypes types{"std_logic","std_ulogic"};
+                    const auto begin=declarationBody(i+5,end,names,bindings,types,true);
+                    if (begin) concurrent(*begin,end,arch,names,bindings,types);
                     else result.incomplete=true;
                 }
                 auto semi=end+1; while (semi<t.size()&&t[semi].text!=";") ++semi;
