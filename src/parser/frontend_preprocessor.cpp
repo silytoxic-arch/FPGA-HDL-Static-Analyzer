@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <mutex>
 #include <regex>
+#include <set>
 #include <sstream>
 
 namespace fpga::parser {
@@ -140,20 +141,35 @@ void mapExpanded(FrontendPreprocessorResult& result,std::string text) {
     result.source=core::SourceFile(raw.path(),raw.language(),std::move(text));
 }
 } // namespace
+struct FrontendPreprocessorSession::State {
+    vendorpp::define_map_t cache;
+    State() { cache.clear(); } // Match the explicit public clear boundary.
+};
+namespace {
+std::mutex& engineMutex() {
+    static std::mutex mutex;
+    return mutex;
+}
+}
+FrontendPreprocessorSession::FrontendPreprocessorSession():state_(std::make_unique<State>()) {}
+FrontendPreprocessorSession::~FrontendPreprocessorSession()=default;
+void FrontendPreprocessorSession::reset() {
+    std::lock_guard guard(engineMutex());
+    state_->cache.clear();
+}
 core::SourceLocation FrontendPreprocessorResult::origin(std::size_t virtualLine) const {
     if(virtualLine==0 || virtualLine>origins.size()) return {source.path(),0,1,0};
     const auto& at=origins[virtualLine-1];return {at.file,at.line,1,0};
 }
-FrontendPreprocessorResult expandFrontendSource(const core::SourceFile& source,const PreprocessorOptions& options,
-                                               const FrontendPreprocessorLimits& limits) {
-    FrontendPreprocessorResult result{source,{},{},{}};
+FrontendPreprocessorResult FrontendPreprocessorSession::expand(
+    const core::SourceFile& source,const PreprocessorOptions& options,const FrontendPreprocessorLimits& limits) {
+    FrontendPreprocessorResult result{source,{},{},{},{}};
     if(source.language()==core::HdlLanguage::Vhdl || source.language()==core::HdlLanguage::Unknown) {
         result.issues.push_back({"PP-FRONTEND-LANGUAGE","该展开器仅接受 Verilog/SystemVerilog。",{source.path(),0,1,0}});return result;
     }
     // The retained upstream engine has static token queues. Its complete call
     // and cleanup run under this lock; independent analyzer threads never mix.
-    static std::mutex mutex;
-    std::lock_guard guard(mutex);
+    std::lock_guard guard(engineMutex());
     vendorpp::budget={};
     vendorpp::budget.maxOperations=limits.maxOperations;
     vendorpp::budget.maxOutputBytes=limits.maxOutputBytes;
@@ -163,7 +179,7 @@ FrontendPreprocessorResult expandFrontendSource(const core::SourceFile& source,c
     vendorpp::budget.current_file=utf8(source.path());
     vendorpp::yosys_input_files.clear();
     try {
-        vendorpp::define_map_t configured,cache;
+        vendorpp::define_map_t configured;
         for(const auto& definition:options.defines) {
             const auto equal=definition.find('=');const auto name=definition.substr(0,equal);
             if(!identifier(name)) throw vendorpp::Failure("Invalid configured macro name.",utf8(source.path()));
@@ -172,10 +188,14 @@ FrontendPreprocessorResult expandFrontendSource(const core::SourceFile& source,c
         // Default read_hdl emits read_verilog -sv without -nosynthesis or
         // -formal. The native frontend adds this after command-line defines.
         configured.add("SYNTHESIS","1");
+        std::set<std::string> initialNames;
+        for(const auto& entry:configured.defines) initialNames.insert(entry.first);
+        for(const auto& entry:state_->cache.defines) initialNames.insert(entry.first);
+        result.initialMacroNames.assign(initialNames.begin(),initialNames.end());
         std::list<std::string> directories;
         for(const auto& path:options.includeDirectories) directories.push_back(utf8(path));
         std::istringstream input(source.content());
-        auto expanded=vendorpp::frontend_verilog_preproc(input,utf8(source.path()),configured,cache,directories);
+        auto expanded=vendorpp::frontend_verilog_preproc(input,utf8(source.path()),configured,state_->cache,directories);
         for(const auto& file:vendorpp::yosys_input_files) result.includedFiles.push_back(vendorpp::path_from_utf8(file));
         mapExpanded(result,std::move(expanded));
     } catch(const vendorpp::Failure& error) {
@@ -185,5 +205,10 @@ FrontendPreprocessorResult expandFrontendSource(const core::SourceFile& source,c
         result.issues.push_back({"PP-FRONTEND-EXPANSION","文件读取或展开过程异常，请检查包含路径的编码、权限和宏定义。",{source.path(),0,1,0}});
     }
     vendorpp::yosys_input_files.clear();return result;
+}
+FrontendPreprocessorResult expandFrontendSource(const core::SourceFile& source,const PreprocessorOptions& options,
+                                               const FrontendPreprocessorLimits& limits) {
+    FrontendPreprocessorSession session;
+    return session.expand(source,options,limits);
 }
 } // namespace fpga::parser

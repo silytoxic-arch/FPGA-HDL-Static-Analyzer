@@ -54,6 +54,7 @@ void help(std::ostream& out) {
         << "                      文件头策略：header-policy；关键字：header-keyword（见项目配置文档）\n"
         << "                      命名关键字：keyword-policy、keyword-category（厂商默认类别未知）\n"
         << "  -f, --file-list F   从清单加载 HDL 输入、include 路径和宏\n"
+        << "                      保留输入/清单顺序；目录内按路径排序，跨文件宏请按定义顺序列出\n"
         << "  --baseline FILE     忽略基线文件中已记录的问题\n"
         << "  --write-baseline F  写入当前问题基线并成功退出\n"
         << "  --disable RULE      禁用规则，可重复指定\n"

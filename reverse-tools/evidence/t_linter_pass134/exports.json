@@ -1,0 +1,113 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "exports": [
+    {
+      "name": "?clear@CheckRule@Yosys@@QEAAXXZ",
+      "va": "0x180622e60"
+    },
+    {
+      "name": "?clearloginfo@CheckRule@Yosys@@QEAAXXZ",
+      "va": "0x1806238f0"
+    },
+    {
+      "name": "?getCheckResults@CheckRule@Yosys@@QEAA?AV?$vector@Uruleinfo_t@Yosys@@V?$allocator@Uruleinfo_t@Yosys@@@std@@@std@@XZ",
+      "va": "0x180623df0"
+    },
+    {
+      "name": "?getHierarchy@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z",
+      "va": "0x180623ea0"
+    },
+    {
+      "name": "?getLoginfo@CheckRule@Yosys@@QEAA?AV?$vector@Uloginfo_t@Yosys@@V?$allocator@Uloginfo_t@Yosys@@@std@@@std@@XZ",
+      "va": "0x180623fe0"
+    },
+    {
+      "name": "?parserVerilogCode@CheckRule@Yosys@@QEAAXPEBD@Z",
+      "va": "0x180624370"
+    },
+    {
+      "name": "?rulesSetup@CheckRule@Yosys@@QEAAXXZ",
+      "va": "0x180624590"
+    },
+    {
+      "name": "?runRule@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V34@@Z",
+      "va": "0x1806245b0"
+    },
+    {
+      "name": "?runRuleInPhases@CheckRule@Yosys@@QEAA_NV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z",
+      "va": "0x1806249c0"
+    },
+    {
+      "name": "?runRulesPhase0Prepare@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V34@@Z",
+      "va": "0x180624b70"
+    },
+    {
+      "name": "?runRulesPhase1Prepare@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ",
+      "va": "0x1806254e0"
+    },
+    {
+      "name": "?runRulesPhase2Prepare@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ",
+      "va": "0x1806260e0"
+    },
+    {
+      "name": "?runRulesPhase3Prepare@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ",
+      "va": "0x180626820"
+    },
+    {
+      "name": "?runRulesPhase4Prepare@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ",
+      "va": "0x180626d20"
+    },
+    {
+      "name": "?runRulesPhase5Prepare@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ",
+      "va": "0x180627220"
+    },
+    {
+      "name": "?runRulesPost@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V34@@Z",
+      "va": "0x1806272a0"
+    },
+    {
+      "name": "?runRulesPrepare@CheckRule@Yosys@@QEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V34@@Z",
+      "va": "0x180627340"
+    },
+    {
+      "name": "?setAllRule@CheckRule@Yosys@@QEAAX_N@Z",
+      "va": "0x180628900"
+    },
+    {
+      "name": "?setHeaderComment@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$map@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_NU?$less@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@V?$allocator@U?$pair@$$CBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@std@@@2@@4@@Z",
+      "va": "0x180628970"
+    },
+    {
+      "name": "?setIPCorePath@CheckRule@Yosys@@QEAAXV?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@std@@@Z",
+      "va": "0x180628b20"
+    },
+    {
+      "name": "?setMaxStatesNum@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z",
+      "va": "0x180628d30"
+    },
+    {
+      "name": "?setRule@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@Z",
+      "va": "0x180628fe0"
+    },
+    {
+      "name": "?setRuleNameCase@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N111@Z",
+      "va": "0x180629120"
+    },
+    {
+      "name": "?setRuleNameConvention@CheckRule@Yosys@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@0000@Z",
+      "va": "0x180629290"
+    },
+    {
+      "name": "?setSearchDir@CheckRule@Yosys@@QEAAXV?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@std@@@Z",
+      "va": "0x180629520"
+    },
+    {
+      "name": "?setTopFile@CheckRule@Yosys@@QEAA?AV?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@std@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@4@@Z",
+      "va": "0x180629590"
+    },
+    {
+      "name": "?setTopModule@CheckRule@Yosys@@QEAA_NV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z",
+      "va": "0x1806298c0"
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 #include "analysis/analyzer.h"
 #include "analysis/rule_catalog.h"
 #include "analysis/standard_evaluator.h"
+#include "analysis/standard_profiles.h"
+#include "parser/frontend_preprocessor.h"
+#include <array>
 #include "parser/preprocessor.h"
 #include "parser/semantic_analyzer.h"
 
@@ -947,6 +950,22 @@ void mergeTimingInfo(AnalysisResult& result, parser::UnitTimingInfo timing) {
     }
 }
 
+// Expand once, in the caller's source order, for the native Verilog profile.
+// Every later consumer receives the same immutable per-root result.
+std::vector<std::optional<parser::FrontendPreprocessorResult>> prepareFrontendInputs(
+    std::span<const core::SourceFile> sources,const AnalysisOptions& options) {
+    std::vector<std::optional<parser::FrontendPreprocessorResult>> inputs(sources.size());
+    const auto profile=findStandardProfile(options.standardId);
+    if(options.countOnly || !profile || profile->id!="GJB10157-2021") return inputs;
+    parser::FrontendPreprocessorSession session;
+    for(std::size_t i=0;i<sources.size();++i) {
+        if(sources[i].language()!=core::HdlLanguage::Verilog &&
+           sources[i].language()!=core::HdlLanguage::SystemVerilog) continue;
+        inputs[i]=session.expand(sources[i],{options.includeDirectories,options.defines});
+    }
+    return inputs;
+}
+
 } // namespace
 
 Analyzer::Analyzer(AnalysisOptions options) : options_(std::move(options)) {}
@@ -970,11 +989,13 @@ core::HdlLanguage Analyzer::languageFromPath(const std::filesystem::path& path) 
 }
 
 AnalysisResult Analyzer::analyzeSource(const core::SourceFile& source) const {
-    return analyzeSourceImpl(source, true);
+    const auto inputs=prepareFrontendInputs(std::span<const core::SourceFile>(&source,1),options_);
+    return analyzeSourceImpl(source,true,inputs[0] ? &*inputs[0] : nullptr);
 }
 
 AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
-                                           bool runTimingRules) const {
+                                           bool runTimingRules,
+                                           const parser::FrontendPreprocessorResult* frontend) const {
     AnalysisResult result;
     result.severityOverrides = options_.severityOverrides;
     result.standardId = options_.standardId;
@@ -989,7 +1010,7 @@ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
     result.lineStatistics.append(countSourceLines(source));
     if (options_.countOnly) return result;
     const auto preprocessed = parser::preprocess(
-        source, {options_.includeDirectories, options_.defines});
+        source, {options_.includeDirectories, options_.defines},frontend);
     result.structure = parser::parseDesignUnits(preprocessed.source);
     for (auto& timing : parser::extractTimingInfo(preprocessed.source)) {
         mergeTimingInfo(result, std::move(timing));
@@ -1025,7 +1046,10 @@ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
     analyzeCommon(source, rawLines, result);
     applySeverityOverrides(result, options_);
     filterViolations(result, {source}, options_);
-    if (runTimingRules) applyStandardProfile(result, std::span<const core::SourceFile>(&source, 1), options_);
+    if (runTimingRules) {
+        const std::array<const parser::FrontendPreprocessorResult*,1> inputs{frontend};
+        applyStandardProfile(result,std::span<const core::SourceFile>(&source,1),options_,inputs);
+    }
     std::ranges::sort(result.violations, [](const Violation& a, const Violation& b) {
         return std::tie(a.file, a.line, a.column, a.ruleId) <
                std::tie(b.file, b.line, b.column, b.ruleId);
@@ -1036,28 +1060,35 @@ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
 AnalysisResult Analyzer::analyzePaths(const std::vector<std::filesystem::path>& inputs) const {
     std::vector<std::string> inputErrors;
     std::vector<std::filesystem::path> files;
+    std::set<std::filesystem::path> seenFiles;
+    const auto appendFile=[&](const std::filesystem::path& file) {
+        if(seenFiles.insert(file).second) files.push_back(file);
+    };
     for (const auto& input : inputs) {
         std::error_code error;
         if (std::filesystem::is_regular_file(input, error)) {
             if (languageFromPath(input) != core::HdlLanguage::Unknown && !matchesExclude(input, options_)) {
-                files.push_back(input);
+                appendFile(input);
             }
         } else if (std::filesystem::is_directory(input, error)) {
+            std::vector<std::filesystem::path> directoryFiles;
             std::filesystem::recursive_directory_iterator iterator(
                 input, std::filesystem::directory_options::skip_permission_denied, error);
             for (const auto& entry : iterator) {
                 if (entry.is_regular_file(error) &&
                     languageFromPath(entry.path()) != core::HdlLanguage::Unknown &&
                     !matchesExclude(entry.path(), options_)) {
-                    files.push_back(entry.path());
+                    directoryFiles.push_back(entry.path());
                 }
             }
+            // Directory enumeration is deterministic; explicit roots/file-list
+            // order must remain intact because source macros persist by order.
+            std::ranges::sort(directoryFiles);
+            for(const auto& file:directoryFiles) appendFile(file);
         } else {
             inputErrors.push_back("Input does not exist or is not readable: " + input.string());
         }
     }
-    std::ranges::sort(files);
-    files.erase(std::unique(files.begin(), files.end()), files.end());
     std::vector<core::SourceFile> sources;
     sources.reserve(files.size());
     for (const auto& file : files) {
@@ -1084,9 +1115,14 @@ AnalysisResult Analyzer::analyzeSources(const std::vector<core::SourceFile>& sou
     combined.verilogKeywordPolicy = options_.verilogKeywordPolicy;
     combined.powerOnPolicy = options_.powerOnPolicy;
     combined.standardId = options_.standardId;
+    const auto frontendInputs=prepareFrontendInputs(sources,options_);
+    std::vector<const parser::FrontendPreprocessorResult*> frontendViews;
+    frontendViews.reserve(sources.size());
+    for(const auto& input:frontendInputs) frontendViews.push_back(input ? &*input : nullptr);
     std::vector<core::SourceFile> preprocessedVhdlSources;
-    for (const auto& source : sources) {
-        auto result = analyzeSourceImpl(source, false);
+    for (std::size_t index=0;index<sources.size();++index) {
+        const auto& source=sources[index];
+        auto result = analyzeSourceImpl(source,false,frontendViews[index]);
         combined.filesAnalyzed += result.filesAnalyzed;
         for (const auto& file : result.lineStatistics.files) combined.lineStatistics.append(file);
         combined.designUnits += result.designUnits;
@@ -1129,7 +1165,7 @@ AnalysisResult Analyzer::analyzeSources(const std::vector<core::SourceFile>& sou
     analyzeStructure(combined, options_);
     applySeverityOverrides(combined, options_);
     filterViolations(combined, sources, options_);
-    applyStandardProfile(combined, sources, options_);
+    applyStandardProfile(combined,sources,options_,frontendViews);
     std::ranges::sort(combined.violations, [](const Violation& a, const Violation& b) {
         return std::tie(a.file, a.line, a.column, a.ruleId) <
                std::tie(b.file, b.line, b.column, b.ruleId);

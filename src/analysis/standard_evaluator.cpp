@@ -12989,14 +12989,7 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
     // native input is a frontend AST. Raw physical-line predicates continue
     // to use source/tokens below. VHDL does not consume this Verilog branch.
     auto preprocessed = parser::preprocess(
-        source, {options.includeDirectories, options.defines});
-    if (expandedFrontend) {
-        // A failed macro/include expansion is not a proven AST input for any
-        // direct frontend-facing check. Physical-source checks keep their own
-        // input contract and do not consume this virtual source.
-        preprocessed.issues.insert(preprocessed.issues.end(),
-            expandedFrontend->issues.begin(),expandedFrontend->issues.end());
-    }
+        source, {options.includeDirectories, options.defines},expandedFrontend);
     const auto activeTokens = preprocessed.issues.empty()
         ? standardTokens(preprocessed.source) : std::vector<parser::HdlToken>{};
     if (expandedFrontend) {
@@ -17483,7 +17476,8 @@ void checkNativeVerilogCommentRatio(AnalysisResult& result,
 
 void applyStandardProfile(AnalysisResult& result,
                           std::span<const core::SourceFile> sources,
-                          const AnalysisOptions& options) {
+                          const AnalysisOptions& options,
+                          std::span<const parser::FrontendPreprocessorResult* const> frontendInputs) {
     if (options.standardId.empty() || options.countOnly) return;
     const auto profile = findStandardProfile(options.standardId);
     if (!profile) {
@@ -17510,18 +17504,15 @@ void applyStandardProfile(AnalysisResult& result,
         }
     }
 
-    // Each root retains its own configured translation unit until the native
-    // design/cache lifetime is proved. Reuse these exact expanded inputs for
-    // both the project owner index and the per-file naming checks.
-    std::vector<std::optional<parser::FrontendPreprocessorResult>> frontendInputs(sources.size());
+    // Reuse the analyzer's import session, including its exact source order and
+    // clear boundary. Never independently expand the same project twice.
     std::map<std::string,std::size_t> frontendModules;
     bool frontendModuleIndexKnown=true;
     if (profile->id == "GJB10157-2021") {
         for(std::size_t i=0;i<sources.size();++i) {
             if(!applicable(sources[i],profile->id)) continue;
-            auto& input=frontendInputs[i];
-            input=parser::expandFrontendSource(sources[i],{options.includeDirectories,options.defines});
-            if(!input->issues.empty()) { frontendModuleIndexKnown=false;continue; }
+            const auto* input=i<frontendInputs.size() ? frontendInputs[i] : nullptr;
+            if(!input || !input->issues.empty()) { frontendModuleIndexKnown=false;continue; }
             for(const auto& unit:parser::parseDesignUnits(input->source))
                 if(unit.kind==parser::DesignUnitKind::VerilogModule) ++frontendModules[unit.name];
         }
@@ -17532,7 +17523,7 @@ void applyStandardProfile(AnalysisResult& result,
         if (!applicable(source, profile->id)) continue;
         hasApplicableSource = true;
         directChecks(result, source, profile->id, options,
-            frontendInputs[i] ? &*frontendInputs[i] : nullptr,
+            i<frontendInputs.size() ? frontendInputs[i] : nullptr,
             frontendModules,frontendModuleIndexKnown);
     }
     if (profile->id == "GJB10157-2021")

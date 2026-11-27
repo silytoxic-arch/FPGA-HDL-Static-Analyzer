@@ -1045,7 +1045,13 @@ const confirmed = {
 for (const clause of ["GJB10157.5.2.1", "GJB10157.5.2.2", "GJB10157.5.2.3", "GJB10157.5.2.4", "GJB10157.5.2.6", "GJB10157.5.2.12", "GJB10157.5.2.15"]) {
   confirmed[clause].predicate += ' V1.4.251 observes read_hdl → read_verilog -sv without formal/nosynthesis flags, the native implicit SYNTHESIS=1 insertion and YOSYS constructor. Naming consumers reuse expanded roots to count module owners across files; only exactly-one groups enter the recovered selectors, including A-2-5. R-2-3 now consumes expanded declarations and preserves category configuration, syntax admission, message/severity and lexer-origin product locations. An expansion failure leaves global uniqueness unproved; no-match remains review-required.';
   confirmed[clause].evidence.push('docs/native_rule_recovery_pass133.md', ...["reverse-tools/evidence/t_linter_pass133/frontend_execute.txt#sha256=11a84a6ef0498ad07ae0ed6eddf624721a581c67257704f8e8e826ed1b615be9", "reverse-tools/evidence/t_linter_pass133/engine_call_abi.txt#sha256=c41f5fda52092afcc7dbcf2cd560beb0256307733f7dc0b84dfa88b80702f23f", "reverse-tools/evidence/t_linter_pass133/macro_constructor.txt#sha256=3159bf8d3dafcad17b6aec7f764d13265f7e1463a414f1e84146170551cb8ec3", "reverse-tools/evidence/t_linter_pass133/include_options.txt#sha256=df3dbdd71dcc69634b53dcd3d4a633ce2a7206ae5584bb570116ba0cb4089884", "reverse-tools/evidence/t_linter_pass133/read_hdl_command.txt#sha256=ff663435c3808a5daf002a3786ae49838b25df174273d6d5a912022641264cd3", "reverse-tools/evidence/t_linter_pass133/frontend_entry_refs.txt#sha256=3adb731a74b02fa61816503084c3ac4021a30b4135c1df66fcfd0c6be702df85", "reverse-tools/evidence/t_linter_pass133/macro_literal.txt#sha256=8d09c50dd016e00d2293cb16d8314e0557d3b37e9327176d7b0d18d723526eaa", "reverse-tools/evidence/t_linter_pass133/upstream_verilog_frontend.cc#sha256=03a17de60fa4ab60cb7c5900cd5331e9e586d735848a8c3e78fb810f9baa0028"]);
-  confirmed[clause].limitations += ' The new cross-root owner index is bounded parsing, not full native map/lowering equivalence. Each root still has a fresh macro cache: the native cache pointer alone does not establish its lifetime across public analyze calls. Alternate formal/nosynthesis modes, complete project AST and proprietary recovery/order remain unresolved.';
+  confirmed[clause].limitations += ' The new cross-root owner index is bounded parsing, not full native map/lowering equivalence. V1.4.251 used a fresh cache per root pending the public parser/clear lifetime evidence recovered in pass 134. Alternate formal/nosynthesis modes, complete project AST and proprietary recovery/order remain unresolved.';
+}
+// Pass 134: recovered public design/cache lifetime, applied per analysis.
+for (const clause of ["GJB10157.5.2.1", "GJB10157.5.2.2", "GJB10157.5.2.3", "GJB10157.5.2.4", "GJB10157.5.2.6", "GJB10157.5.2.12", "GJB10157.5.2.15"]) {
+  confirmed[clause].predicate += ' V1.4.252 recovers exported parserVerilogCode 180624370 forwarding commands into the shared design and exported clear 180622e60 clearing its +0x168 macro cache through 180942fc0. Phase1 saves the original design for scratch work; Phase2 restores it. Product maps each GJB10157 Analyzer call to one isolated import session, retaining explicit root/file-list order and source define/undef/resetall state across roots. Configured pre-defines are reapplied per root, then source cache entries take precedence. Generic projection receives the same initial defined-name set and authoritative directive issues; naming checks reuse the exact same expansions.';
+  confirmed[clause].evidence.push('docs/native_rule_recovery_pass134.md', ...["reverse-tools/evidence/t_linter_pass134/cache_clear.txt#sha256=8c3f49b75a63fbff80f504a8d103f8b24471fe4f8c2704c2877587067b1cc720", "reverse-tools/evidence/t_linter_pass134/design_refs.txt#sha256=c9ab3daa3746bdb98a49a9cba1e8f90f36438ea942ef88273a5ce8f61889ee31", "reverse-tools/evidence/t_linter_pass134/exports.json#sha256=3164318a4728ad4dfa2191b25747bffeec1d81728a66feccbadd722454fe750f", "reverse-tools/evidence/t_linter_pass134/extract_exports.py#sha256=d0ac7670c56b50db7c8d6b81d1c7e76c96e0faa16191130960c297170d04d7a4", "reverse-tools/evidence/t_linter_pass134/phase_designs.txt#sha256=720fd301ce651f9feaa35832adf7b0302c2911dda5fdcb4e2e94f453c7da8747", "reverse-tools/evidence/t_linter_pass134/public_clear.txt#sha256=a4d34797b4692dd18ac0d962a93f75768b5a43e1fcecf91d35e2f279b5ccd8db", "reverse-tools/evidence/t_linter_pass134/public_parser.txt#sha256=4ab037afc5903c339e9ea72ab5500251ee056e4f09b9d72e860486f1685e34d9"]);
+  confirmed[clause].limitations += ' Shared import-session cache and initial projection state are now integrated for the seven naming consumers. Remaining project helpers still construct independent legacy projections; within-file include macro effects in that projection, full structural/semantic AST, optional frontend modes, original GUI ordering, native error recovery and runtime parity are not complete. No finding remains review-required.';
 }
 // Preserve 14 previously verified native-core entries that predate this
 // generator's inline confirmed map. The baseline is a checked-in, SHA-bound
@@ -1214,7 +1220,7 @@ const rules = native.rules.map(rule => {
     entryObservation: clause === 'GJB10157.6.2.5' ? confirmed[clause].predicate : entryObservations[clause] ?? null,
     implementationMode: documented?.detector_mode ?? 'unknown',
     implementationSource: integrated ? (['GJB10157.5.2.1', 'GJB10157.5.2.2', 'GJB10157.5.2.3', 'GJB10157.5.2.4', 'GJB10157.5.2.6', 'GJB10157.5.2.12', 'GJB10157.5.2.15'].includes(clause) ?
-      'src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/standard_evaluator.cpp' : clause === 'GJB9765.4.10.h' ?
+      'src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/analyzer.cpp + src/analysis/standard_evaluator.cpp' : clause === 'GJB9765.4.10.h' ?
       'src/analysis/vhdl_clock_control.h + src/analysis/standard_evaluator.cpp' :
       clause === 'GJB9765.4.8.e' ?
       'src/analysis/vhdl_empty_statement.h + src/analysis/standard_evaluator.cpp' :
@@ -1493,13 +1499,13 @@ const rules = native.rules.map(rule => {
         release: 'docs/v1_4_87_release.md'
       }, 'GJB10157.5.2.15': {
         nativeFindings: 'docs/evidence/native_verilog_naming_case_5_2_15_configuration_findings.md',
-        release: 'docs/v1_4_251_release.md'
+        release: 'docs/v1_4_252_release.md'
       }, 'GJB10157.5.2.6': {
         nativeFindings: 'docs/evidence/native_verilog_case_only_names_5_2_6_findings.md',
-        release: 'docs/v1_4_251_release.md'
+        release: 'docs/v1_4_252_release.md'
       }, 'GJB10157.5.2.3': {
         nativeFindings: 'docs/evidence/native_verilog_keyword_5_2_3_findings.md',
-        release: 'docs/v1_4_251_release.md'
+        release: 'docs/v1_4_252_release.md'
       }, 'GJB10157.5.2.9': {
         nativeFindings: 'docs/evidence/native_verilog_positional_ports_5_2_9_findings.md',
         release: 'docs/v1_4_198_release.md'
@@ -1535,19 +1541,19 @@ const rules = native.rules.map(rule => {
         release: 'docs/v1_4_209_release.md'
       }, 'GJB10157.5.2.1': {
         nativeFindings: 'docs/evidence/native_verilog_naming_shape_preprocessing_findings.md',
-        release: 'docs/v1_4_251_release.md'
+        release: 'docs/v1_4_252_release.md'
       }, 'GJB10157.5.2.2': {
         nativeFindings: 'docs/evidence/native_verilog_underscore_5_2_2_findings.md',
-        release: 'docs/v1_4_251_release.md'
+        release: 'docs/v1_4_252_release.md'
       }, 'GJB10157.5.2.4': {
         nativeFindings: 'docs/evidence/native_verilog_power_names_5_2_4_findings.md',
-        release: 'docs/v1_4_251_release.md'
+        release: 'docs/v1_4_252_release.md'
       }, 'GJB10157.5.2.5': {
         nativeFindings: 'docs/evidence/native_verilog_module_per_file_5_2_5_findings.md',
         release: 'docs/v1_4_193_release.md'
       }, 'GJB10157.5.2.12': {
         nativeFindings: 'docs/evidence/native_verilog_name_length_5_2_12_findings.md',
-        release: 'docs/v1_4_251_release.md'
+        release: 'docs/v1_4_252_release.md'
       }, 'GJB10157.9.1.5': {
         nativeFindings: 'docs/evidence/native_verilog_structural_preprocessing_findings.md',
         release: 'docs/v1_4_14_release.md'

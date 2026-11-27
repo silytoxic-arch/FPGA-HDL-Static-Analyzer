@@ -80,7 +80,8 @@ struct ConditionalFrame {
 } // namespace
 
 PreprocessorResult preprocess(const core::SourceFile& source,
-                              const PreprocessorOptions& options) {
+                              const PreprocessorOptions& options,
+                              const FrontendPreprocessorResult* validatedFrontend) {
     if (source.language() == core::HdlLanguage::Vhdl) {
         return {source, {}};
     }
@@ -93,6 +94,10 @@ PreprocessorResult preprocess(const core::SourceFile& source,
         if (!name.empty()) {
             macros[name] = equals == std::string::npos ? "1" : definition.substr(equals + 1);
         }
+    }
+    if(validatedFrontend) {
+        macros.clear();
+        for(const auto& name:validatedFrontend->initialMacroNames) macros[name]="1";
     }
 
     std::unordered_set<std::size_t> directiveOffsets;
@@ -188,7 +193,11 @@ PreprocessorResult preprocess(const core::SourceFile& source,
         issues.push_back({"PP-UNCLOSED-CONDITIONAL",
                           "Conditional compilation block has no matching `endif", frame.location});
     }
-    if (frontendIncludeValidation) {
+    if (validatedFrontend) {
+        // Native expansion is authoritative for directive/include validity;
+        // do not run an isolated second engine with a different macro cache.
+        issues=validatedFrontend->issues;
+    } else if (frontendIncludeValidation) {
         const auto expanded=expandFrontendSource(source,options);
         issues.insert(issues.end(),expanded.issues.begin(),expanded.issues.end());
     }

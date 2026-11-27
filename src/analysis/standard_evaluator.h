@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/source.h"
+#include "parser/frontend_preprocessor.h"
 
 #include <span>
 #include <string_view>
@@ -13,7 +14,8 @@ enum class StandardRuleState;
 
 void applyStandardProfile(AnalysisResult& result,
                           std::span<const core::SourceFile> sources,
-                          const AnalysisOptions& options);
+                          const AnalysisOptions& options,
+                          std::span<const parser::FrontendPreprocessorResult* const> frontendInputs);
 
 [[nodiscard]] std::string_view standardRuleStateName(StandardRuleState state) noexcept;
 [[nodiscard]] bool hasAutomatedStandardDetector(std::string_view clauseId) noexcept;

@@ -14,6 +14,8 @@
 #include <string_view>
 #include <vector>
 
+namespace fpga::parser { struct FrontendPreprocessorResult; }
+
 namespace fpga::analysis {
 
 struct RuleSeverityOverride {
@@ -95,7 +97,8 @@ public:
 
 private:
     [[nodiscard]] AnalysisResult
-    analyzeSourceImpl(const core::SourceFile& source, bool runTimingRules) const;
+    analyzeSourceImpl(const core::SourceFile& source, bool runTimingRules,
+                      const parser::FrontendPreprocessorResult* frontend) const;
 
     AnalysisOptions options_;
 };

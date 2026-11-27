@@ -1,6 +1,7 @@
 #include "parser/frontend_preprocessor.h"
 #include "analysis/analyzer.h"
 #include "parser/design_parser.h"
+#include "project/file_list.h"
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -256,6 +257,129 @@ int main() {
                  "module shared;endmodule\nmodule unique_owner;parameter other_lower=1;endmodule\n");
     check(count(linted,"GJB10157.5.2.15")==1,
         "A-2-5 duplicate suppression preserves a different unique module and its own declaration selector");
+    parser::FrontendPreprocessorSession session;
+    const auto step=[&](std::string text,const parser::PreprocessorOptions& options=parser::PreprocessorOptions{}) {
+        return session.expand({root,core::HdlLanguage::SystemVerilog,std::move(text)},options);
+    };
+    out=step("`define SHARED_NAME from_first__\n`define SHARED_ACTIVE\n");
+    check(out.issues.empty(),"definition-only roots are valid session inputs");
+    out=step("`ifdef SHARED_ACTIVE\nmodule active;wire `SHARED_NAME;endmodule\n`else\nmodule inactive;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"from_first__")&&has(out,"active")&&!has(out,"inactive"),
+        "a later root consumes definitions and conditional state from the previous root");
+    check(std::find(out.initialMacroNames.begin(),out.initialMacroNames.end(),"SHARED_ACTIVE")!=out.initialMacroNames.end(),
+        "initial macro snapshot records the merged native defined-name set");
+    projected=parser::preprocess({root,core::HdlLanguage::SystemVerilog,
+        "`ifdef SHARED_ACTIVE\nmodule active;wire `SHARED_NAME;endmodule\n`else\nmodule inactive;endmodule\n`endif\n"},{},&out);
+    check(projected.issues.empty()&&projected.source.content().find("module active;")!=std::string::npos&&
+        projected.source.content().find("module inactive;")==std::string::npos,
+        "physical-position projection uses the same inherited branch configuration");
+    out=step("`define ID(x=default__) wire x;\n");
+    out=step("module m;`ID() endmodule\n");
+    check(out.issues.empty()&&has(out,"default__"),"function bodies and formal defaults survive into a later root");
+    out=step("`define JOIN(a,b) a``b\n");
+    out=step("module m;wire `JOIN(joined,__);endmodule\n");
+    check(out.issues.empty()&&has(out,"joined__"),"cached function macros preserve argument substitution and pasting");
+    out=step("`undef SHARED_NAME\n`undef SHARED_ACTIVE\n");
+    out=step("`ifdef SHARED_ACTIVE\nmodule inactive;endmodule\n`else\nmodule active;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"active")&&!has(out,"inactive"),"undef in one root updates the next root's cache");
+    out=step("module m;wire `SHARED_NAME;endmodule\n");
+    check(!out.issues.empty(),"an undefined cached body is not resurrected in the next root");
+    session.reset();
+    out=step("`ifdef SHARED_ACTIVE\nmodule inactive;endmodule\n`else\nmodule active;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"active")&&!has(out,"inactive"),"explicit reset clears session source definitions");
+    out=step("`define NAME from_cache__\n");
+    out=step("module m;wire `NAME;endmodule\n",{{},{"NAME=from_config"}});
+    check(out.issues.empty()&&has(out,"from_cache__")&&!has(out,"from_config"),"cached source definitions take precedence over configured pre-defines");
+    session.reset();
+    out=step("module first;endmodule\n",{{},{"CONFIG_ONLY"}});
+    out=step("`ifdef CONFIG_ONLY\nmodule inactive;endmodule\n`else\nmodule active;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"active")&&!has(out,"inactive"),"configured definitions are not silently persisted as source cache entries");
+    out=step("`undef CONFIG_ONLY\n",{{},{"CONFIG_ONLY"}});
+    out=step("`ifdef CONFIG_ONLY\nmodule active;endmodule\n`endif\n",{{},{"CONFIG_ONLY"}});
+    check(out.issues.empty()&&has(out,"active"),"the next read command reapplies its configured definitions after a prior source undef");
+    out=step("`define OLD_NAME old__\n`resetall\n");
+    out=step("`ifdef OLD_NAME\nmodule inactive;endmodule\n`else\nmodule active;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"active")&&!has(out,"inactive"),"resetall clears the shared cache for later roots");
+    out=step("`ifdef SYNTHESIS\nmodule active;endmodule\n`endif\n`ifdef YOSYS\nmodule tool_default;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"active")&&has(out,"tool_default"),"new read commands restore implicit defaults after resetall");
+    out=step("`define SYNTHESIS 0\n");
+    out=step("module m;localparam VALUE=`SYNTHESIS;endmodule\n");
+    check(out.issues.empty()&&has(out,"0")&&!has(out,"1"),"source-cached SYNTHESIS overrides the next command's implicit definition at cache merge");
+    session.reset();
+    out=step("module m;localparam VALUE=`YOSYS;endmodule\n",{{},{"YOSYS=0"}});
+    check(out.issues.empty()&&has(out,"0"),"a clear boundary does not inject an extra cache entry over an explicit configured YOSYS value");
+    out=step("`include \"defs.vh\"\n");
+    out=step("`ifdef ACTIVE\nmodule m;wire `NAME;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"from_header__"),"header definitions are retained across root boundaries");
+    session.reset();
+    {std::ofstream f(base/"once.vh");f<<"`ifndef ONCE_SESSION\n`define ONCE_SESSION\nmodule once_owner;wire SIGNAL;endmodule\n`endif\n";}
+    out=step("`include \"once.vh\"\n");
+    check(out.issues.empty()&&has(out,"once_owner"),"first session include enters a guarded header");
+    out=step("`include \"once.vh\"\n");
+    check(out.issues.empty()&&!has(out,"once_owner"),"a later root observes the previous include guard");
+    session.reset();
+    out=step("`include \"once.vh\"\n");
+    check(out.issues.empty()&&has(out,"once_owner"),"reset reopens include guards for a new import session");
+    out=step("`UNKNOWN\n");
+    check(!out.issues.empty(),"failed session expansion is visible");
+    session.reset();
+    out=step("module recovered;endmodule\n");
+    check(out.issues.empty()&&has(out,"recovered"),"reset after a failure leaves no stale token or macro state");
+    linted=multi("`define NAME SIGNAL\n","module second_owner;\nwire `NAME;\nendmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==1&&std::any_of(linted.violations.begin(),linted.violations.end(),[&](const auto& item){
+        return item.ruleId=="GJB10157.5.2.3"&&item.file==base/"other.sv"&&item.line==2&&item.column==1;
+    }),"cross-root cached macro declarations report the consuming source and line");
+    linted=multi("`define ACTIVE_PROJECT\n",
+        "`ifdef ACTIVE_PROJECT\nmodule active_owner;wire bad__;endmodule\n`else\nmodule inactive_owner;wire good_name;endmodule\n`endif\n");
+    check(count(linted,"GJB10157.5.2.2")==1&&std::any_of(linted.structure.begin(),linted.structure.end(),[](const auto& unit){return unit.name=="active_owner";})&&
+        std::none_of(linted.structure.begin(),linted.structure.end(),[](const auto& unit){return unit.name=="inactive_owner";}),
+        "generic structure and naming use the same inherited root-entry conditional state");
+    linted=multi("`define HEADER \"keyword.vh\"\n","module owner;\n`include `HEADER\nendmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==1&&std::none_of(linted.violations.begin(),linted.violations.end(),[](const auto& item){return item.ruleId.starts_with("PP-");}),
+        "macro include filenames from an earlier root are not revalidated in an isolated cache");
+    linted=multi("`include \"once.vh\"\n","`include \"once.vh\"\n");
+    check(count(linted,"GJB10157.5.2.3")==1,"project include guards prevent a fabricated duplicate-module group");
+    linted=multi("`define MAKE module shared;wire SIGNAL;endmodule\n",
+                 "`MAKE\n`MAKE\nmodule unique_owner;wire SIGNAL;endmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==1,"cached function-free module macros preserve duplicate exclusion and a unique sibling");
+    linted=multi("`define SHARED_NAME SIGNAL\n`undef SHARED_NAME\n","module second_owner;wire `SHARED_NAME;endmodule\n");
+    check(count(linted,"PP-FRONTEND-DIRECTIVE")>0&&count(linted,"GJB10157.5.2.3")==0,
+        "an undefined cross-root macro remains an unresolved project input");
+    linted=multi("module first_owner;wire `NAME;endmodule\n","`define NAME SIGNAL\n");
+    check(count(linted,"PP-FRONTEND-DIRECTIVE")>0&&count(linted,"GJB10157.5.2.3")==0,
+        "processing order is explicit; later definitions are not invented before use");
+    linted=lint("module standalone;wire `NAME;endmodule\n");
+    check(count(linted,"PP-FRONTEND-DIRECTIVE")>0,"a new Analyzer invocation cannot see the prior project's cache");
+    jobs.clear();
+    for(int i=0;i<8;++i) jobs.push_back(std::async(std::launch::async,[&,i] {
+        parser::FrontendPreprocessorSession privateSession;
+        const auto name="session_private_"+std::to_string(i);
+        auto first=privateSession.expand({root,core::HdlLanguage::SystemVerilog,"`define NAME "+name+"\n"});
+        const auto second=privateSession.expand({root,core::HdlLanguage::SystemVerilog,"module m;wire `NAME;endmodule\n"});
+        return first.issues.empty()&&second.issues.empty()&&has(second,name);
+    }));
+    for(auto& job:jobs) check(job.get(),"parallel project sessions preserve private caches across multiple calls");
+    const auto orderDir=base/"ordered_inputs";std::filesystem::create_directories(orderDir);
+    {std::ofstream f(orderDir/"z_defs.sv");f<<"`define ORDERED_NAME SIGNAL\n";}
+    {std::ofstream f(orderDir/"a_use.sv");f<<"module ordered_owner;wire `ORDERED_NAME;endmodule\n";}
+    analysis::AnalysisOptions orderedOptions;orderedOptions.standardId="GJB10157-2021";
+    linted=analysis::Analyzer(orderedOptions).analyzePaths({orderDir/"z_defs.sv",orderDir/"a_use.sv",orderDir/"z_defs.sv"});
+    check(count(linted,"GJB10157.5.2.3")==1&&linted.filesAnalyzed==2&&
+        std::none_of(linted.violations.begin(),linted.violations.end(),[](const auto& item){return item.ruleId.starts_with("PP-");}),
+        "path imports preserve explicit definition-before-use order and first occurrence deduplication");
+    linted=analysis::Analyzer(orderedOptions).analyzePaths({orderDir});
+    check(count(linted,"PP-FRONTEND-DIRECTIVE")>0&&count(linted,"GJB10157.5.2.3")==0,
+        "directory input remains deterministic path order, without inventing macro dependencies");
+    {std::ofstream f(orderDir/"ordered.f");f<<"z_defs.sv\na_use.sv\n";}
+    const auto listed=project::loadFileList(orderDir/"ordered.f");
+    linted=analysis::Analyzer(orderedOptions).analyzePaths(listed.inputs);
+    check(listed.errors.empty()&&count(linted,"GJB10157.5.2.3")==1,
+        "simulator file-list import retains definition-before-use order through the analyzer");
+    const analysis::Analyzer reusedAnalyzer(orderedOptions);
+    linted=reusedAnalyzer.analyzeSources({{root,core::HdlLanguage::SystemVerilog,"`define SHOULD_NOT_LEAK SIGNAL\n"}});
+    linted=reusedAnalyzer.analyzeSource({root,core::HdlLanguage::SystemVerilog,"module standalone;wire `SHOULD_NOT_LEAK;endmodule\n"});
+    check(count(linted,"PP-FRONTEND-DIRECTIVE")>0&&count(linted,"GJB10157.5.2.3")==0,
+        "even reuse of the same Analyzer object starts a fresh import session per call");
     std::cout<<checks<<" checks, "<<failures<<" failures\n";
     return failures?1:0;
 }

@@ -21,11 +21,18 @@ Host adaptation:
   reports with no column use column 1; exact physical macro columns/offsets are
   not inferred.
 
-Each expansion currently represents one explicitly configured translation unit.
-Default read_hdl defines YOSYS and SYNTHESIS; alternate formal/nosynthesis modes
-are not exposed. Project-wide shared macro caches, full Verilog parsing,
-and vendor changes outside the recovered paths remain unresolved. Naming
-clauses 5.2.1/.2/.3/.4/.6/.12/.15 consume this expanded input in this version; other
-rules are migrated only after their provenance/input contracts are checked.
+A frontend session models public parserVerilogCode calls sharing the design's
+macro cache until clear(). Each GJB10157 Analyzer invocation creates a private
+session and processes roots in supplied order. Configured definitions are
+reapplied on each root; source define/undef/resetall update the shared cache.
+Public clear and the save/scratch/restore rule-preparation boundary are retained
+in pass 134 evidence. Independent analyzer calls never share caches.
 
-See `docs/native_rule_recovery_pass132.md` and `THIRD_PARTY_NOTICES.md`.
+Default read_hdl defines YOSYS and SYNTHESIS; alternate formal/nosynthesis modes
+are not exposed. Naming clauses 5.2.1/.2/.3/.4/.6/.12/.15 consume expanded input.
+Generic physical-position projection receives the same initial defined-name
+snapshot and directive validation. Its within-file include effects, remaining
+structural/semantic models, full AST/lowering, optional frontends and vendor
+changes outside recovered paths remain unresolved.
+
+See `docs/native_rule_recovery_pass134.md` and `THIRD_PARTY_NOTICES.md`.

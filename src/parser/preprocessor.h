@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace fpga::parser {
+struct FrontendPreprocessorResult;
 
 struct PreprocessorOptions {
     std::vector<std::filesystem::path> includeDirectories;
@@ -27,7 +28,10 @@ struct PreprocessorResult {
 // Applies high-confidence Verilog conditional compilation while preserving
 // byte length and line positions. Include files are resolved and checked, but
 // are not textually injected into the returned source buffer.
+// A supplied validatedFrontend must be the result for this same original root;
+// it supplies its native session entry state and authoritative directive issues.
 [[nodiscard]] PreprocessorResult preprocess(
-    const core::SourceFile& source, const PreprocessorOptions& options = {});
+    const core::SourceFile& source, const PreprocessorOptions& options = {},
+    const FrontendPreprocessorResult* validatedFrontend = nullptr);
 
 } // namespace fpga::parser

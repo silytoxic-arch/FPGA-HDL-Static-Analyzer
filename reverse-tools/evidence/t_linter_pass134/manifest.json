@@ -1,0 +1,48 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "boundary": "Public commands reuse a design until clear. Phase1 saves the original and uses scratch; phase2 restores it. Product maps one Analyzer call to one isolated import session. GUI command order, optional frontends, full AST and runtime parity remain unproved.",
+  "files": [
+    {
+      "path": "cache_clear.txt",
+      "size": 395,
+      "sha256": "8c3f49b75a63fbff80f504a8d103f8b24471fe4f8c2704c2877587067b1cc720",
+      "role": "static native decompilation/reference evidence; no target execution"
+    },
+    {
+      "path": "design_refs.txt",
+      "size": 12672,
+      "sha256": "c9ab3daa3746bdb98a49a9cba1e8f90f36438ea942ef88273a5ce8f61889ee31",
+      "role": "static native decompilation/reference evidence; no target execution"
+    },
+    {
+      "path": "exports.json",
+      "size": 4754,
+      "sha256": "3164318a4728ad4dfa2191b25747bffeec1d81728a66feccbadd722454fe750f",
+      "role": "derived target export metadata"
+    },
+    {
+      "path": "extract_exports.py",
+      "size": 1692,
+      "sha256": "d0ac7670c56b50db7c8d6b81d1c7e76c96e0faa16191130960c297170d04d7a4",
+      "role": "read-only PE metadata extraction script"
+    },
+    {
+      "path": "phase_designs.txt",
+      "size": 30170,
+      "sha256": "720fd301ce651f9feaa35832adf7b0302c2911dda5fdcb4e2e94f453c7da8747",
+      "role": "static native decompilation/reference evidence; no target execution"
+    },
+    {
+      "path": "public_clear.txt",
+      "size": 13370,
+      "sha256": "a4d34797b4692dd18ac0d962a93f75768b5a43e1fcecf91d35e2f279b5ccd8db",
+      "role": "static native decompilation/reference evidence; no target execution"
+    },
+    {
+      "path": "public_parser.txt",
+      "size": 1687,
+      "sha256": "4ab037afc5903c339e9ea72ab5500251ee056e4f09b9d72e860486f1685e34d9",
+      "role": "static native decompilation/reference evidence; no target execution"
+    }
+  ]
+}
