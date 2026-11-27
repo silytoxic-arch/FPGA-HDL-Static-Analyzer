@@ -6753,7 +6753,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native run gathers AST_ALWAYS/AST_ASSIGN roots (0x52/0x4d), then AST_LOGIC_AND/OR/NOT descendants (0x45/0x46/0x47). FUN_180579d70 enumerates each operator's direct children and emits at the operator location when FUN_1808f4650 infers any child width greater than one; it then breaks, proving at most one diagnostic per logical operator. Instruction 0x18057a141 sets the fifth helper argument to zero before the call at 0x18057a157. Product applies the recovered bounded flag-zero arithmetic/concat/replicate/bitwise width model to direct children and treats a nested logical child result as one bit. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing.",
+      "predicate": "Native run gathers AST_ALWAYS/AST_ASSIGN roots (0x52/0x4d), then AST_LOGIC_AND/OR/NOT descendants (0x45/0x46/0x47). FUN_180579d70 enumerates each operator's direct children and emits at the operator location when FUN_1808f4650 infers any child width greater than one; it then breaks, proving at most one diagnostic per logical operator. Instruction 0x18057a141 sets the fifth helper argument to zero before the call at 0x18057a157. Product applies the recovered bounded flag-zero arithmetic/concat/replicate/bitwise width model to direct children and treats a nested logical child result as one bit. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing. V1.4.255 evaluates this bounded predicate on the immutable expanded root, with matching virtual module/token/width coordinates and reporting-only origin mapping. Vector logical and case-item width default parameters are admitted using named/positional override targets from all expanded roots; unavailable expanded roots cannot prove absence of overrides. Case-item unknown-selector versus unknown-item asymmetry remains unchanged.",
       "predicateEvidence": [
         "ev_025e8620d4259b128b7931578411d267230b470f26259611fa352340b7fd16b4",
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_8_asm.txt",
@@ -6769,7 +6769,14 @@
         "reverse-tools/evidence/t_linter_pass135/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
         "reverse-tools/evidence/t_linter_pass135/repro/comparison.json#sha256=a61bce044edf7f6a9bb2d49c018b74e073b92fd73dee1c0b171ce29c5b43faad",
         "reverse-tools/evidence/t_linter_pass135/repro/flags.vh#sha256=d08c6ee585ca128540fe5b001fec21ba10ab737d6c9400c72b4170bb88eafa5f",
-        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172"
+        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172",
+        "docs/native_rule_recovery_pass137.md",
+        "reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505",
+        "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694",
+        "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088",
+        "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -6795,8 +6802,9 @@
           "matched": true
         }
       ],
-      "limitations": "Exact source lowering, parameter overrides outside the known project, comparisons, functions, casts, dynamic selections, unsupported helper AST branches, macros/generate scopes and diagnostic ordering remain unresolved. Product admits a bounded fixed-width subset and known default P-1:0 parameterized ranges only; no finding remains ManualReviewRequired. No full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required.",
-      "sharedInputRelease": "docs/v1_4_253_release.md"
+      "limitations": "Exact source lowering, parameter overrides outside the known project, comparisons, functions, casts, dynamic selections, unsupported helper AST branches, macros/generate scopes and diagnostic ordering remain unresolved. Product admits a bounded fixed-width subset and known default P-1:0 parameterized ranges only; no finding remains ManualReviewRequired. No full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required. This input migration is not full proprietary AST elaboration or runtime equivalence. Override collection is limited to parser-recognized instances, and does not solve actual overridden values, defparam, external elaboration configuration, generated scopes or malformed recovery. Missing precision maps to column one; no alarm remains review-required.",
+      "sharedInputRelease": "docs/v1_4_253_release.md",
+      "expandedExpressionInputRelease": "docs/v1_4_255_release.md"
     },
     {
       "publicRuleId": "A-9-2",
@@ -7046,7 +7054,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 collects assignment-related AST types 0x56/0x55/0x4d and skips $para_assign and internal names containing $. It infers the LHS with FUN_1808f4650 flag zero. A non-ternary RHS is first inferred with flag zero; on mismatch it is inferred with flag one, and Warning survives only when both widths differ from the LHS. AST_TERNARY(0x48) true and false result children are compared independently with flag zero. In FUN_1808f46c0, recovered flag-one AST_MUL sums direct child widths and treats the first direct constant child decoded as value two as one bit; flag-zero AST_MUL takes the maximum. Product uses this dual-pass bounded model for fixed assignments and separate ternary branches. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing.",
+      "predicate": "Native slot 0 collects assignment-related AST types 0x56/0x55/0x4d and skips $para_assign and internal names containing $. It infers the LHS with FUN_1808f4650 flag zero. A non-ternary RHS is first inferred with flag zero; on mismatch it is inferred with flag one, and Warning survives only when both widths differ from the LHS. AST_TERNARY(0x48) true and false result children are compared independently with flag zero. In FUN_1808f46c0, recovered flag-one AST_MUL sums direct child widths and treats the first direct constant child decoded as value two as one bit; flag-zero AST_MUL takes the maximum. Product uses this dual-pass bounded model for fixed assignments and separate ternary branches. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing. V1.4.255 evaluates this bounded predicate on the immutable expanded root, with matching virtual module/token/width coordinates and reporting-only origin mapping. Vector logical and case-item width default parameters are admitted using named/positional override targets from all expanded roots; unavailable expanded roots cannot prove absence of overrides. Case-item unknown-selector versus unknown-item asymmetry remains unchanged.",
       "predicateEvidence": [
         "ev_ba7c5d2230d301bad7129b407ba296b167e5e1bd805b43f7d517d5fb85be2c25",
         "docs/native_rule_recovery_pass135.md",
@@ -7059,7 +7067,14 @@
         "reverse-tools/evidence/t_linter_pass135/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
         "reverse-tools/evidence/t_linter_pass135/repro/comparison.json#sha256=a61bce044edf7f6a9bb2d49c018b74e073b92fd73dee1c0b171ce29c5b43faad",
         "reverse-tools/evidence/t_linter_pass135/repro/flags.vh#sha256=d08c6ee585ca128540fe5b001fec21ba10ab737d6c9400c72b4170bb88eafa5f",
-        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172"
+        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172",
+        "docs/native_rule_recovery_pass137.md",
+        "reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505",
+        "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694",
+        "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088",
+        "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -7084,8 +7099,9 @@
           "matched": true
         }
       ],
-      "limitations": "Unknown-width -1 behavior, function calls, casts, dynamic selections, complete parameter/macro/generate expansion, delayed assignments, complex lvalues, frontend normalization, source locations and exact diagnostic multiplicity remain unresolved. Product supports fixed signals/selections/literals, concatenation/static replication, bitwise and bounded arithmetic trees after configured preprocessing; unsupported widths remain unknown. No alarm remains ManualReviewRequired and full native equivalence is not claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required.",
-      "sharedInputRelease": "docs/v1_4_253_release.md"
+      "limitations": "Unknown-width -1 behavior, function calls, casts, dynamic selections, complete parameter/macro/generate expansion, delayed assignments, complex lvalues, frontend normalization, source locations and exact diagnostic multiplicity remain unresolved. Product supports fixed signals/selections/literals, concatenation/static replication, bitwise and bounded arithmetic trees after configured preprocessing; unsupported widths remain unknown. No alarm remains ManualReviewRequired and full native equivalence is not claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required. This input migration is not full proprietary AST elaboration or runtime equivalence. Override collection is limited to parser-recognized instances, and does not solve actual overridden values, defparam, external elaboration configuration, generated scopes or malformed recovery. Missing precision maps to column one; no alarm remains review-required.",
+      "sharedInputRelease": "docs/v1_4_253_release.md",
+      "expandedExpressionInputRelease": "docs/v1_4_255_release.md"
     },
     {
       "publicRuleId": "R-10-3",
@@ -7595,7 +7611,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native collector FUN_180716130 admits nonempty AST_CASE(0x57) nodes only when byte +0x183 is zero, excluding the observed IF/ELSIF/ELSE-lowered CASE path. Slot 0 then accepts an AST_COND/CONDX/CONDZ(0x58..0x5a) child whose first child is AST_DEFAULT(0x5b), or whose sole child is AST_BLOCK(0x54); otherwise it emits one Warning at the CASE node. The Yosys parser source maps these two shapes to `default:` and the legal colonless `default <statement>` form. Product uses a dedicated conditionally preprocessed adapter for ordinary/casex/casez nodes and both source fallback forms. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing.",
+      "predicate": "Native collector FUN_180716130 admits nonempty AST_CASE(0x57) nodes only when byte +0x183 is zero, excluding the observed IF/ELSIF/ELSE-lowered CASE path. Slot 0 then accepts an AST_COND/CONDX/CONDZ(0x58..0x5a) child whose first child is AST_DEFAULT(0x5b), or whose sole child is AST_BLOCK(0x54); otherwise it emits one Warning at the CASE node. The Yosys parser source maps these two shapes to `default:` and the legal colonless `default <statement>` form. Product uses a dedicated conditionally preprocessed adapter for ordinary/casex/casez nodes and both source fallback forms. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing. V1.4.255 evaluates this bounded predicate on the immutable expanded root, with matching virtual module/token/width coordinates and reporting-only origin mapping. Vector logical and case-item width default parameters are admitted using named/positional override targets from all expanded roots; unavailable expanded roots cannot prove absence of overrides. Case-item unknown-selector versus unknown-item asymmetry remains unchanged.",
       "predicateEvidence": [
         "ev_e69cc1c5a34d9cccdde7754f61613b89544679ed77ae679a1ee94a84b9dff82c",
         "ev_8e1f2c6a9a8140cca8d40a38d0ea81fab5d70826fe87a63eb8e495f0b446e2ae",
@@ -7611,7 +7627,14 @@
         "reverse-tools/evidence/t_linter_pass135/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
         "reverse-tools/evidence/t_linter_pass135/repro/comparison.json#sha256=a61bce044edf7f6a9bb2d49c018b74e073b92fd73dee1c0b171ce29c5b43faad",
         "reverse-tools/evidence/t_linter_pass135/repro/flags.vh#sha256=d08c6ee585ca128540fe5b001fec21ba10ab737d6c9400c72b4170bb88eafa5f",
-        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172"
+        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172",
+        "docs/native_rule_recovery_pass137.md",
+        "reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505",
+        "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694",
+        "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088",
+        "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -7636,8 +7659,9 @@
           "matched": true
         }
       ],
-      "limitations": "The formal name of byte +0x183, exact embedded Yosys revision, generated/simplified CASE nodes, malformed-source recovery, macro-generated locations and native message text remain unresolved. Product skips preprocessing failures, checks lexical case/casez/casex only and leaves no-alarm results ManualReviewRequired; no full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required.",
-      "sharedInputRelease": "docs/v1_4_253_release.md"
+      "limitations": "The formal name of byte +0x183, exact embedded Yosys revision, generated/simplified CASE nodes, malformed-source recovery, macro-generated locations and native message text remain unresolved. Product skips preprocessing failures, checks lexical case/casez/casex only and leaves no-alarm results ManualReviewRequired; no full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required. This input migration is not full proprietary AST elaboration or runtime equivalence. Override collection is limited to parser-recognized instances, and does not solve actual overridden values, defparam, external elaboration configuration, generated scopes or malformed recovery. Missing precision maps to column one; no alarm remains review-required.",
+      "sharedInputRelease": "docs/v1_4_253_release.md",
+      "expandedExpressionInputRelease": "docs/v1_4_255_release.md"
     },
     {
       "publicRuleId": "A-11-4",
@@ -7920,7 +7944,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native FUN_180581c20 admits AST_CASE(0x57), calls FUN_1808f4650 with fifth argument zero for the selector and each non-block child of AST_COND(0x58), skips AST_DEFAULT(0x5b) groups and AST_BLOCK(0x54) children, and emits separately for every inferable unequal item. The item-side -1 result is skipped only after comparison; selector-side -1 is not gated and therefore differs from any known item. AST_CONDX/Z(0x59/0x5a) are not admitted. Product uses a dedicated conditionally preprocessed adapter with the recovered flag-zero expression subset, per-label and nested-case traversal, and the same asymmetric unknown gate. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing.",
+      "predicate": "Native FUN_180581c20 admits AST_CASE(0x57), calls FUN_1808f4650 with fifth argument zero for the selector and each non-block child of AST_COND(0x58), skips AST_DEFAULT(0x5b) groups and AST_BLOCK(0x54) children, and emits separately for every inferable unequal item. The item-side -1 result is skipped only after comparison; selector-side -1 is not gated and therefore differs from any known item. AST_CONDX/Z(0x59/0x5a) are not admitted. Product uses a dedicated conditionally preprocessed adapter with the recovered flag-zero expression subset, per-label and nested-case traversal, and the same asymmetric unknown gate. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing. V1.4.255 evaluates this bounded predicate on the immutable expanded root, with matching virtual module/token/width coordinates and reporting-only origin mapping. Vector logical and case-item width default parameters are admitted using named/positional override targets from all expanded roots; unavailable expanded roots cannot prove absence of overrides. Case-item unknown-selector versus unknown-item asymmetry remains unchanged.",
       "predicateEvidence": [
         "ev_0b09d6b91a21ca26dc7642b75c4a26bb857bd00e480582e0b34035a26f1fc69a",
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
@@ -7935,7 +7959,14 @@
         "reverse-tools/evidence/t_linter_pass135/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
         "reverse-tools/evidence/t_linter_pass135/repro/comparison.json#sha256=a61bce044edf7f6a9bb2d49c018b74e073b92fd73dee1c0b171ce29c5b43faad",
         "reverse-tools/evidence/t_linter_pass135/repro/flags.vh#sha256=d08c6ee585ca128540fe5b001fec21ba10ab737d6c9400c72b4170bb88eafa5f",
-        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172"
+        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172",
+        "docs/native_rule_recovery_pass137.md",
+        "reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505",
+        "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694",
+        "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088",
+        "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -7960,8 +7991,9 @@
           "matched": true
         }
       ],
-      "limitations": "Function-return widths, casts, dynamic selections, complete parameter/macro/generate elaboration, native frontend normalization, source locations and diagnostic de-duplication remain unresolved. Product does not guess unknown item widths; no-alarm results remain ManualReviewRequired and full native equivalence is not claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required.",
-      "sharedInputRelease": "docs/v1_4_253_release.md"
+      "limitations": "Function-return widths, casts, dynamic selections, complete parameter/macro/generate elaboration, native frontend normalization, source locations and diagnostic de-duplication remain unresolved. Product does not guess unknown item widths; no-alarm results remain ManualReviewRequired and full native equivalence is not claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required. This input migration is not full proprietary AST elaboration or runtime equivalence. Override collection is limited to parser-recognized instances, and does not solve actual overridden values, defparam, external elaboration configuration, generated scopes or malformed recovery. Missing precision maps to column one; no alarm remains review-required.",
+      "sharedInputRelease": "docs/v1_4_253_release.md",
+      "expandedExpressionInputRelease": "docs/v1_4_255_release.md"
     },
     {
       "publicRuleId": "R-11-4",
@@ -8280,7 +8312,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native FUN_180714dd0 gathers every label before AST_BLOCK/DEFAULT(0x54/0x5b) from AST_COND/CONDX/CONDZ(0x58..0x5a), then compares every label pair. Constant state byte 0x04 is a wildcard. Unequal widths compare shared low bytes and remain compatible unless an extra byte on the longer value is 0x01. Nonconstant labels compare exact node names. Every matching pair emits Warning at the later label. Product uses a dedicated conditionally preprocessed adapter with the recovered pairwise, wildcard and unequal-width rules. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing.",
+      "predicate": "Native FUN_180714dd0 gathers every label before AST_BLOCK/DEFAULT(0x54/0x5b) from AST_COND/CONDX/CONDZ(0x58..0x5a), then compares every label pair. Constant state byte 0x04 is a wildcard. Unequal widths compare shared low bytes and remain compatible unless an extra byte on the longer value is 0x01. Nonconstant labels compare exact node names. Every matching pair emits Warning at the later label. Product uses a dedicated conditionally preprocessed adapter with the recovered pairwise, wildcard and unequal-width rules. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing. V1.4.255 evaluates this bounded predicate on the immutable expanded root, with matching virtual module/token/width coordinates and reporting-only origin mapping. Vector logical and case-item width default parameters are admitted using named/positional override targets from all expanded roots; unavailable expanded roots cannot prove absence of overrides. Case-item unknown-selector versus unknown-item asymmetry remains unchanged.",
       "predicateEvidence": [
         "ev_2df0538f0bc68b70437ba5da70a47c50a5c70f900c63bb943a806baf7392318f",
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
@@ -8295,7 +8327,14 @@
         "reverse-tools/evidence/t_linter_pass135/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
         "reverse-tools/evidence/t_linter_pass135/repro/comparison.json#sha256=a61bce044edf7f6a9bb2d49c018b74e073b92fd73dee1c0b171ce29c5b43faad",
         "reverse-tools/evidence/t_linter_pass135/repro/flags.vh#sha256=d08c6ee585ca128540fe5b001fec21ba10ab737d6c9400c72b4170bb88eafa5f",
-        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172"
+        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172",
+        "docs/native_rule_recovery_pass137.md",
+        "reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505",
+        "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694",
+        "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088",
+        "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e",
+        "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -8320,8 +8359,9 @@
           "matched": true
         }
       ],
-      "limitations": "Parameter/localparam and constant-expression frontend folding, negative and very large decimal values, signed extension, the name field of complex nonconstant expressions, generated locations and exact message text remain unresolved. Product admits bounded literal forms and simple identifier labels only, skips unresolved preprocessing and leaves no-alarm results ManualReviewRequired; no full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required.",
-      "sharedInputRelease": "docs/v1_4_253_release.md"
+      "limitations": "Parameter/localparam and constant-expression frontend folding, negative and very large decimal values, signed extension, the name field of complex nonconstant expressions, generated locations and exact message text remain unresolved. Product admits bounded literal forms and simple identifier labels only, skips unresolved preprocessing and leaves no-alarm results ManualReviewRequired; no full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required. This input migration is not full proprietary AST elaboration or runtime equivalence. Override collection is limited to parser-recognized instances, and does not solve actual overridden values, defparam, external elaboration configuration, generated scopes or malformed recovery. Missing precision maps to column one; no alarm remains review-required.",
+      "sharedInputRelease": "docs/v1_4_253_release.md",
+      "expandedExpressionInputRelease": "docs/v1_4_255_release.md"
     },
     {
       "publicRuleId": "A-11-2",

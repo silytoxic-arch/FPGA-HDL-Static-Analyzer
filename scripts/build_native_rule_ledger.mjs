@@ -1207,6 +1207,13 @@ for (const clause of expandedCoreClauses) {
   confirmed[clause].evidence.push('docs/native_rule_recovery_pass136.md', ...["reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8", "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf", "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc", "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425", "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91", "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e", "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971", "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b", "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651", "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"]);
   confirmed[clause].limitations += ' Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.';
 }
+// Pass 137: bounded standard predicates consume expanded expression inputs.
+const expandedExpressionClauses=['GJB10157.8.8','GJB10157.9.1.2','GJB10157.9.2.1','GJB10157.9.2.7','GJB10157.9.2.3'];
+for(const clause of expandedExpressionClauses) {
+  confirmed[clause].predicate += ' V1.4.255 evaluates this bounded predicate on the immutable expanded root, with matching virtual module/token/width coordinates and reporting-only origin mapping. Vector logical and case-item width default parameters are admitted using named/positional override targets from all expanded roots; unavailable expanded roots cannot prove absence of overrides. Case-item unknown-selector versus unknown-item asymmetry remains unchanged.';
+  confirmed[clause].evidence.push('docs/native_rule_recovery_pass137.md', ...["reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505", "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694", "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088", "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13", "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e", "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"]);
+  confirmed[clause].limitations += ' This input migration is not full proprietary AST elaboration or runtime equivalence. Override collection is limited to parser-recognized instances, and does not solve actual overridden values, defparam, external elaboration configuration, generated scopes or malformed recovery. Missing precision maps to column one; no alarm remains review-required.';
+}
 const rules = native.rules.map(rule => {
   // Accept both the raw REA entry inventory and the previously generated
   // ledger as the stable native-entry source. This keeps checkpoint rebuilds
@@ -1630,6 +1637,11 @@ for (const row of rules) if (expandedCoreClauses.includes(row.clause)) {
   row.additionalTests=[...new Set([...tests,'tests/frontend_source_view_tests.cpp'])];
   row.expandedCoreInputRelease='docs/v1_4_254_release.md';
   row.expandedCoreInputSource='src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp';
+}
+for(const row of rules) if(expandedExpressionClauses.includes(row.clause)) {
+  const tests=Array.isArray(row.additionalTests)?row.additionalTests:row.additionalTests?[row.additionalTests]:[];
+  row.additionalTests=[...new Set([...tests,'tests/frontend_preprocessor_tests.cpp'])];
+  row.expandedExpressionInputRelease='docs/v1_4_255_release.md';
 }
 if (rules.length !== 209 || new Set(rules.map(rule => rule.clause)).size !== 209)
   throw new Error('Expected 209 unique GJB rules');

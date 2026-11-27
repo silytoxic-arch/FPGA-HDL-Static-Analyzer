@@ -1,0 +1,63 @@
+{
+  "boundary": "Product version comparison, not vendor runtime oracle; no vendor DLL execution.",
+  "baseline": "1.4.254 / 95ac48a175828a7a1447e8b6f65253600e33f28d",
+  "current": "1.4.255",
+  "cases": {
+    "literal": {
+      "before": {
+        "A-9-1": [
+          {
+            "line": 1,
+            "column": 64,
+            "message": "逻辑运算符 && 的已解析操作数是多位向量"
+          }
+        ]
+      },
+      "after": {
+        "A-9-1": [
+          {
+            "line": 1,
+            "column": 64,
+            "message": "逻辑运算符 && 的已解析操作数是多位向量"
+          }
+        ]
+      }
+    },
+    "macro": {
+      "before": {
+        "A-9-1": []
+      },
+      "after": {
+        "A-9-1": [
+          {
+            "line": 2,
+            "column": 1,
+            "message": "逻辑运算符 && 的已解析操作数是多位向量"
+          }
+        ]
+      }
+    },
+    "override_literal": {
+      "before": {
+        "A-9-1": []
+      },
+      "after": {
+        "A-9-1": []
+      }
+    },
+    "override_macro": {
+      "before": {
+        "A-9-1": [
+          {
+            "line": 1,
+            "column": 76,
+            "message": "逻辑运算符 && 的已解析操作数是多位向量"
+          }
+        ]
+      },
+      "after": {
+        "A-9-1": []
+      }
+    }
+  }
+}

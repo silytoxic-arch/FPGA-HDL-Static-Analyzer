@@ -440,6 +440,71 @@ int main() {
     linted=lint("`define OPEN `ifdef NEVER_DEFINED\n`OPEN\nmodule should_not_appear;wire bad__;endmodule\n`endif\n");
     check(linted.structure.empty()&&count(linted,"PP-FRONTEND-DIRECTIVE")>0,
         "a macro-generated conditional with no unique physical directive binding defers structure instead of selecting a guessed branch");
+
+    // Literal/macro/include metamorphic coverage for the migrated native-shaped adapters.
+    const std::vector<std::pair<std::string,std::string>> expandedCases{
+        {"GJB10157.8.8","module vec(input [3:0] a,b,output reg y);always @* y=a&&b;endmodule"},
+        {"GJB10157.9.1.2","module assign_width(input [3:0] a,output [1:0] y);assign y=a;endmodule"},
+        {"GJB10157.9.2.1","module fallback(input a,output reg y);always @* case(a) 1'b0:y=0;endcase endmodule"},
+        {"GJB10157.9.2.7","module overlap(input a,output reg y);always @* case(a) 1'b0:y=0;1'b0:y=1;default:y=0;endcase endmodule"},
+        {"GJB10157.9.2.3","module item_width(input [3:0] a,output reg y);always @* case(a) 1'b0:y=0;default:y=1;endcase endmodule"}
+    };
+    for(const auto& [rule,text]:expandedCases) {
+        const auto literal=lint(text+"\n");
+        const auto macro=lint("`define MAKE "+text+"\n`MAKE\n");
+        const auto nested=lint("`define ID(x) x\n`define MAKE "+text+"\n`ID(`MAKE)\n");
+        check(count(literal,rule)==1,"literal positive fixture has exactly one target diagnostic");
+        check(count(macro,rule)==count(literal,rule),"macro-generated complete module preserves predicate result");
+        check(count(nested,rule)==count(literal,rule),"nested function-like macro preserves predicate result");
+        for(const auto& violation:macro.violations) if(violation.ruleId==rule)
+            check(violation.file==root&&violation.line==2&&violation.column==1,
+                "expanded diagnostics map to macro invocation without invented columns");
+        {std::ofstream f(base/"rule_input.vh");f<<text<<'\n';}
+        const auto included=lint("`include \"rule_input.vh\"\n");
+        check(count(included,rule)==1,"included complete module is checked by expanded adapter");
+        for(const auto& violation:included.violations) if(violation.ruleId==rule)
+            check(violation.file==(base/"rule_input.vh")&&violation.line==1,
+                "included diagnostic retains header origin");
+        const auto inactive=lint("`ifdef NEVER_DEFINED\n"+text+"\n`endif\n");
+        check(count(inactive,rule)==0,"inactive generated-rule input stays excluded");
+    }
+    const std::vector<std::pair<std::string,std::string>> expandedNegativeCases{
+        {"GJB10157.8.8","module scalar(input a,b,output reg y);always @* y=a&&b;endmodule"},
+        {"GJB10157.9.1.2","module equal_width(input [3:0] a,output [3:0] y);assign y=a;endmodule"},
+        {"GJB10157.9.2.1","module fallback(input a,output reg y);always @* case(a) 1'b0:y=0;default:y=1;endcase endmodule"},
+        {"GJB10157.9.2.7","module disjoint(input a,output reg y);always @* case(a) 1'b0:y=0;1'b1:y=1;endcase endmodule"},
+        {"GJB10157.9.2.3","module equal_item(input [3:0] a,output reg y);always @* case(a) 4'b0000:y=0;default:y=1;endcase endmodule"}
+    };
+    for(const auto& [rule,text]:expandedNegativeCases) {
+        check(count(lint(text+"\n"),rule)==0,"literal negative fixture has no target diagnostic");
+        check(count(lint("`define MAKE "+text+"\n`MAKE\n"),rule)==0,
+            "macro-expanded negative fixture stays clear");
+    }
+    const std::string parameterChild="module child #(parameter P=4)(input [P-1:0] a,b,output reg y);always @* y=a&&b;endmodule\n";
+    const std::string caseChild="module child #(parameter P=1)(input [3:0] a,input [P-1:0] b,output reg y);always @* case(a) b:y=0;default:y=1;endcase endmodule\n";
+    analysis::AnalysisOptions projectOptions;projectOptions.standardId="GJB10157-2021";
+    for(const auto& [rule,child]:std::vector<std::pair<std::string,std::string>>{
+            {"GJB10157.8.8",parameterChild},{"GJB10157.9.2.3",caseChild}}) {
+        check(count(lint(child),rule)==1,"known default parameter width remains available");
+        for(const auto& overrideText:std::vector<std::string>{"#(.P(1))","#(1)"}) {
+            const std::string parent="module parent;child "+overrideText+" inst();endmodule";
+            check(count(lint(child+parent+"\n"),rule)==0,"literal overrides defer default-dependent width");
+            check(count(lint(child+"`define MAKE "+parent+"\n`MAKE\n"),rule)==0,
+                "macro parent overrides are included in default-parameter admission");
+            const auto cross=analysis::Analyzer(projectOptions).analyzeSources({
+                {root,core::HdlLanguage::SystemVerilog,child},
+                {base/"parent.sv",core::HdlLanguage::SystemVerilog,"`define MAKE "+parent+"\n`MAKE\n"}});
+            check(count(cross,rule)==0,"cross-file expanded overrides defer child defaults");
+        }
+        const auto incomplete=analysis::Analyzer(projectOptions).analyzeSources({
+            {root,core::HdlLanguage::SystemVerilog,child},
+            {base/"missing.sv",core::HdlLanguage::SystemVerilog,"`MISSING_MODULE\n"}});
+        check(count(incomplete,rule)==0&&count(incomplete,"PP-FRONTEND-DIRECTIVE")>0,
+            "failed imported root cannot prove absence of overrides");
+    }
+    linted=lint("`define MAKE module vec(input [3:0] a,b,output reg y);always @* y=a&&b;endmodule\n`line 73 \"logical.sv\" 0\n`MAKE\n");
+    check(std::ranges::any_of(linted.violations,[](const auto& v){return v.ruleId=="GJB10157.8.8"&&v.file=="logical.sv"&&v.line==73&&v.column==1;}),
+        "line directive uses logical report origin for expanded rule diagnostics");
     std::cout<<checks<<" checks, "<<failures<<" failures\n";
     return failures?1:0;
 }

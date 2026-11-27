@@ -1,0 +1,12 @@
+{
+  "pass": 137,
+  "files": [
+    "reverse-tools/evidence/t_linter_pass137/expanded_rule_adapters.patch#sha256=a3b44f3185e7305ecb63c91ad6f1ddfef0ef5153472b458d567fb0a2ca2b1505",
+    "reverse-tools/evidence/t_linter_pass137/repro/comparison.json#sha256=af099616e197ba6ea8acda8c1785a84da211769a0ccc1943c095823d72f87694",
+    "reverse-tools/evidence/t_linter_pass137/repro/literal.sv#sha256=85ae1e9780a1c232d4533a32d73c27f4bd0f1e78671448ae40ea0bdb72772088",
+    "reverse-tools/evidence/t_linter_pass137/repro/macro.sv#sha256=c8ad9a3298326d2a9e7a1b33883a384ebd0213329cc3f21ab8c285c1f3272b13",
+    "reverse-tools/evidence/t_linter_pass137/repro/override_literal.sv#sha256=1288fdefedb9983e200d3e5a71c83d1a01c02f7f2b174b36443396d23adc847e",
+    "reverse-tools/evidence/t_linter_pass137/repro/override_macro.sv#sha256=640aa751befe288d9ab18308d811315f46e872ec9add4c296dd3c4af0ba9495f"
+  ],
+  "boundary": "Product version comparison, not vendor runtime oracle; no vendor DLL execution."
+}

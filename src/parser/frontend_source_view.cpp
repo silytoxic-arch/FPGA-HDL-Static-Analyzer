@@ -42,6 +42,14 @@ core::SourceLocation FrontendSourceView::report(const core::SourceLocation& pars
     }
     return origin;
 }
+core::SourceLocation FrontendSourceView::report(std::size_t line,std::size_t column) const {
+    core::SourceLocation parsed{input().path(),line,column,0};
+    if(line>0 && line<=expandedLines_.size() && column>0 &&
+       column<=lineText(input().content(),expandedLines_,line).size()+1)
+        parsed.byteOffset=expandedLines_[line-1]+column-1;
+    return report(parsed);
+}
+
 void FrontendSourceView::reportProcess(SequentialProcessInfo& process) const {
     process.location=report(process.location);
     for(auto& reset:process.resets) reset.location=report(reset.location);

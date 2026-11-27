@@ -5,6 +5,7 @@
 #include "parser/design_parser.h"
 #include "parser/preprocessor.h"
 #include "parser/frontend_preprocessor.h"
+#include "parser/frontend_source_view.h"
 #include "parser/semantic_analyzer.h"
 #include "analysis/verilog_constant_expression.h"
 #include "analysis/native_verilog_integer.h"
@@ -65,6 +66,54 @@ parser::PreprocessorResult projectPreprocess(const core::SourceFile& source,
     const auto found=inputs.find(&source);
     return parser::preprocess(source,{options.includeDirectories,options.defines},
         found==inputs.end() ? nullptr : found->second);
+}
+
+// Project facts must come from the same immutable expanded roots as expressions.
+// An unavailable root cannot prove absence of a parameter override.
+struct ExpandedWidthProject {
+    bool inputsAvailable{true};
+    std::set<std::string> overridden;
+    ExpandedWidthProject(std::span<const core::SourceFile> sources,
+                         const FrontendInputMap& inputs) {
+        for (const auto& source : sources) {
+            if (source.language()!=core::HdlLanguage::Verilog &&
+                source.language()!=core::HdlLanguage::SystemVerilog) continue;
+            const auto found=inputs.find(&source);
+            if(found==inputs.end() || !found->second || !found->second->issues.empty()) {
+                inputsAvailable=false;
+                continue;
+            }
+            for(const auto& unit:parser::parseDesignUnits(found->second->source))
+                for(const auto& instance:unit.instances)
+                    if(instance.hasNamedParameterOverrides || instance.hasPositionalParameterOverrides)
+                        overridden.insert(instance.target);
+        }
+    }
+    bool allowDefaults(const std::string& name) const {
+        return inputsAvailable && !overridden.contains(name);
+    }
+};
+
+template<class Check>
+void forExpandedRuleRoots(AnalysisResult& result,
+    std::span<const core::SourceFile> sources, const FrontendInputMap& inputs, Check check) {
+    for(const auto& original:sources) {
+        if(original.language()!=core::HdlLanguage::Verilog &&
+           original.language()!=core::HdlLanguage::SystemVerilog) continue;
+        const auto found=inputs.find(&original);
+        if(found==inputs.end() || !found->second) continue;
+        const parser::FrontendSourceView view(original,*found->second);
+        if(!view.admitted()) continue;
+        const auto first=result.violations.size();
+        check(view.input());
+        for(auto at=first;at<result.violations.size();++at) {
+            auto& violation=result.violations[at];
+            const auto location=view.report(violation.line,violation.column);
+            violation.file=location.file;
+            violation.line=location.line;
+            violation.column=location.column;
+        }
+    }
 }
 
 struct DiagnosticMapping {
@@ -16166,22 +16215,15 @@ void checkNativeVerilogVectorLogical(AnalysisResult& result,
     // zero, so bounded arithmetic/concat/replicate children use the recovered
     // flag-zero width model. A nested logical child itself has width one.
     // ev_025e8620d4259b128b7931578411d267230b470f26259611fa352340b7fd16b4
-    for (const auto& source : sources) {
-        if (!applicable(source, "GJB10157-2021")) continue;
-        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
-        if (!preprocessed.issues.empty()) continue;
-        const auto tokens = standardTokens(preprocessed.source);
-        const auto units = parser::parseDesignUnits(preprocessed.source);
+    (void)options;
+    const ExpandedWidthProject project(sources,frontendInputs);
+    forExpandedRuleRoots(result,sources,frontendInputs,[&](const core::SourceFile& source) {
+        const auto tokens = standardTokens(source);
+        const auto units = parser::parseDesignUnits(source);
         for (const auto& unit : units) {
             if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
-            const bool overridden = std::ranges::any_of(result.structure, [&](const auto& parent) {
-                return std::ranges::any_of(parent.instances, [&](const auto& instance) {
-                    return instance.target == unit.name &&
-                        (instance.hasNamedParameterOverrides || instance.hasPositionalParameterOverrides);
-                });
-            });
             const auto model = fixedVerilogModuleWidthModel(
-                unit, preprocessed.source, tokens, !overridden);
+                unit, source, tokens, project.allowDefaults(unit.name));
             if (!model) continue;
             std::size_t body = model->begin + 2;
             int parentheses = 0;
@@ -16314,7 +16356,7 @@ void checkNativeVerilogVectorLogical(AnalysisResult& result,
                     analyzeLogical(analyzeLogical, island.first, island.second);
             }
         }
-    }
+    });
 }
 
 void checkNativeVerilogConditionWidths(AnalysisResult& result,
@@ -16442,15 +16484,13 @@ void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
     // independently with flag zero. The only recovered flag-one difference is
     // AST_MUL: it sums child widths instead of taking their maximum.
     // ev_ba7c5d2230d301bad7129b407ba296b167e5e1bd805b43f7d517d5fb85be2c25
-    for (const auto& source : sources) {
-        if (!applicable(source, "GJB10157-2021")) continue;
-        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
-        if (!preprocessed.issues.empty()) continue;
-        const auto tokens = standardTokens(preprocessed.source);
-        for (const auto& unit : parser::parseDesignUnits(preprocessed.source)) {
+    (void)options;
+    forExpandedRuleRoots(result,sources,frontendInputs,[&](const core::SourceFile& source) {
+        const auto tokens = standardTokens(source);
+        for (const auto& unit : parser::parseDesignUnits(source)) {
             if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
             const auto model = fixedVerilogModuleWidthModel(
-                unit, preprocessed.source, tokens);
+                unit, source, tokens);
             if (!model) continue;
             std::size_t body = model->begin + 2;
             int headerParens = 0;
@@ -16569,7 +16609,7 @@ void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
                         const auto width = fixedBoundedExpressionWidth(
                             *model, branches[branch].first, branches[branch].second, false);
                         if (!width || *width == *lhsWidth) continue;
-                        emit(result, "GJB10157.9.1.2", preprocessed.source,
+                        emit(result, "GJB10157.9.1.2", source,
                              tokens[branches[branch].first].line,
                              tokens[branches[branch].first].column,
                              std::string(branch == 0 ? "三目表达式真分支" : "三目表达式假分支") +
@@ -16584,7 +16624,7 @@ void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
                 const auto flagOne = fixedBoundedExpressionWidth(
                     *model, assignment + 1, *rhsLast, true);
                 if (!flagOne || *flagOne == *lhsWidth) continue;
-                emit(result, "GJB10157.9.1.2", preprocessed.source,
+                emit(result, "GJB10157.9.1.2", source,
                      tokens[assignment].line, tokens[assignment].column,
                      "赋值两侧位宽不一致：目标为 " +
                          std::to_string(*lhsWidth) + " 位，右值 flag-zero/flag-one 宽度为 " +
@@ -16592,7 +16632,7 @@ void checkNativeVerilogAssignmentWidths(AnalysisResult& result,
                          std::to_string(*flagOne) + " 位");
             }
         }
-    }
+    });
 }
 
 void checkNativeVerilogCaseFallback(AnalysisResult& result,
@@ -16608,11 +16648,9 @@ void checkNativeVerilogCaseFallback(AnalysisResult& result,
     // without a colon produces BLOCK alone. Emit once at each case node.
     // ev_e69cc1c5a34d9cccdde7754f61613b89544679ed77ae679a1ee94a84b9dff82c
     // ev_8e1f2c6a9a8140cca8d40a38d0ea81fab5d70826fe87a63eb8e495f0b446e2ae
-    for (const auto& source : sources) {
-        if (!applicable(source, "GJB10157-2021")) continue;
-        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
-        if (!preprocessed.issues.empty()) continue;
-        const auto tokens = standardTokens(preprocessed.source);
+    (void)options;
+    forExpandedRuleRoots(result,sources,frontendInputs,[&](const core::SourceFile& source) {
+        const auto tokens = standardTokens(source);
         for (std::size_t caseToken = 0; caseToken + 2 < tokens.size(); ++caseToken) {
             const auto& kind = tokens[caseToken].text;
             if ((kind != "case" && kind != "casez" && kind != "casex") ||
@@ -16663,12 +16701,12 @@ void checkNativeVerilogCaseFallback(AnalysisResult& result,
             }
             if (!fallback) {
                 const auto& token = tokens[caseToken];
-                emit(result, "GJB10157.9.2.1", preprocessed.source,
+                emit(result, "GJB10157.9.2.1", source,
                      token.line, token.column,
                      "case 语句缺少 default 回退分支");
             }
         }
-    }
+    });
 }
 
 struct NativeCaseOverlapLabel {
@@ -16794,11 +16832,9 @@ void checkNativeVerilogCaseOverlap(AnalysisResult& result,
     // Nonconstant labels use an exact name comparison. Each matching pair
     // emits at the later label; there is no first-match break.
     // ev_2df0538f0bc68b70437ba5da70a47c50a5c70f900c63bb943a806baf7392318f
-    for (const auto& source : sources) {
-        if (!applicable(source, "GJB10157-2021")) continue;
-        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
-        if (!preprocessed.issues.empty()) continue;
-        const auto tokens = standardTokens(preprocessed.source);
+    (void)options;
+    forExpandedRuleRoots(result,sources,frontendInputs,[&](const core::SourceFile& source) {
+        const auto tokens = standardTokens(source);
         for (std::size_t caseToken = 0; caseToken + 2 < tokens.size(); ++caseToken) {
             const auto& caseKind = tokens[caseToken].text;
             if ((caseKind != "case" && caseKind != "casez" && caseKind != "casex") ||
@@ -16861,7 +16897,7 @@ void checkNativeVerilogCaseOverlap(AnalysisResult& result,
                             for (const auto& previous : labels) {
                                 if (!nativeCaseLabelsOverlap(previous, *label)) continue;
                                 const auto& atToken = tokens[label->token];
-                                emit(result, "GJB10157.9.2.7", preprocessed.source,
+                                emit(result, "GJB10157.9.2.7", source,
                                      atToken.line, atToken.column,
                                      "case 选择项 " + label->display +
                                          " 与先前选择项 " + previous.display + "（第 " +
@@ -16878,7 +16914,7 @@ void checkNativeVerilogCaseOverlap(AnalysisResult& result,
                 cursor = next > *colon + 1 ? next : *colon + 1;
             }
         }
-    }
+    });
 }
 
 void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
@@ -16893,23 +16929,16 @@ void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
     // AST_DEFAULT(0x5b) groups and AST_BLOCK(0x54) children are excluded.
     // Static instruction evidence: 0x180581ef4, 0x180581f22-0x180581f55,
     // 0x180581f83-0x180581fbd.
-    for (const auto& source : sources) {
-        if (!applicable(source, "GJB10157-2021")) continue;
-        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
-        if (!preprocessed.issues.empty()) continue;
-        const auto tokens = standardTokens(preprocessed.source);
-        const auto units = parser::parseDesignUnits(preprocessed.source);
-        std::set<std::string> parameterOverriddenTargets;
-        for (const auto& parent : units)
-            for (const auto& instance : parent.instances)
-                if (instance.hasNamedParameterOverrides ||
-                    instance.hasPositionalParameterOverrides)
-                    parameterOverriddenTargets.insert(instance.target);
+    (void)options;
+    const ExpandedWidthProject project(sources,frontendInputs);
+    forExpandedRuleRoots(result,sources,frontendInputs,[&](const core::SourceFile& source) {
+        const auto tokens = standardTokens(source);
+        const auto units = parser::parseDesignUnits(source);
         for (const auto& unit : units) {
             if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
             const auto model = fixedVerilogModuleWidthModel(
-                unit, preprocessed.source, tokens,
-                !parameterOverriddenTargets.contains(unit.name));
+                unit, source, tokens,
+                project.allowDefaults(unit.name));
             if (!model) continue;
 
             const auto skipBalanced = [&](std::size_t open,
@@ -17077,7 +17106,7 @@ void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
                                     const auto selectorText = selectorWidth
                                         ? std::to_string(*selectorWidth) + " 位"
                                         : std::string("未知宽度（原生值 -1）");
-                                    emit(result, "GJB10157.9.2.3", preprocessed.source,
+                                    emit(result, "GJB10157.9.2.3", source,
                                          tokens[label].line, tokens[label].column,
                                          "case 选择项为 " + std::to_string(*itemWidth) +
                                              " 位，选择器为" + selectorText);
@@ -17092,7 +17121,7 @@ void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
                 }
             }
         }
-    }
+    });
 }
 
 void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,

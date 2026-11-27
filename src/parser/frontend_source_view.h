@@ -12,6 +12,7 @@ public:
     [[nodiscard]] const core::SourceFile& input() const { return frontend_.source; }
     [[nodiscard]] bool admitted() const { return frontend_.issues.empty(); }
     [[nodiscard]] core::SourceLocation report(const core::SourceLocation& parsed) const;
+    [[nodiscard]] core::SourceLocation report(std::size_t line, std::size_t column) const;
     [[nodiscard]] DesignUnitInfo report(DesignUnitInfo parsed) const;
     [[nodiscard]] UnitTimingInfo report(UnitTimingInfo parsed) const;
 private:
