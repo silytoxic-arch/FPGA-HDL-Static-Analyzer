@@ -1,0 +1,818 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2143a44..9e585e0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ cmake_minimum_required(VERSION 3.24)
+-project(FPGAAnalyzer VERSION 1.4.253 LANGUAGES CXX)
++project(FPGAAnalyzer VERSION 1.4.254 LANGUAGES CXX)
+ 
+ set(CMAKE_CXX_STANDARD 20)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+@@ -31,6 +31,7 @@ add_library(fpga_core STATIC
+     src/parser/design_parser.cpp
+     src/parser/preprocessor.cpp
+     src/parser/frontend_preprocessor.cpp
++    src/parser/frontend_source_view.cpp
+     src/parser/vendor/yosys_preproc.cpp
+     src/parser/semantic_analyzer.cpp
+     src/parser/timing_analyzer.cpp
+diff --git a/src/analysis/analyzer.cpp b/src/analysis/analyzer.cpp
+index 7440e4b..33b1b3f 100644
+--- a/src/analysis/analyzer.cpp
++++ b/src/analysis/analyzer.cpp
+@@ -3,6 +3,8 @@
+ #include "analysis/standard_evaluator.h"
+ #include "analysis/standard_profiles.h"
+ #include "parser/frontend_preprocessor.h"
++#include "parser/frontend_source_view.h"
++#include "core/source_text.h"
+ #include <array>
+ #include "parser/preprocessor.h"
+ #include "parser/semantic_analyzer.h"
+@@ -134,11 +136,11 @@ void applySeverityOverrides(AnalysisResult& result, const AnalysisOptions& optio
+     }
+ }
+ 
+-void filterViolations(AnalysisResult& result, const std::vector<core::SourceFile>& sources,
++void filterViolations(AnalysisResult& result, std::span<const core::SourceFile* const> sources,
+                       const AnalysisOptions& options) {
+     // Splitting a large generated netlist once per diagnostic made waiver
+     // filtering proportional to source-size * findings. Cache within this
+-    // call only, preserving first matching source and existing waiver rules.
++    // call only, using the proven source text and existing waiver rules.
+     struct WaiverSource {
+         std::vector<Line> lines;
+         std::vector<std::size_t> fileDirectiveLines;
+@@ -146,18 +148,18 @@ void filterViolations(AnalysisResult& result, const std::vector<core::SourceFile
+     std::unordered_map<const core::SourceFile*, WaiverSource> waiverSources;
+     const auto suppressed = [&](const Violation& violation) {
+         if (globallyDisabled(violation.ruleId, options)) return true;
+-        const auto source = std::ranges::find_if(sources, [&](const core::SourceFile& candidate) {
+-            return candidate.path().lexically_normal() == violation.file.lexically_normal();
++        const auto source = std::ranges::find_if(sources, [&](const core::SourceFile* candidate) {
++            return candidate->path().lexically_normal() == violation.file.lexically_normal();
+         });
+         if (source == sources.end()) return false;
+-        auto cached = waiverSources.find(&*source);
++        auto cached = waiverSources.find(*source);
+         if (cached == waiverSources.end()) {
+             WaiverSource entry;
+-            entry.lines = splitLines(source->content());
++            entry.lines = splitLines((*source)->content());
+             for (std::size_t i = 0; i < entry.lines.size(); ++i)
+                 if (entry.lines[i].text.find("fpga-lint-disable-file") != std::string::npos)
+                     entry.fileDirectiveLines.push_back(i);
+-            cached = waiverSources.emplace(&*source, std::move(entry)).first;
++            cached = waiverSources.emplace(*source, std::move(entry)).first;
+         }
+         const auto& lines = cached->second.lines;
+         if (std::ranges::any_of(cached->second.fileDirectiveLines, [&](std::size_t line) {
+@@ -176,6 +178,32 @@ void filterViolations(AnalysisResult& result, const std::vector<core::SourceFile
+     result.suppressedViolations += before - result.violations.size();
+ }
+ 
++// Match waivers against immutable consumed text. Ambiguous same-path snapshots
++// cannot prove a suppression; never reread a potentially changed include file.
++std::vector<const core::SourceFile*> waiverInputViews(std::span<const core::SourceFile> roots,
++    std::span<const parser::FrontendPreprocessorResult* const> frontends) {
++    std::map<std::filesystem::path,const core::SourceFile*> views;
++    std::set<std::filesystem::path> ambiguous;
++    const auto add=[&](const core::SourceFile& source) {
++        const auto key=source.path().lexically_normal();
++        if(ambiguous.contains(key)) return;
++        const auto [found,inserted]=views.emplace(key,&source);
++        if(!inserted && !core::sameLineEndingText(found->second->content(),source.content())) {
++            views.erase(found);ambiguous.insert(key);
++        }
++    };
++    for(const auto& root:roots) add(root);
++    for(const auto* frontend:frontends) if(frontend) {
++        for(const auto& source:frontend->includedSources) add(source);
++        for(const auto& path:frontend->ambiguousInputFiles) {
++            const auto key=path.lexically_normal();views.erase(key);ambiguous.insert(key);
++        }
++    }
++    std::vector<const core::SourceFile*> result;
++    for(const auto& [path,source]:views) {static_cast<void>(path);result.push_back(source);}
++    return result;
++}
++
+ void analyzeCommon(const core::SourceFile& source, const std::vector<Line>& lines,
+                    AnalysisResult& result) {
+     for (const auto& line : lines) {
+@@ -950,13 +978,12 @@ void mergeTimingInfo(AnalysisResult& result, parser::UnitTimingInfo timing) {
+     }
+ }
+ 
+-// Expand once, in the caller's source order, for the native Verilog profile.
++// Expand Verilog once in the caller's source order, for generic and standard analysis.
+ // Every later consumer receives the same immutable per-root result.
+ std::vector<std::optional<parser::FrontendPreprocessorResult>> prepareFrontendInputs(
+     std::span<const core::SourceFile> sources,const AnalysisOptions& options) {
+     std::vector<std::optional<parser::FrontendPreprocessorResult>> inputs(sources.size());
+-    const auto profile=findStandardProfile(options.standardId);
+-    if(options.countOnly || !profile || profile->id!="GJB10157-2021") return inputs;
++    if(options.countOnly) return inputs;
+     parser::FrontendPreprocessorSession session;
+     for(std::size_t i=0;i<sources.size();++i) {
+         if(sources[i].language()!=core::HdlLanguage::Verilog &&
+@@ -995,7 +1022,8 @@ AnalysisResult Analyzer::analyzeSource(const core::SourceFile& source) const {
+ 
+ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
+                                            bool runTimingRules,
+-                                           const parser::FrontendPreprocessorResult* frontend) const {
++                                           const parser::FrontendPreprocessorResult* frontend,
++                                           std::vector<parser::DesignUnitInfo>* sourceBoundStructure) const {
+     AnalysisResult result;
+     result.severityOverrides = options_.severityOverrides;
+     result.standardId = options_.standardId;
+@@ -1011,10 +1039,36 @@ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
+     if (options_.countOnly) return result;
+     const auto preprocessed = parser::preprocess(
+         source, {options_.includeDirectories, options_.defines},frontend);
+-    result.structure = parser::parseDesignUnits(preprocessed.source);
+-    for (auto& timing : parser::extractTimingInfo(preprocessed.source)) {
+-        mergeTimingInfo(result, std::move(timing));
++    const auto profile=findStandardProfile(options_.standardId);
++    const bool needsSourceBound=profile && profile->id=="GJB10157-2021";
++    AnalysisResult boundModel;
++    if(!frontend || needsSourceBound) {
++        boundModel.structure=parser::parseDesignUnits(preprocessed.source);
++        for(auto& timing:parser::extractTimingInfo(preprocessed.source)) mergeTimingInfo(boundModel,std::move(timing));
++    }
++    std::vector<parser::DesignUnitInfo> boundUnits;
++    std::optional<parser::FrontendSourceView> sourceView;
++    const core::SourceFile* modelInput=&preprocessed.source;
++    bool modelAdmitted=preprocessed.issues.empty();
++    if(frontend) {
++        sourceView.emplace(source,*frontend);
++        modelInput=&sourceView->input();
++        modelAdmitted=sourceView->admitted();
++        if(modelAdmitted) {
++            // Merge while positions are still virtual: separate expanded
++            // processes can later report on the same physical invocation line.
++            result.structure=parser::parseDesignUnits(*modelInput);
++            for(auto& timing:parser::extractTimingInfo(*modelInput)) mergeTimingInfo(result,std::move(timing));
++            for(auto& unit:result.structure) unit=sourceView->report(std::move(unit));
++        }
++        boundUnits=std::move(boundModel.structure);
++    } else {
++        result.structure=std::move(boundModel.structure);
++        if(needsSourceBound) boundUnits=result.structure;
+     }
++    if(sourceBoundStructure)
++        sourceBoundStructure->insert(sourceBoundStructure->end(),
++            std::make_move_iterator(boundUnits.begin()),std::make_move_iterator(boundUnits.end()));
+     if (runTimingRules) {
+         analyzeTimingConsistency(result);
+         analyzeUnusedAsynchronousResets(result);
+@@ -1023,32 +1077,42 @@ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
+         analyzeResetDomainCrossings(result);
+     }
+     result.designUnits = result.structure.size();
+-    for (const auto& issue : preprocessed.issues) {
++    const auto& preprocessingIssues=frontend && !needsSourceBound && frontend->issues.empty()
++        ? frontend->issues : preprocessed.issues;
++    for (const auto& issue : preprocessingIssues) {
+         addViolation(result, issue.ruleId, Severity::Error, issue.message,
+                      "The HDL preprocessor could not resolve the source configuration reliably.",
+                      "Correct the directive or configure the required macro/include directory.",
+                      issue.location.file, issue.location.line, issue.location.column);
+     }
+-    for (const auto& issue : parser::checkSyntax(preprocessed.source)) {
++    const bool physicalSyntaxFallback=frontend && !modelAdmitted &&
++        std::ranges::none_of(parser::tokenize(source),[](const auto& token){return token.text=="`";});
++    const auto syntaxIssues=modelAdmitted ? parser::checkSyntax(*modelInput) :
++        physicalSyntaxFallback ? parser::checkSyntax(source) : std::vector<parser::SyntaxIssue>{};
++    for (const auto& issue : syntaxIssues) {
++        const auto at=sourceView && !physicalSyntaxFallback ? sourceView->report(issue.location) : issue.location;
+         addViolation(result, issue.ruleId, Severity::Error, issue.message,
+                      "The HDL source is structurally malformed, so later lint results may be incomplete.",
+                      "Correct the source syntax at this location and run the analyzer again.",
+-                     issue.location.file, issue.location.line, issue.location.column);
++                     at.file, at.line, at.column);
+     }
+-    for (const auto& issue : parser::analyzeSemantics(preprocessed.source)) {
++    const auto semanticIssues=modelAdmitted ? parser::analyzeSemantics(*modelInput) : std::vector<parser::SemanticIssue>{};
++    for (const auto& issue : semanticIssues) {
++        const auto at=sourceView ? sourceView->report(issue.location) : issue.location;
+         const auto definition = findRule(issue.ruleId);
+         const auto severity = definition ? definition->severity : Severity::Warning;
+         addViolation(result, issue.ruleId, severity, issue.message,
+-                     issue.description, issue.recommendation, issue.location.file,
+-                     issue.location.line, issue.location.column, issue.designUnit, issue.signal);
++                     issue.description, issue.recommendation, at.file,
++                     at.line, at.column, issue.designUnit, issue.signal);
+     }
+     const auto rawLines = splitLines(source.content());
+     analyzeCommon(source, rawLines, result);
+     applySeverityOverrides(result, options_);
+-    filterViolations(result, {source}, options_);
++    const std::array<const parser::FrontendPreprocessorResult*,1> inputs{frontend};
++    const auto waiverViews=waiverInputViews(std::span<const core::SourceFile>(&source,1),inputs);
++    filterViolations(result,waiverViews,options_);
+     if (runTimingRules) {
+-        const std::array<const parser::FrontendPreprocessorResult*,1> inputs{frontend};
+-        applyStandardProfile(result,std::span<const core::SourceFile>(&source,1),options_,inputs);
++        applyStandardProfile(result,std::span<const core::SourceFile>(&source,1),options_,inputs,std::move(boundUnits));
+     }
+     std::ranges::sort(result.violations, [](const Violation& a, const Violation& b) {
+         return std::tie(a.file, a.line, a.column, a.ruleId) <
+@@ -1119,10 +1183,11 @@ AnalysisResult Analyzer::analyzeSources(const std::vector<core::SourceFile>& sou
+     std::vector<const parser::FrontendPreprocessorResult*> frontendViews;
+     frontendViews.reserve(sources.size());
+     for(const auto& input:frontendInputs) frontendViews.push_back(input ? &*input : nullptr);
++    std::vector<parser::DesignUnitInfo> sourceBoundStructure;
+     std::vector<core::SourceFile> preprocessedVhdlSources;
+     for (std::size_t index=0;index<sources.size();++index) {
+         const auto& source=sources[index];
+-        auto result = analyzeSourceImpl(source,false,frontendViews[index]);
++        auto result = analyzeSourceImpl(source,false,frontendViews[index],&sourceBoundStructure);
+         combined.filesAnalyzed += result.filesAnalyzed;
+         for (const auto& file : result.lineStatistics.files) combined.lineStatistics.append(file);
+         combined.designUnits += result.designUnits;
+@@ -1163,9 +1228,15 @@ AnalysisResult Analyzer::analyzeSources(const std::vector<core::SourceFile>& sou
+     }
+     combined.designUnits = combined.structure.size();
+     analyzeStructure(combined, options_);
++    // Resolve the physical-source adapter model in the same project scope;
++    // these binding facts are separate from its discarded generic findings.
++    AnalysisResult boundProject;
++    boundProject.structure=std::move(sourceBoundStructure);
++    analyzeStructure(boundProject,options_);
+     applySeverityOverrides(combined, options_);
+-    filterViolations(combined, sources, options_);
+-    applyStandardProfile(combined,sources,options_,frontendViews);
++    const auto waiverViews=waiverInputViews(sources,frontendViews);
++    filterViolations(combined,waiverViews,options_);
++    applyStandardProfile(combined,sources,options_,frontendViews,std::move(boundProject.structure));
+     std::ranges::sort(combined.violations, [](const Violation& a, const Violation& b) {
+         return std::tie(a.file, a.line, a.column, a.ruleId) <
+                std::tie(b.file, b.line, b.column, b.ruleId);
+diff --git a/src/analysis/analyzer.h b/src/analysis/analyzer.h
+index ff4b5e1..315d892 100644
+--- a/src/analysis/analyzer.h
++++ b/src/analysis/analyzer.h
+@@ -98,7 +98,8 @@ public:
+ private:
+     [[nodiscard]] AnalysisResult
+     analyzeSourceImpl(const core::SourceFile& source, bool runTimingRules,
+-                      const parser::FrontendPreprocessorResult* frontend) const;
++                      const parser::FrontendPreprocessorResult* frontend,
++                      std::vector<parser::DesignUnitInfo>* sourceBoundStructure=nullptr) const;
+ 
+     AnalysisOptions options_;
+ };
+diff --git a/src/analysis/standard_evaluator.cpp b/src/analysis/standard_evaluator.cpp
+index e714ac1..bf03c90 100644
+--- a/src/analysis/standard_evaluator.cpp
++++ b/src/analysis/standard_evaluator.cpp
+@@ -17482,7 +17482,7 @@ void checkNativeVerilogCommentRatio(AnalysisResult& result,
+                    "该工程代码注释率小于20%");
+ }
+ 
+-void applyStandardProfile(AnalysisResult& result,
++static void evaluateStandardProfile(AnalysisResult& result,
+                           std::span<const core::SourceFile> sources,
+                           const AnalysisOptions& options,
+                           std::span<const parser::FrontendPreprocessorResult* const> frontendInputs) {
+@@ -17771,4 +17771,26 @@ void applyStandardProfile(AnalysisResult& result,
+     }
+ }
+ 
++// Existing physical-source adapters may only consume their source-bound
++// model. Expanded core diagnostics have already been computed and mapped;
++// do not feed their mapped byte offsets back into those legacy token models.
++void applyStandardProfile(AnalysisResult& result,std::span<const core::SourceFile> sources,
++    const AnalysisOptions& options,
++    std::span<const parser::FrontendPreprocessorResult* const> frontendInputs,
++    std::vector<parser::DesignUnitInfo> sourceBoundStructure) {
++    const auto profile=findStandardProfile(options.standardId);
++    if(!profile || profile->id!="GJB10157-2021") {
++        evaluateStandardProfile(result,sources,options,frontendInputs);
++        return;
++    }
++    AnalysisResult evaluation;
++    evaluation.structure=std::move(sourceBoundStructure);
++    evaluation.violations=std::move(result.violations);
++    evaluation.errors=std::move(result.errors);
++    evaluateStandardProfile(evaluation,sources,options,frontendInputs);
++    result.violations=std::move(evaluation.violations);
++    result.errors=std::move(evaluation.errors);
++    result.standardAssessments=std::move(evaluation.standardAssessments);
++}
++
+ } // namespace fpga::analysis
+diff --git a/src/analysis/standard_evaluator.h b/src/analysis/standard_evaluator.h
+index f9b3d60..2acf2a1 100644
+--- a/src/analysis/standard_evaluator.h
++++ b/src/analysis/standard_evaluator.h
+@@ -2,6 +2,7 @@
+ 
+ #include "core/source.h"
+ #include "parser/frontend_preprocessor.h"
++#include "parser/design_parser.h"
+ 
+ #include <span>
+ #include <string_view>
+@@ -15,7 +16,8 @@ enum class StandardRuleState;
+ void applyStandardProfile(AnalysisResult& result,
+                           std::span<const core::SourceFile> sources,
+                           const AnalysisOptions& options,
+-                          std::span<const parser::FrontendPreprocessorResult* const> frontendInputs);
++                          std::span<const parser::FrontendPreprocessorResult* const> frontendInputs,
++                          std::vector<parser::DesignUnitInfo> sourceBoundStructure);
+ 
+ [[nodiscard]] std::string_view standardRuleStateName(StandardRuleState state) noexcept;
+ [[nodiscard]] bool hasAutomatedStandardDetector(std::string_view clauseId) noexcept;
+diff --git a/src/parser/frontend_preprocessor.cpp b/src/parser/frontend_preprocessor.cpp
+index da3a086..ad7b71f 100644
+--- a/src/parser/frontend_preprocessor.cpp
++++ b/src/parser/frontend_preprocessor.cpp
+@@ -180,7 +180,7 @@ core::SourceLocation FrontendPreprocessorResult::origin(std::size_t virtualLine)
+ }
+ FrontendPreprocessorResult FrontendPreprocessorSession::expand(
+     const core::SourceFile& source,const PreprocessorOptions& options,const FrontendPreprocessorLimits& limits) {
+-    FrontendPreprocessorResult result{source,{},{},{},{},{}};
++    FrontendPreprocessorResult result{source,{},{},{},{},{},{},{}};
+     if(source.language()==core::HdlLanguage::Vhdl || source.language()==core::HdlLanguage::Unknown) {
+         result.issues.push_back({"PP-FRONTEND-LANGUAGE","该展开器仅接受 Verilog/SystemVerilog。",{source.path(),0,1,0}});return result;
+     }
+@@ -214,6 +214,13 @@ FrontendPreprocessorResult FrontendPreprocessorSession::expand(
+         std::istringstream input(source.content());
+         auto expanded=vendorpp::frontend_verilog_preproc(input,utf8(source.path()),configured,state_->cache,directories);
+         for(const auto& file:vendorpp::yosys_input_files) result.includedFiles.push_back(vendorpp::path_from_utf8(file));
++        for(auto& [file,text]:vendorpp::budget.inputSnapshots) {
++            const auto path=vendorpp::path_from_utf8(file);
++            if(path.lexically_normal()!=source.path().lexically_normal() && !vendorpp::budget.unstableSnapshots.contains(file))
++                result.includedSources.emplace_back(path,source.language(),std::move(text));
++        }
++        for(const auto& file:vendorpp::budget.unstableSnapshots)
++            result.ambiguousInputFiles.push_back(vendorpp::path_from_utf8(file));
+         mapExpanded(result,std::move(expanded));
+     } catch(const vendorpp::Failure& error) {
+         result.issues.push_back({"PP-FRONTEND-EXPANSION","宏或包含文件展开失败："+failureText(error.what()),
+diff --git a/src/parser/frontend_preprocessor.h b/src/parser/frontend_preprocessor.h
+index 26b4466..3541090 100644
+--- a/src/parser/frontend_preprocessor.h
++++ b/src/parser/frontend_preprocessor.h
+@@ -30,6 +30,10 @@ struct FrontendPreprocessorResult {
+     // physical-position projection uses presence only, never guessed bodies.
+     std::vector<std::string> initialMacroNames;
+     std::vector<FrontendConditionalDecision> conditionalDecisions;
++    // Immutable text actually consumed by the engine; used for include-file
++    // waivers, not guessed disk byte offsets. Conflicting snapshots are omitted.
++    std::vector<core::SourceFile> includedSources;
++    std::vector<std::filesystem::path> ambiguousInputFiles;
+     [[nodiscard]] core::SourceLocation origin(std::size_t virtualLine) const;
+ };
+ // One native-style design import session. Source defines/undef/resetall update
+diff --git a/src/parser/preprocessor.cpp b/src/parser/preprocessor.cpp
+index 7079d0f..6c72746 100644
+--- a/src/parser/preprocessor.cpp
++++ b/src/parser/preprocessor.cpp
+@@ -107,8 +107,14 @@ PreprocessorResult preprocess(const core::SourceFile& source,
+     bool projectionUnproved=false;
+ 
+     std::unordered_set<std::size_t> directiveOffsets;
+-    for (const auto& token:tokenize(source))
+-        if (token.text=="`") directiveOffsets.insert(token.offset);
++    const auto rawTokens=tokenize(source);
++    bool conditionalOnly=true;
++    for (std::size_t i=0;i<rawTokens.size();++i) if(rawTokens[i].text=="`") {
++        directiveOffsets.insert(rawTokens[i].offset);
++        const auto name=i+1<rawTokens.size() ? rawTokens[i+1].text : std::string{};
++        if(name!="ifdef" && name!="ifndef" && name!="elsif" && name!="else" && name!="endif")
++            conditionalOnly=false;
++    }
+     bool frontendIncludeValidation=false;
+     std::vector<PreprocessorIssue> issues;
+     std::vector<ConditionalFrame> conditionals;
+@@ -211,10 +217,16 @@ PreprocessorResult preprocess(const core::SourceFile& source,
+     if (validatedFrontend) {
+         // Native expansion is authoritative for directive/include validity;
+         // do not run an isolated second engine with a different macro cache.
++        std::vector<PreprocessorIssue> physicalConditionalIssues;
++        if(!validatedFrontend->issues.empty() && conditionalOnly)
++            for(const auto& item:issues)
++                if(item.ruleId=="PP-UNEXPECTED-DIRECTIVE" || item.ruleId=="PP-UNCLOSED-CONDITIONAL")
++                    physicalConditionalIssues.push_back(item);
+         issues=validatedFrontend->issues;
++        issues.insert(issues.end(),physicalConditionalIssues.begin(),physicalConditionalIssues.end());
+         if(issues.empty() && (projectionUnproved || !decisions.empty())) {
+             issues.push_back({"PP-FRONTEND-DIRECTIVE",
+-                "条件编译位置无法可靠对应原文件，请复核设计结构。",{source.path(),0,1,0}});
++                "部分规则的条件编译位置无法可靠对应原文件，请复核相关规则结果。",{source.path(),0,1,0}});
+             output=blank(std::move(output));
+         }
+     } else if (frontendIncludeValidation) {
+diff --git a/src/parser/vendor/preprocessor_support.h b/src/parser/vendor/preprocessor_support.h
+index 667a767..0dd8acf 100644
+--- a/src/parser/vendor/preprocessor_support.h
++++ b/src/parser/vendor/preprocessor_support.h
+@@ -1,4 +1,5 @@
+ #pragma once
++#include "core/source_text.h"
+ // Standalone host bridge for the ISC-licensed Yosys preprocessor. No RTLIL,
+ // target DLL, vendor runtime or global application state is linked here.
+ #include <algorithm>
+@@ -30,6 +31,8 @@ struct Budget {
+         maxOutputBytes{64*1024*1024}, maxInputBytes{64*1024*1024}, maxIncludeDepth{128}, maxMacroRestoreDepth{256};
+     std::string current_file;
+     std::vector<ConditionalEvent> conditionalEvents;
++    std::map<std::string,std::string> inputSnapshots;
++    std::set<std::string> unstableSnapshots;
+ };
+ inline thread_local Budget budget;
+ inline thread_local std::set<std::string> yosys_input_files;
+diff --git a/src/parser/vendor/yosys_preproc.cpp b/src/parser/vendor/yosys_preproc.cpp
+index ab8fbc9..960a4aa 100644
+--- a/src/parser/vendor/yosys_preproc.cpp
++++ b/src/parser/vendor/yosys_preproc.cpp
+@@ -393,6 +393,7 @@ void define_map_t::log() const
+ static void input_file(std::istream &f, std::string filename)
+ {
+ 	check_input_file(filename);
++	std::string snapshot;
+ 	char buffer[513];
+ 	int rc;
+ 
+@@ -403,8 +404,14 @@ static void input_file(std::istream &f, std::string filename)
+ 	while ((rc = readsome(f, buffer, sizeof(buffer)-1)) > 0) {
+ 		buffer[rc] = 0;
+ 		check_input_bytes(static_cast<size_t>(rc), buffer);
++		snapshot.append(buffer, static_cast<size_t>(rc));
+ 		input_buffer.insert(it, buffer);
+ 	}
++	const auto encoded = path_from_utf8(filename).lexically_normal().generic_u8string();
++	const std::string snapshotKey(reinterpret_cast<const char*>(encoded.data()), encoded.size());
++	const auto previous = budget.inputSnapshots.find(snapshotKey);
++	if (previous == budget.inputSnapshots.end()) budget.inputSnapshots.emplace(snapshotKey, std::move(snapshot));
++	else if (!fpga::core::sameLineEndingText(previous->second, snapshot)) budget.unstableSnapshots.insert(snapshotKey);
+ 	input_buffer.insert(it, "\n`file_pop\n");
+ }
+ 
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 30b3c65..cfc86cf 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -539,3 +539,7 @@ endif()
+ add_executable(fpga_frontend_preprocessor_tests frontend_preprocessor_tests.cpp)
+ target_link_libraries(fpga_frontend_preprocessor_tests PRIVATE fpga_core fpga_build_options)
+ add_test(NAME frontend_preprocessor_unit COMMAND fpga_frontend_preprocessor_tests)
++
++add_executable(fpga_frontend_source_view_tests frontend_source_view_tests.cpp)
++target_link_libraries(fpga_frontend_source_view_tests PRIVATE fpga_core fpga_build_options)
++add_test(NAME frontend_source_view_unit COMMAND fpga_frontend_source_view_tests)
+diff --git a/tests/frontend_preprocessor_tests.cpp b/tests/frontend_preprocessor_tests.cpp
+index 813f4ed..b3c7a80 100644
+--- a/tests/frontend_preprocessor_tests.cpp
++++ b/tests/frontend_preprocessor_tests.cpp
+@@ -412,10 +412,13 @@ int main() {
+     check(out.issues.empty()&&out.conditionalDecisions[0].physical.file==root&&out.conditionalDecisions[0].physical.line==3,
+         "line directives do not replace the physical identity used by conditional projection");
+     linted=lint(aliased);
+-    check(linted.structure.size()==1&&linted.structure.front().location.file==root&&linted.structure.front().location.line==4&&
++    projected=parser::preprocess({root,core::HdlLanguage::SystemVerilog,aliased},{},&out);
++    const auto physicalUnits=parser::parseDesignUnits(projected.source);
++    check(physicalUnits.size()==1&&physicalUnits.front().location.file==root&&physicalUnits.front().location.line==4&&
++        linted.structure.size()==1&&linted.structure.front().location.file=="logical.sv"&&linted.structure.front().location.line==202&&
+         std::any_of(linted.violations.begin(),linted.violations.end(),[](const auto& item){
+             return item.ruleId=="GJB10157.5.2.2"&&item.file=="logical.sv"&&item.line==202;
+-        }),"physical structure and logical lexer report locations remain distinct after line directives");
++        }),"physical adapter projection and expanded model report coordinates remain distinct after line directives");
+     out=run("`define ID(x) x\nmodule m;\nwire `ID(\nname\n);\n`ifdef SYNTHESIS\nwire other;\n`endif\nendmodule\n");
+     check(out.issues.empty()&&out.conditionalDecisions.size()==2&&out.conditionalDecisions[0].physical.line==6&&
+         out.conditionalDecisions[1].physical.line==8,"multiline macro arguments do not shift later physical conditional decisions");
+diff --git a/src/core/source_text.h b/src/core/source_text.h
+new file mode 100644
+index 0000000..18c36a4
+--- /dev/null
++++ b/src/core/source_text.h
+@@ -0,0 +1,21 @@
++#pragma once
++#include <string_view>
++
++namespace fpga::core {
++// The Windows include stream normalizes CRLF while in-memory roots retain
++// their original bytes. Compare exact text modulo that host line convention.
++inline bool sameLineEndingText(std::string_view left,std::string_view right) {
++    std::size_t l=0,r=0;
++    const auto next=[](std::string_view text,std::size_t& offset) {
++        if(offset<text.size() && text[offset]=='\r' &&
++           (offset+1==text.size() || text[offset+1]=='\n')) ++offset;
++        if(offset==text.size()) return -1;
++        return static_cast<int>(static_cast<unsigned char>(text[offset++]));
++    };
++    while(true) {
++        const auto a=next(left,l),b=next(right,r);
++        if(a!=b) return false;
++        if(a==-1) return true;
++    }
++}
++} // namespace fpga::core
+diff --git a/src/parser/frontend_source_view.h b/src/parser/frontend_source_view.h
+new file mode 100644
+index 0000000..a0a29a5
+--- /dev/null
++++ b/src/parser/frontend_source_view.h
+@@ -0,0 +1,23 @@
++#pragma once
++#include "parser/frontend_preprocessor.h"
++#include "parser/semantic_analyzer.h"
++
++namespace fpga::parser {
++// Parsed locations belong to input(). Reporting produces separate values;
++// callers must not use reported byte offsets to index the expanded text.
++class FrontendSourceView {
++public:
++    FrontendSourceView(const core::SourceFile& original,
++                       const FrontendPreprocessorResult& frontend);
++    [[nodiscard]] const core::SourceFile& input() const { return frontend_.source; }
++    [[nodiscard]] bool admitted() const { return frontend_.issues.empty(); }
++    [[nodiscard]] core::SourceLocation report(const core::SourceLocation& parsed) const;
++    [[nodiscard]] DesignUnitInfo report(DesignUnitInfo parsed) const;
++    [[nodiscard]] UnitTimingInfo report(UnitTimingInfo parsed) const;
++private:
++    void reportProcess(SequentialProcessInfo& process) const;
++    const core::SourceFile& original_;
++    const FrontendPreprocessorResult& frontend_;
++    std::vector<std::size_t> originalLines_, expandedLines_;
++};
++} // namespace fpga::parser
+diff --git a/src/parser/frontend_source_view.cpp b/src/parser/frontend_source_view.cpp
+new file mode 100644
+index 0000000..852024b
+--- /dev/null
++++ b/src/parser/frontend_source_view.cpp
+@@ -0,0 +1,78 @@
++#include "parser/frontend_source_view.h"
++#include <string_view>
++
++namespace fpga::parser {
++namespace {
++std::vector<std::size_t> lineStarts(const std::string& text) {
++    std::vector<std::size_t> starts{0};
++    for(std::size_t i=0;i<text.size();++i) if(text[i]=='\n') starts.push_back(i+1);
++    return starts;
++}
++std::string_view lineText(const std::string& text,const std::vector<std::size_t>& starts,
++                          std::size_t line) {
++    if(line==0 || line>starts.size()) return {};
++    const auto begin=starts[line-1];
++    auto end=line<starts.size() ? starts[line]-1 : text.size();
++    if(end>begin && text[end-1]=='\r') --end;
++    return std::string_view(text).substr(begin,end-begin);
++}
++}
++FrontendSourceView::FrontendSourceView(const core::SourceFile& original,
++    const FrontendPreprocessorResult& frontend):original_(original),frontend_(frontend),
++    originalLines_(lineStarts(original.content())),expandedLines_(lineStarts(frontend.source.content())) {}
++
++core::SourceLocation FrontendSourceView::report(const core::SourceLocation& parsed) const {
++    if(parsed.file.empty() || parsed.file.lexically_normal()!=input().path().lexically_normal()) return parsed;
++    auto origin=frontend_.origin(parsed.line);
++    for(const auto& file:frontend_.ambiguousInputFiles)
++        if(file.lexically_normal()==origin.file.lexically_normal()) return origin;
++    // Equality of whole lines plus the parser's own offset/column agreement is
++    // a bounded proof of unchanged literal coordinates. Macro/include/line
++    // origins without that proof retain the established column 1/offset 0.
++    if(origin.file.lexically_normal()==original_.path().lexically_normal() &&
++       origin.line>0 && origin.line<=originalLines_.size() &&
++       parsed.line>0 && parsed.line<=expandedLines_.size()) {
++        const auto original=lineText(original_.content(),originalLines_,origin.line);
++        const auto expanded=lineText(input().content(),expandedLines_,parsed.line);
++        if(original==expanded && parsed.column>0 && parsed.column<=expanded.size()+1 &&
++           parsed.byteOffset==expandedLines_[parsed.line-1]+parsed.column-1) {
++            origin.column=parsed.column;
++            origin.byteOffset=originalLines_[origin.line-1]+parsed.column-1;
++        }
++    }
++    return origin;
++}
++void FrontendSourceView::reportProcess(SequentialProcessInfo& process) const {
++    process.location=report(process.location);
++    for(auto& reset:process.resets) reset.location=report(reset.location);
++    for(auto& event:process.clockEvents) event.location=report(event.location);
++}
++DesignUnitInfo FrontendSourceView::report(DesignUnitInfo unit) const {
++    unit.location=report(unit.location);
++    for(auto& instance:unit.instances) {
++        instance.location=report(instance.location);
++        for(auto& connection:instance.namedConnections) {
++            connection.location=report(connection.location);
++            connection.actualLocation=report(connection.actualLocation);
++        }
++        for(auto& connection:instance.positionalConnections) connection.location=report(connection.location);
++        for(auto& parameter:instance.namedParameterOverrides) parameter.location=report(parameter.location);
++    }
++    for(auto& port:unit.ports) port.location=report(port.location);
++    for(auto& parameter:unit.parameters) parameter.location=report(parameter.location);
++    for(auto& duplicate:unit.duplicatePortDeclarations) duplicate.location=report(duplicate.location);
++    for(auto& duplicate:unit.duplicateParameterDeclarations) duplicate.location=report(duplicate.location);
++    for(auto& clock:unit.clocks) clock.location=report(clock.location);
++    for(auto& reset:unit.resets) reset.location=report(reset.location);
++    for(auto& process:unit.sequentialProcesses) reportProcess(process);
++    for(auto& synchronizer:unit.cdcSynchronizers) synchronizer.location=report(synchronizer.location);
++    for(auto& transfer:unit.simpleSignalTransfers) transfer.location=report(transfer.location);
++    return unit;
++}
++UnitTimingInfo FrontendSourceView::report(UnitTimingInfo timing) const {
++    for(auto& clock:timing.clocks) clock.location=report(clock.location);
++    for(auto& reset:timing.resets) reset.location=report(reset.location);
++    for(auto& process:timing.sequentialProcesses) reportProcess(process);
++    return timing;
++}
++} // namespace fpga::parser
+diff --git a/tests/frontend_source_view_tests.cpp b/tests/frontend_source_view_tests.cpp
+new file mode 100644
+index 0000000..4417b9d
+--- /dev/null
++++ b/tests/frontend_source_view_tests.cpp
+@@ -0,0 +1,185 @@
++#include "parser/frontend_source_view.h"
++#include "analysis/analyzer.h"
++#include <algorithm>
++#include <chrono>
++#include <fstream>
++#include <iostream>
++
++int main() {
++    using namespace fpga;
++    int checks=0,failures=0;
++    const auto check=[&](bool okay,const char* label) {++checks;if(!okay){++failures;std::cerr<<"FAIL "<<label<<'\n';}};
++    const auto base=std::filesystem::temp_directory_path()/
++        ("fpga-source-view-"+std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
++    std::filesystem::create_directories(base);
++    struct Cleanup {std::filesystem::path path;~Cleanup(){std::error_code ec;std::filesystem::remove_all(path,ec);}} cleanup{base};
++    const auto count=[](const auto& result,std::string_view rule) {
++        return std::count_if(result.violations.begin(),result.violations.end(),[&](const auto& item){return item.ruleId==rule;});
++    };
++    const core::SourceFile literal(base/"literal.sv",core::HdlLanguage::SystemVerilog,
++        "module literal_owner(input a,output y);\r\nassign y=a;\r\nendmodule\r\n");
++    const auto expanded=parser::expandFrontendSource(literal);
++    const parser::FrontendSourceView view(literal,expanded);
++    const auto parsed=parser::parseDesignUnits(view.input());
++    check(view.admitted()&&parsed.size()==1,"a literal root is admitted through the typed expanded view");
++    if(parsed.size()!=1) return 1;
++    const auto reported=view.report(parsed.front());
++    check(reported.location.file==literal.path()&&reported.location.line==1&&reported.location.column==8&&
++          reported.location.byteOffset==literal.content().find("literal_owner"),"literal module coordinates retain the original precise column and byte offset");
++    check(parsed.front().location.byteOffset!=reported.location.byteOffset&&parsed.front().location.line!=reported.location.line,
++          "report mapping does not overwrite the retained virtual parse coordinates");
++    check(reported.ports.size()==2&&reported.ports[0].location.byteOffset==literal.content().find("a,output"),
++          "nested literal port locations use original text offsets");
++    for(const auto& issue:parser::analyzeSemantics(view.input())) {
++        const auto at=view.report(issue.location);
++        check(at.file==literal.path()&&at.line>0,"semantic issue locations resolve through the typed source view");
++    }
++    const core::SourceFile macro(base/"macro.sv",core::HdlLanguage::SystemVerilog,
++        "`define MAKE module macro_owner(input clk,input d,output reg q);always @(posedge clk) q<=d;endmodule\n`MAKE\n");
++    auto result=analysis::Analyzer().analyzeSource(macro);
++    check(result.designUnits==1&&result.structure.size()==1,"generic analysis reports a macro-generated module instead of an empty design");
++    if(result.structure.size()!=1) return 1;
++    const auto& unit=result.structure.front();
++    check(unit.name=="macro_owner"&&unit.ports.size()==3&&unit.clocks.size()==1&&unit.sequentialProcesses.size()==1,
++          "macro-generated ports, clocks and sequential processes enter the actual analysis result");
++    if(unit.ports.size()!=3 || unit.clocks.size()!=1 || unit.sequentialProcesses.size()!=1) return 1;
++    check(unit.location.file==macro.path()&&unit.location.line==2&&unit.location.column==1&&unit.location.byteOffset==0,
++          "macro-generated locations retain invocation line and explicitly unknown physical offset");
++    check(unit.ports[0].location.line==2&&unit.clocks[0].location.line==2&&unit.sequentialProcesses[0].location.line==2,
++          "nested model locations map independently to the invocation");
++    check(unit.sequentialProcesses[0].clock=="clk"&&unit.sequentialProcesses[0].writes==std::vector<std::string>{"q"},
++          "timing relationships are computed before report location conversion");
++    const core::SourceFile twoProcesses(base/"two.sv",core::HdlLanguage::SystemVerilog,
++        "`define MAKE module two_owner(input clk,d0,d1,output reg q0,q1);always @(posedge clk) q0<=d0;always @(posedge clk) q1<=d1;endmodule\n`MAKE\n");
++    result=analysis::Analyzer().analyzeSource(twoProcesses);
++    check(result.structure.size()==1&&result.structure.front().sequentialProcesses.size()==2,
++          "distinct expanded processes are not collapsed when physical invocation coordinates coincide");
++    if(result.structure.size()==1&&result.structure.front().sequentialProcesses.size()==2) {
++        const auto& processes=result.structure.front().sequentialProcesses;
++        check(processes[0].location==processes[1].location&&processes[0].writes!=processes[1].writes,
++              "equal report coordinates preserve distinct process data");
++    }
++    {std::ofstream file(base/"leaf.vh");file<<"module leaf #(parameter P=1)(input a,output y);\nassign y=a;\nendmodule\n";}
++    const core::SourceFile parent(base/"parent.sv",core::HdlLanguage::SystemVerilog,
++        "`include \"leaf.vh\"\nmodule parent(input a,output y);\nleaf #(.P(2)) child(.a(a),.y(y));\nendmodule\n");
++    result=analysis::Analyzer().analyzeSources({parent});
++    check(result.structure.size()==2&&result.designUnits==2&&result.filesAnalyzed==1,
++          "included design units enter structure without pretending the selected root count changed");
++    const auto leaf=std::find_if(result.structure.begin(),result.structure.end(),[](const auto& item){return item.name=="leaf";});
++    const auto top=std::find_if(result.structure.begin(),result.structure.end(),[](const auto& item){return item.name=="parent";});
++    check(leaf!=result.structure.end()&&top!=result.structure.end(),"both included child and parent owners are retained");
++    if(leaf!=result.structure.end()&&top!=result.structure.end()) {
++        check(leaf->location.file==base/"leaf.vh"&&leaf->location.line==1&&leaf->location.column==1&&leaf->location.byteOffset==0,
++              "included module locations name the actual header without a guessed byte offset");
++        check(leaf->ports.size()==2&&leaf->parameters.size()==1&&leaf->ports[0].location.file==base/"leaf.vh"&&
++              leaf->parameters[0].location.file==base/"leaf.vh","included parameter and port origins are mapped with their owner");
++        check(!leaf->topLevel&&top->topLevel&&top->instances.size()==1&&top->instances[0].resolved,
++              "hierarchy resolution consumes expanded units and preserves child binding");
++        if(top->instances.size()==1) {
++            const auto& instance=top->instances.front();
++            check(instance.location.file==parent.path()&&instance.location.line==3&&instance.location.byteOffset>0,
++                  "literal parent instance coordinates retain a physical text offset");
++            check(instance.namedConnections.size()==2&&instance.namedParameterOverrides.size()==1,
++                  "expanded instances retain named connection and parameter metadata");
++            if(instance.namedConnections.size()==2&&instance.namedParameterOverrides.size()==1) {
++                check(instance.namedConnections[0].location.file==parent.path()&&instance.namedConnections[0].location.line==3&&
++                      instance.namedConnections[0].actualLocation.file==parent.path()&&instance.namedConnections[0].actualLocation.line==3,
++                      "formal and actual association positions are mapped separately");
++                check(instance.namedParameterOverrides[0].location.file==parent.path()&&instance.namedParameterOverrides[0].location.line==3,
++                      "named parameter override positions remain attached to the parent source");
++            }
++        }
++    }
++    const core::SourceFile undriven(base/"undriven.sv",core::HdlLanguage::SystemVerilog,
++        "`define MAKE module undriven_owner(output y);endmodule\n`MAKE\n");
++    result=analysis::Analyzer().analyzeSource(undriven);
++    check(count(result,"RTL-UNDRIVEN-OUTPUT")==1&&std::any_of(result.violations.begin(),result.violations.end(),[&](const auto& item){
++        return item.ruleId=="RTL-UNDRIVEN-OUTPUT"&&item.file==undriven.path()&&item.line==2&&item.column==1;
++    }),"semantic analysis of macro-generated declarations reports the original invocation");
++    {std::ofstream file(base/"broken.vh");file<<"module broken;\n";}
++    result=analysis::Analyzer().analyzeSource({base/"broken_root.sv",core::HdlLanguage::SystemVerilog,"`include \"broken.vh\"\n"});
++    check(std::any_of(result.violations.begin(),result.violations.end(),[&](const auto& item){
++        return item.ruleId=="SYNTAX-UNCLOSED-CONSTRUCT"&&item.file==base/"broken.vh"&&item.line==1;
++    }),"structural syntax issues in included HDL retain the included file origin");
++    const core::SourceFile aliased(base/"aliased.sv",core::HdlLanguage::SystemVerilog,
++        "`line 90 \"generated_original.sv\" 0\nmodule aliased_owner(input clk,d,output reg q);always @(posedge clk) q<=d;endmodule\n");
++    result=analysis::Analyzer().analyzeSource(aliased);
++    check(result.structure.size()==1&&result.structure.front().location.file=="generated_original.sv"&&
++        result.structure.front().location.line==90&&result.structure.front().location.byteOffset==0,
++        "logical line origins are report coordinates, not byte offsets into the selected root");
++    check(result.structure.size()==1&&result.structure.front().clocks.size()==1,"aliased timing remains populated");
++    if(result.structure.size()==1&&result.structure.front().clocks.size()==1)
++        check(result.structure.front().clocks[0].location.file=="generated_original.sv"&&result.structure.front().clocks[0].location.line==90,
++              "timing origins follow logical line mapping with their module");
++    result=analysis::Analyzer().analyzeSource({base/"unknown.sv",core::HdlLanguage::SystemVerilog,"module unknown_owner;wire `UNKNOWN;endmodule\n"});
++    check(result.structure.empty()&&count(result,"PP-FRONTEND-DIRECTIVE")>0,
++          "failed expansion never falls back to a fabricated partial core model");
++    analysis::AnalysisOptions options;options.standardId="GJB10157-2021";options.topModule="macro_owner";
++    result=analysis::Analyzer(options).analyzeSource(macro);
++    check(result.errors.empty()&&result.structure.size()==1&&result.structure.front().clocks.size()==1,
++          "standard evaluation retains the actual expanded structure and timing result");
++    check(!result.standardAssessments.empty()&&std::none_of(result.standardAssessments.begin(),result.standardAssessments.end(),[](const auto& row){
++        return row.state==analysis::StandardRuleState::Passed;
++    }),"unmigrated standard adapters and clean core results do not become automatic rule compliance");
++    const analysis::Analyzer generic;
++    const core::SourceFile sharedDefinitions(base/"definitions.sv",core::HdlLanguage::SystemVerilog,
++        "`define SHARED module shared_owner(input a,output y);assign y=a;endmodule\n");
++    const core::SourceFile sharedUse(base/"use.sv",core::HdlLanguage::SystemVerilog,"`SHARED\n");
++    result=generic.analyzeSources({sharedDefinitions,sharedUse});
++    check(result.structure.size()==1&&result.structure.front().name=="shared_owner"&&result.structure.front().ports.size()==2,
++          "generic project mode shares source macros in root order");
++    result=generic.analyzeSource(sharedUse);
++    check(result.structure.empty()&&count(result,"PP-FRONTEND-DIRECTIVE")>0,
++          "reusing a generic Analyzer does not leak a prior project macro cache");
++    {std::ofstream file(base/"waived.vh");file<<"module waived_owner(output y); // fpga-lint-disable-line RTL-UNDRIVEN-OUTPUT\nendmodule\n";}
++    const core::SourceFile waivedRoot(base/"waived_root.sv",core::HdlLanguage::SystemVerilog,"`include \"waived.vh\"\n");
++    const auto waiverFrame=parser::expandFrontendSource(waivedRoot);
++    check(waiverFrame.includedSources.size()==1&&waiverFrame.includedSources[0].content().find("fpga-lint-disable-line")!=std::string::npos,
++          "include snapshots preserve the actual consumed comments before expansion strips them");
++    result=generic.analyzeSource(waivedRoot);
++    check(count(result,"RTL-UNDRIVEN-OUTPUT")==0&&result.suppressedViolations>0,
++          "generic include diagnostics honor waivers from their consumed source snapshot");
++    {std::ofstream file(base/"waived.vh");file<<"module waived_owner(output y);\nendmodule\n";}
++    result=generic.analyzeSource(waivedRoot);
++    check(count(result,"RTL-UNDRIVEN-OUTPUT")==1,"a later independent analysis reads the new include text instead of stale waiver state");
++    {std::ofstream file(base/"self.sv");file<<"`ifndef SEEN\nmodule disk_owner;endmodule\n`endif\n";}
++    const core::SourceFile changing(base/"self.sv",core::HdlLanguage::SystemVerilog,
++        "`define SEEN\n`include \"./self.sv\"\n// fpga-lint-disable-next-line RTL-UNDRIVEN-OUTPUT\nmodule memory_owner(output y);\nendmodule\n");
++    const auto changingFrame=parser::expandFrontendSource(changing);
++    check(changingFrame.issues.empty()&&changingFrame.ambiguousInputFiles.size()==1,
++          "different consumed texts for one pathname are explicitly marked ambiguous");
++    const parser::FrontendSourceView changingView(changing,changingFrame);
++    const auto changingUnits=parser::parseDesignUnits(changingView.input());
++    if(changingUnits.size()==1) {
++        const auto mapped=changingView.report(changingUnits[0]);
++        check(mapped.location.column==1&&mapped.location.byteOffset==0,
++              "ambiguous pathname snapshots do not acquire a guessed exact offset");
++    } else check(false,"guarded self-include leaves one memory owner");
++    result=generic.analyzeSource(changing);
++    check(count(result,"RTL-UNDRIVEN-OUTPUT")==1,"ambiguous same-path text cannot prove a comment-based suppression");
++    const std::string crlfText="`ifndef SAME_GUARD\r\n`define SAME_GUARD\r\n`include \"same.sv\"\r\nmodule same_owner(output y); // fpga-lint-disable-line RTL-UNDRIVEN-OUTPUT\r\nendmodule\r\n`endif\r\n";
++    {std::ofstream file(base/"same.sv",std::ios::binary);file<<crlfText;}
++    const core::SourceFile sameRoot(base/"same.sv",core::HdlLanguage::SystemVerilog,crlfText);
++    const auto sameFrame=parser::expandFrontendSource(sameRoot);
++    check(sameFrame.issues.empty()&&sameFrame.ambiguousInputFiles.empty(),
++          "host CRLF normalization alone does not fabricate conflicting same-path snapshots");
++    result=generic.analyzeSource(sameRoot);
++    check(result.structure.size()==1&&count(result,"RTL-UNDRIVEN-OUTPUT")==0&&result.suppressedViolations>0,
++          "a guarded CRLF self-include preserves an original-source waiver on all hosts");
++    analysis::AnalysisOptions mappedOptions;mappedOptions.standardId="GJB10157-2021";
++    result=analysis::Analyzer(mappedOptions).analyzeSource({base/"mapped_seq.sv",core::HdlLanguage::SystemVerilog,
++        "`define MAKE module mapped_seq(input clk,d,output reg q);always @(posedge clk) q=d;endmodule\n`MAKE\n"});
++    check(result.structure.size()==1&&count(result,"GJB10157.9.1.4")==1&&std::any_of(result.violations.begin(),result.violations.end(),[](const auto& item){
++        return item.ruleId=="GJB10157.9.1.4"&&item.line==2&&item.column==1;
++    }),"expanded sequential blocking evidence survives standard translation and source-bound adapter evaluation");
++    result=analysis::Analyzer(mappedOptions).analyzeSource({base/"mapped_comb.sv",core::HdlLanguage::SystemVerilog,
++        "`define MAKE module mapped_comb(input d,output reg q);always @* q<=d;endmodule\n`MAKE\n"});
++    check(count(result,"GJB10157.9.1.3")==1,"expanded combinational nonblocking assignments reach their official standard clause");
++    result=analysis::Analyzer(mappedOptions).analyzeSource({base/"mapped_defparam.sv",core::HdlLanguage::SystemVerilog,
++        "`define MAKE module leaf #(parameter P=1);endmodule module parent;leaf child();defparam child.P=2;endmodule\n`MAKE\n"});
++    check(count(result,"GJB10157.5.2.16")==1&&std::any_of(result.violations.begin(),result.violations.end(),[](const auto& item){
++        return item.ruleId=="GJB10157.5.2.16"&&item.message=="禁止使用defparam语句"&&item.line==2&&item.column==1;
++    }),"macro-generated defparam preserves the recovered fixed standard diagnostic and invocation origin");
++    std::cout<<checks<<" source-view checks, "<<failures<<" failures\n";
++    return failures?1:0;
++}

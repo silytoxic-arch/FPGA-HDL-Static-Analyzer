@@ -412,10 +412,13 @@ int main() {
     check(out.issues.empty()&&out.conditionalDecisions[0].physical.file==root&&out.conditionalDecisions[0].physical.line==3,
         "line directives do not replace the physical identity used by conditional projection");
     linted=lint(aliased);
-    check(linted.structure.size()==1&&linted.structure.front().location.file==root&&linted.structure.front().location.line==4&&
+    projected=parser::preprocess({root,core::HdlLanguage::SystemVerilog,aliased},{},&out);
+    const auto physicalUnits=parser::parseDesignUnits(projected.source);
+    check(physicalUnits.size()==1&&physicalUnits.front().location.file==root&&physicalUnits.front().location.line==4&&
+        linted.structure.size()==1&&linted.structure.front().location.file=="logical.sv"&&linted.structure.front().location.line==202&&
         std::any_of(linted.violations.begin(),linted.violations.end(),[](const auto& item){
             return item.ruleId=="GJB10157.5.2.2"&&item.file=="logical.sv"&&item.line==202;
-        }),"physical structure and logical lexer report locations remain distinct after line directives");
+        }),"physical adapter projection and expanded model report coordinates remain distinct after line directives");
     out=run("`define ID(x) x\nmodule m;\nwire `ID(\nname\n);\n`ifdef SYNTHESIS\nwire other;\n`endif\nendmodule\n");
     check(out.issues.empty()&&out.conditionalDecisions.size()==2&&out.conditionalDecisions[0].physical.line==6&&
         out.conditionalDecisions[1].physical.line==8,"multiline macro arguments do not shift later physical conditional decisions");

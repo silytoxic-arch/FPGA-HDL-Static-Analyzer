@@ -30,6 +30,10 @@ struct FrontendPreprocessorResult {
     // physical-position projection uses presence only, never guessed bodies.
     std::vector<std::string> initialMacroNames;
     std::vector<FrontendConditionalDecision> conditionalDecisions;
+    // Immutable text actually consumed by the engine; used for include-file
+    // waivers, not guessed disk byte offsets. Conflicting snapshots are omitted.
+    std::vector<core::SourceFile> includedSources;
+    std::vector<std::filesystem::path> ambiguousInputFiles;
     [[nodiscard]] core::SourceLocation origin(std::size_t virtualLine) const;
 };
 // One native-style design import session. Source defines/undef/resetall update

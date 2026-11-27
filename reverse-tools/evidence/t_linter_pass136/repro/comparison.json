@@ -1,0 +1,37 @@
+{
+  "baselineCommit": "e811bfdf4cdaace8281b651efb967006c90f8a12",
+  "before": {
+    "reportSha256": "4c6297c9345021e8f1518581f0e5f4ebe1a9a47f221c783b3ecb538356c8eeca",
+    "errors": [],
+    "units": []
+  },
+  "after": {
+    "reportSha256": "94aebee1f6733f6b33096408cddefb616dd40008ea2aa15f492bf50b8cc14e3f",
+    "errors": [],
+    "units": [
+      {
+        "name": "macro_owner",
+        "file": "/private/tmp/fpga-pass136-expanded-structure/macro.sv",
+        "line": 2,
+        "ports": 2,
+        "clocks": 0,
+        "processes": 0
+      }
+    ]
+  },
+  "clockedAfter": {
+    "reportSha256": "cc2d9d459020829ff2c7ab0b890a88c29a5a75d8afbd00729e1874e2d3af1ca6",
+    "errors": [],
+    "units": [
+      {
+        "name": "clocked_owner",
+        "file": "/private/tmp/fpga-pass136-expanded-structure/clocked.sv",
+        "line": 2,
+        "ports": 3,
+        "clocks": 1,
+        "processes": 1
+      }
+    ]
+  },
+  "boundary": "Product CLI reports on ordered frozen fixtures; no vendor execution or full native grammar equivalence. Before selected macro_owner already passed top admission but reported no design units."
+}

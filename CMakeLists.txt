@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(FPGAAnalyzer VERSION 1.4.253 LANGUAGES CXX)
+project(FPGAAnalyzer VERSION 1.4.254 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,6 +31,7 @@ add_library(fpga_core STATIC
     src/parser/design_parser.cpp
     src/parser/preprocessor.cpp
     src/parser/frontend_preprocessor.cpp
+    src/parser/frontend_source_view.cpp
     src/parser/vendor/yosys_preproc.cpp
     src/parser/semantic_analyzer.cpp
     src/parser/timing_analyzer.cpp

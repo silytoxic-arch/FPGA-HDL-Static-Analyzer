@@ -17482,7 +17482,7 @@ void checkNativeVerilogCommentRatio(AnalysisResult& result,
                    "该工程代码注释率小于20%");
 }
 
-void applyStandardProfile(AnalysisResult& result,
+static void evaluateStandardProfile(AnalysisResult& result,
                           std::span<const core::SourceFile> sources,
                           const AnalysisOptions& options,
                           std::span<const parser::FrontendPreprocessorResult* const> frontendInputs) {
@@ -17769,6 +17769,28 @@ void applyStandardProfile(AnalysisResult& result,
         }
         result.standardAssessments.push_back({std::string(entry.clauseId), state});
     }
+}
+
+// Existing physical-source adapters may only consume their source-bound
+// model. Expanded core diagnostics have already been computed and mapped;
+// do not feed their mapped byte offsets back into those legacy token models.
+void applyStandardProfile(AnalysisResult& result,std::span<const core::SourceFile> sources,
+    const AnalysisOptions& options,
+    std::span<const parser::FrontendPreprocessorResult* const> frontendInputs,
+    std::vector<parser::DesignUnitInfo> sourceBoundStructure) {
+    const auto profile=findStandardProfile(options.standardId);
+    if(!profile || profile->id!="GJB10157-2021") {
+        evaluateStandardProfile(result,sources,options,frontendInputs);
+        return;
+    }
+    AnalysisResult evaluation;
+    evaluation.structure=std::move(sourceBoundStructure);
+    evaluation.violations=std::move(result.violations);
+    evaluation.errors=std::move(result.errors);
+    evaluateStandardProfile(evaluation,sources,options,frontendInputs);
+    result.violations=std::move(evaluation.violations);
+    result.errors=std::move(evaluation.errors);
+    result.standardAssessments=std::move(evaluation.standardAssessments);
 }
 
 } // namespace fpga::analysis

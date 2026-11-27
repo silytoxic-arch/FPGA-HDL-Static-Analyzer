@@ -37,7 +37,11 @@ A parallel physical file/line stack ignores logical line renaming when binding
 these events back to root directives. Ambiguous/macro-generated control
 bindings defer physical structure instead of choosing an unproved branch.
 The nine standard helpers that preprocess roots reuse the same import context.
-Full textually generated structural/semantic AST, optional frontends and vendor
-changes outside recovered paths remain unresolved.
+The generic bounded structure/semantic/timing models now consume expanded HDL
+through FrontendSourceView. Native full AST/lowering, standard-specific adapters
+that still require physical tokens, optional frontends and vendor changes outside
+recovered paths remain unresolved. A host-only input_file observer freezes the
+consumed text for include waivers; conflicting same-path text cannot prove a
+suppression, while Windows CRLF normalization is compared consistently.
 
-See `docs/native_rule_recovery_pass135.md` and `THIRD_PARTY_NOTICES.md`.
+See `docs/native_rule_recovery_pass136.md` and `THIRD_PARTY_NOTICES.md`.

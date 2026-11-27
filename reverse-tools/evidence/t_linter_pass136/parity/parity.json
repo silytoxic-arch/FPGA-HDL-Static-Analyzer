@@ -1,0 +1,11 @@
+{
+  "baselineCommit": "e811bfdf4cdaace8281b651efb967006c90f8a12",
+  "equal": true,
+  "outputBytes": 412,
+  "outputSha256": "d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+  "inputs": [
+    "/private/tmp/fpga-pass135-stream-parity/first.sv",
+    "/private/tmp/fpga-pass135-stream-parity/second.sv"
+  ],
+  "boundary": "Mac-host product-engine regression for the new input snapshot observer; no T-Linter execution. Stream includes absolute fixture paths."
+}

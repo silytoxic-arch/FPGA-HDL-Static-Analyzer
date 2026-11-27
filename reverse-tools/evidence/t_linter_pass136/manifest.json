@@ -1,0 +1,56 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "boundary": "Provenance-aware integration of bounded product models and an input snapshot observer; native preprocessor/lexer basis retained in earlier passes. No DLL execution; no full rule/AST equivalence claim. Stream hash includes recorded absolute paths.",
+  "files": [
+    {
+      "path": "expanded_model_integration.patch",
+      "size": 51783,
+      "sha256": "38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8"
+    },
+    {
+      "path": "parity/driver.cpp",
+      "size": 579,
+      "sha256": "24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf"
+    },
+    {
+      "path": "parity/first.sv",
+      "size": 183,
+      "sha256": "c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc"
+    },
+    {
+      "path": "parity/flags.vh",
+      "size": 87,
+      "sha256": "3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425"
+    },
+    {
+      "path": "parity/parity.json",
+      "size": 475,
+      "sha256": "a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91"
+    },
+    {
+      "path": "parity/second.sv",
+      "size": 117,
+      "sha256": "9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e"
+    },
+    {
+      "path": "parity/stream.out",
+      "size": 412,
+      "sha256": "d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971"
+    },
+    {
+      "path": "repro/clocked.sv",
+      "size": 109,
+      "sha256": "b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b"
+    },
+    {
+      "path": "repro/comparison.json",
+      "size": 1123,
+      "sha256": "0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651"
+    },
+    {
+      "path": "repro/macro.sv",
+      "size": 77,
+      "sha256": "15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
+    }
+  ]
+}

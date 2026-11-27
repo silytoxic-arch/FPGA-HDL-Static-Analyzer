@@ -1,4 +1,5 @@
 #pragma once
+#include "core/source_text.h"
 // Standalone host bridge for the ISC-licensed Yosys preprocessor. No RTLIL,
 // target DLL, vendor runtime or global application state is linked here.
 #include <algorithm>
@@ -30,6 +31,8 @@ struct Budget {
         maxOutputBytes{64*1024*1024}, maxInputBytes{64*1024*1024}, maxIncludeDepth{128}, maxMacroRestoreDepth{256};
     std::string current_file;
     std::vector<ConditionalEvent> conditionalEvents;
+    std::map<std::string,std::string> inputSnapshots;
+    std::set<std::string> unstableSnapshots;
 };
 inline thread_local Budget budget;
 inline thread_local std::set<std::string> yosys_input_files;

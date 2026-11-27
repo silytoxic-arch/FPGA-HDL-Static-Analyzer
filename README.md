@@ -1,10 +1,10 @@
-# FPGA HDL Static Analyzer — V1.4.253
+# FPGA HDL Static Analyzer — V1.4.254
 
 [![Windows Build](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml/badge.svg)](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml)
 
 公开源码仓库使用 GitHub Actions 在 Windows Server 2022、Visual Studio 2022 和 Qt 6.8.3 环境中自动编译、运行全部测试并生成 Windows x64 ZIP。可在仓库的 **Actions → Windows Build** 页面手动触发，构建完成后从 `FPGA-HDL-Static-Analyzer-Windows-x64` 工件下载。
 
-V1.4.253 修正 include 后的条件分支与结构视图不一致：物理投影复用展开器分支判定，九个工程规则入口共享上下文，显式顶层按展开模块索引准入。详见 [本轮记录](docs/v1_4_253_release.md)。
+V1.4.254 接入宏/include 展开后的通用结构、语义和时序模型，报告宏生成模块的端口、时钟和时序过程；以独立源码视图保留解析与报告坐标，并使用读取快照处理头文件豁免。详见 [本轮记录](docs/v1_4_254_release.md)。
 
 V1.4.214 深化官方三段式规则 `R-5-5`：恢复两条原生诊断正文、Error、赋值物理行无列定位，以及“目标名 + 物理行”的报告重数；确认启用 `initial` 时 DLL 仅登记赋值目标而不校验 RHS 固定性。复杂 default/reset 分支继续要求人工复核。详见 [本轮记录](docs/v1_4_214_release.md)。
 

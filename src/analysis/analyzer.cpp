@@ -3,6 +3,8 @@
 #include "analysis/standard_evaluator.h"
 #include "analysis/standard_profiles.h"
 #include "parser/frontend_preprocessor.h"
+#include "parser/frontend_source_view.h"
+#include "core/source_text.h"
 #include <array>
 #include "parser/preprocessor.h"
 #include "parser/semantic_analyzer.h"
@@ -134,11 +136,11 @@ void applySeverityOverrides(AnalysisResult& result, const AnalysisOptions& optio
     }
 }
 
-void filterViolations(AnalysisResult& result, const std::vector<core::SourceFile>& sources,
+void filterViolations(AnalysisResult& result, std::span<const core::SourceFile* const> sources,
                       const AnalysisOptions& options) {
     // Splitting a large generated netlist once per diagnostic made waiver
     // filtering proportional to source-size * findings. Cache within this
-    // call only, preserving first matching source and existing waiver rules.
+    // call only, using the proven source text and existing waiver rules.
     struct WaiverSource {
         std::vector<Line> lines;
         std::vector<std::size_t> fileDirectiveLines;
@@ -146,18 +148,18 @@ void filterViolations(AnalysisResult& result, const std::vector<core::SourceFile
     std::unordered_map<const core::SourceFile*, WaiverSource> waiverSources;
     const auto suppressed = [&](const Violation& violation) {
         if (globallyDisabled(violation.ruleId, options)) return true;
-        const auto source = std::ranges::find_if(sources, [&](const core::SourceFile& candidate) {
-            return candidate.path().lexically_normal() == violation.file.lexically_normal();
+        const auto source = std::ranges::find_if(sources, [&](const core::SourceFile* candidate) {
+            return candidate->path().lexically_normal() == violation.file.lexically_normal();
         });
         if (source == sources.end()) return false;
-        auto cached = waiverSources.find(&*source);
+        auto cached = waiverSources.find(*source);
         if (cached == waiverSources.end()) {
             WaiverSource entry;
-            entry.lines = splitLines(source->content());
+            entry.lines = splitLines((*source)->content());
             for (std::size_t i = 0; i < entry.lines.size(); ++i)
                 if (entry.lines[i].text.find("fpga-lint-disable-file") != std::string::npos)
                     entry.fileDirectiveLines.push_back(i);
-            cached = waiverSources.emplace(&*source, std::move(entry)).first;
+            cached = waiverSources.emplace(*source, std::move(entry)).first;
         }
         const auto& lines = cached->second.lines;
         if (std::ranges::any_of(cached->second.fileDirectiveLines, [&](std::size_t line) {
@@ -174,6 +176,32 @@ void filterViolations(AnalysisResult& result, const std::vector<core::SourceFile
     const auto before = result.violations.size();
     std::erase_if(result.violations, suppressed);
     result.suppressedViolations += before - result.violations.size();
+}
+
+// Match waivers against immutable consumed text. Ambiguous same-path snapshots
+// cannot prove a suppression; never reread a potentially changed include file.
+std::vector<const core::SourceFile*> waiverInputViews(std::span<const core::SourceFile> roots,
+    std::span<const parser::FrontendPreprocessorResult* const> frontends) {
+    std::map<std::filesystem::path,const core::SourceFile*> views;
+    std::set<std::filesystem::path> ambiguous;
+    const auto add=[&](const core::SourceFile& source) {
+        const auto key=source.path().lexically_normal();
+        if(ambiguous.contains(key)) return;
+        const auto [found,inserted]=views.emplace(key,&source);
+        if(!inserted && !core::sameLineEndingText(found->second->content(),source.content())) {
+            views.erase(found);ambiguous.insert(key);
+        }
+    };
+    for(const auto& root:roots) add(root);
+    for(const auto* frontend:frontends) if(frontend) {
+        for(const auto& source:frontend->includedSources) add(source);
+        for(const auto& path:frontend->ambiguousInputFiles) {
+            const auto key=path.lexically_normal();views.erase(key);ambiguous.insert(key);
+        }
+    }
+    std::vector<const core::SourceFile*> result;
+    for(const auto& [path,source]:views) {static_cast<void>(path);result.push_back(source);}
+    return result;
 }
 
 void analyzeCommon(const core::SourceFile& source, const std::vector<Line>& lines,
@@ -950,13 +978,12 @@ void mergeTimingInfo(AnalysisResult& result, parser::UnitTimingInfo timing) {
     }
 }
 
-// Expand once, in the caller's source order, for the native Verilog profile.
+// Expand Verilog once in the caller's source order, for generic and standard analysis.
 // Every later consumer receives the same immutable per-root result.
 std::vector<std::optional<parser::FrontendPreprocessorResult>> prepareFrontendInputs(
     std::span<const core::SourceFile> sources,const AnalysisOptions& options) {
     std::vector<std::optional<parser::FrontendPreprocessorResult>> inputs(sources.size());
-    const auto profile=findStandardProfile(options.standardId);
-    if(options.countOnly || !profile || profile->id!="GJB10157-2021") return inputs;
+    if(options.countOnly) return inputs;
     parser::FrontendPreprocessorSession session;
     for(std::size_t i=0;i<sources.size();++i) {
         if(sources[i].language()!=core::HdlLanguage::Verilog &&
@@ -995,7 +1022,8 @@ AnalysisResult Analyzer::analyzeSource(const core::SourceFile& source) const {
 
 AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
                                            bool runTimingRules,
-                                           const parser::FrontendPreprocessorResult* frontend) const {
+                                           const parser::FrontendPreprocessorResult* frontend,
+                                           std::vector<parser::DesignUnitInfo>* sourceBoundStructure) const {
     AnalysisResult result;
     result.severityOverrides = options_.severityOverrides;
     result.standardId = options_.standardId;
@@ -1011,10 +1039,36 @@ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
     if (options_.countOnly) return result;
     const auto preprocessed = parser::preprocess(
         source, {options_.includeDirectories, options_.defines},frontend);
-    result.structure = parser::parseDesignUnits(preprocessed.source);
-    for (auto& timing : parser::extractTimingInfo(preprocessed.source)) {
-        mergeTimingInfo(result, std::move(timing));
+    const auto profile=findStandardProfile(options_.standardId);
+    const bool needsSourceBound=profile && profile->id=="GJB10157-2021";
+    AnalysisResult boundModel;
+    if(!frontend || needsSourceBound) {
+        boundModel.structure=parser::parseDesignUnits(preprocessed.source);
+        for(auto& timing:parser::extractTimingInfo(preprocessed.source)) mergeTimingInfo(boundModel,std::move(timing));
     }
+    std::vector<parser::DesignUnitInfo> boundUnits;
+    std::optional<parser::FrontendSourceView> sourceView;
+    const core::SourceFile* modelInput=&preprocessed.source;
+    bool modelAdmitted=preprocessed.issues.empty();
+    if(frontend) {
+        sourceView.emplace(source,*frontend);
+        modelInput=&sourceView->input();
+        modelAdmitted=sourceView->admitted();
+        if(modelAdmitted) {
+            // Merge while positions are still virtual: separate expanded
+            // processes can later report on the same physical invocation line.
+            result.structure=parser::parseDesignUnits(*modelInput);
+            for(auto& timing:parser::extractTimingInfo(*modelInput)) mergeTimingInfo(result,std::move(timing));
+            for(auto& unit:result.structure) unit=sourceView->report(std::move(unit));
+        }
+        boundUnits=std::move(boundModel.structure);
+    } else {
+        result.structure=std::move(boundModel.structure);
+        if(needsSourceBound) boundUnits=result.structure;
+    }
+    if(sourceBoundStructure)
+        sourceBoundStructure->insert(sourceBoundStructure->end(),
+            std::make_move_iterator(boundUnits.begin()),std::make_move_iterator(boundUnits.end()));
     if (runTimingRules) {
         analyzeTimingConsistency(result);
         analyzeUnusedAsynchronousResets(result);
@@ -1023,32 +1077,42 @@ AnalysisResult Analyzer::analyzeSourceImpl(const core::SourceFile& source,
         analyzeResetDomainCrossings(result);
     }
     result.designUnits = result.structure.size();
-    for (const auto& issue : preprocessed.issues) {
+    const auto& preprocessingIssues=frontend && !needsSourceBound && frontend->issues.empty()
+        ? frontend->issues : preprocessed.issues;
+    for (const auto& issue : preprocessingIssues) {
         addViolation(result, issue.ruleId, Severity::Error, issue.message,
                      "The HDL preprocessor could not resolve the source configuration reliably.",
                      "Correct the directive or configure the required macro/include directory.",
                      issue.location.file, issue.location.line, issue.location.column);
     }
-    for (const auto& issue : parser::checkSyntax(preprocessed.source)) {
+    const bool physicalSyntaxFallback=frontend && !modelAdmitted &&
+        std::ranges::none_of(parser::tokenize(source),[](const auto& token){return token.text=="`";});
+    const auto syntaxIssues=modelAdmitted ? parser::checkSyntax(*modelInput) :
+        physicalSyntaxFallback ? parser::checkSyntax(source) : std::vector<parser::SyntaxIssue>{};
+    for (const auto& issue : syntaxIssues) {
+        const auto at=sourceView && !physicalSyntaxFallback ? sourceView->report(issue.location) : issue.location;
         addViolation(result, issue.ruleId, Severity::Error, issue.message,
                      "The HDL source is structurally malformed, so later lint results may be incomplete.",
                      "Correct the source syntax at this location and run the analyzer again.",
-                     issue.location.file, issue.location.line, issue.location.column);
+                     at.file, at.line, at.column);
     }
-    for (const auto& issue : parser::analyzeSemantics(preprocessed.source)) {
+    const auto semanticIssues=modelAdmitted ? parser::analyzeSemantics(*modelInput) : std::vector<parser::SemanticIssue>{};
+    for (const auto& issue : semanticIssues) {
+        const auto at=sourceView ? sourceView->report(issue.location) : issue.location;
         const auto definition = findRule(issue.ruleId);
         const auto severity = definition ? definition->severity : Severity::Warning;
         addViolation(result, issue.ruleId, severity, issue.message,
-                     issue.description, issue.recommendation, issue.location.file,
-                     issue.location.line, issue.location.column, issue.designUnit, issue.signal);
+                     issue.description, issue.recommendation, at.file,
+                     at.line, at.column, issue.designUnit, issue.signal);
     }
     const auto rawLines = splitLines(source.content());
     analyzeCommon(source, rawLines, result);
     applySeverityOverrides(result, options_);
-    filterViolations(result, {source}, options_);
+    const std::array<const parser::FrontendPreprocessorResult*,1> inputs{frontend};
+    const auto waiverViews=waiverInputViews(std::span<const core::SourceFile>(&source,1),inputs);
+    filterViolations(result,waiverViews,options_);
     if (runTimingRules) {
-        const std::array<const parser::FrontendPreprocessorResult*,1> inputs{frontend};
-        applyStandardProfile(result,std::span<const core::SourceFile>(&source,1),options_,inputs);
+        applyStandardProfile(result,std::span<const core::SourceFile>(&source,1),options_,inputs,std::move(boundUnits));
     }
     std::ranges::sort(result.violations, [](const Violation& a, const Violation& b) {
         return std::tie(a.file, a.line, a.column, a.ruleId) <
@@ -1119,10 +1183,11 @@ AnalysisResult Analyzer::analyzeSources(const std::vector<core::SourceFile>& sou
     std::vector<const parser::FrontendPreprocessorResult*> frontendViews;
     frontendViews.reserve(sources.size());
     for(const auto& input:frontendInputs) frontendViews.push_back(input ? &*input : nullptr);
+    std::vector<parser::DesignUnitInfo> sourceBoundStructure;
     std::vector<core::SourceFile> preprocessedVhdlSources;
     for (std::size_t index=0;index<sources.size();++index) {
         const auto& source=sources[index];
-        auto result = analyzeSourceImpl(source,false,frontendViews[index]);
+        auto result = analyzeSourceImpl(source,false,frontendViews[index],&sourceBoundStructure);
         combined.filesAnalyzed += result.filesAnalyzed;
         for (const auto& file : result.lineStatistics.files) combined.lineStatistics.append(file);
         combined.designUnits += result.designUnits;
@@ -1163,9 +1228,15 @@ AnalysisResult Analyzer::analyzeSources(const std::vector<core::SourceFile>& sou
     }
     combined.designUnits = combined.structure.size();
     analyzeStructure(combined, options_);
+    // Resolve the physical-source adapter model in the same project scope;
+    // these binding facts are separate from its discarded generic findings.
+    AnalysisResult boundProject;
+    boundProject.structure=std::move(sourceBoundStructure);
+    analyzeStructure(boundProject,options_);
     applySeverityOverrides(combined, options_);
-    filterViolations(combined, sources, options_);
-    applyStandardProfile(combined,sources,options_,frontendViews);
+    const auto waiverViews=waiverInputViews(sources,frontendViews);
+    filterViolations(combined,waiverViews,options_);
+    applyStandardProfile(combined,sources,options_,frontendViews,std::move(boundProject.structure));
     std::ranges::sort(combined.violations, [](const Violation& a, const Violation& b) {
         return std::tie(a.file, a.line, a.column, a.ruleId) <
                std::tie(b.file, b.line, b.column, b.ruleId);

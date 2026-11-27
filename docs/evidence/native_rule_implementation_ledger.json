@@ -140,13 +140,24 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native FUN_180533200 admits one AST_MODULE root, gathers AST_WIRE(6) declarations, separates port-like declarations from internal candidates using direction bytes +0xa0/+0xa1 and additional declaration flags, then builds use relations from AST_ASSIGN(0x4d), AST_ASSIGN_EQ/LE(0x55/0x56), cell nodes (0x4f) and AST_IDENTIFIER(0x13). FUN_180532db0 recursively adds only candidate-matching identifiers from the selected subtree. Resolved cell output formals place actual identifiers in the driven-location relation, while input/inout or unresolved formals place them in the use relation. The constructor writes word 0x0001 at object+0x158, enabling the internal branch with +0x159 clear and selecting the exact messages 冗余的端口 / 冗余的内部信号. Product maps unused input ports, unused internal declarations and driven-but-unloaded internal signals, and reproduces same-source named/positional formal-direction handling.",
+      "predicate": "Native FUN_180533200 admits one AST_MODULE root, gathers AST_WIRE(6) declarations, separates port-like declarations from internal candidates using direction bytes +0xa0/+0xa1 and additional declaration flags, then builds use relations from AST_ASSIGN(0x4d), AST_ASSIGN_EQ/LE(0x55/0x56), cell nodes (0x4f) and AST_IDENTIFIER(0x13). FUN_180532db0 recursively adds only candidate-matching identifiers from the selected subtree. Resolved cell output formals place actual identifiers in the driven-location relation, while input/inout or unresolved formals place them in the use relation. The constructor writes word 0x0001 at object+0x158, enabling the internal branch with +0x159 clear and selecting the exact messages 冗余的端口 / 冗余的内部信号. Product maps unused input ports, unused internal declarations and driven-but-unloaded internal signals, and reproduces same-source named/positional formal-direction handling. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_c23e1dd474e34320a04313e6aa3afdf5242bad24898eb80fb524c4f680f3ab79",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
         "reverse-tools/evidence/a2_8_constructor_messages.txt",
         "reverse-tools/evidence/a2_8_relation_helpers.txt",
-        "docs/evidence/native_verilog_redundant_ports_signals_5_2_18_findings.md#recovered-predicate"
+        "docs/evidence/native_verilog_redundant_ports_signals_5_2_18_findings.md#recovered-predicate",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -154,7 +165,8 @@
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/analyzer_tests.cpp",
-        "tests/standard_accuracy_tests.cpp"
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.18.html",
@@ -172,7 +184,9 @@
           "matched": true
         }
       ],
-      "limitations": "The semantic names of declaration flags +0xa2/+0xa4, cross-file/library formal resolution, elaborated aliases, generated scopes, direct post-construction object mutation by an unknown external client and exact diagnostic multiplicity remain unresolved. Product deliberately excludes undriven outputs and inout boundary ports from redundancy findings; unresolved or ambiguous cell types remain conservative and no alarm remains ManualReviewRequired. Full native equivalence is not claimed."
+      "limitations": "The semantic names of declaration flags +0xa2/+0xa4, cross-file/library formal resolution, elaborated aliases, generated scopes, direct post-construction object mutation by an unknown external client and exact diagnostic multiplicity remain unresolved. Product deliberately excludes undriven outputs and inout boundary ports from redundancy findings; unresolved or ambiguous cell types remain conservative and no alarm remains ManualReviewRequired. Full native equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-7-1",
@@ -294,16 +308,29 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 at 0x180564070 is a thunk to FUN_180666520. That worker builds combinational components through FUN_180665150, whose index/lowlink DFS FUN_18066b340 emits strongly connected cell groups. FUN_18066a260 collects internal signals; the entry unconditionally builds the diagnostic 检测到组合回路 for each admitted component with source metadata. Unlike 7.2.2 there is no four-gate-type count threshold. Product retains existing semantic combinational-cycle and documented inferred-latch checks and adds scalar primitive/Boolean SCC coverage without the two-counted-gate cap.",
+      "predicate": "Native slot 0 at 0x180564070 is a thunk to FUN_180666520. That worker builds combinational components through FUN_180665150, whose index/lowlink DFS FUN_18066b340 emits strongly connected cell groups. FUN_18066a260 collects internal signals; the entry unconditionally builds the diagnostic 检测到组合回路 for each admitted component with source metadata. Unlike 7.2.2 there is no four-gate-type count threshold. Product retains existing semantic combinational-cycle and documented inferred-latch checks and adds scalar primitive/Boolean SCC coverage without the two-counted-gate cap. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "docs/evidence/native_verilog_combinational_loop_7_2_1_findings.md",
-        "attachment:examples_html/GJB10157_VLOG.7.2.1.html#sha256=bfc81524d7e452d62c6aac5ef3f3269fffa0a82ef2c7b00eb2d95e38eaf3b0d2"
+        "attachment:examples_html/GJB10157_VLOG.7.2.1.html#sha256=bfc81524d7e452d62c6aac5ef3f3269fffa0a82ef2c7b00eb2d95e38eaf3b0d2",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/analysis/verilog_gate_feedback.h + src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": null,
+      "additionalTests": [
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.7.2.1.html",
         "sha256": "bfc81524d7e452d62c6aac5ef3f3269fffa0a82ef2c7b00eb2d95e38eaf3b0d2",
@@ -332,7 +359,9 @@
           "matched": true
         }
       ],
-      "limitations": "Native netlist cell admission, single-cell feedback, complete vector and constant lowering, hierarchy, generate, aliases, latch-specific lowering and exact diagnostic multiplicity remain unresolved. The inferred procedural-latch mapping remains separately supported by the packaged example; full native equivalence is not claimed and no alarm remains manual review."
+      "limitations": "Native netlist cell admission, single-cell feedback, complete vector and constant lowering, hierarchy, generate, aliases, latch-specific lowering and exact diagnostic multiplicity remain unresolved. The inferred procedural-latch mapping remains separately supported by the packaged example; full native equivalence is not claimed and no alarm remains manual review. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-6-2",
@@ -1973,13 +2002,24 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Constructor FUN_180021130 registers GJB10157_VLOG.5.2.10 and installs vtable 0x180eebad8; native slot 0 FUN_18052cd30 resolves exactly the AST_MODULE named by the shared setTopModule value DAT_18135b808, collects AST_WIRE nodes below that module that have fields +0xa0 set and +0x58 nonempty, normalizes their names, then collects AST_IDENTIFIER load references and reports each driven candidate absent from the load-reference set. It emits Error at the candidate declaration line with no native column and constructs the exact diagnostic 禁止顶层的输入管脚<name>悬空 from DAT_180eebb28, the normalized candidate name and DAT_180eebb20. Product uses its declaration-, driver-, read- and instance-connection-aware Verilog semantic model, limits an explicitly selected top to that module, maps absent column to 1 and emits the exact recovered text while retaining the broader 5.2.18 mapping.",
+      "predicate": "Constructor FUN_180021130 registers GJB10157_VLOG.5.2.10 and installs vtable 0x180eebad8; native slot 0 FUN_18052cd30 resolves exactly the AST_MODULE named by the shared setTopModule value DAT_18135b808, collects AST_WIRE nodes below that module that have fields +0xa0 set and +0x58 nonempty, normalizes their names, then collects AST_IDENTIFIER load references and reports each driven candidate absent from the load-reference set. It emits Error at the candidate declaration line with no native column and constructs the exact diagnostic 禁止顶层的输入管脚<name>悬空 from DAT_180eebb28, the normalized candidate name and DAT_180eebb20. Product uses its declaration-, driver-, read- and instance-connection-aware Verilog semantic model, limits an explicitly selected top to that module, maps absent column to 1 and emits the exact recovered text while retaining the broader 5.2.18 mapping. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "reverse-tools/evidence/t_linter_pass60/r2_10_decompile.txt#sha256=1c7e44df6c35e5268306f6f0c79bafdfd70ca13ad875c8b25cbbdc0dbe530269",
         "reverse-tools/evidence/t_linter_pass60/r2_10_strings.txt#sha256=2639109b3787df329683c75d62ea975d373a8b6123b43fd9c07d258c0f6a282e",
         "ev_6bc1e894e3076c31b7a4412d4c1ff3a616a58190705bb50cb97af2a2335c0043",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
-        "docs/evidence/native_verilog_unloaded_driven_signal_5_2_10_findings.md#恢复判据"
+        "docs/evidence/native_verilog_unloaded_driven_signal_5_2_10_findings.md#恢复判据",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -1987,7 +2027,8 @@
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/analyzer_tests.cpp",
-        "tests/standard_accuracy_tests.cpp"
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.10.html",
@@ -2007,7 +2048,9 @@
           "matched": true
         }
       ],
-      "limitations": "The semantic names of native fields +0x58 and +0xa0 are inferred from control flow and the packaged examples rather than recovered debug types. Exact frontend treatment of assignment targets, aliases, memories, generated scopes, hierarchical references, primitives and diagnostic multiplicity remains unresolved. Product conservatively treats any recognized instance actual as a use because formal direction may require project elaboration. No alarm remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The semantic names of native fields +0x58 and +0xa0 are inferred from control flow and the packaged examples rather than recovered debug types. Exact frontend treatment of assignment targets, aliases, memories, generated scopes, hierarchical references, primitives and diagnostic multiplicity remains unresolved. Product conservatively treats any recognized instance actual as a use because formal direction may require project elaboration. No alarm remains ManualReviewRequired and full native equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "A-2-1",
@@ -2604,7 +2647,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native slot 2 admits only AST_DEFPARAM(11). FUN_180531530 iterates every nonnull admitted candidate in the +0xa8 map, rechecks type 11, and emits once per node without first-match termination or name deduplication. It uses node source path +0x1e0 and physical line +0x210, fixed Error severity, and the exact GB18030 message 禁止使用defparam语句. Product reports every active preprocessed defparam token, preserves identical same-line multiplicity, and uses column 1 for the native line-only location.",
+      "predicate": "Native slot 2 admits only AST_DEFPARAM(11). FUN_180531530 iterates every nonnull admitted candidate in the +0xa8 map, rechecks type 11, and emits once per node without first-match termination or name deduplication. It uses node source path +0x1e0 and physical line +0x210, fixed Error severity, and the exact GB18030 message 禁止使用defparam语句. Product reports every active preprocessed defparam token, preserves identical same-line multiplicity, and uses column 1 for the native line-only location. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_ea1ab0c9b3158d8d1b272c89c8bd0c5d48da023aea4038b61b643beed2d6c305",
         "ev_87e31428f393724302af14e09cfc512b1ac20b2f8a33090a51c2a0918f113729",
@@ -2612,13 +2655,27 @@
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
         "ev_b1a08455bb3675ba32b6e6c1112c4855111694443abd5936f16c0fab4a0c34dd",
         "reverse-tools/evidence/a2_6_defparam_entry.txt#sha256=88a7e65c08c7abb8461d656c7f88e3ccf744e118bafe623fd7aba280d03c673a",
-        "docs/evidence/native_verilog_defparam_5_2_16_findings.md"
+        "docs/evidence/native_verilog_defparam_5_2_16_findings.md",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": "tests/standard_accuracy_tests.cpp",
+      "additionalTests": [
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.16.html",
         "sha256": "af2110fb3e1f3f392710cf6d676ecf51ab5e29fbfc1e5dc4f8f8122941f44ddb",
@@ -2637,7 +2694,9 @@
           "matched": true
         }
       ],
-      "limitations": "Complete source ownership for macro/include-generated nodes, generated-module and malformed-input AST recovery, +0xa8 candidate-map key construction and traversal order, and full proprietary frontend equivalence remain unresolved. Product consumes the configured preprocessed source and does not certify quiet paths compliant."
+      "limitations": "Complete source ownership for macro/include-generated nodes, generated-module and malformed-input AST recovery, +0xa8 candidate-map key construction and traversal order, and full proprietary frontend equivalence remain unresolved. Product consumes the configured preprocessed source and does not certify quiet paths compliant. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "A-2-7",
@@ -3606,7 +3665,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Constructor FUN_180021b80 installs vtable 0x180eef1d8. Slot 1 FUN_18071a060 admits only AST_CELL(0x4f), and slot 0 FUN_1806d30d0 recursively collects AST_ARGUMENT(13) below each admitted cell. The first argument whose name length at +0x58 is zero emits one record and breaks only that cell loop, so each positional instance reports once regardless of its positional-port count. The message concatenates GB18030 fragments as 实例<normalized-cell-name>未使用命名关联端口映射连接; source path +0x1e0 and physical line +0x210 come from the cell and no native column is stored. The native record says Warning while the shipped GJB10157 profiles configure this rule as Error; product follows the selected standard profile and reproduces the predicate, multiplicity, exact text and line-only location.",
+      "predicate": "Constructor FUN_180021b80 installs vtable 0x180eef1d8. Slot 1 FUN_18071a060 admits only AST_CELL(0x4f), and slot 0 FUN_1806d30d0 recursively collects AST_ARGUMENT(13) below each admitted cell. The first argument whose name length at +0x58 is zero emits one record and breaks only that cell loop, so each positional instance reports once regardless of its positional-port count. The message concatenates GB18030 fragments as 实例<normalized-cell-name>未使用命名关联端口映射连接; source path +0x1e0 and physical line +0x210 come from the cell and no native column is stored. The native record says Warning while the shipped GJB10157 profiles configure this rule as Error; product follows the selected standard profile and reproduces the predicate, multiplicity, exact text and line-only location. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_6659c1428a97450292d463e44400d3a98c8a36293bdf30761102a33f30cffc76",
         "ev_90de243667744365d1adc00c2a5571260bb3e2e2df08f1c6761bebb0f92a38e8",
@@ -3614,13 +3673,27 @@
         "ev_2931001d50d0a817c327e36f2110c5a6b8262d6ef85f7f36049a336d94f9a687",
         "ev_d02a3a7b6216e84a9e2e87d6b439ba09f213ce9520a3e520c4538722f755f236",
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
-        "docs/evidence/native_verilog_positional_ports_5_2_9_findings.md#原生实现观察"
+        "docs/evidence/native_verilog_positional_ports_5_2_9_findings.md#原生实现观察",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": "tests/standard_accuracy_tests.cpp",
+      "additionalTests": [
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.9.html",
         "sha256": "6075b6902829b849677775b174a93bbae900da03e442c193625be258fb36317d",
@@ -3639,7 +3712,9 @@
           "matched": true
         }
       ],
-      "limitations": "Complete proprietary macro/include/generate cell construction, escaped and non-ASCII normalization, implicit connections, malformed recovery, cell traversal order and the downstream mechanism reconciling the internal Warning record with profile Error remain unresolved. Product uses parsed positional port associations, profile Error and column 1; no alarm remains ManualReviewRequired and full frontend equivalence is not claimed."
+      "limitations": "Complete proprietary macro/include/generate cell construction, escaped and non-ASCII normalization, implicit connections, malformed recovery, cell traversal order and the downstream mechanism reconciling the internal Warning record with profile Error remain unresolved. Product uses parsed positional port associations, profile Error and column 1; no alarm remains ManualReviewRequired and full frontend equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-3-1",
@@ -6061,7 +6136,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native AST_ALWAYS/AST_ASSIGN traversal gathers AST_LT/LE/GE/GT/EQ/NE/EQX/NEX descendants. A two-child candidate is reported when the two native width results differ. Both calls at 0x1805706ad/0x1805706cc explicitly pass fifth flag zero, so nested ADD/SUB/MUL/DIV/MOD take max child width, POW/unary signs propagate the first child, CONCAT sums and REPLICATE multiplies. Product integrates these bounded static-width expression shapes in control conditions, conditional expressions, direct procedural assignment RHS and continuous assignment RHS.",
+      "predicate": "Native AST_ALWAYS/AST_ASSIGN traversal gathers AST_LT/LE/GE/GT/EQ/NE/EQX/NEX descendants. A two-child candidate is reported when the two native width results differ. Both calls at 0x1805706ad/0x1805706cc explicitly pass fifth flag zero, so nested ADD/SUB/MUL/DIV/MOD take max child width, POW/unary signs propagate the first child, CONCAT sums and REPLICATE multiplies. Product integrates these bounded static-width expression shapes in control conditions, conditional expressions, direct procedural assignment RHS and continuous assignment RHS. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_4b56231ed19a0a496798bd8721aae35b6e61063b9d5ff29c517a8328ea93f004",
         "ev_64f1059ebe9591553a1ca8ce04e68a11ec13f174085f30430d2355624bf9696d",
@@ -6070,7 +6145,18 @@
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_1_asm.txt",
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_1_flag_zero.md",
-        "docs/evidence/native_verilog_comparison_width_8_1_findings.md"
+        "docs/evidence/native_verilog_comparison_width_8_1_findings.md",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -6078,7 +6164,8 @@
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/analyzer_tests.cpp",
-        "tests/standard_accuracy_tests.cpp"
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.8.1.html",
@@ -6096,7 +6183,9 @@
           "matched": true
         }
       ],
-      "limitations": "Unsupported helper AST operators, functions, dynamic selections, AST transformation details, parameter overrides, complete macro/generate lowering and exact diagnostic order/multiplicity remain unverified. Product supports bounded static-width identifiers/selects, explicitly sized literals, concat/replicate and arithmetic/unary nodes; unresolved expressions do not certify compliance. No alarm remains ManualReviewRequired."
+      "limitations": "Unsupported helper AST operators, functions, dynamic selections, AST transformation details, parameter overrides, complete macro/generate lowering and exact diagnostic order/multiplicity remain unverified. Product supports bounded static-width identifiers/selects, explicitly sized literals, concat/replicate and arithmetic/unary nodes; unresolved expressions do not certify compliance. No alarm remains ManualReviewRequired. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-9-2",
@@ -6146,18 +6235,32 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 gathers AST_ALWAYS/AST_ASSIGN roots (0x52/0x4d), recursively collects AST_BIT_NOT/AND/OR/XOR/XNOR (0x24..0x28), excludes unary AST_BIT_NOT, requires exactly two children, and emits when the two FUN_1808f4650 results differ. Instruction-level evidence shows the fifth argument is zero for both helper calls. Product checks binary &, |, ^, ^~ and ~^ in continuous assignments and processes using the recovered bounded flag-zero expression-width model on both operands.",
+      "predicate": "Native slot 0 gathers AST_ALWAYS/AST_ASSIGN roots (0x52/0x4d), recursively collects AST_BIT_NOT/AND/OR/XOR/XNOR (0x24..0x28), excludes unary AST_BIT_NOT, requires exactly two children, and emits when the two FUN_1808f4650 results differ. Instruction-level evidence shows the fifth argument is zero for both helper calls. Product checks binary &, |, ^, ^~ and ~^ in continuous assignments and processes using the recovered bounded flag-zero expression-width model on both operands. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_94b9f8237842ac4a0763ce4d23151460e93acab5cb095bee6eec6c8eb5392337",
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_2_flag_zero.md",
-        "docs/evidence/native_bitwise_width_8_2_findings.md#FUN_180571230"
+        "docs/evidence/native_bitwise_width_8_2_findings.md#FUN_180571230",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": "tests/analyzer_tests.cpp; tests/standard_accuracy_tests.cpp",
+      "additionalTests": [
+        "tests/analyzer_tests.cpp; tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.8.2.html",
         "sha256": "e987850a91c229db4dac8187526a018d43185fb23dd6b2ae2e1f85fabac1c54f"
@@ -6174,7 +6277,9 @@
           "matched": true
         }
       ],
-      "limitations": "Other AST operators, signed extension details, macros, parameter overrides, function calls, dynamic selects, complete generated scopes and diagnostic multiplicity remain unresolved. Product admits direct fixed-width signals, constant selects, explicitly sized literals, concatenations, static replications and bounded parenthesized flag-zero arithmetic operands; unsupported expressions remain unknown. No finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "Other AST operators, signed extension details, macros, parameter overrides, function calls, dynamic selects, complete generated scopes and diagnostic multiplicity remain unresolved. Product admits direct fixed-width signals, constant selects, explicitly sized literals, concatenations, static replications and bounded parenthesized flag-zero arithmetic operands; unsupported expressions remain unknown. No finding remains ManualReviewRequired and full native equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-9-3",
@@ -6224,12 +6329,23 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 gathers AST_ALWAYS/AST_ASSIGN roots (0x52/0x4d), then each AST_ADD/SUB/MUL/DIV/MOD/POW node (0x3c,0x3d,0x3e,0x3f,0x40,0x42). FUN_180573af0 recursively visits the complete subtree of each arithmetic node, resolves AST_IDENTIFIER declarations with FUN_1808f4650, appends the resolved symbol byte at +0xa4, and the run reports exactly when the resulting bit vector contains both zero and one. Product reconstructs bounded Verilog arithmetic subtrees by precedence and associativity and independently classifies declaration-resolved identifier descendants on every node in assignments and processes.",
+      "predicate": "Native slot 0 gathers AST_ALWAYS/AST_ASSIGN roots (0x52/0x4d), then each AST_ADD/SUB/MUL/DIV/MOD/POW node (0x3c,0x3d,0x3e,0x3f,0x40,0x42). FUN_180573af0 recursively visits the complete subtree of each arithmetic node, resolves AST_IDENTIFIER declarations with FUN_1808f4650, appends the resolved symbol byte at +0xa4, and the run reports exactly when the resulting bit vector contains both zero and one. Product reconstructs bounded Verilog arithmetic subtrees by precedence and associativity and independently classifies declaration-resolved identifier descendants on every node in assignments and processes. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_831e82f060cbac3411dda956028bf6b283df8fb032e92e7f9d0b77df52239651",
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_3_recursive_identifiers.md",
-        "docs/evidence/native_mixed_signedness_8_3_findings.md#FUN_1805728e0"
+        "docs/evidence/native_mixed_signedness_8_3_findings.md#FUN_1805728e0",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -6237,7 +6353,8 @@
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/analyzer_tests.cpp",
-        "tests/standard_accuracy_tests.cpp"
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.8.3.html",
@@ -6255,7 +6372,9 @@
           "matched": true
         }
       ],
-      "limitations": "The semantic name of symbol byte +0xa4 is inferred from the rule, declarations and examples rather than recovered debug types. Casts, parameters, functions, macros, complete concatenation lowering, generated scopes, malformed recovery and exact diagnostic multiplicity remain unresolved. Product admits bounded arithmetic precedence trees whose identifier declarations resolve in the current unit. No finding remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The semantic name of symbol byte +0xa4 is inferred from the rule, declarations and examples rather than recovered debug types. Casts, parameters, functions, macros, complete concatenation lowering, generated scopes, malformed recovery and exact diagnostic multiplicity remain unresolved. Product admits bounded arithmetic precedence trees whose identifier declarations resolve in the current unit. No finding remains ManualReviewRequired and full native equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-9-4",
@@ -6536,7 +6655,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native root admission includes module, continuous/cell connection, blocking and nonblocking assignment paths. FUN_1805790d0 reports ADD/SUB when any direct operand width exceeds the target, or equals it unless that operand is a multi-child AST_CONCAT whose last AST child has an empty/all-S0 bits vector. FUN_1808f46c0 AST_CONSTANT handling identifies +0x88/+0x90 as bits-vector bounds; Yosys concat grammar makes the last AST child the source-leftmost item. All GJB10157.8.7 calls pass fifth flag byte zero: nested ADD/SUB/MUL/DIV/MOD therefore infer max child width, nested POW/unary signs propagate the first child, CONCAT sums and REPLICATE multiplies. Outer branches remain MUL=sum(direct-child inferred widths), DIV/MOD=target_width < inferred_node_width-1, and POW=target_width < (int)(pow(2.0, exponent_width)-1.0)*base_width-1 for an AST_IDENTIFIER base. Product integrates these bounded recursive arithmetic shapes and exact non-overflowing POW formula.",
+      "predicate": "Native root admission includes module, continuous/cell connection, blocking and nonblocking assignment paths. FUN_1805790d0 reports ADD/SUB when any direct operand width exceeds the target, or equals it unless that operand is a multi-child AST_CONCAT whose last AST child has an empty/all-S0 bits vector. FUN_1808f46c0 AST_CONSTANT handling identifies +0x88/+0x90 as bits-vector bounds; Yosys concat grammar makes the last AST child the source-leftmost item. All GJB10157.8.7 calls pass fifth flag byte zero: nested ADD/SUB/MUL/DIV/MOD therefore infer max child width, nested POW/unary signs propagate the first child, CONCAT sums and REPLICATE multiplies. Outer branches remain MUL=sum(direct-child inferred widths), DIV/MOD=target_width < inferred_node_width-1, and POW=target_width < (int)(pow(2.0, exponent_width)-1.0)*base_width-1 for an AST_IDENTIFIER base. Product integrates these bounded recursive arithmetic shapes and exact non-overflowing POW formula. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_2d39647f5db8d6528c086519184668d7bd758d868c50723656f573df76be7be0",
         "ev_965de2ff6bdd12c2e267427e014a9916d9a02e3f5092ba6edc9c48b5a6b30171",
@@ -6545,13 +6664,27 @@
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_7_add_sub_concat.md",
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_7_nested_width.md",
         "reverse-tools/evidence/t_linter_pass4/gjb10157_8_7_pow_constants.md",
-        "docs/evidence/native_arithmetic_result_width_8_7_findings.md#fun_1805790d0-运算分派"
+        "docs/evidence/native_arithmetic_result_width_8_7_findings.md#fun_1805790d0-运算分派",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": "tests/standard_accuracy_tests.cpp",
+      "additionalTests": [
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.8.7.html",
         "sha256": "733f43f3f9bde6155ced29b02926d1e5123d28892620bab3f3cc404d52f0a3f9"
@@ -6568,7 +6701,9 @@
           "matched": true
         }
       ],
-      "limitations": "Unsupported helper AST operators, unresolved parameter/function widths, dynamic selections, exact behavior for unsupported concat items, overflowing/out-of-range POW floating-to-int and signed arithmetic, signedness, parameter overrides, cell binding and diagnostic deduplication remain unresolved. Product recursive support is bounded to statically sized identifiers/selects, explicitly sized literals, concat/replicate and arithmetic/unary nodes. Unsupported/no-alarm results remain ManualReviewRequired; full native equivalence is not claimed."
+      "limitations": "Unsupported helper AST operators, unresolved parameter/function widths, dynamic selections, exact behavior for unsupported concat items, overflowing/out-of-range POW floating-to-int and signed arithmetic, signedness, parameter overrides, cell binding and diagnostic deduplication remain unresolved. Product recursive support is bounded to statically sized identifiers/selects, explicitly sized literals, concat/replicate and arithmetic/unary nodes. Unsupported/no-alarm results remain ManualReviewRequired; full native equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "A-9-1",
@@ -7032,16 +7167,29 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 collects AST_ASSIGN_LE (0x56), separately collects AST_FOR (0x5c), and removes nonblocking assignment nodes that are direct children of FOR nodes before reporting candidates. Packaged examples establish combinational-process scope. Product gates diagnostics on recognized combinational processes, excludes lexical FOR headers, and retains nonblocking assignments in loop bodies.",
+      "predicate": "Native slot 0 collects AST_ASSIGN_LE (0x56), separately collects AST_FOR (0x5c), and removes nonblocking assignment nodes that are direct children of FOR nodes before reporting candidates. Packaged examples establish combinational-process scope. Product gates diagnostics on recognized combinational processes, excludes lexical FOR headers, and retains nonblocking assignments in loop bodies. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_3559bbfa3ab0dd89f9f56a9fa44e730da86bef373dc158064f9eeecbeac23583",
-        "docs/evidence/native_assignment_style_9_1_3_9_1_4_findings.md#FUN_1806f6280"
+        "docs/evidence/native_assignment_style_9_1_3_9_1_4_findings.md#FUN_1806f6280",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/analyzer_tests.cpp",
-      "additionalTests": null,
+      "additionalTests": [
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.9.1.3.html",
         "sha256": "735b922755383d81e8bf4ba0b84ff5063caea82a5d2be52fc1b52c1fb2f02e91"
@@ -7058,7 +7206,9 @@
           "matched": true
         }
       ],
-      "limitations": "The producer of native root collection at +0x68, exact combinational classification, generated-name exclusion, AST child filtering, preprocessing, source lowering and diagnostic multiplicity remain unresolved. The product applies source-level process classification and is only partially integrated; no finding remains ManualReviewRequired."
+      "limitations": "The producer of native root collection at +0x68, exact combinational classification, generated-name exclusion, AST child filtering, preprocessing, source lowering and diagnostic multiplicity remain unresolved. The product applies source-level process classification and is only partially integrated; no finding remains ManualReviewRequired. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-10-4",
@@ -7140,16 +7290,29 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 collects AST_ASSIGN_EQ (0x55), separately collects AST_FOR (0x5c), and removes blocking assignment nodes that are direct children of FOR nodes before reporting candidates. Packaged examples establish edge-triggered-process scope. Product gates diagnostics on recognized sequential processes, excludes lexical FOR headers, and retains blocking assignments in loop bodies.",
+      "predicate": "Native slot 0 collects AST_ASSIGN_EQ (0x55), separately collects AST_FOR (0x5c), and removes blocking assignment nodes that are direct children of FOR nodes before reporting candidates. Packaged examples establish edge-triggered-process scope. Product gates diagnostics on recognized sequential processes, excludes lexical FOR headers, and retains blocking assignments in loop bodies. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_6fb033e05739cbac69b2fe5ec384d93646e1e61fba3574b5673d84dc38d6ea8a",
-        "docs/evidence/native_assignment_style_9_1_3_9_1_4_findings.md#FUN_1806f4b40"
+        "docs/evidence/native_assignment_style_9_1_3_9_1_4_findings.md#FUN_1806f4b40",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/analyzer_tests.cpp",
-      "additionalTests": null,
+      "additionalTests": [
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.9.1.4.html",
         "sha256": "6af71cb89483105dbda833b797e920300d47cb3294467c461cb8b1cf64f315d5"
@@ -7166,7 +7329,9 @@
           "matched": true
         }
       ],
-      "limitations": "The producer of native root collection at +0xa8, exact sequential classification, generated-name exclusion, AST child filtering, preprocessing, source lowering and diagnostic multiplicity remain unresolved. The product applies source-level process classification and is only partially integrated; no finding remains ManualReviewRequired."
+      "limitations": "The producer of native root collection at +0xa8, exact sequential classification, generated-name exclusion, AST child filtering, preprocessing, source lowering and diagnostic multiplicity remain unresolved. The product applies source-level process classification and is only partially integrated; no finding remains ManualReviewRequired. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-10-5",
@@ -7295,18 +7460,31 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 reports candidate nodes whose byte +0x29b is nonzero and whose source line +0x210 is nonzero; slot 2 returns the same byte predicate. Whole-DLL instruction search found one real +0x29b setter at 0x180958c8c. The parser action jump table maps that setter uniquely to Bison rule 545, and reverse traversal of yyr1/yyr2/yystos/yypact/yytable/yycheck recovers the exact production behavioral_stmt -> non_opt_delay behavioral_stmt. The action first verifies the AST pointer vector is nonempty and then marks its tail node. Product maps this native-reachable prefix delay in always/initial/task scopes and retains packaged-example coverage for blocking/nonblocking intra-assignment delay plus continuous-assignment delay.",
+      "predicate": "Native slot 0 reports candidate nodes whose byte +0x29b is nonzero and whose source line +0x210 is nonzero; slot 2 returns the same byte predicate. Whole-DLL instruction search found one real +0x29b setter at 0x180958c8c. The parser action jump table maps that setter uniquely to Bison rule 545, and reverse traversal of yyr1/yyr2/yystos/yypact/yytable/yycheck recovers the exact production behavioral_stmt -> non_opt_delay behavioral_stmt. The action first verifies the AST pointer vector is nonempty and then marks its tail node. Product maps this native-reachable prefix delay in always/initial/task scopes and retains packaged-example coverage for blocking/nonblocking intra-assignment delay plus continuous-assignment delay. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_f7bed42c00fb3a78b643107964ff5214a93b03dae42be4931bec54f66f2325ab",
         "ev_ead125ba606823e5109a27ae163ab1c0763acbeab2fe633d066048ea9fa90961",
         "ev_62d22d7ac1f9dc6363f30e31f5340934b7924d2974c825979617c9122689acf4",
-        "docs/evidence/native_verilog_delay_9_1_6_findings.md#已确认的二进制事实"
+        "docs/evidence/native_verilog_delay_9_1_6_findings.md#已确认的二进制事实",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
       "implementationSource": "src/parser/semantic_analyzer.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": null,
+      "additionalTests": [
+        "tests/frontend_source_view_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.9.1.6.html",
         "sha256": "d4872c09ca5a9240e2dd33fcc74d1bca28132320571bd75dd6e9f12ad96e0c81"
@@ -7333,7 +7511,9 @@
           "matched": true
         }
       ],
-      "limitations": "Native assignment productions 518/522 contain a delay nonterminal but their action blocks do not write +0x29b, despite packaged examples marking intra-assignment delays as violations; this is recorded as a native/document coverage discrepancy rather than hidden. Continuous-assignment coverage is a standards-intent product extension. Generated/error-recovery nodes, indirect propagation, macro-expanded native locations, zero-line nodes and exact diagnostic multiplicity remain unresolved. No alarm remains ManualReviewRequired; no full native equivalence is claimed."
+      "limitations": "Native assignment productions 518/522 contain a delay nonterminal but their action blocks do not write +0x29b, despite packaged examples marking intra-assignment delays as violations; this is recorded as a native/document coverage discrepancy rather than hidden. Continuous-assignment coverage is a standards-intent product extension. Generated/error-recovery nodes, indirect propagation, macro-expanded native locations, zero-line nodes and exact diagnostic multiplicity remain unresolved. No alarm remains ManualReviewRequired; no full native equivalence is claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-11-1",
@@ -9497,14 +9677,25 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native slot 1 admits module/always AST candidates. Run invokes FUN_1806e04f0 over elaborated module connection, cell-port and signal-bit records, then FUN_180565f90/FUN_1806e3910 return SCC results without an entry-level filter limiting the graph to source assignments or a short cell-type list. Packaged examples prove scalar, combinational-always and constant-bit-select cycles. Product combines its semantic Tarjan graph with a bounded scalar primitive/netlist SCC adapter and suppresses duplicate components.",
+      "predicate": "Native slot 1 admits module/always AST candidates. Run invokes FUN_1806e04f0 over elaborated module connection, cell-port and signal-bit records, then FUN_180565f90/FUN_1806e3910 return SCC results without an entry-level filter limiting the graph to source assignments or a short cell-type list. Packaged examples prove scalar, combinational-always and constant-bit-select cycles. Product combines its semantic Tarjan graph with a bounded scalar primitive/netlist SCC adapter and suppresses duplicate components. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_1613897b47a43ac88942d85372441ea02a59f7d819caacbe350e38e131d4039f",
         "ev_7c8c0522a979376c5bcc52b5067221464c6da315d3772c03b1e15bbf77ae5449",
         "ev_4a4611d849db58ae32e4828dd165a9bb6cad419a7baa44c001959069449748b7",
         "reverse-tools/evidence/r13_7/native_entry_functions.txt",
         "reverse-tools/evidence/r13_7/native_helpers.txt",
-        "docs/evidence/native_verilog_combinational_feedback_9_4_7_findings.md"
+        "docs/evidence/native_verilog_combinational_feedback_9_4_7_findings.md",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -9512,7 +9703,8 @@
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/analyzer_tests.cpp",
-        "tests/standard_accuracy_tests.cpp"
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_source_view_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.9.4.7.html",
@@ -9542,7 +9734,9 @@
           "matched": true
         }
       ],
-      "limitations": "Exact native internal-cell admission, bit-name encoding, constant propagation/optimization order, cross-module paths, dynamic selects, wide vectors, unsupported primitives and diagnostic multiplicity remain incomplete. Product admits parser-proved source cycles, bounded constant bit nodes and a scalar primitive/Boolean subset; unsupported clean paths remain ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "Exact native internal-cell admission, bit-name encoding, constant propagation/optimization order, cross-module paths, dynamic selects, wide vectors, unsupported primitives and diagnostic multiplicity remain incomplete. Product admits parser-proved source cycles, bounded constant bit nodes and a scalar primitive/Boolean subset; unsupported clean paths remain ManualReviewRequired and full native equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-13-8",
@@ -9592,7 +9786,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native slot 1 accepts AST_MODULE(2). Run examines indexed AST children: AST_CONSTANT(16) values are compared inclusively with stored lower/upper bounds; AST_IDENTIFIER(19) uses a name/value lookup; AST_ADD/SUB(0x3c/0x3d) admits one identifier and one constant and checks the derived result and related operand. The recovered frontend producer FUN_180914500 additionally writes exact attribute is_over_array_index on a directly assigned AST_IDENTIFIER bit-select when declaration_width < 2^inferred_index_width. Product checks fixed packed and unpacked multidimensional ranges, direct numeric unshadowed localparams, and the bounded direct-write/single-index-identifier capacity branch.",
+      "predicate": "Native slot 1 accepts AST_MODULE(2). Run examines indexed AST children: AST_CONSTANT(16) values are compared inclusively with stored lower/upper bounds; AST_IDENTIFIER(19) uses a name/value lookup; AST_ADD/SUB(0x3c/0x3d) admits one identifier and one constant and checks the derived result and related operand. The recovered frontend producer FUN_180914500 additionally writes exact attribute is_over_array_index on a directly assigned AST_IDENTIFIER bit-select when declaration_width < 2^inferred_index_width. Product checks fixed packed and unpacked multidimensional ranges, direct numeric unshadowed localparams, and the bounded direct-write/single-index-identifier capacity branch. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_9afd90263d48852bb5c185ff6fecdb3be08b01db3a71348e854e5c253c0e764a",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
@@ -9600,7 +9794,18 @@
         "ev_6b4f5b969272e1d0b342d5808a49e11fa7b0a126c8c7bbaf2231e743df6d69d0",
         "reverse-tools/evidence/r13_8/native_entry_functions.txt",
         "reverse-tools/evidence/r13_6_producers/string_references.txt",
-        "docs/evidence/native_verilog_array_index_9_4_8_findings.md"
+        "docs/evidence/native_verilog_array_index_9_4_8_findings.md",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -9609,7 +9814,8 @@
       "additionalTests": [
         "tests/analyzer_tests.cpp",
         "tests/standard_accuracy_tests.cpp",
-        "tests/CMakeLists.txt"
+        "tests/CMakeLists.txt",
+        "tests/frontend_source_view_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.9.4.8.html",
@@ -9639,7 +9845,9 @@
           "matched": true
         }
       ],
-      "limitations": "Native identifier-map construction/value model, parameter overrides, complete AST_ADD/SUB evaluation, signed index semantics, elaboration, aliases, compound dynamic indices, multidimensional dynamic writes and exact diagnostic multiplicity remain incomplete. Product binds only direct-numeric module localparams before behavioral constructs, rejects shadow/duplicate names and macro-bearing bodies, and limits the recovered producer adapter to a direct assignment target with one declared index identifier; unsupported clean paths remain ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "Native identifier-map construction/value model, parameter overrides, complete AST_ADD/SUB evaluation, signed index semantics, elaboration, aliases, compound dynamic indices, multidimensional dynamic writes and exact diagnostic multiplicity remain incomplete. Product binds only direct-numeric module localparams before behavioral constructs, rejects shadow/duplicate names and macro-bearing bodies, and limits the recovered producer adapter to a direct assignment target with one declared index identifier; unsupported clean paths remain ManualReviewRequired and full native equivalence is not claimed. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-13-9",
@@ -9689,7 +9897,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native run constructs two name-indexed relation objects and forwards candidate names/AST locations to both. Their concrete types VLR-110012 and VLR-110013 have distinct slot-0 output functions: 0x180756330 emits the exact redundant-name template and 0x180755270 emits the exact missing-name template. Both functions report inside a per-name loop. Product computes bounded read/list set differences for explicit non-edge always sensitivity, retains simple raw Verilog event names already present in the list, emits one issue per name, locates missing names at body reads and redundant names at list entries, and uses the recovered native Chinese messages.",
+      "predicate": "Native run constructs two name-indexed relation objects and forwards candidate names/AST locations to both. Their concrete types VLR-110012 and VLR-110013 have distinct slot-0 output functions: 0x180756330 emits the exact redundant-name template and 0x180755270 emits the exact missing-name template. Both functions report inside a per-name loop. Product computes bounded read/list set differences for explicit non-edge always sensitivity, retains simple raw Verilog event names already present in the list, emits one issue per name, locates missing names at body reads and redundant names at list entries, and uses the recovered native Chinese messages. V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.",
       "predicateEvidence": [
         "ev_04c1a0c257c1585816c39115af5d7c4a151a9fdd1666c2327497848834963158",
         "ev_106bd7cb2a5a3d16e0e79592006d2c487832e308ede99d8a497762978842c2b3",
@@ -9700,7 +9908,18 @@
         "reverse-tools/evidence/r13_9/relation_vtables.txt",
         "reverse-tools/evidence/r13_9/relation_virtual_methods.txt",
         "reverse-tools/evidence/r13_9/relation_strings.txt",
-        "docs/evidence/native_verilog_sensitivity_completeness_9_4_9_findings.md#已观察事实"
+        "docs/evidence/native_verilog_sensitivity_completeness_9_4_9_findings.md#已观察事实",
+        "docs/native_rule_recovery_pass136.md",
+        "reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8",
+        "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf",
+        "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc",
+        "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425",
+        "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91",
+        "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e",
+        "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
+        "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b",
+        "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651",
+        "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -9709,7 +9928,8 @@
       "additionalTests": [
         "tests/analyzer_tests.cpp",
         "tests/standard_accuracy_tests.cpp",
-        "tests/CMakeLists.txt"
+        "tests/CMakeLists.txt",
+        "tests/frontend_source_view_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.9.4.9.html",
@@ -9747,7 +9967,9 @@
           "matched": true
         }
       ],
-      "limitations": "Exact native AST-name normalization, all relation-object map fields, implicit-net admission outside the documented forms, expression/function-call sensitivity, aliases, preprocessing, result ordering and recovered source-position rules remain incomplete. Product only promotes undeclared names already present in a simple explicit Verilog sensitivity list; all other uncertain names stay review-required, and no alarm is not compliance."
+      "limitations": "Exact native AST-name normalization, all relation-object map fields, implicit-net admission outside the documented forms, expression/function-call sensitivity, aliases, preprocessing, result ordering and recovered source-position rules remain incomplete. Product only promotes undeclared names already present in a simple explicit Verilog sensitivity list; all other uncertain names stay review-required, and no alarm is not compliance. Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.",
+      "expandedCoreInputRelease": "docs/v1_4_254_release.md",
+      "expandedCoreInputSource": "src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp"
     },
     {
       "publicRuleId": "R-7-2",

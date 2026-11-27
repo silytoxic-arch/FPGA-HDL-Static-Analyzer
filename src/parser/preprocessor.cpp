@@ -107,8 +107,14 @@ PreprocessorResult preprocess(const core::SourceFile& source,
     bool projectionUnproved=false;
 
     std::unordered_set<std::size_t> directiveOffsets;
-    for (const auto& token:tokenize(source))
-        if (token.text=="`") directiveOffsets.insert(token.offset);
+    const auto rawTokens=tokenize(source);
+    bool conditionalOnly=true;
+    for (std::size_t i=0;i<rawTokens.size();++i) if(rawTokens[i].text=="`") {
+        directiveOffsets.insert(rawTokens[i].offset);
+        const auto name=i+1<rawTokens.size() ? rawTokens[i+1].text : std::string{};
+        if(name!="ifdef" && name!="ifndef" && name!="elsif" && name!="else" && name!="endif")
+            conditionalOnly=false;
+    }
     bool frontendIncludeValidation=false;
     std::vector<PreprocessorIssue> issues;
     std::vector<ConditionalFrame> conditionals;
@@ -211,10 +217,16 @@ PreprocessorResult preprocess(const core::SourceFile& source,
     if (validatedFrontend) {
         // Native expansion is authoritative for directive/include validity;
         // do not run an isolated second engine with a different macro cache.
+        std::vector<PreprocessorIssue> physicalConditionalIssues;
+        if(!validatedFrontend->issues.empty() && conditionalOnly)
+            for(const auto& item:issues)
+                if(item.ruleId=="PP-UNEXPECTED-DIRECTIVE" || item.ruleId=="PP-UNCLOSED-CONDITIONAL")
+                    physicalConditionalIssues.push_back(item);
         issues=validatedFrontend->issues;
+        issues.insert(issues.end(),physicalConditionalIssues.begin(),physicalConditionalIssues.end());
         if(issues.empty() && (projectionUnproved || !decisions.empty())) {
             issues.push_back({"PP-FRONTEND-DIRECTIVE",
-                "条件编译位置无法可靠对应原文件，请复核设计结构。",{source.path(),0,1,0}});
+                "部分规则的条件编译位置无法可靠对应原文件，请复核相关规则结果。",{source.path(),0,1,0}});
             output=blank(std::move(output));
         }
     } else if (frontendIncludeValidation) {

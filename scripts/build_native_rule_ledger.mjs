@@ -1200,6 +1200,13 @@ const integratedSourceAdapters = new Set([
   'GJB10157.9.4.9',
   'GJB10157.9.4.10'
 ]);
+// Pass 136: generic core models now consume the actual expanded input.
+const expandedCoreClauses = ["GJB10157.5.2.9", "GJB10157.5.2.10", "GJB10157.5.2.16", "GJB10157.5.2.18", "GJB10157.7.2.1", "GJB10157.8.1", "GJB10157.8.2", "GJB10157.8.3", "GJB10157.8.7", "GJB10157.9.1.3", "GJB10157.9.1.4", "GJB10157.9.1.6", "GJB10157.9.4.7", "GJB10157.9.4.8", "GJB10157.9.4.9"];
+for (const clause of expandedCoreClauses) {
+  confirmed[clause].predicate += ' V1.4.254 runs the existing bounded generic syntax/semantic/structure/timing models on expanded Verilog in generic and standard modes. FrontendSourceView retains parsed versus reported coordinate contracts, merges timing before origin conversion, and maps nested model locations without indexing raw text using virtual offsets. Core findings remain available to existing standard translation; macro-generated sequential blocking, combinational nonblocking and defparam clauses have end-to-end regressions. Physical-source standard adapters retain a separately bound and project-resolved model until migrated; this is not full native AST/collector equivalence.';
+  confirmed[clause].evidence.push('docs/native_rule_recovery_pass136.md', ...["reverse-tools/evidence/t_linter_pass136/expanded_model_integration.patch#sha256=38366f02f553014960564228aebb5e9c7dde1d9c1eed29e8055aca88d4a245a8", "reverse-tools/evidence/t_linter_pass136/parity/driver.cpp#sha256=24ed8bcda3a5d7544729d82d74460e19d97e804e39ea0e0939f923ee0111aecf", "reverse-tools/evidence/t_linter_pass136/parity/first.sv#sha256=c84ff38f9fe0b35a548441c637cd04fd7be09d9ff75223b1148424dc9ac897dc", "reverse-tools/evidence/t_linter_pass136/parity/flags.vh#sha256=3477ad94636bb9c186773c8998470bbf1b27005cc1cdd773afb38f19bab29425", "reverse-tools/evidence/t_linter_pass136/parity/parity.json#sha256=a57dca452d840466c8aadf7dd392c47d5e4ad71abbe1de5c16ae4baac1624e91", "reverse-tools/evidence/t_linter_pass136/parity/second.sv#sha256=9705cfa346a64c3180e83df0962df676ed64f8d9338c41d954f1ba0d460d5b4e", "reverse-tools/evidence/t_linter_pass136/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971", "reverse-tools/evidence/t_linter_pass136/repro/clocked.sv#sha256=b8a10475cdef41d69f7c971504a277a21878cd207aa491aa5ca448f8105bb07b", "reverse-tools/evidence/t_linter_pass136/repro/comparison.json#sha256=0f31094a7311fd5bd46d50a5a21e59d79a230781e08599e8eef5510ad5340651", "reverse-tools/evidence/t_linter_pass136/repro/macro.sv#sha256=15ef6b9917828da8440c44ebb6c1f56b52e653e98618e492305a918b287daa48"]);
+  confirmed[clause].limitations += ' Expanded core model coverage is bounded by the existing parser/semantic grammar. Standard-specific physical adapters, proprietary lowering/admission, generated scopes, optional frontends and full vendor runtime parity remain unproved. Include/logical/macro positions without text-identity proof use column 1 and offset zero. No finding remains review-required.';
+}
 const rules = native.rules.map(rule => {
   // Accept both the raw REA entry inventory and the previously generated
   // ledger as the stable native-entry source. This keeps checkpoint rebuilds
@@ -1617,6 +1624,12 @@ for (const row of rules) if (conditionalInputClauses.includes(row.clause)) {
   const tests = Array.isArray(row.additionalTests) ? row.additionalTests : row.additionalTests ? [row.additionalTests] : [];
   row.additionalTests = [...new Set([...tests, 'tests/frontend_preprocessor_tests.cpp'])];
   row.sharedInputRelease = 'docs/v1_4_253_release.md';
+}
+for (const row of rules) if (expandedCoreClauses.includes(row.clause)) {
+  const tests=Array.isArray(row.additionalTests) ? row.additionalTests : row.additionalTests ? [row.additionalTests] : [];
+  row.additionalTests=[...new Set([...tests,'tests/frontend_source_view_tests.cpp'])];
+  row.expandedCoreInputRelease='docs/v1_4_254_release.md';
+  row.expandedCoreInputSource='src/parser/frontend_source_view.cpp + src/analysis/analyzer.cpp';
 }
 if (rules.length !== 209 || new Set(rules.map(rule => rule.clause)).size !== 209)
   throw new Error('Expected 209 unique GJB rules');

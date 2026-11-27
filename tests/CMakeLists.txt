@@ -539,3 +539,7 @@ endif()
 add_executable(fpga_frontend_preprocessor_tests frontend_preprocessor_tests.cpp)
 target_link_libraries(fpga_frontend_preprocessor_tests PRIVATE fpga_core fpga_build_options)
 add_test(NAME frontend_preprocessor_unit COMMAND fpga_frontend_preprocessor_tests)
+
+add_executable(fpga_frontend_source_view_tests frontend_source_view_tests.cpp)
+target_link_libraries(fpga_frontend_source_view_tests PRIVATE fpga_core fpga_build_options)
+add_test(NAME frontend_source_view_unit COMMAND fpga_frontend_source_view_tests)

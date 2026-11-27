@@ -393,6 +393,7 @@ void define_map_t::log() const
 static void input_file(std::istream &f, std::string filename)
 {
 	check_input_file(filename);
+	std::string snapshot;
 	char buffer[513];
 	int rc;
 
@@ -403,8 +404,14 @@ static void input_file(std::istream &f, std::string filename)
 	while ((rc = readsome(f, buffer, sizeof(buffer)-1)) > 0) {
 		buffer[rc] = 0;
 		check_input_bytes(static_cast<size_t>(rc), buffer);
+		snapshot.append(buffer, static_cast<size_t>(rc));
 		input_buffer.insert(it, buffer);
 	}
+	const auto encoded = path_from_utf8(filename).lexically_normal().generic_u8string();
+	const std::string snapshotKey(reinterpret_cast<const char*>(encoded.data()), encoded.size());
+	const auto previous = budget.inputSnapshots.find(snapshotKey);
+	if (previous == budget.inputSnapshots.end()) budget.inputSnapshots.emplace(snapshotKey, std::move(snapshot));
+	else if (!fpga::core::sameLineEndingText(previous->second, snapshot)) budget.unstableSnapshots.insert(snapshotKey);
 	input_buffer.insert(it, "\n`file_pop\n");
 }
 

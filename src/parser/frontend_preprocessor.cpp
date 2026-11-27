@@ -180,7 +180,7 @@ core::SourceLocation FrontendPreprocessorResult::origin(std::size_t virtualLine)
 }
 FrontendPreprocessorResult FrontendPreprocessorSession::expand(
     const core::SourceFile& source,const PreprocessorOptions& options,const FrontendPreprocessorLimits& limits) {
-    FrontendPreprocessorResult result{source,{},{},{},{},{}};
+    FrontendPreprocessorResult result{source,{},{},{},{},{},{},{}};
     if(source.language()==core::HdlLanguage::Vhdl || source.language()==core::HdlLanguage::Unknown) {
         result.issues.push_back({"PP-FRONTEND-LANGUAGE","该展开器仅接受 Verilog/SystemVerilog。",{source.path(),0,1,0}});return result;
     }
@@ -214,6 +214,13 @@ FrontendPreprocessorResult FrontendPreprocessorSession::expand(
         std::istringstream input(source.content());
         auto expanded=vendorpp::frontend_verilog_preproc(input,utf8(source.path()),configured,state_->cache,directories);
         for(const auto& file:vendorpp::yosys_input_files) result.includedFiles.push_back(vendorpp::path_from_utf8(file));
+        for(auto& [file,text]:vendorpp::budget.inputSnapshots) {
+            const auto path=vendorpp::path_from_utf8(file);
+            if(path.lexically_normal()!=source.path().lexically_normal() && !vendorpp::budget.unstableSnapshots.contains(file))
+                result.includedSources.emplace_back(path,source.language(),std::move(text));
+        }
+        for(const auto& file:vendorpp::budget.unstableSnapshots)
+            result.ambiguousInputFiles.push_back(vendorpp::path_from_utf8(file));
         mapExpanded(result,std::move(expanded));
     } catch(const vendorpp::Failure& error) {
         result.issues.push_back({"PP-FRONTEND-EXPANSION","宏或包含文件展开失败："+failureText(error.what()),

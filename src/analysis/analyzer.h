@@ -98,7 +98,8 @@ public:
 private:
     [[nodiscard]] AnalysisResult
     analyzeSourceImpl(const core::SourceFile& source, bool runTimingRules,
-                      const parser::FrontendPreprocessorResult* frontend) const;
+                      const parser::FrontendPreprocessorResult* frontend,
+                      std::vector<parser::DesignUnitInfo>* sourceBoundStructure=nullptr) const;
 
     AnalysisOptions options_;
 };
