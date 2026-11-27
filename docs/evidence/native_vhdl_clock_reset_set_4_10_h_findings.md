@@ -31,8 +31,22 @@
 错误版本保留为反例证据，不作为源算法事实。
 详见 [第一百二十八轮](../native_rule_recovery_pass128.md)。
 
+## 第一百二十九至一百三十一轮：声明与进程来源
+
+标识符枚举和无关 subtype 不再阻断整个 architecture；按声明顺序绑定可见的
+无约束 IEEE 标量 subtype 链，并分别处理 block/generate 中的类型/对象遮蔽。
+process 也支持有界局部 variable/constant/类型声明及初始化，允许唯一顶层 IF
+前后的简单信号赋值与 NULL。声明、INITIAL、赋值和 NULL 不被误计为第二个源 IF。
+局部标量可读值与信号身份分别核对；同名局部变量、常量不能冒充外层时钟。
+多个顶层 IF、复杂语句和未确认的同名跨 owner 配对继续未知。
+
+这扩大了已恢复谓词的有界来源范围，不声称恢复了完整原生类型/语法引擎。
+详见 [第一百二十九轮](../native_rule_recovery_pass129.md)、
+[第一百三十轮](../native_rule_recovery_pass130.md)、
+[第一百三十一轮](../native_rule_recovery_pass131.md)。
+
 ## 尚未恢复的范围
 
-完整进程分类、IEEE 别名和复杂声明、现代生成语法、块接口、选名/跨文件、
-后续名称归一化及原生根分组仍待恢复。architecture 隔离与显式 IEEE 绑定继续
-声明为产品的有界来源约束。无诊断继续 ManualReviewRequired。
+完整进程分类、带约束/解析函数/包选名的别名和复杂声明、现代生成语法、块接口、
+跨文件、后续名称归一化及原生根分组仍待恢复。architecture 隔离与有界 IEEE 来源绑定
+继续声明为产品来源约束。无诊断继续 ManualReviewRequired。

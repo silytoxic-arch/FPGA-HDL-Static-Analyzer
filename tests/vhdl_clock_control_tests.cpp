@@ -203,6 +203,59 @@ int main() {
         "same-owner subtype clocks preserve the complete ordered pair multiplicity");
     check(wrap(same,"subtype clock_t is std_logic; signal clk:clock_t;")+wrap(same,"signal clk:clock_t;"),1,1,true,
         "an architecture scalar alias never leaks into a later design unit");
+    const auto processDecl=[&](const std::string& declarations,const std::string& prefix="",const std::string& suffix="") {
+        return "process(clk) is "+declarations+" begin "+prefix+
+            same.substr(same.find("begin ")+6,same.rfind("end process;")-same.find("begin ")-6)+suffix+" end process;";
+    };
+    check(wrap(processDecl("variable counter:integer;")),1,1,false,"unrelated process variables do not add native source IF nodes");
+    check(wrap(processDecl("variable counter:integer:=0;")),1,1,false,"variable initializers remain declaration INITIAL siblings");
+    check(wrap(processDecl("variable a,b:integer:=0;")),1,1,false,"grouped initialized variables do not add clock conditions");
+    check(wrap(processDecl("constant N:integer:=2;")),1,1,false,"process constant declarations preserve the source IF class");
+    check(wrap(processDecl("constant A,B:integer:=2;")),1,1,false,"grouped process constants preserve the source IF class");
+    check(wrap(processDecl("subtype value_t is std_logic; variable v:value_t:='0';")),1,1,false,
+        "unrelated process scalar subtypes and initialized variables retain the outer clock");
+    check(wrap(processDecl("type state_t is (IDLE,RUN); variable state:state_t:=IDLE;")),1,1,false,
+        "process enum declarations and variables do not reject the complete process");
+    check(wrap(processDecl("variable clk:std_logic;")),0,0,true,"a local variable cannot inherit the outer clock signal binding");
+    check(wrap(processDecl("constant clk:std_logic:='0';")),0,0,true,"a local constant cannot inherit the outer clock signal binding");
+    check(wrap(processDecl("subtype clk is std_logic;")),0,0,true,"a process subtype name hides an outer clock");
+    check(wrap(processDecl("type state_t is (clk,RUN);")),0,0,true,"a process enum literal hides an outer clock");
+    check(wrap(processDecl("variable rst:std_logic;")),1,1,false,"an unused process variable does not hide an unrelated clock");
+    check(wrap(processDecl("variable clk:std_logic;")+same),1,1,true,"process-local shadows do not leak into a following process");
+    check(wrap(processDecl("function f return boolean is begin return true; end function;")),0,0,true,
+        "local subprogram BEGIN is never the process body boundary");
+    check(wrap(processDecl("signal clk:std_logic;")),0,0,true,"illegal process signals do not create a proven clock binding");
+    check(wrap(processDecl("file f:text;")),0,0,true,"unrecovered process file lowering remains unknown");
+    check(wrap(processDecl("variable v:integer; variable v:integer;")),0,0,true,"duplicate process declarations remain unknown");
+    check(wrap(processDecl("variable rising_edge:integer;")),0,0,true,"local IEEE edge-function shadows remain unknown");
+    check(wrap(processDecl("", "dout<=din; ")),1,1,false,"a preceding simple assignment is not a second source IF");
+    check(wrap(processDecl("", "", "dout<='0';")),1,1,false,"a following simple assignment is not a second source IF");
+    check(wrap(processDecl("", "null;", "null;")),1,1,false,"NULL sequential siblings do not contribute IF classifier entries");
+    check(wrap(processDecl("", "a:dout<=din;", "b:null;")),1,1,false,"labels preserve assignment and NULL sibling shapes");
+    check(wrap(processDecl("constant N:integer:=0;", "dout<='0';null;", "dout<=din;")),1,1,false,
+        "declarations and multiple non-IF siblings preserve the unique source IF");
+    check(wrap(processDecl("", "wait until clk='1';")),0,0,true,"unrecovered WAIT siblings remain unknown");
+    check(wrap(processDecl("", "dout<=din and rst;")),0,0,true,"complex sequential assignments remain outside the bounded statement parser");
+    check(wrap(processDecl("", "if rst='0' then dout<='0'; end if;")),0,0,true,
+        "another top-level source IF does not inherit native class one or two");
+    check(wrap("process(clk) begin dout<=din; null; end process;"),0,0,true,
+        "non-IF siblings alone never manufacture a process classification");
+    check(wrap(processDecl("variable counter:integer:=0;"),"subtype clock_t is std_logic; signal clk:clock_t;"),1,1,false,
+        "process declarations preserve an inherited scalar-subtype signal owner");
+    const std::string localControl="process(clk) is variable control:std_logic:='0'; begin "
+        "if rising_edge(clk) then if clk='0' then dout<=din; elsif control='1' then dout<=din; "
+        "end if; end if; end process;";
+    check(wrap(localControl),1,1,false,"local scalar variables remain readable EQ controls without being clocks");
+    auto constantControl=localControl;
+    constantControl.replace(constantControl.find("variable"),8,"constant");
+    check(wrap(constantControl),1,1,false,"local scalar constants remain readable EQ controls without being clocks");
+    check(wrap("process(clk) is variable control:std_logic:='0'; begin if rising_edge(clk) then "
+        "if control=clk then dout<=din; end if; end if; end process;"),1,0,false,
+        "a local scalar first identifier remains the selected EQ operand");
+    check(wrap("process(clk) is variable rst:std_logic:='0'; begin if rising_edge(clk) then "
+        "if rst='1' then dout<=din; end if; end if; end process;"
+        "process(rst) begin if rising_edge(rst) then dout<=din; end if; end process;"),2,0,true,
+        "same-spelling local values and outer clock signals are distinct lexical owners");
     const auto postponed=std::string("p: postponed ")+same.substr(0,same.find("end process;"))+"end postponed process p;";
     check(wrap(postponed),1,1,false,"named END POSTPONED PROCESS closes exactly once");
     check(wrap(postponed+same),2,4,false,"adjacent postponed and ordinary processes preserve cross pairs");

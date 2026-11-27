@@ -168,15 +168,19 @@ class Scanner {
         return i+1;
     }
     // Declaration names hide outer objects before their type is considered.
-    // Non-scalar objects and constants never inherit an outer scalar binding.
+    // Objects never inherit an outer binding. Process scalar values receive
+    // their own readable binding; their signal identity is checked separately.
     std::optional<std::size_t> declarationBody(std::size_t start,std::size_t limit,
                                               Names& names,Bindings& bindings,ScalarTypes& types,
-                                              bool beginRequired) const {
+                                              bool beginRequired,bool processScope=false) const {
         auto i=start;
         bool sawDeclaration=false;
         Names declaredHere;
         while (i<limit) {
             if (word(i,"begin")) return i+1;
+            // Process declarations cannot introduce signals; file ownership and
+            // lowering are not recovered for this bounded process adapter.
+            if (processScope && (word(i,"signal") || word(i,"file"))) return std::nullopt;
             if (word(i,"type") || word(i,"subtype")) {
                 if (i+1>=limit || !declaredHere.insert(lower(t[i+1].text)).second) return std::nullopt;
                 const auto next=typeDeclaration(i,limit,names,bindings,types);
@@ -194,6 +198,7 @@ class Scanner {
             }
             sawDeclaration=true;
             const bool signal=word(i,"signal");
+            const bool localValue=processScope && (word(i,"variable") || word(i,"constant"));
             ++i;
             std::vector<std::string> declared;
             while (i<limit && basic(t[i])) {
@@ -212,7 +217,7 @@ class Scanner {
             if (word(tail,"register") || word(tail,"bus")) ++tail;
             const bool initializer=tail+1<limit && t[tail].text==":" && t[tail+1].text=="=" &&
                 t[tail+1].offset==t[tail].offset+1;
-            const bool boundScalar=signal && scalarType && tail<limit &&
+            const bool boundScalar=(signal || localValue) && scalarType && tail<limit &&
                 (t[tail].text==";" || initializer);
             for (const auto& name:declared) {
                 names.erase(name);
@@ -256,7 +261,7 @@ class Scanner {
             if (word(i,"process")) {
                 const auto end=statementEnd(i,"process",limit);
                 if (!end) { result.incomplete=true; return; }
-                process(i,end->end,architecture,names,bindings);
+                process(i,end->end,architecture,names,bindings,types);
                 i=end->after-1;
             } else if (word(i,"block") || word(i,"generate")) {
                 const bool block=word(i,"block");
@@ -448,8 +453,31 @@ class Scanner {
         return control.branches.size()==1 || assignments(control.branches[1].bodyBegin,
             control.branches[1].bodyEnd,names,false);
     }
-    void process(std::size_t p,std::size_t stop,std::size_t architecture,const Names& names,
-                 const Bindings& bindings) {
+    // Native 4c5070 gathers top-level source IF nodes from sequential BLOCKs;
+    // simple assignment/NULL siblings and declaration/INITIAL nodes do not add
+    // another IF. Multiple IFs have other native classes, not admitted here.
+    bool processIf(std::size_t begin,std::size_t stop,const Names& names,If& selected) const {
+        bool found=false;
+        while (begin<stop) {
+            if (begin+1<stop && basic(t[begin]) && t[begin+1].text==":") begin+=2;
+            if (word(begin,"if")) {
+                if (found || !readIf(begin,stop,selected)) return false;
+                found=true;
+                begin=selected.end;
+            } else {
+                auto semi=begin;
+                while (semi<stop && t[semi].text!=";") ++semi;
+                if (semi==stop || !assignments(begin,semi+1,names,false)) return false;
+                begin=semi+1;
+            }
+        }
+        return found;
+    }
+    void process(std::size_t p,std::size_t stop,std::size_t architecture,const Names& outerNames,
+                 const Bindings& outerBindings,const ScalarTypes& outerTypes) {
+        auto names=outerNames;
+        auto bindings=outerBindings;
+        auto types=outerTypes;
         auto begin=p+1;
         if (begin<stop && t[begin].text=="(") {
             ++begin;
@@ -463,14 +491,23 @@ class Scanner {
             ++begin;
         }
         if (word(begin,"is")) ++begin;
-        if (!word(begin,"begin")) { result.incomplete=true; return; }
-        ++begin;
+        const auto body=declarationBody(begin,stop,names,bindings,types,true,true);
+        if (!body) { result.incomplete=true; return; }
+        // Local scalar variables/constants can be EQ operands, but cannot
+        // inherit the signal identity required by this edge-call adapter.
+        Names clockNames;
+        for (const auto& name:outerNames) {
+            const auto previous=outerBindings.find(name);
+            const auto current=bindings.find(name);
+            if (previous!=outerBindings.end() && current!=bindings.end() &&
+                previous->second==current->second && names.contains(name)) clockNames.insert(name);
+        }
         If outer;
-        if (!readIf(begin,stop,outer) || outer.end!=stop) { result.incomplete=true; return; }
+        if (!processIf(*body,stop,names,outer)) { result.incomplete=true; return; }
         VhdlClockControlModel model; model.architectureToken=architecture; model.processToken=p;
         const auto& first=outer.branches.front();
         model.edge=parseVhdlEdgeCondition(source,t,first.conditionBegin,first.conditionEnd);
-        if (model.edge.status==VhdlEdgeConditionStatus::Matched && bound(model.edge.clockToken,names)) {
+        if (model.edge.status==VhdlEdgeConditionStatus::Matched && bound(model.edge.clockToken,clockNames)) {
             // Flat class2 only: no outer ELSIF/ELSE. This avoids silently
             // accepting collector branch-map paths outside the known subset.
             if (outer.branches.size()!=1 || !edgeBody(first,names,false,model.equalityIdentifierTokens)) {
@@ -483,7 +520,7 @@ class Scanner {
                 !assignments(first.bodyBegin,first.bodyEnd,names,true)) { result.incomplete=true; return; }
             const auto& next=outer.branches[1];
             model.edge=parseVhdlEdgeCondition(source,t,next.conditionBegin,next.conditionEnd);
-            if (model.edge.status!=VhdlEdgeConditionStatus::Matched || !bound(model.edge.clockToken,names) ||
+            if (model.edge.status!=VhdlEdgeConditionStatus::Matched || !bound(model.edge.clockToken,clockNames) ||
                 !edgeBody(next,names,true,model.equalityIdentifierTokens)) { result.incomplete=true; return; }
             std::size_t index{};
             if (eq(first.conditionBegin,first.conditionEnd,names,index)) model.equalityIdentifierTokens.push_back(index);

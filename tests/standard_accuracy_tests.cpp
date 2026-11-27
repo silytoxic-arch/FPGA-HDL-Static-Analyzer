@@ -8725,6 +8725,29 @@ int main() {
                      item.state == analysis::StandardRuleState::ManualReviewRequired;
           }), "admitting a scalar subtype clock never marks an alarm-free partial rule compliant");
 
+    result = analyze(clockWrap("process(clk) is variable count:integer:=0; constant N:integer:=2; "
+        "begin dout<=din; null; if rising_edge(clk) then if clk='0' then dout<=din; "
+        "end if; end if; null; end process;"), true);
+    check(count(result,"GJB9765.4.10.h")==1,
+          "process declarations and non-IF siblings retain the native clock/control check end to end");
+    result = analyze(clockWrap("process(clk) is variable clk:std_logic; begin if rising_edge(clk) then "
+        "if clk='0' then dout<=din; end if; end if; end process;\n"+clockReuse), true);
+    check(count(result,"GJB9765.4.10.h")==1 &&
+          std::ranges::any_of(result.violations,[](const auto& item) {
+              return item.ruleId=="GJB9765.4.10.h" && item.line==6 && item.column==1;
+          }), "process-local variable shadow cannot erase the following proven clock source location");
+    result = analyze(clockWrap("process(clk) is constant N:integer:=0; begin null; "
+        "if rising_edge(clk) then dout<=din; end if; null; end process;"), true);
+    check(count(result,"GJB9765.4.10.h")==0 &&
+          std::ranges::any_of(result.standardAssessments,[](const auto& item) {
+              return item.clauseId=="GJB9765.4.10.h" && item.state==analysis::StandardRuleState::ManualReviewRequired;
+          }), "declaration and sibling support never clears an alarm-free partial rule");
+    result = analyze(clockWrap("process(clk) begin dout<=din; "+
+        clockReuse.substr(clockReuse.find("begin ")+6,clockReuse.rfind("end process;")-clockReuse.find("begin ")-6)+
+        " if rst='0' then dout<='0'; end if; end process;"),true);
+    check(count(result,"GJB9765.4.10.h")==0,
+          "multiple top-level IFs cannot be admitted by ignoring all but one source IF");
+
     result = analyze(
         "entity probe is port(clk,a,b:in bit; d:out bit); end entity;\n"
         "architecture rtl of probe is signal my_temp1,my_temp2:bit; begin\n"

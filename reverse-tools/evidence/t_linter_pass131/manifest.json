@@ -1,0 +1,48 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "method": "Static VHDL parser/listener dispatch and node-construction evidence; no target execution. Prior pass128 instruction-verified root walker and pass130 classifier evidence remain prerequisites.",
+  "files": [
+    {
+      "path": "reverse-tools/evidence/t_linter_pass131/process_declarations_parser.txt",
+      "size": 2803,
+      "sha256": "2d71d8a9bdc6db2251956ac3665517374db30ada4d1a42c4cfa622a5f9f4b413",
+      "role": "static-evidence; raw decompiler argument omissions are not vendor ABI facts"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass131/declaration_contexts.txt",
+      "size": 3648,
+      "sha256": "f6150cd1fc780a03cd996af565f6f9e6111649d889278ca8d5cb8fbd2636202c",
+      "role": "static-evidence; raw decompiler argument omissions are not vendor ABI facts"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass131/process_declaration_listener.txt",
+      "size": 1484,
+      "sha256": "a83f97807598e1041cd5400f9e86e812eaf781ba8a2714778ec711e594a8b87c",
+      "role": "static-evidence; raw decompiler argument omissions are not vendor ABI facts"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass131/variable_listener.txt",
+      "size": 23146,
+      "sha256": "3b6f9609ea8ea78f88adbcb20a9bec24eea290c724ccb7e9030476aa6e9d2fad",
+      "role": "static-evidence; raw decompiler argument omissions are not vendor ABI facts"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass131/constant_listener.txt",
+      "size": 23082,
+      "sha256": "00fbd19038d05fadb77530a7d5b9853524276bb0a7a4ead1cc3b2be3adf013be",
+      "role": "static-evidence; raw decompiler argument omissions are not vendor ABI facts"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass131/assignment_contexts.txt",
+      "size": 3064,
+      "sha256": "7b9c9dfbe5b89029b92cff473a9bc2f7a1276a047002249cdaf0c2b23b092e93",
+      "role": "static-evidence; raw decompiler argument omissions are not vendor ABI facts"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass131/signal_assignment_listener.txt",
+      "size": 3742,
+      "sha256": "21ad0ef7403331811f4a3042c96ac1e74c3a0beeff25ab37f6097418fe03b5b3",
+      "role": "static-evidence; raw decompiler argument omissions are not vendor ABI facts"
+    }
+  ]
+}
