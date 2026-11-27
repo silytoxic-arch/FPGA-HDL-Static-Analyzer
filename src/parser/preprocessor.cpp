@@ -84,7 +84,9 @@ PreprocessorResult preprocess(const core::SourceFile& source,
     if (source.language() == core::HdlLanguage::Vhdl) {
         return {source, {}};
     }
-    std::unordered_map<std::string, std::string> macros;
+    // Match the recovered default read_hdl/read_verilog branch. These are
+    // ordinary definitions: source `undef and `resetall can remove them.
+    std::unordered_map<std::string, std::string> macros{{"YOSYS","1"},{"SYNTHESIS","1"}};
     for (const auto& definition : options.defines) {
         const auto equals = definition.find('=');
         const auto name = macroName(definition.substr(0, equals));
@@ -162,6 +164,8 @@ PreprocessorResult preprocess(const core::SourceFile& source,
             }
         } else if (active && directive == "undef") {
             macros.erase(macroName(arguments));
+        } else if (active && directive == "resetall") {
+            macros.clear();
         } else if (active && directive == "include" && arguments.find('`')!=std::string::npos) {
             // Function/default/quoted include macros require the real token
             // expansion engine. Do not mislabel a valid macro as a bad path.

@@ -169,6 +169,9 @@ FrontendPreprocessorResult expandFrontendSource(const core::SourceFile& source,c
             if(!identifier(name)) throw vendorpp::Failure("Invalid configured macro name.",utf8(source.path()));
             configured.add(name,equal==std::string::npos?"1":definition.substr(equal+1));
         }
+        // Default read_hdl emits read_verilog -sv without -nosynthesis or
+        // -formal. The native frontend adds this after command-line defines.
+        configured.add("SYNTHESIS","1");
         std::list<std::string> directories;
         for(const auto& path:options.includeDirectories) directories.push_back(utf8(path));
         std::istringstream input(source.content());

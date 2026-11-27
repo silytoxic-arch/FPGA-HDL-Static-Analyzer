@@ -22,9 +22,10 @@ Host adaptation:
   not inferred.
 
 Each expansion currently represents one explicitly configured translation unit.
-Implicit tool defines, project-wide shared macro caches, full Verilog parsing,
-and vendor changes outside the recovered paths remain unresolved. Only naming
-clauses 5.2.1/.2/.4/.6/.12/.15 consume this new expanded input in this version; other
+Default read_hdl defines YOSYS and SYNTHESIS; alternate formal/nosynthesis modes
+are not exposed. Project-wide shared macro caches, full Verilog parsing,
+and vendor changes outside the recovered paths remain unresolved. Naming
+clauses 5.2.1/.2/.3/.4/.6/.12/.15 consume this expanded input in this version; other
 rules are migrated only after their provenance/input contracts are checked.
 
 See `docs/native_rule_recovery_pass132.md` and `THIRD_PARTY_NOTICES.md`.

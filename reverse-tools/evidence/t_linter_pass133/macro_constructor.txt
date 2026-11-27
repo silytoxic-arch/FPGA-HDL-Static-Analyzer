@@ -1,0 +1,123 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+
+===== 180941620 180941620 FUN_180941620 =====
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+longlong * FUN_180941620(longlong *param_1)
+
+{
+  ulonglong uVar1;
+  void *_Memory;
+  ulonglong uVar2;
+  uint uVar3;
+  longlong lVar4;
+  void *_Memory_00;
+  longlong *plVar5;
+  undefined1 *_Buf1;
+  longlong *_Buf2;
+  void **ppvVar6;
+  ulonglong _Size;
+  undefined1 auStack_c8 [32];
+  longlong local_a8;
+  undefined1 local_98 [8];
+  longlong *local_90;
+  void *local_88;
+  undefined8 local_80;
+  longlong *local_78;
+  undefined1 local_70;
+  undefined7 uStack_6f;
+  ulonglong local_60;
+  ulonglong local_58;
+  undefined1 local_50;
+  undefined7 uStack_4f;
+  undefined8 local_40;
+  ulonglong local_38;
+  ulonglong local_30;
+  
+  local_80 = 0xfffffffffffffffe;
+  local_30 = DAT_18131ef10 ^ (ulonglong)auStack_c8;
+  *param_1 = 0;
+  param_1[1] = 0;
+  local_90 = param_1;
+  local_78 = param_1;
+  lVar4 = FUN_180942160();
+  *param_1 = lVar4;
+  local_38 = 0xf;
+  local_40 = 0;
+  local_50 = 0;
+  FUN_180040680(&local_50,&DAT_180de4850,1);
+  local_58 = 0xf;
+  local_60 = 0;
+  local_70 = 0;
+  FUN_180040680(&local_70,"YOSYS",5);
+  local_90 = operator_new(0x50);
+  _Memory_00 = (void *)0x0;
+  if (local_90 != (longlong *)0x0) {
+    _Memory_00 = (void *)FUN_1809414c0(local_90,&local_50,0);
+  }
+  local_88 = _Memory_00;
+  plVar5 = (longlong *)FUN_18052e9d0(param_1,&local_70);
+  uVar2 = local_60;
+  if (plVar5 != (longlong *)*param_1) {
+    _Buf2 = plVar5 + 4;
+    uVar1 = plVar5[6];
+    if (0xf < (ulonglong)plVar5[7]) {
+      _Buf2 = (longlong *)*_Buf2;
+    }
+    _Buf1 = &local_70;
+    if (0xf < local_58) {
+      _Buf1 = (undefined1 *)CONCAT71(uStack_6f,local_70);
+    }
+    _Size = uVar1;
+    if (local_60 < uVar1) {
+      _Size = local_60;
+    }
+    uVar3 = 0;
+    if (_Size != 0) {
+      uVar3 = memcmp(_Buf1,_Buf2,_Size);
+    }
+    if (uVar3 == 0) {
+      if (uVar2 < uVar1) {
+        uVar3 = 0xffffffff;
+      }
+      else {
+        uVar3 = (uint)(uVar2 != uVar1);
+      }
+    }
+    if (-1 < (int)uVar3) goto LAB_1809417aa;
+  }
+  local_90 = (longlong *)&local_70;
+  local_a8 = FUN_18093f9e0(param_1,&DAT_180f599f8,&local_90,local_98);
+  FUN_180940430(param_1,&local_90,plVar5,local_a8 + 0x20);
+  plVar5 = local_90;
+LAB_1809417aa:
+  ppvVar6 = (void **)(plVar5 + 8);
+  if (ppvVar6 != &local_88) {
+    local_88 = (void *)0x0;
+    _Memory = *ppvVar6;
+    *ppvVar6 = _Memory_00;
+    _Memory_00 = (void *)0x0;
+    if (_Memory != (void *)0x0) {
+      FUN_180941c70(_Memory);
+      free(_Memory);
+      _Memory_00 = (void *)0x0;
+    }
+  }
+  if (_Memory_00 != (void *)0x0) {
+    FUN_180941c70(_Memory_00);
+    free(_Memory_00);
+  }
+  if (0xf < local_58) {
+    FUN_1800409e0(&local_70,CONCAT71(uStack_6f,local_70),local_58 + 1);
+  }
+  local_58 = 0xf;
+  local_60 = 0;
+  local_70 = 0;
+  if (0xf < local_38) {
+    FUN_1800409e0(&local_50,CONCAT71(uStack_4f,local_50),local_38 + 1);
+  }
+  return param_1;
+}
+
+

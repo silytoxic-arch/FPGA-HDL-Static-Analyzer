@@ -187,6 +187,75 @@ int main() {
     check(count(linted,"GJB10157.5.2.15")==1,"macro-generated parameters use the native constant naming-case selector");
     linted=lint("`define UPPER Data\n`define LOWER data\nmodule valid_module;wire `UPPER, `LOWER;endmodule\n");
     check(count(linted,"GJB10157.5.2.6")==1,"macro-generated case-only collisions retain module-local name comparison");
+    out=run("`ifdef SYNTHESIS\nmodule active;wire synth_name;endmodule\n`else\nmodule inactive;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"active")&&!has(out,"inactive"),
+          "default native read_hdl selects SYNTHESIS, not simulation-only branches");
+    out=run("`ifdef YOSYS\nmodule active;endmodule\n`endif\n`ifdef FORMAL\nmodule formal_only;endmodule\n`endif\n");
+    check(out.issues.empty()&&has(out,"active")&&!has(out,"formal_only"),"default tool macro exists without inventing FORMAL mode");
+    out=run("module m;localparam VALUE=`SYNTHESIS;endmodule\n",{{},{"SYNTHESIS=0"}});
+    check(out.issues.empty()&&has(out,"1")&&!has(out,"0"),"implicit SYNTHESIS is applied after configured defines as in native execute");
+    for(const auto directive:{"`undef SYNTHESIS\n","`resetall\n"}) {
+        const auto text=std::string(directive)+"`ifdef SYNTHESIS\nmodule inactive;endmodule\n`else\nmodule active;endmodule\n`endif\n";
+        out=run(text);projected=parser::preprocess({root,core::HdlLanguage::SystemVerilog,text});
+        check(out.issues.empty()&&has(out,"active")&&!has(out,"inactive")&&
+              projected.source.content().find("module active;")!=std::string::npos&&
+              projected.source.content().find("module inactive;")==std::string::npos,
+              "source undef/resetall removes default macros in both input paths");
+    }
+    linted=lint("`ifdef SYNTHESIS\nmodule valid_module;wire bad__;endmodule\n`else\nmodule valid_module;wire good_name;endmodule\n`endif\n");
+    check(count(linted,"GJB10157.5.2.2")==1,"default synthesis branch reaches naming checks end to end");
+    linted=lint("`define NAME SIGNAL\nmodule valid_module;wire `NAME;endmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==1&&std::any_of(linted.violations.begin(),linted.violations.end(),[&](const auto& item){
+        return item.ruleId=="GJB10157.5.2.3"&&item.file==root&&item.line==2&&item.column==1&&
+            item.message=="禁止使用VHDL关键字同名的SIGNAL"&&item.severity==analysis::Severity::Error;
+    }),"R-2-3 macro names retain exact category text, severity and invocation line");
+    {std::ofstream f(base/"keyword.vh");f<<"wire SIGNAL;\n";}
+    linted=lint("module valid_module;\n`include \"keyword.vh\"\nendmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==1&&std::any_of(linted.violations.begin(),linted.violations.end(),[&](const auto& item){
+        return item.ruleId=="GJB10157.5.2.3"&&item.file==base/"keyword.vh"&&item.line==1;
+    }),"R-2-3 included names use the established lexer origin policy");
+    linted=lint("`define MAKE module valid_module;wire SIGNAL;endmodule\n`MAKE\n");
+    check(count(linted,"GJB10157.5.2.3")==1,"macro-created module roots enter the expanded owner index");
+    {std::ofstream f(base/"keyword_defs.vh");f<<"`define ACTIVE_KEYWORD\n`define NAME SIGNAL\n";}
+    linted=lint("`include \"keyword_defs.vh\"\n`ifdef ACTIVE_KEYWORD\nmodule valid_module;wire `NAME;endmodule\n`endif\n");
+    check(count(linted,"GJB10157.5.2.3")==1,"header-defined conditionals no longer depend on the unexpanded structure index");
+    const auto multi=[&](std::string a,std::string b) {
+        analysis::AnalysisOptions options;options.standardId="GJB10157-2021";
+        return analysis::Analyzer(options).analyzeSources({
+            {root,core::HdlLanguage::SystemVerilog,std::move(a)},
+            {base/"other.sv",core::HdlLanguage::SystemVerilog,std::move(b)}});
+    };
+    const std::string namesBody="wire _bad__,SIGNAL,VDD,x,Data,data;";
+    linted=multi("module shared;"+namesBody+"endmodule\n","module shared;"+namesBody+"endmodule\n");
+    for(const auto rule:{"GJB10157.5.2.1","GJB10157.5.2.2","GJB10157.5.2.3",
+                         "GJB10157.5.2.4","GJB10157.5.2.6","GJB10157.5.2.12"})
+        check(count(linted,rule)==0,"duplicate owner groups across files suppress only rules with the recovered uniqueness gate");
+    linted=multi("`define MAKE module shared;wire SIGNAL;endmodule\n`MAKE\n",
+                 "module shared;wire SIGNAL;endmodule\nmodule unique_owner;wire SIGNAL;endmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==1&&std::any_of(linted.violations.begin(),linted.violations.end(),[&](const auto& item){
+        return item.ruleId=="GJB10157.5.2.3"&&item.file==base/"other.sv";
+    }),"macro-created duplicate groups do not suppress a different unique owner");
+    {std::ofstream f(base/"module.vh");f<<"module shared;wire SIGNAL;endmodule\n";}
+    linted=multi("`include \"module.vh\"\n","module shared;wire SIGNAL;endmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==0,"included module roots participate in cross-file duplicate groups");
+    linted=multi("module unique_owner;wire SIGNAL;endmodule\n","`ifdef NEVER_DEFINED\nmodule unique_owner;endmodule\n`endif\n");
+    check(count(linted,"GJB10157.5.2.3")==1,"inactive roots do not manufacture duplicate owners");
+    linted=multi("module unique_owner;wire SIGNAL;endmodule\n","`UNKNOWN\n");
+    check(count(linted,"GJB10157.5.2.3")==0&&count(linted,"PP-FRONTEND-DIRECTIVE")>0,
+        "an unexpanded source leaves the global owner index unproved, not uniquely bound by omission");
+    check(std::any_of(linted.standardAssessments.begin(),linted.standardAssessments.end(),[](const auto& item){
+        return item.clauseId=="GJB10157.5.2.3"&&item.state==analysis::StandardRuleState::ManualReviewRequired;
+    }),"an unknown project owner index never certifies keyword compliance");
+    linted=lint("module valid_module;wire SIGNAL;endmodule\n");
+    check(count(linted,"GJB10157.5.2.3")==1,"a failed prior project does not poison the next analysis owner index");
+    linted=multi("module shared;parameter lower_name=1;endmodule\n",
+                 "module shared;parameter other_lower=1;endmodule\n");
+    check(count(linted,"GJB10157.5.2.15")==0,
+        "A-2-5 native entry also requires a unique AST module, across physical roots");
+    linted=multi("module shared;parameter lower_name=1;endmodule\n",
+                 "module shared;endmodule\nmodule unique_owner;parameter other_lower=1;endmodule\n");
+    check(count(linted,"GJB10157.5.2.15")==1,
+        "A-2-5 duplicate suppression preserves a different unique module and its own declaration selector");
     std::cout<<checks<<" checks, "<<failures<<" failures\n";
     return failures?1:0;
 }

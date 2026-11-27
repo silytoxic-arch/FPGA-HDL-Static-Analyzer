@@ -1,0 +1,55 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "upstreamCommit": "6f9602b4cfedc6441f55272f6c025d64620cd24f",
+  "boundary": "Default command and constructor observed. Cache pointer recovered; design lifetime/caller scope unresolved. No runtime oracle or full AST equivalence.",
+  "files": [
+    {
+      "path": "frontend_execute.txt",
+      "size": 52471,
+      "sha256": "11a84a6ef0498ad07ae0ed6eddf624721a581c67257704f8e8e826ed1b615be9",
+      "role": "native static evidence; no DLL execution"
+    },
+    {
+      "path": "engine_call_abi.txt",
+      "size": 728,
+      "sha256": "c41f5fda52092afcc7dbcf2cd560beb0256307733f7dc0b84dfa88b80702f23f",
+      "role": "native static evidence; no DLL execution"
+    },
+    {
+      "path": "macro_constructor.txt",
+      "size": 3028,
+      "sha256": "3159bf8d3dafcad17b6aec7f764d13265f7e1463a414f1e84146170551cb8ec3",
+      "role": "native static evidence; no DLL execution"
+    },
+    {
+      "path": "include_options.txt",
+      "size": 5647,
+      "sha256": "df3dbdd71dcc69634b53dcd3d4a633ce2a7206ae5584bb570116ba0cb4089884",
+      "role": "native static evidence; no DLL execution"
+    },
+    {
+      "path": "read_hdl_command.txt",
+      "size": 22735,
+      "sha256": "ff663435c3808a5daf002a3786ae49838b25df174273d6d5a912022641264cd3",
+      "role": "native static evidence; no DLL execution"
+    },
+    {
+      "path": "frontend_entry_refs.txt",
+      "size": 265,
+      "sha256": "3adb731a74b02fa61816503084c3ac4021a30b4135c1df66fcfd0c6be702df85",
+      "role": "native static evidence; no DLL execution"
+    },
+    {
+      "path": "macro_literal.txt",
+      "size": 911,
+      "sha256": "8d09c50dd016e00d2293cb16d8314e0557d3b37e9327176d7b0d18d723526eaa",
+      "role": "native static evidence; no DLL execution"
+    },
+    {
+      "path": "upstream_verilog_frontend.cc",
+      "size": 21449,
+      "sha256": "03a17de60fa4ab60cb7c5900cd5331e9e586d735848a8c3e78fb810f9baa0028",
+      "role": "version-correlated official ISC source, not native decompilation"
+    }
+  ]
+}

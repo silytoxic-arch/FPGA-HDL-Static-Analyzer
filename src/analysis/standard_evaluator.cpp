@@ -8777,7 +8777,8 @@ std::vector<std::pair<std::string, core::SourceLocation>> declaredNames(
 
 void caseOnlyDeclarationChecks(AnalysisResult& result, const core::SourceFile& source,
                                const std::vector<parser::HdlToken>& tokens,
-                               const VerilogNamingShapeScan& scan) {
+                               const VerilogNamingShapeScan& scan,
+                               const std::map<std::string,std::size_t>& moduleMultiplicity) {
     // Native 5.2.6 walks each AST_MODULE independently and collects MODULE,
     // WIRE, PARAMETER, LOCALPARAM, CELL and TASK (not FUNCTION). Its core
     // predicate is unequal original names with equal lowercase names. The
@@ -8785,10 +8786,7 @@ void caseOnlyDeclarationChecks(AnalysisResult& result, const core::SourceFile& s
     // ev_9f4b850ac513b5a9f63dffbc54f518d21028ea2923558edeee5753c9452398df
     // ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b
     std::map<std::size_t, const VerilogNamingShapeDeclaration*> declarations;
-    std::map<std::string, std::size_t> moduleMultiplicity;
     for (const auto& declaration : scan.declarations) {
-        if (declaration.subject == VerilogNamingShapeSubject::Module)
-            ++moduleMultiplicity[declaration.moduleName];
         if (declaration.subject == VerilogNamingShapeSubject::Function ||
             declaration.subject == VerilogNamingShapeSubject::Unsupported) continue;
         declarations.emplace(declaration.tokenIndex, &declaration);
@@ -12980,7 +12978,10 @@ void checkVhdlClockAsControl(AnalysisResult& result, const core::SourceFile& sou
 }
 
 void directChecks(AnalysisResult& result, const core::SourceFile& source,
-                  std::string_view standardId, const AnalysisOptions& options) {
+                  std::string_view standardId, const AnalysisOptions& options,
+                  const parser::FrontendPreprocessorResult* expandedFrontend,
+                  const std::map<std::string,std::size_t>& frontendModules,
+                  bool frontendModuleIndexKnown) {
     const bool vhdl = standardId == "GJB9765-2020";
     const auto lines = linesOf(source.content());
     const auto tokens = standardTokens(source);
@@ -12989,9 +12990,7 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
     // to use source/tokens below. VHDL does not consume this Verilog branch.
     auto preprocessed = parser::preprocess(
         source, {options.includeDirectories, options.defines});
-    std::optional<parser::FrontendPreprocessorResult> expandedFrontend;
-    if (!vhdl) {
-        expandedFrontend=parser::expandFrontendSource(source,{options.includeDirectories,options.defines});
+    if (expandedFrontend) {
         // A failed macro/include expansion is not a proven AST input for any
         // direct frontend-facing check. Physical-source checks keep their own
         // input contract and do not consume this virtual source.
@@ -13015,12 +13014,15 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
         if (frontend.issues.empty()) {
             const auto expandedTokens=standardTokens(frontend.source);
             const auto shape=scanVerilogNamingShape(frontend.source,expandedTokens);
-            std::map<std::string,std::size_t> modules;
-            for (const auto& declaration:shape.declarations)
-                if(declaration.subject==VerilogNamingShapeSubject::Module) ++modules[declaration.moduleName];
+            // Count expanded owners across every source in this analysis, not
+            // the raw structure or just this physical root. Include files and
+            // macro-generated modules participate in the same name groups.
+            const auto& modules=frontendModules;
             // Native 5.2.15 uses its own declaration-family boundary. Preserve
             // that selector while changing only the configured frontend input.
             for(const auto& declaration:VerilogNamingDeclarations(frontend.source,expandedTokens).collect()) {
+                const auto owner=modules.find(declaration.moduleName);
+                if(!frontendModuleIndexKnown || owner==modules.end() || owner->second!=1) continue;
                 if(checkVerilogNamingStyle(declaration.normalizedName,declaration.subject)!=true) continue;
                 const auto& token=expandedTokens[declaration.tokenIndex];
                 emitAtLocation(result,"GJB10157.5.2.15",frontend.origin(token.line),
@@ -13028,13 +13030,15 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                         ":建议变量的命名中字母全部采用小写或者仅首字母大写" : ":建议常量的命名中字母全部采用大写"));
             }
             const auto caseStart=result.violations.size();
-            caseOnlyDeclarationChecks(result,frontend.source,expandedTokens,shape);
+            if (frontendModuleIndexKnown)
+                caseOnlyDeclarationChecks(result,frontend.source,expandedTokens,shape,modules);
             for(auto index=caseStart;index<result.violations.size();++index) {
                 const auto at=frontend.origin(result.violations[index].line);
                 result.violations[index].file=at.file;result.violations[index].line=at.line;
                 result.violations[index].column=1;
             }
             for (const auto& declaration:shape.declarations) {
+                if(!frontendModuleIndexKnown) continue;
                 const auto module=modules.find(declaration.moduleName);
                 if(module==modules.end() || module->second!=1) continue;
                 const auto& token=expandedTokens[declaration.tokenIndex];
@@ -13052,6 +13056,20 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
                     const bool consecutive=declaration.normalizedName.find("__")!=std::string::npos;
                     emitAtLocation(result,"GJB10157.5.2.2",at,declaration.normalizedName+
                         (consecutive ? ":禁止命名中使用连续的\"__\"" : ":禁止命名末尾使用\"_\""));
+                }
+            }
+            if (frontendModuleIndexKnown && parser::checkSyntax(frontend.source).empty()) {
+                const auto& keywordPolicy=options.verilogKeywordPolicy.configurationKnown
+                    ? options.verilogKeywordPolicy : Gjb10157DocumentedKeywordPolicy;
+                for(const auto& declaration:shape.declarations) {
+                    const auto owner=modules.find(declaration.moduleName);
+                    if(owner==modules.end() || owner->second!=1) continue;
+                    const auto match=checkVerilogKeywordName(
+                        declaration.normalizedName,declaration.subject,keywordPolicy);
+                    if(match.status!=VerilogKeywordStatus::Matched) continue;
+                    const auto& token=expandedTokens[declaration.tokenIndex];
+                    emitAtLocation(result,"GJB10157.5.2.3",frontend.origin(token.line),
+                        nativeVerilogKeywordMessage(*match.category,declaration.normalizedName));
                 }
             }
         }
@@ -14447,35 +14465,6 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             }
             checkVerilogFullCaseAttribute(result, preprocessed.source, activeTokens);
             checkNativeVerilogForbiddenTypes(result, preprocessed.source, activeTokens);
-            // Keyword admission still depends on the project structure and
-            // retains its existing input contract until that context is mapped.
-            const auto activeNamingShape =
-                scanVerilogNamingShape(preprocessed.source, activeTokens);
-            const auto& keywordPolicy = options.verilogKeywordPolicy.configurationKnown
-                ? options.verilogKeywordPolicy : Gjb10157DocumentedKeywordPolicy;
-            const bool keywordSourceAdmitted =
-                parser::checkSyntax(preprocessed.source).empty();
-            if (keywordSourceAdmitted) {
-                for (const auto& declaration : activeNamingShape.declarations) {
-                    // FUN_180535e60 iterates the ordered module-name map and
-                    // admits a group only when its vector contains exactly one
-                    // AST_MODULE. A duplicate group does not suppress a
-                    // different uniquely bound module in the same source.
-                    const auto ownerCount = std::ranges::count_if(
-                        result.structure, [&](const auto& unit) {
-                            return unit.kind == parser::DesignUnitKind::VerilogModule &&
-                                   unit.name == declaration.moduleName;
-                        });
-                    if (ownerCount != 1) continue;
-                    const auto match = checkVerilogKeywordName(
-                        declaration.normalizedName, declaration.subject, keywordPolicy);
-                    if (match.status != VerilogKeywordStatus::Matched) continue;
-                    const auto& token = activeTokens[declaration.tokenIndex];
-                    emit(result, "GJB10157.5.2.3", source, token.line, 1,
-                         nativeVerilogKeywordMessage(
-                             *match.category, declaration.normalizedName));
-                }
-            }
             checkTopLevelVerilogPortTypes(result, source, activeTokens, options);
             checkTopLevelVerilogGlueLogic(result, source, activeTokens, options);
             checkNonTopVerilogHierarchyLogic(result, source, activeTokens, options);
@@ -17521,11 +17510,30 @@ void applyStandardProfile(AnalysisResult& result,
         }
     }
 
+    // Each root retains its own configured translation unit until the native
+    // design/cache lifetime is proved. Reuse these exact expanded inputs for
+    // both the project owner index and the per-file naming checks.
+    std::vector<std::optional<parser::FrontendPreprocessorResult>> frontendInputs(sources.size());
+    std::map<std::string,std::size_t> frontendModules;
+    bool frontendModuleIndexKnown=true;
+    if (profile->id == "GJB10157-2021") {
+        for(std::size_t i=0;i<sources.size();++i) {
+            if(!applicable(sources[i],profile->id)) continue;
+            auto& input=frontendInputs[i];
+            input=parser::expandFrontendSource(sources[i],{options.includeDirectories,options.defines});
+            if(!input->issues.empty()) { frontendModuleIndexKnown=false;continue; }
+            for(const auto& unit:parser::parseDesignUnits(input->source))
+                if(unit.kind==parser::DesignUnitKind::VerilogModule) ++frontendModules[unit.name];
+        }
+    }
     bool hasApplicableSource = false;
-    for (const auto& source : sources) {
+    for (std::size_t i=0;i<sources.size();++i) {
+        const auto& source=sources[i];
         if (!applicable(source, profile->id)) continue;
         hasApplicableSource = true;
-        directChecks(result, source, profile->id, options);
+        directChecks(result, source, profile->id, options,
+            frontendInputs[i] ? &*frontendInputs[i] : nullptr,
+            frontendModules,frontendModuleIndexKnown);
     }
     if (profile->id == "GJB10157-2021")
         checkNativeVerilogParameterReuse(result, sources, options);

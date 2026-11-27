@@ -24,7 +24,8 @@ struct FrontendPreprocessorResult {
 };
 // Separate frontend input: physical-line rules must keep preprocess()/original
 // source. Each call is one configured compilation unit; project-wide macro
-// cache sharing and implicit target-tool defines are not inferred.
+// cache sharing is not inferred. Default read_hdl defines YOSYS and SYNTHESIS;
+// formal/nosynthesis modes are not exposed or guessed.
 [[nodiscard]] FrontendPreprocessorResult expandFrontendSource(
     const core::SourceFile& source,const PreprocessorOptions& options={},
     const FrontendPreprocessorLimits& limits={});

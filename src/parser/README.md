@@ -33,3 +33,8 @@ V1.4.250 新增独立 `frontend_preprocessor`，移植版本对应、带 ISC 许
 命名规则，物理源码规则不使用展开文本。`preprocessor` 的位置保持视图仍供未迁移的
 模型使用；完整项目结构/语义、跨编译单元宏缓存及编译模式尚未完成统一迁移。
 来源、限制和定位差异见 docs/native_rule_recovery_pass132.md。
+
+V1.4.251 根据默认 read_hdl → read_verilog -sv 调用链补齐 YOSYS/SYNTHESIS
+预定义；源码 undef/resetall 可删除它们。命名检查复用同批展开输入建立跨文件模块
+计数，R-2-3 也迁移到展开输入。该索引不代表完整 AST 或共享工程宏缓存；
+任何根文件展开失败时，要求唯一模块的命名规则保持未证明。
