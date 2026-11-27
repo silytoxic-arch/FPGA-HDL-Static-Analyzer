@@ -1,0 +1,72 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "method": "Version-correlated public source corroborated by static target paths; target not executed; not proof of every vendor modification or compilation option.",
+  "files": [
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/port_cpp.patch",
+      "size": 5340,
+      "sha256": "a8375256a2e944eb6136819dd43cb3d0316199b2359eba76e510e32231ed0aab",
+      "role": "host-adaptation diff; not target behavior evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/port_header.patch",
+      "size": 682,
+      "sha256": "bbc1e239d21a8c5cbaaf1463ecfff58d1d102eb6634a699fdb4c6de618c2b0ef",
+      "role": "host-adaptation diff; not target behavior evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/preprocessor_refs.txt",
+      "size": 56816,
+      "sha256": "aaeec0774efde450e6da60141f6d95aee998c4038faff7f745c49461f7beaee3",
+      "role": "static-target-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/preprocessor_strings.json",
+      "size": 4192,
+      "sha256": "c9cdb0aa6e02cc30e12fe821a68151c4f51e8e2c19f924386b82843c9e35e7c6",
+      "role": "static-target-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/source_lineage.json",
+      "size": 1406,
+      "sha256": "c2621e5e288377154151c589be34dfad60f8def51b50d25d8a9ed8364e11f3c2",
+      "role": "evidence interpretation with explicit limitations"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/upstream_commit.json",
+      "size": 208,
+      "sha256": "cd969268b9f0c2b91e179cf5ee02e0ea13a97b0c48ccfd2d9eef0ff074a91c92",
+      "role": "public-upstream-source/metadata, version-correlated; not native decompilation; ISC notice retained"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/upstream_preproc.cc",
+      "size": 25657,
+      "sha256": "0c61dbdd6c788805b8e24b4987aed896f4496497e76170b53af40c61360fa3df",
+      "role": "public-upstream-source/metadata, version-correlated; not native decompilation; ISC notice retained"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/upstream_preproc.h",
+      "size": 2354,
+      "sha256": "b8fe417d26c6e5c615e7dd19b815c229eeb76149607c7650d7d87fc9aa6a5cfd",
+      "role": "public-upstream-source/metadata, version-correlated; not native decompilation; ISC notice retained"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/upstream_verilog_lexer.l",
+      "size": 18395,
+      "sha256": "f1b95882788b8e49f023b5e2bc8cf366118ffb92011579db050723c39447481c",
+      "role": "public-upstream-source/metadata, version-correlated; not native decompilation; ISC notice retained"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/version_location.json",
+      "size": 356,
+      "sha256": "abb074471d7415660ae105db06e21381f7ffebcdb303291e0105d382e3f581d6",
+      "role": "static-target-evidence"
+    },
+    {
+      "path": "reverse-tools/evidence/t_linter_pass132/version_refs.txt",
+      "size": 1350,
+      "sha256": "94dd81b1663575f603aadad8fff9d4cfe66b6afc39aabc563b21b50088808a24",
+      "role": "static-target-evidence"
+    }
+  ]
+}

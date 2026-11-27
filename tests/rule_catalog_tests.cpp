@@ -15,7 +15,7 @@ int main() {
         if (!condition) { std::cerr << "FAIL: " << message << '\n'; ++failures; }
     };
     const auto rules = ruleCatalog();
-    check(rules.size() == 97, "all built-in rules are registered");
+    check(rules.size() == 100, "all built-in rules are registered");
     std::set<std::string> identifiers;
     std::string previous;
     for (const auto& rule : rules) {

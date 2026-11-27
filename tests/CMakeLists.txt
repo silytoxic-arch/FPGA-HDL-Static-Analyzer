@@ -535,3 +535,7 @@ if(FPGA_ANALYZER_BUILD_GUI)
     set_tests_properties(gui_project_workflow PROPERTIES TIMEOUT 25
         ENVIRONMENT "FPGA_GUI_TEST_PROJECT=${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
 endif()
+
+add_executable(fpga_frontend_preprocessor_tests frontend_preprocessor_tests.cpp)
+target_link_libraries(fpga_frontend_preprocessor_tests PRIVATE fpga_core fpga_build_options)
+add_test(NAME frontend_preprocessor_unit COMMAND fpga_frontend_preprocessor_tests)

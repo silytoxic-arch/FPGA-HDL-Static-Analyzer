@@ -1,0 +1,9 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "version": "Yosys latest (git sha1 6f9602b, Visual Studio)",
+  "fileOffset": "0xfd5fd8",
+  "rva": "0xfd6bd8",
+  "va": "0x180fd6bd8",
+  "section": ".rdata",
+  "bytes": "596f737973206c61746573742028676974207368613120366639363032622c2056697375616c2053747564696f2900"
+}

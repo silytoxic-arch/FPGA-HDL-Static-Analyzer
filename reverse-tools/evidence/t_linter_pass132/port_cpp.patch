@@ -1,0 +1,193 @@
+--- upstream_preproc.cc
++++ src/parser/vendor/yosys_preproc.cpp
+@@ -32,21 +32,25 @@
+  *
+  */
+ 
+-#include "preproc.h"
+-#include "verilog_frontend.h"
+-#include "kernel/log.h"
++#include "parser/vendor/yosys_preproc.h"
+ #include <assert.h>
+ #include <stack>
+ #include <stdarg.h>
+ #include <stdio.h>
+ #include <string.h>
+ 
+-YOSYS_NAMESPACE_BEGIN
+-using namespace VERILOG_FRONTEND;
++namespace fpga::parser::vendorpp {
+ 
+ static std::list<std::string> output_code;
+ static std::list<std::string> input_buffer;
+ static size_t input_buffer_charp;
++
++static void append_output(std::string value)
++{
++    check_output_size(budget.outputBytes,value.size());
++    budget.outputBytes+=value.size();
++    output_code.push_back(std::move(value));
++}
+ 
+ static void return_char(char ch)
+ {
+@@ -67,6 +71,7 @@
+ 
+ static char next_char()
+ {
++	check_operation_budget();
+ 	if (input_buffer.empty())
+ 		return 0;
+ 
+@@ -108,7 +113,7 @@
+ 	token += ch;
+ 	if (ch == '\n') {
+ 		if (pass_newline) {
+-			output_code.push_back(token);
++			append_output(token);
+ 			return "";
+ 		}
+ 		return token;
+@@ -380,13 +385,14 @@
+ 	for (auto &it : defines) {
+ 		const std::string &name = it.first;
+ 		const define_body_t &body = *it.second;
+-		Yosys::log("`define %s%s %s\n",
++		fpga::parser::vendorpp::log("`define %s%s %s\n",
+ 		           name.c_str(), body.has_args ? "()" : "", body.body.c_str());
+ 	}
+ }
+ 
+ static void input_file(std::istream &f, std::string filename)
+ {
++	check_input_file(filename);
+ 	char buffer[513];
+ 	int rc;
+ 
+@@ -396,6 +402,7 @@
+ 	input_buffer.insert(it, "`file_push \"" + filename + "\"\n");
+ 	while ((rc = readsome(f, buffer, sizeof(buffer)-1)) > 0) {
+ 		buffer[rc] = 0;
++		check_input_bytes(static_cast<size_t>(rc), buffer);
+ 		input_buffer.insert(it, buffer);
+ 	}
+ 	input_buffer.insert(it, "\n`file_pop\n");
+@@ -513,6 +520,7 @@
+ 			log_error("Expected to find '(' to begin macro arguments for '%s', but instead found '%s'\n",
+ 				name.c_str(), tok.c_str());
+ 		}
++		check_macro_depth(macro_arg_stack.size());
+ 		std::vector<std::string> args;
+ 		bool done = false;
+ 		while (!done) {
+@@ -773,6 +781,9 @@
+ 	input_buffer.clear();
+ 	input_buffer_charp = 0;
+ 
++	struct ClearOnExit {
++		~ClearOnExit() { output_code.clear(); input_buffer.clear(); input_buffer_charp = 0; }
++	} clear_on_exit;
+ 	input_file(f, filename);
+ 
+ 	while (!input_buffer.empty())
+@@ -852,7 +863,7 @@
+ 
+ 		if (ifdef_fail_level > 0) {
+ 			if (tok == "\n")
+-				output_code.push_back(tok);
++				append_output(tok);
+ 			continue;
+ 		}
+ 
+@@ -874,7 +885,7 @@
+ 			std::ifstream ff;
+ 			ff.clear();
+ 			std::string fixed_fn = fn;
+-			ff.open(fixed_fn.c_str());
++			open_native_file(ff, fixed_fn);
+ 
+ 			bool filename_path_sep_found;
+ 			bool fn_relative;
+@@ -882,10 +893,10 @@
+ 			// Both forward and backslash are acceptable separators on Windows.
+ 			filename_path_sep_found = (filename.find_first_of("/\\") != std::string::npos);
+ 			// Easier just to invert the check for an absolute path (e.g. C:\ or C:/)
+-			fn_relative = !(fn[1] == ':' && (fn[2] == '/' || fn[2] == '\\'));
++			fn_relative = !(fn.size() >= 3 && fn[1] == ':' && (fn[2] == '/' || fn[2] == '\\'));
+ #else
+ 			filename_path_sep_found = (filename.find('/') != std::string::npos);
+-			fn_relative = (fn[0] != '/');
++			fn_relative = (fn.empty() || fn[0] != '/');
+ #endif
+ 
+ 			if (ff.fail() && fn.size() > 0 && fn_relative && filename_path_sep_found) {
+@@ -897,7 +908,7 @@
+ #else
+ 				fixed_fn = filename.substr(0, filename.rfind('/')+1) + fn;
+ #endif
+-				ff.open(fixed_fn);
++				open_native_file(ff, fixed_fn);
+ 			}
+ 			if (ff.fail() && fn.size() > 0 && fn_relative) {
+ 				// if the include file was not found and it is not given with an absolute path, then
+@@ -905,12 +916,12 @@
+ 				for (auto incdir : include_dirs) {
+ 					ff.clear();
+ 					fixed_fn = incdir + '/' + fn;
+-					ff.open(fixed_fn);
++					open_native_file(ff, fixed_fn);
+ 					if (!ff.fail()) break;
+ 				}
+ 			}
+ 			if (ff.fail()) {
+-				output_code.push_back("`file_notfound " + fn);
++				append_output("`file_notfound " + fn);
+ 			} else {
+ 				input_file(ff, fixed_fn);
+ 				yosys_input_files.insert(fixed_fn);
+@@ -923,15 +934,19 @@
+ 			std::string fn = next_token(true);
+ 			if (!fn.empty() && fn.front() == '"' && fn.back() == '"')
+ 				fn = fn.substr(1, fn.size()-2);
+-			output_code.push_back(tok + " \"" + fn + "\"");
++			append_output(tok + " \"" + fn + "\"");
++			check_include_depth(filename_stack.size() + 1);
+ 			filename_stack.push_back(filename);
+ 			filename = fn;
++			budget.current_file = filename;
+ 			continue;
+ 		}
+ 
+ 		if (tok == "`file_pop") {
+-			output_code.push_back(tok);
++			append_output(tok);
++			if (filename_stack.empty()) log_error("Unexpected file_pop directive.\n");
+ 			filename = filename_stack.back();
++			budget.current_file = filename;
+ 			filename_stack.pop_back();
+ 			continue;
+ 		}
+@@ -974,7 +989,7 @@
+ 		if (try_expand_macro(defines, macro_arg_stack, tok))
+ 			continue;
+ 
+-		output_code.push_back(tok);
++		append_output(tok);
+ 	}
+ 
+ 	if (ifdef_fail_level > 0 || ifdef_pass_level > 0) {
+@@ -983,7 +998,7 @@
+ 
+ 	std::string output;
+ 	for (auto &str : output_code)
+-		output += str;
++		{ check_output_size(output.size(), str.size()); output += str; }
+ 
+ 	output_code.clear();
+ 	input_buffer.clear();
+@@ -992,4 +1007,4 @@
+ 	return output;
+ }
+ 
+-YOSYS_NAMESPACE_END
++} // namespace fpga::parser::vendorpp

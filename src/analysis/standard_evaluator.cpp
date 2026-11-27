@@ -4,6 +4,7 @@
 #include "analysis/standard_profiles.h"
 #include "parser/design_parser.h"
 #include "parser/preprocessor.h"
+#include "parser/frontend_preprocessor.h"
 #include "parser/semantic_analyzer.h"
 #include "analysis/verilog_constant_expression.h"
 #include "analysis/native_verilog_integer.h"
@@ -12986,10 +12987,76 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
     // Keep one configured preprocessing result for every Verilog rule whose
     // native input is a frontend AST. Raw physical-line predicates continue
     // to use source/tokens below. VHDL does not consume this Verilog branch.
-    const auto preprocessed = parser::preprocess(
+    auto preprocessed = parser::preprocess(
         source, {options.includeDirectories, options.defines});
+    std::optional<parser::FrontendPreprocessorResult> expandedFrontend;
+    if (!vhdl) {
+        expandedFrontend=parser::expandFrontendSource(source,{options.includeDirectories,options.defines});
+        // A failed macro/include expansion is not a proven AST input for any
+        // direct frontend-facing check. Physical-source checks keep their own
+        // input contract and do not consume this virtual source.
+        preprocessed.issues.insert(preprocessed.issues.end(),
+            expandedFrontend->issues.begin(),expandedFrontend->issues.end());
+    }
     const auto activeTokens = preprocessed.issues.empty()
         ? standardTokens(preprocessed.source) : std::vector<parser::HdlToken>{};
+    if (expandedFrontend) {
+        const auto& frontend=*expandedFrontend;
+        for (const auto& issue:frontend.issues) {
+            if(std::any_of(result.violations.begin(),result.violations.end(),[&](const auto& item) {
+                return item.ruleId==issue.ruleId && item.file==issue.location.file &&
+                    item.line==issue.location.line && item.column==issue.location.column;
+            })) continue;
+            result.violations.push_back({issue.ruleId,Severity::Error,issue.message,
+                "无法可靠建立宏展开及包含文件后的前端输入。",
+                "检查宏定义、实参和 include 路径；行号 0 表示尚无可靠的精确位置。",
+                issue.location.file,issue.location.line,issue.location.column,std::nullopt,std::nullopt});
+        }
+        if (frontend.issues.empty()) {
+            const auto expandedTokens=standardTokens(frontend.source);
+            const auto shape=scanVerilogNamingShape(frontend.source,expandedTokens);
+            std::map<std::string,std::size_t> modules;
+            for (const auto& declaration:shape.declarations)
+                if(declaration.subject==VerilogNamingShapeSubject::Module) ++modules[declaration.moduleName];
+            // Native 5.2.15 uses its own declaration-family boundary. Preserve
+            // that selector while changing only the configured frontend input.
+            for(const auto& declaration:VerilogNamingDeclarations(frontend.source,expandedTokens).collect()) {
+                if(checkVerilogNamingStyle(declaration.normalizedName,declaration.subject)!=true) continue;
+                const auto& token=expandedTokens[declaration.tokenIndex];
+                emitAtLocation(result,"GJB10157.5.2.15",frontend.origin(token.line),
+                    declaration.normalizedName+(declaration.subject==VerilogNamingSubject::WireLike ?
+                        ":建议变量的命名中字母全部采用小写或者仅首字母大写" : ":建议常量的命名中字母全部采用大写"));
+            }
+            const auto caseStart=result.violations.size();
+            caseOnlyDeclarationChecks(result,frontend.source,expandedTokens,shape);
+            for(auto index=caseStart;index<result.violations.size();++index) {
+                const auto at=frontend.origin(result.violations[index].line);
+                result.violations[index].file=at.file;result.violations[index].line=at.line;
+                result.violations[index].column=1;
+            }
+            for (const auto& declaration:shape.declarations) {
+                const auto module=modules.find(declaration.moduleName);
+                if(module==modules.end() || module->second!=1) continue;
+                const auto& token=expandedTokens[declaration.tokenIndex];
+                const auto at=frontend.origin(token.line); // Native records have no column.
+                if(checkVerilogPowerName(declaration.normalizedName,declaration.subject)==true)
+                    emitAtLocation(result,"GJB10157.5.2.4",at,"禁止使用"+declaration.normalizedName+"命名");
+                if(declaration.subject!=VerilogNamingShapeSubject::Function &&
+                   checkVerilogNameLength(declaration.normalizedName)==true)
+                    emitAtLocation(result,"GJB10157.5.2.12",at,
+                        declaration.normalizedName+":建议命名长度在2到32个字符之间");
+                if(declaration.predicates.firstByteViolation==true)
+                    emitAtLocation(result,"GJB10157.5.2.1",at,
+                        declaration.normalizedName+"命名必须以字母开始");
+                if(declaration.predicates.underscoreViolation==true) {
+                    const bool consecutive=declaration.normalizedName.find("__")!=std::string::npos;
+                    emitAtLocation(result,"GJB10157.5.2.2",at,declaration.normalizedName+
+                        (consecutive ? ":禁止命名中使用连续的\"__\"" : ":禁止命名末尾使用\"_\""));
+                }
+            }
+        }
+    }
+
     if (vhdl) {
         for (const auto& issue : parser::analyzeVhdlUnreachableComparisons(source))
             emit(result, "GJB9765.4.2.e", source, issue.location.line,
@@ -14380,91 +14447,10 @@ void directChecks(AnalysisResult& result, const core::SourceFile& source,
             }
             checkVerilogFullCaseAttribute(result, preprocessed.source, activeTokens);
             checkNativeVerilogForbiddenTypes(result, preprocessed.source, activeTokens);
-            // Native FUN_1805306e0 consumes AST_PARAMETER/LOCALPARAM/WIRE
-            // after frontend conditional selection. Apply the recovered case
-            // predicate to the configured active token stream, not raw source
-            // containing mutually exclusive branches. Unresolved preprocessing
-            // deliberately produces no guessed 5.2.15 finding.
-            // FUN_18003e420 builds the native message as normalized name plus
-            // one fixed GB18030 suffix. The native location record carries the
-            // owning module source path and declaration line, but no column.
-            // a2_5_naming_case_entry.txt SHA256
-            // 13a1afd1f7ffad5be0c2a08657d7e67a149cc0ddef9b861841aa76deafb598f4
-            for (const auto& declaration :
-                 VerilogNamingDeclarations(preprocessed.source, activeTokens).collect()) {
-                if (checkVerilogNamingStyle(
-                        declaration.normalizedName, declaration.subject) != true) continue;
-                const auto& token = activeTokens[declaration.tokenIndex];
-                emit(result, "GJB10157.5.2.15", source, token.line, 1,
-                     declaration.subject == VerilogNamingSubject::WireLike
-                         ? declaration.normalizedName +
-                               ":建议变量的命名中字母全部采用小写或者仅首字母大写"
-                         : declaration.normalizedName +
-                               ":建议常量的命名中字母全部采用大写");
-            }
-            // Native 5.2.6 compares parsed declaration names within each
-            // AST_MODULE. Use the same configured active branch boundary as
-            // the frontend-facing naming checks; mutually exclusive source
-            // declarations must never occupy the same comparison set.
+            // Keyword admission still depends on the project structure and
+            // retains its existing input contract until that context is mapped.
             const auto activeNamingShape =
                 scanVerilogNamingShape(preprocessed.source, activeTokens);
-            caseOnlyDeclarationChecks(
-                result, source, activeTokens, activeNamingShape);
-            std::map<std::string, std::size_t> activeModuleMultiplicity;
-            for (const auto& declaration : activeNamingShape.declarations)
-                if (declaration.subject == VerilogNamingShapeSubject::Module)
-                    ++activeModuleMultiplicity[declaration.moduleName];
-            // Native 5.2.1/.2/.4/.12 consume the same frontend AST declaration
-            // families as the adjacent naming rules. Evaluate the configured
-            // active branch rather than dropping every declaration enclosed by
-            // an ifdef/ifndef in the raw source adapter.
-            for (const auto& declaration : activeNamingShape.declarations) {
-                const auto& token = activeTokens[declaration.tokenIndex];
-                const auto owner = activeModuleMultiplicity.find(declaration.moduleName);
-                const bool uniqueModule = owner != activeModuleMultiplicity.end() &&
-                    owner->second == 1;
-                // Native FUN_18052c420 iterates the module-name map and admits
-                // only a group containing exactly one AST_MODULE(2). It emits
-                // Error once per selected declaration node, at the declaration
-                // physical line with no column, using normalized-name plus the
-                // exact GB18030 suffix 命名必须以字母开始.
-                if (uniqueModule && declaration.predicates.firstByteViolation == true)
-                    emit(result, "GJB10157.5.2.1", source, token.line, 1,
-                         declaration.normalizedName + "命名必须以字母开始");
-                // Native FUN_180535370 uses the same unique-module-map gate as
-                // the adjacent naming collectors, but excludes FUNCTION(4)
-                // itself.  It tests "__" before the trailing-byte predicate,
-                // so a name satisfying both branches emits only the first
-                // fixed message.  The native record carries no column.
-                if (uniqueModule && declaration.predicates.underscoreViolation == true) {
-                    const bool consecutive =
-                        declaration.normalizedName.find("__") != std::string::npos;
-                    emit(result, "GJB10157.5.2.2", source, token.line, 1,
-                         declaration.normalizedName +
-                             (consecutive
-                                  ? ":禁止命名中使用连续的\"__\""
-                                  : ":禁止命名末尾使用\"_\""));
-                }
-                // Native FUN_180539910 admits only a module-name map group
-                // containing exactly one AST_MODULE.  It lowercases both the
-                // five fixed names and a candidate copy, performs equal-length
-                // byte comparison, and reports every selected node.  The
-                // message retains the original normalized name; the report has
-                // a candidate integer location but no column.
-                if (uniqueModule && checkVerilogPowerName(
-                        declaration.normalizedName, declaration.subject) == true)
-                    emit(result, "GJB10157.5.2.4", source, token.line, 1,
-                         "禁止使用" + declaration.normalizedName + "命名");
-                // FUN_18052d8a0 iterates the module-name map and admits a
-                // group only when it contains exactly one AST_MODULE.  Every
-                // selected descendant of duplicate same-name modules is
-                // therefore skipped together with both module declarations.
-                if (uniqueModule &&
-                    declaration.subject != VerilogNamingShapeSubject::Function &&
-                    checkVerilogNameLength(declaration.normalizedName) == true)
-                    emit(result, "GJB10157.5.2.12", source, token.line, 1,
-                         declaration.normalizedName + ":建议命名长度在2到32个字符之间");
-            }
             const auto& keywordPolicy = options.verilogKeywordPolicy.configurationKnown
                 ? options.verilogKeywordPolicy : Gjb10157DocumentedKeywordPolicy;
             const bool keywordSourceAdmitted =

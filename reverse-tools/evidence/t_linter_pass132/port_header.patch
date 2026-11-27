@@ -1,0 +1,28 @@
+--- upstream_preproc.h
++++ src/parser/vendor/yosys_preproc.h
+@@ -23,14 +23,15 @@
+ #ifndef VERILOG_PREPROC_H
+ #define VERILOG_PREPROC_H
+ 
+-#include "kernel/yosys.h"
++#include "parser/vendor/preprocessor_support.h"
+ 
++#include "parser/vendor/preprocessor_support.h"
+ #include <iosfwd>
+ #include <list>
+ #include <memory>
+ #include <string>
+ 
+-YOSYS_NAMESPACE_BEGIN
++namespace fpga::parser::vendorpp {
+ 
+ struct define_body_t;
+ struct arg_map_t;
+@@ -73,6 +74,6 @@
+                          define_map_t                 &global_defines_cache,
+                          const std::list<std::string> &include_dirs);
+ 
+-YOSYS_NAMESPACE_END
++} // namespace fpga::parser::vendorpp
+ 
+ #endif

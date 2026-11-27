@@ -1,0 +1,22 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "upstreamCommit": "6f9602b4cfedc6441f55272f6c025d64620cd24f",
+  "upstreamUrl": "https://github.com/YosysHQ/yosys/tree/6f9602b4cfedc6441f55272f6c025d64620cd24f/frontends/verilog",
+  "license": "ISC; notices retained in sources and installed THIRD_PARTY_NOTICES.md",
+  "nativeVersionPointer": "0x18131eef8",
+  "nativeMatches": {
+    "0x180942d70": "arg_map_t::add duplicate-formal branch",
+    "0x1809452a0": "arg_map_t::get_vals default/empty/missing actual selection",
+    "0x180947050": "read_define state machine",
+    "0x180943c80": "frontend_verilog_preproc conditional/file-stack and macro dispatch"
+  },
+  "evidenceKind": "Version-correlated public source corroborated by static target paths; target not executed; not proof of every vendor modification or compilation option.",
+  "mappingBoundary": "File-stack/line counter mapping, not exact physical macro columns/byte offsets. Native module-owned report paths are documented per rule; product deliberately maps the selected declaration to its lexical source origin.",
+  "unresolved": [
+    "shared project macro-cache lifetime",
+    "implicit tool defines and compilation modes",
+    "full source-to-AST construction and synthesis-translation modes",
+    "host text-mode corner cases",
+    "vendor modifications and runtime differential verification"
+  ]
+}

@@ -1819,8 +1819,20 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Constructor FUN_1800210a0 installs vtable 0x180eeb9b8. Active slot FUN_18052c420 walks the ordered module-name map at object+0x68 and admits a group only when its vector contains exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79), TASK(3) and FUNCTION(4), normalizes each nonempty name, and reports only when the first ASCII byte is 0..9 or underscore. Every admitted declaration node independently emits fixed Error at the owning module source path and declaration physical line with no column; the exact GB18030 diagnostic is <normalized-name>命名必须以字母开始. Product mirrors the unique-module boundary, configured active preprocessing, bounded declaration families, per-node multiplicity and diagnostic surface.",
+      "predicate": "Constructor FUN_1800210a0 installs vtable 0x180eeb9b8. Active slot FUN_18052c420 walks the ordered module-name map at object+0x68 and admits a group only when its vector contains exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79), TASK(3) and FUNCTION(4), normalizes each nonempty name, and reports only when the first ASCII byte is 0..9 or underscore. Every admitted declaration node independently emits fixed Error at the owning module source path and declaration physical line with no column; the exact GB18030 diagnostic is <normalized-name>命名必须以字母开始. Product mirrors the unique-module boundary, configured active preprocessing, bounded declaration families, per-node multiplicity and fixed message/severity. Configured object/function macros, defaults, token-paste/string expansion and nested includes now use the version-correlated standalone frontend port. The platform maps candidate reports through the lexer file/line protocol, deliberately using declaration-origin filenames rather than claiming exact native module-owned report-path parity.",
       "predicateEvidence": [
+        "docs/native_rule_recovery_pass132.md",
+        "reverse-tools/evidence/t_linter_pass132/port_cpp.patch#sha256=a8375256a2e944eb6136819dd43cb3d0316199b2359eba76e510e32231ed0aab",
+        "reverse-tools/evidence/t_linter_pass132/port_header.patch#sha256=bbc1e239d21a8c5cbaaf1463ecfff58d1d102eb6634a699fdb4c6de618c2b0ef",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_refs.txt#sha256=aaeec0774efde450e6da60141f6d95aee998c4038faff7f745c49461f7beaee3",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_strings.json#sha256=c9cdb0aa6e02cc30e12fe821a68151c4f51e8e2c19f924386b82843c9e35e7c6",
+        "reverse-tools/evidence/t_linter_pass132/source_lineage.json#sha256=c2621e5e288377154151c589be34dfad60f8def51b50d25d8a9ed8364e11f3c2",
+        "reverse-tools/evidence/t_linter_pass132/upstream_commit.json#sha256=cd969268b9f0c2b91e179cf5ee02e0ea13a97b0c48ccfd2d9eef0ff074a91c92",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.cc#sha256=0c61dbdd6c788805b8e24b4987aed896f4496497e76170b53af40c61360fa3df",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.h#sha256=b8fe417d26c6e5c615e7dd19b815c229eeb76149607c7650d7d87fc9aa6a5cfd",
+        "reverse-tools/evidence/t_linter_pass132/upstream_verilog_lexer.l#sha256=f1b95882788b8e49f023b5e2bc8cf366118ffb92011579db050723c39447481c",
+        "reverse-tools/evidence/t_linter_pass132/version_location.json#sha256=abb074471d7415660ae105db06e21381f7ffebcdb303291e0105d382e3f581d6",
+        "reverse-tools/evidence/t_linter_pass132/version_refs.txt#sha256=94dd81b1663575f603aadad8fff9d4cfe66b6afc39aabc563b21b50088808a24",
         "ev_8ed10f75820818d3d20d08887706e8cd7659c8e91158a8f12d34d1be83f68c3b",
         "ev_512c915b90a165536016fafbb5a5ded6cfba13c0084ad97b3576b7906ee5547b",
         "docs/evidence/native_verilog_naming_shape_preprocessing_findings.md",
@@ -1828,14 +1840,17 @@
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": "tests/verilog_naming_shape_tests.cpp",
+      "additionalTests": [
+        "tests/verilog_naming_shape_tests.cpp",
+        "tests/frontend_preprocessor_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.1.html",
         "sha256": "b9be2fa0132d9bf4f6c0c64fbb02fff667b62a62a6a58340d18bb317c50a9f9f",
         "nativeFindings": "docs/evidence/native_verilog_naming_shape_preprocessing_findings.md",
-        "release": "docs/v1_4_13_release.md"
+        "release": "docs/v1_4_250_release.md"
       },
       "exampleChecks": [
         {
@@ -1849,7 +1864,7 @@
           "matched": true
         }
       ],
-      "limitations": "The predicate is not a universal nonletter ban: other punctuation and non-ASCII leading bytes do not enter the recovered branch. Numeric-leading source recovery is limited to underscore-bearing tokens at unambiguous declaration positions; other malformed names are not vendor-AST-proven. Cross-file duplicate module groups, complete macro/include/generated AST construction, proprietary escaped-name and locale normalization, opaque types, complex cells, syntax recovery and global diagnostic ordering remain unresolved. Product skips unsupported contexts; a quiet result remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The predicate is not a universal nonletter ban: other punctuation and non-ASCII leading bytes do not enter the recovered branch. Numeric-leading source recovery is limited to underscore-bearing tokens at unambiguous declaration positions; other malformed names are not vendor-AST-proven. Cross-file duplicate module groups, complete macro/include/generated AST construction, proprietary escaped-name and locale normalization, opaque types, complex cells, syntax recovery and global diagnostic ordering remain unresolved. Product skips unsupported contexts; a quiet result remains ManualReviewRequired and full native equivalence is not claimed. Expanded input is one configured compilation unit. Shared project macro caches, implicit tool defines/modes, complete AST/synthesis-translation behavior and vendor modifications remain unresolved. Source columns/byte offsets for macro replacements are not inferred; report filenames use the platform declaration-origin mapping, not a claim of native path equivalence."
     },
     {
       "publicRuleId": "R-2-10",
@@ -2099,8 +2114,20 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native FUN_18052d8a0 iterates the module-name map and admits only a group containing exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4). Each nonempty normalized name reports when its unsigned byte length is below the signed-then-unsigned minimum or above the corresponding maximum; constructor FUN_1800212e0 defaults these fields to inclusive 2..32. Negative and inverted values therefore retain deterministic x64 unsigned-comparison behavior. The diagnostic is fixed Error, uses the candidate physical line without a column, and is exactly <name>:建议命名长度在<min>到<max>个字符之间. Product mirrors these boundaries after configured conditional preprocessing and skips complete duplicate same-name module groups.",
+      "predicate": "Native FUN_18052d8a0 iterates the module-name map and admits only a group containing exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4). Each nonempty normalized name reports when its unsigned byte length is below the signed-then-unsigned minimum or above the corresponding maximum; constructor FUN_1800212e0 defaults these fields to inclusive 2..32. Negative and inverted values therefore retain deterministic x64 unsigned-comparison behavior. The diagnostic is fixed Error, uses the candidate physical line without a column, and is exactly <name>:建议命名长度在<min>到<max>个字符之间. Product mirrors these boundaries after configured conditional preprocessing and skips complete duplicate same-name module groups. Configured object/function macros, defaults, token-paste/string expansion and nested includes now use the version-correlated standalone frontend port. The platform maps candidate reports through the lexer file/line protocol, deliberately using declaration-origin filenames rather than claiming exact native module-owned report-path parity.",
       "predicateEvidence": [
+        "docs/native_rule_recovery_pass132.md",
+        "reverse-tools/evidence/t_linter_pass132/port_cpp.patch#sha256=a8375256a2e944eb6136819dd43cb3d0316199b2359eba76e510e32231ed0aab",
+        "reverse-tools/evidence/t_linter_pass132/port_header.patch#sha256=bbc1e239d21a8c5cbaaf1463ecfff58d1d102eb6634a699fdb4c6de618c2b0ef",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_refs.txt#sha256=aaeec0774efde450e6da60141f6d95aee998c4038faff7f745c49461f7beaee3",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_strings.json#sha256=c9cdb0aa6e02cc30e12fe821a68151c4f51e8e2c19f924386b82843c9e35e7c6",
+        "reverse-tools/evidence/t_linter_pass132/source_lineage.json#sha256=c2621e5e288377154151c589be34dfad60f8def51b50d25d8a9ed8364e11f3c2",
+        "reverse-tools/evidence/t_linter_pass132/upstream_commit.json#sha256=cd969268b9f0c2b91e179cf5ee02e0ea13a97b0c48ccfd2d9eef0ff074a91c92",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.cc#sha256=0c61dbdd6c788805b8e24b4987aed896f4496497e76170b53af40c61360fa3df",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.h#sha256=b8fe417d26c6e5c615e7dd19b815c229eeb76149607c7650d7d87fc9aa6a5cfd",
+        "reverse-tools/evidence/t_linter_pass132/upstream_verilog_lexer.l#sha256=f1b95882788b8e49f023b5e2bc8cf366118ffb92011579db050723c39447481c",
+        "reverse-tools/evidence/t_linter_pass132/version_location.json#sha256=abb074471d7415660ae105db06e21381f7ffebcdb303291e0105d382e3f581d6",
+        "reverse-tools/evidence/t_linter_pass132/version_refs.txt#sha256=94dd81b1663575f603aadad8fff9d4cfe66b6afc39aabc563b21b50088808a24",
         "ev_72031d097e80e28af266b1d999a091e98e505f631f13006bbb16c39c3b51e52b",
         "ev_18d1ea59101ccfacbaf11002bc798a90887dab8fc02865c01c8d2c786def1449",
         "reverse-tools/evidence/a2_2_name_length_entry.txt#sha256=7e2ee731f5c8c2757a42434c68e98e5e9f6909c55336bc99d55eaa27336cfe41",
@@ -2112,18 +2139,19 @@
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/verilog_name_length_tests.cpp",
         "tests/verilog_naming_shape_tests.cpp",
-        "tests/standard_accuracy_tests.cpp"
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_preprocessor_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.12.html",
         "sha256": "6c11ed00f6fae63c42c4387f212b1083c98b0a2f9e72ea3181a38535b3b73108",
         "nativeFindings": "docs/evidence/native_verilog_name_length_5_2_12_findings.md",
-        "release": "docs/v1_4_92_release.md"
+        "release": "docs/v1_4_250_release.md"
       },
       "exampleChecks": [
         {
@@ -2137,7 +2165,7 @@
           "matched": true
         }
       ],
-      "limitations": "Complete macro/include/generated AST construction, escaped-name normalization, complex cells, malformed recovery, source ownership and proprietary traversal order remain unverified. The supplied client and DLL expose no bound override; an attachment-external client that mutates internal objects is outside the evidence boundary. Product uses the recovered fixed defaults and bounded source adapter; no alarm remains ManualReviewRequired and full frontend equivalence is not claimed."
+      "limitations": "Complete macro/include/generated AST construction, escaped-name normalization, complex cells, malformed recovery, source ownership and proprietary traversal order remain unverified. The supplied client and DLL expose no bound override; an attachment-external client that mutates internal objects is outside the evidence boundary. Product uses the recovered fixed defaults and bounded source adapter; no alarm remains ManualReviewRequired and full frontend equivalence is not claimed. Expanded input is one configured compilation unit. Shared project macro caches, implicit tool defines/modes, complete AST/synthesis-translation behavior and vendor modifications remain unresolved. Source columns/byte offsets for macro replacements are not inferred; report filenames use the platform declaration-origin mapping, not a claim of native path equivalence."
     },
     {
       "publicRuleId": "A-2-3",
@@ -2359,8 +2387,20 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Native constructor FUN_1800214a0 fixes bytes +0x158/+0x159/+0x15a to 0/1/1. FUN_1805306e0 therefore rejects any ASCII lowercase byte in AST_PARAMETER/AST_LOCALPARAM names and, for AST_WIRE, requires an ASCII-letter first byte and rejects uppercase bytes after the first. Each violating declaration emits exactly once with fixed Error severity, the owning AST_MODULE source path, declaration physical line and no recovered column. FUN_18003e420 constructs normalized-name plus an exact GB18030 suffix: :建议常量的命名中字母全部采用大写 for parameter/localparam, or :建议变量的命名中字母全部采用小写或者仅首字母大写 for the default wire branch. Product mirrors those diagnostics on its configured active declaration stream and preserves same-line per-node multiplicity.",
+      "predicate": "Native constructor FUN_1800214a0 fixes bytes +0x158/+0x159/+0x15a to 0/1/1. FUN_1805306e0 therefore rejects any ASCII lowercase byte in AST_PARAMETER/AST_LOCALPARAM names and, for AST_WIRE, requires an ASCII-letter first byte and rejects uppercase bytes after the first. Each violating declaration emits exactly once with fixed Error severity, the owning AST_MODULE source path, declaration physical line and no recovered column. FUN_18003e420 constructs normalized-name plus an exact GB18030 suffix: :建议常量的命名中字母全部采用大写 for parameter/localparam, or :建议变量的命名中字母全部采用小写或者仅首字母大写 for the default wire branch. Product preserves the recovered predicate, fixed messages/severity and same-line per-node multiplicity on the configured declaration stream. Configured object/function macros, defaults, token-paste/string expansion and nested includes now use the version-correlated standalone frontend port. The platform maps candidate reports through the lexer file/line protocol, deliberately using declaration-origin filenames rather than claiming exact native module-owned report-path parity.",
       "predicateEvidence": [
+        "docs/native_rule_recovery_pass132.md",
+        "reverse-tools/evidence/t_linter_pass132/port_cpp.patch#sha256=a8375256a2e944eb6136819dd43cb3d0316199b2359eba76e510e32231ed0aab",
+        "reverse-tools/evidence/t_linter_pass132/port_header.patch#sha256=bbc1e239d21a8c5cbaaf1463ecfff58d1d102eb6634a699fdb4c6de618c2b0ef",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_refs.txt#sha256=aaeec0774efde450e6da60141f6d95aee998c4038faff7f745c49461f7beaee3",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_strings.json#sha256=c9cdb0aa6e02cc30e12fe821a68151c4f51e8e2c19f924386b82843c9e35e7c6",
+        "reverse-tools/evidence/t_linter_pass132/source_lineage.json#sha256=c2621e5e288377154151c589be34dfad60f8def51b50d25d8a9ed8364e11f3c2",
+        "reverse-tools/evidence/t_linter_pass132/upstream_commit.json#sha256=cd969268b9f0c2b91e179cf5ee02e0ea13a97b0c48ccfd2d9eef0ff074a91c92",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.cc#sha256=0c61dbdd6c788805b8e24b4987aed896f4496497e76170b53af40c61360fa3df",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.h#sha256=b8fe417d26c6e5c615e7dd19b815c229eeb76149607c7650d7d87fc9aa6a5cfd",
+        "reverse-tools/evidence/t_linter_pass132/upstream_verilog_lexer.l#sha256=f1b95882788b8e49f023b5e2bc8cf366118ffb92011579db050723c39447481c",
+        "reverse-tools/evidence/t_linter_pass132/version_location.json#sha256=abb074471d7415660ae105db06e21381f7ffebcdb303291e0105d382e3f581d6",
+        "reverse-tools/evidence/t_linter_pass132/version_refs.txt#sha256=94dd81b1663575f603aadad8fff9d4cfe66b6afc39aabc563b21b50088808a24",
         "ev_ec2de6887151950345c09c26e8681066402a4d6fe1589de3f8fd54b1bd393a74",
         "ev_956bbd82ac398771c56ed5d710a0533ba55bfb28978bbced0e1f1890cd7a34b0",
         "ev_7b4b3954d4a9cbee8dbd98d482b6930f464f137c4714471fef11584e023f4a60",
@@ -2372,17 +2412,18 @@
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/verilog_naming_style_tests.cpp",
-        "tests/verilog_naming_declarations_tests.cpp"
+        "tests/verilog_naming_declarations_tests.cpp",
+        "tests/frontend_preprocessor_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.15.html",
         "sha256": "378f18c9127379c8b656367852dae05ff47e9cf6d1eb855cfb9981a20a01f0c7",
         "nativeFindings": "docs/evidence/native_verilog_naming_case_5_2_15_configuration_findings.md",
-        "release": "docs/v1_4_86_release.md"
+        "release": "docs/v1_4_250_release.md"
       },
       "exampleChecks": [
         {
@@ -2396,7 +2437,7 @@
           "matched": false
         }
       ],
-      "limitations": "Full source-to-AST_WIRE mapping, proprietary identifier normalization, complete macro/include expansion and generated declarations remain unknown. Memory arrays and opaque types are excluded; preprocessing failures are not guessed. The packaged HTML compliant parameter Data contradicts the immutable default binary predicate and remains recorded as an upstream documentation mismatch; a no-finding result stays ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "Full source-to-AST_WIRE mapping, proprietary identifier normalization, complete macro/include expansion and generated declarations remain unknown. Memory arrays and opaque types are excluded; preprocessing failures are not guessed. The packaged HTML compliant parameter Data contradicts the immutable default binary predicate and remains recorded as an upstream documentation mismatch; a no-finding result stays ManualReviewRequired and full native equivalence is not claimed. Expanded input is one configured compilation unit. Shared project macro caches, implicit tool defines/modes, complete AST/synthesis-translation behavior and vendor modifications remain unresolved. Source columns/byte offsets for macro replacements are not inferred; report filenames use the platform declaration-origin mapping, not a claim of native path equivalence."
     },
     {
       "publicRuleId": "A-2-6",
@@ -2611,8 +2652,20 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Constructor FUN_180021700 installs vtable 0x180eec8f0. Active slot FUN_180535370 walks the ordered module-name map at object+0x68 and admits a group only when its vector contains exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4) itself while retaining selected descendants. For every nonempty normalized name it searches \"__\" first and emits <name>:禁止命名中使用连续的\"__\"; only when absent does a trailing underscore emit <name>:禁止命名末尾使用\"_\". Every selected node independently emits fixed Error at the owning module source path with an integer candidate location and no column. Product mirrors the unique-module boundary, branch priority, configured active preprocessing, bounded declaration families, per-node multiplicity and diagnostic surface.",
+      "predicate": "Constructor FUN_180021700 installs vtable 0x180eec8f0. Active slot FUN_180535370 walks the ordered module-name map at object+0x68 and admits a group only when its vector contains exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4) itself while retaining selected descendants. For every nonempty normalized name it searches \"__\" first and emits <name>:禁止命名中使用连续的\"__\"; only when absent does a trailing underscore emit <name>:禁止命名末尾使用\"_\". Every selected node independently emits fixed Error at the owning module source path with an integer candidate location and no column. Product mirrors the unique-module boundary, branch priority, configured active preprocessing, bounded declaration families, per-node multiplicity and fixed message/severity. Configured object/function macros, defaults, token-paste/string expansion and nested includes now use the version-correlated standalone frontend port. The platform maps candidate reports through the lexer file/line protocol, deliberately using declaration-origin filenames rather than claiming exact native module-owned report-path parity.",
       "predicateEvidence": [
+        "docs/native_rule_recovery_pass132.md",
+        "reverse-tools/evidence/t_linter_pass132/port_cpp.patch#sha256=a8375256a2e944eb6136819dd43cb3d0316199b2359eba76e510e32231ed0aab",
+        "reverse-tools/evidence/t_linter_pass132/port_header.patch#sha256=bbc1e239d21a8c5cbaaf1463ecfff58d1d102eb6634a699fdb4c6de618c2b0ef",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_refs.txt#sha256=aaeec0774efde450e6da60141f6d95aee998c4038faff7f745c49461f7beaee3",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_strings.json#sha256=c9cdb0aa6e02cc30e12fe821a68151c4f51e8e2c19f924386b82843c9e35e7c6",
+        "reverse-tools/evidence/t_linter_pass132/source_lineage.json#sha256=c2621e5e288377154151c589be34dfad60f8def51b50d25d8a9ed8364e11f3c2",
+        "reverse-tools/evidence/t_linter_pass132/upstream_commit.json#sha256=cd969268b9f0c2b91e179cf5ee02e0ea13a97b0c48ccfd2d9eef0ff074a91c92",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.cc#sha256=0c61dbdd6c788805b8e24b4987aed896f4496497e76170b53af40c61360fa3df",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.h#sha256=b8fe417d26c6e5c615e7dd19b815c229eeb76149607c7650d7d87fc9aa6a5cfd",
+        "reverse-tools/evidence/t_linter_pass132/upstream_verilog_lexer.l#sha256=f1b95882788b8e49f023b5e2bc8cf366118ffb92011579db050723c39447481c",
+        "reverse-tools/evidence/t_linter_pass132/version_location.json#sha256=abb074471d7415660ae105db06e21381f7ffebcdb303291e0105d382e3f581d6",
+        "reverse-tools/evidence/t_linter_pass132/version_refs.txt#sha256=94dd81b1663575f603aadad8fff9d4cfe66b6afc39aabc563b21b50088808a24",
         "docs/evidence/native_verilog_naming_shape_preprocessing_findings.md",
         "docs/evidence/native_verilog_underscore_5_2_2_findings.md#recovered-predicate",
         "ev_32bd8b91ae9488d76d830d21919304bee359a91224d19bde6409118acd1fab75",
@@ -2620,14 +2673,17 @@
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": "tests/verilog_naming_shape_tests.cpp",
+      "additionalTests": [
+        "tests/verilog_naming_shape_tests.cpp",
+        "tests/frontend_preprocessor_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.2.html",
         "sha256": "37c4f1e4304ae50b30a4a20b0c99cc01bcb728feeb4ed9b2fad3ba7cee924bf2",
         "nativeFindings": "docs/evidence/native_verilog_underscore_5_2_2_findings.md",
-        "release": "docs/v1_4_191_release.md"
+        "release": "docs/v1_4_250_release.md"
       },
       "exampleChecks": [
         {
@@ -2641,7 +2697,7 @@
           "matched": true
         }
       ],
-      "limitations": "The native report integer is observed from candidate+0x200 but that field is not fully named from producer evidence; the product bounded source adapter maps the declaration physical line and column 1 without claiming proprietary field equivalence. Cross-file duplicate module groups, complete macro/include/generated AST construction, preprocessing failures, escaped/non-ASCII normalization, opaque types, complex cells, syntax recovery and global diagnostic ordering remain unresolved. A quiet result remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The native report integer is observed from candidate+0x200 but that field is not fully named from producer evidence; the product bounded source adapter maps the declaration physical line and column 1 without claiming proprietary field equivalence. Cross-file duplicate module groups, complete macro/include/generated AST construction, preprocessing failures, escaped/non-ASCII normalization, opaque types, complex cells, syntax recovery and global diagnostic ordering remain unresolved. A quiet result remains ManualReviewRequired and full native equivalence is not claimed. Expanded input is one configured compilation unit. Shared project macro caches, implicit tool defines/modes, complete AST/synthesis-translation behavior and vendor modifications remain unresolved. Source columns/byte offsets for macro replacements are not inferred; report filenames use the platform declaration-origin mapping, not a claim of native path equivalence."
     },
     {
       "publicRuleId": "R-2-3",
@@ -2783,8 +2839,20 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Constructor FUN_180021820 registers GJB10157_VLOG.5.2.4 and installs vtable 0x180eeda08. Active slot FUN_180539910 walks the ordered module-name map at object+0x68 and admits a group only when its vector contains exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4) itself while retaining selected descendants. Fixed names VDD/VSS/VCC/GND/VREF and a candidate copy are each bytewise transformed with C tolower; vector lookup then uses equal-length memcmp, so matches are exact rather than prefix or substring. Every matched node independently emits fixed Error, source path from the unique module root, candidate+0x210 as an integer location and no column, with exact GB18030 message 禁止使用<original-normalized-name>命名. Product mirrors the unique-module boundary, configured active preprocessing, bounded declaration families, ASCII-proved comparisons, per-node multiplicity and diagnostic surface.",
+      "predicate": "Constructor FUN_180021820 registers GJB10157_VLOG.5.2.4 and installs vtable 0x180eeda08. Active slot FUN_180539910 walks the ordered module-name map at object+0x68 and admits a group only when its vector contains exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4) itself while retaining selected descendants. Fixed names VDD/VSS/VCC/GND/VREF and a candidate copy are each bytewise transformed with C tolower; vector lookup then uses equal-length memcmp, so matches are exact rather than prefix or substring. Every matched node independently emits fixed Error, source path from the unique module root, candidate+0x210 as an integer location and no column, with exact GB18030 message 禁止使用<original-normalized-name>命名. Product mirrors the unique-module boundary, configured active preprocessing, bounded declaration families, ASCII-proved comparisons, per-node multiplicity and fixed message/severity. Configured object/function macros, defaults, token-paste/string expansion and nested includes now use the version-correlated standalone frontend port. The platform maps candidate reports through the lexer file/line protocol, deliberately using declaration-origin filenames rather than claiming exact native module-owned report-path parity.",
       "predicateEvidence": [
+        "docs/native_rule_recovery_pass132.md",
+        "reverse-tools/evidence/t_linter_pass132/port_cpp.patch#sha256=a8375256a2e944eb6136819dd43cb3d0316199b2359eba76e510e32231ed0aab",
+        "reverse-tools/evidence/t_linter_pass132/port_header.patch#sha256=bbc1e239d21a8c5cbaaf1463ecfff58d1d102eb6634a699fdb4c6de618c2b0ef",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_refs.txt#sha256=aaeec0774efde450e6da60141f6d95aee998c4038faff7f745c49461f7beaee3",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_strings.json#sha256=c9cdb0aa6e02cc30e12fe821a68151c4f51e8e2c19f924386b82843c9e35e7c6",
+        "reverse-tools/evidence/t_linter_pass132/source_lineage.json#sha256=c2621e5e288377154151c589be34dfad60f8def51b50d25d8a9ed8364e11f3c2",
+        "reverse-tools/evidence/t_linter_pass132/upstream_commit.json#sha256=cd969268b9f0c2b91e179cf5ee02e0ea13a97b0c48ccfd2d9eef0ff074a91c92",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.cc#sha256=0c61dbdd6c788805b8e24b4987aed896f4496497e76170b53af40c61360fa3df",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.h#sha256=b8fe417d26c6e5c615e7dd19b815c229eeb76149607c7650d7d87fc9aa6a5cfd",
+        "reverse-tools/evidence/t_linter_pass132/upstream_verilog_lexer.l#sha256=f1b95882788b8e49f023b5e2bc8cf366118ffb92011579db050723c39447481c",
+        "reverse-tools/evidence/t_linter_pass132/version_location.json#sha256=abb074471d7415660ae105db06e21381f7ffebcdb303291e0105d382e3f581d6",
+        "reverse-tools/evidence/t_linter_pass132/version_refs.txt#sha256=94dd81b1663575f603aadad8fff9d4cfe66b6afc39aabc563b21b50088808a24",
         "docs/evidence/native_verilog_naming_shape_preprocessing_findings.md",
         "docs/evidence/native_verilog_power_names_5_2_4_findings.md#recovered-predicate",
         "ev_a9ff5e1f8c558a95613fe54cd4ca2bccb6312f68c4803bd832692c1ea973d5a0",
@@ -2795,17 +2863,18 @@
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/verilog_power_names_tests.cpp",
-        "tests/verilog_naming_shape_tests.cpp"
+        "tests/verilog_naming_shape_tests.cpp",
+        "tests/frontend_preprocessor_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.4.html",
         "sha256": "776f4eaf8fc358a82982b705932490dfd3ae3dea85923b0b536da6bf6c26f425",
         "nativeFindings": "docs/evidence/native_verilog_power_names_5_2_4_findings.md",
-        "release": "docs/v1_4_192_release.md"
+        "release": "docs/v1_4_250_release.md"
       },
       "exampleChecks": [
         {
@@ -2819,7 +2888,7 @@
           "matched": true
         }
       ],
-      "limitations": "The recovered C tolower call is locale-sensitive and receives signed char promotion; product proves only ASCII behavior and returns unknown for non-ASCII names. Cross-file duplicate module groups, complete macro/include/generated AST construction, preprocessing failures, escaped-name normalization, opaque types, complex cells, syntax recovery, exact proprietary +0x210 field production and global diagnostic ordering remain unresolved. A quiet result remains ManualReviewRequired and full native equivalence is not claimed."
+      "limitations": "The recovered C tolower call is locale-sensitive and receives signed char promotion; product proves only ASCII behavior and returns unknown for non-ASCII names. Cross-file duplicate module groups, complete macro/include/generated AST construction, preprocessing failures, escaped-name normalization, opaque types, complex cells, syntax recovery, exact proprietary +0x210 field production and global diagnostic ordering remain unresolved. A quiet result remains ManualReviewRequired and full native equivalence is not claimed. Expanded input is one configured compilation unit. Shared project macro caches, implicit tool defines/modes, complete AST/synthesis-translation behavior and vendor modifications remain unresolved. Source columns/byte offsets for macro replacements are not inferred; report filenames use the platform declaration-origin mapping, not a claim of native path equivalence."
     },
     {
       "publicRuleId": "R-2-5",
@@ -2991,8 +3060,20 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; integrated-source-adapter",
-      "predicate": "Constructor FUN_1800219d0 registers GJB10157_VLOG.5.2.6 and vtable 0x180eedc88; active slot FUN_18053a3c0 iterates the ordered module-name map at object+0x68 and admits only a vector containing exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4) itself while retaining selected descendants. Empty proprietary-normalized names are skipped. Each later candidate is compared with earlier candidates in order: exact equal-length bytes do not report; otherwise both copies are transformed bytewise by C tolower and equal folded strings emit once for that later candidate before leaving the prior loop. The fixed Error uses the owning module path, later candidate +0x210 physical location, no column, and exact GB18030 message 禁止仅使用大小写区分命名<later>和<prior>. Product mirrors the unique-module gate, configured active preprocessing, bounded candidate families, ASCII-proved comparison, per-later multiplicity and exact diagnostic surface.",
+      "predicate": "Constructor FUN_1800219d0 registers GJB10157_VLOG.5.2.6 and vtable 0x180eedc88; active slot FUN_18053a3c0 iterates the ordered module-name map at object+0x68 and admits only a vector containing exactly one nonnull AST_MODULE(2). It recursively selects MODULE(2), WIRE(6), PARAMETER(9), LOCALPARAM(10), CELL(79) and TASK(3), excluding FUNCTION(4) itself while retaining selected descendants. Empty proprietary-normalized names are skipped. Each later candidate is compared with earlier candidates in order: exact equal-length bytes do not report; otherwise both copies are transformed bytewise by C tolower and equal folded strings emit once for that later candidate before leaving the prior loop. The fixed Error uses the owning module path, later candidate +0x210 physical location, no column, and exact GB18030 message 禁止仅使用大小写区分命名<later>和<prior>. Product mirrors the unique-module gate, configured active preprocessing, bounded candidate families, ASCII-proved comparison, per-later multiplicity and fixed message/severity. Configured object/function macros, defaults, token-paste/string expansion and nested includes now use the version-correlated standalone frontend port. The platform maps candidate reports through the lexer file/line protocol, deliberately using declaration-origin filenames rather than claiming exact native module-owned report-path parity.",
       "predicateEvidence": [
+        "docs/native_rule_recovery_pass132.md",
+        "reverse-tools/evidence/t_linter_pass132/port_cpp.patch#sha256=a8375256a2e944eb6136819dd43cb3d0316199b2359eba76e510e32231ed0aab",
+        "reverse-tools/evidence/t_linter_pass132/port_header.patch#sha256=bbc1e239d21a8c5cbaaf1463ecfff58d1d102eb6634a699fdb4c6de618c2b0ef",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_refs.txt#sha256=aaeec0774efde450e6da60141f6d95aee998c4038faff7f745c49461f7beaee3",
+        "reverse-tools/evidence/t_linter_pass132/preprocessor_strings.json#sha256=c9cdb0aa6e02cc30e12fe821a68151c4f51e8e2c19f924386b82843c9e35e7c6",
+        "reverse-tools/evidence/t_linter_pass132/source_lineage.json#sha256=c2621e5e288377154151c589be34dfad60f8def51b50d25d8a9ed8364e11f3c2",
+        "reverse-tools/evidence/t_linter_pass132/upstream_commit.json#sha256=cd969268b9f0c2b91e179cf5ee02e0ea13a97b0c48ccfd2d9eef0ff074a91c92",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.cc#sha256=0c61dbdd6c788805b8e24b4987aed896f4496497e76170b53af40c61360fa3df",
+        "reverse-tools/evidence/t_linter_pass132/upstream_preproc.h#sha256=b8fe417d26c6e5c615e7dd19b815c229eeb76149607c7650d7d87fc9aa6a5cfd",
+        "reverse-tools/evidence/t_linter_pass132/upstream_verilog_lexer.l#sha256=f1b95882788b8e49f023b5e2bc8cf366118ffb92011579db050723c39447481c",
+        "reverse-tools/evidence/t_linter_pass132/version_location.json#sha256=abb074471d7415660ae105db06e21381f7ffebcdb303291e0105d382e3f581d6",
+        "reverse-tools/evidence/t_linter_pass132/version_refs.txt#sha256=94dd81b1663575f603aadad8fff9d4cfe66b6afc39aabc563b21b50088808a24",
         "ev_8e1b9d81e8edb95475bc59ecdec44a90c3adff6c5ba423efb03b5515ef57de9b",
         "ev_558bcca5db66985cdb9428bff27ed1b8b21bbb980a13c89c0f556ac278bf6a10",
         "ev_9f4b850ac513b5a9f63dffbc54f518d21028ea2923558edeee5753c9452398df",
@@ -3006,17 +3087,18 @@
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
-      "implementationSource": "src/analysis/standard_evaluator.cpp",
+      "implementationSource": "src/parser/frontend_preprocessor.cpp + src/parser/vendor/yosys_preproc.cpp + src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
       "additionalTests": [
         "tests/standard_accuracy_tests.cpp",
-        "tests/verilog_naming_shape_tests.cpp"
+        "tests/verilog_naming_shape_tests.cpp",
+        "tests/frontend_preprocessor_tests.cpp"
       ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.5.2.6.html",
         "sha256": "aa70c2c50bac432a1844cbbabbfd1040792bec57e1e6c03a5fff06f5e6cb8286",
         "nativeFindings": "docs/evidence/native_verilog_case_only_names_5_2_6_findings.md",
-        "release": "docs/v1_4_194_release.md"
+        "release": "docs/v1_4_250_release.md"
       },
       "exampleChecks": [
         {
@@ -3030,7 +3112,7 @@
           "matched": true
         }
       ],
-      "limitations": "The recovered C tolower call is locale-sensitive and receives signed char promotion; product proves only ASCII behavior. Complete macro/include/generated AST construction, preprocessing failures, escaped-name normalization, opaque types, complex cells, syntax recovery, exact proprietary +0x210 field production and global diagnostic order remain unresolved. A quiet result remains ManualReviewRequired and full native frontend equivalence is not claimed."
+      "limitations": "The recovered C tolower call is locale-sensitive and receives signed char promotion; product proves only ASCII behavior. Complete macro/include/generated AST construction, preprocessing failures, escaped-name normalization, opaque types, complex cells, syntax recovery, exact proprietary +0x210 field production and global diagnostic order remain unresolved. A quiet result remains ManualReviewRequired and full native frontend equivalence is not claimed. Expanded input is one configured compilation unit. Shared project macro caches, implicit tool defines/modes, complete AST/synthesis-translation behavior and vendor modifications remain unresolved. Source columns/byte offsets for macro replacements are not inferred; report filenames use the platform declaration-origin mapping, not a claim of native path equivalence."
     },
     {
       "publicRuleId": "R-2-7",

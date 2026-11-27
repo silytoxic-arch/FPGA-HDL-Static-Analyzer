@@ -47,6 +47,7 @@ jobs:
           $cli = Get-ChildItem build/windows-install/bin/fpga_analyzer_cli.exe
           $gui = Get-ChildItem build/windows-install/bin/fpga_analyzer.exe
           & $cli.FullName --version
+          if (-not (Test-Path build/windows-install/THIRD_PARTY_NOTICES.md)) { throw "Missing third-party license notice" }
           if (-not $gui.Exists) { throw "Missing GUI executable" }
           Get-ChildItem build/windows-release-package/*.zip | ForEach-Object {
             $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()

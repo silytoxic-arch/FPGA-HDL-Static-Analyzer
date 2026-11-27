@@ -64,6 +64,9 @@ constexpr std::array ChineseRuleTexts{
     RuleText{"SYNTAX-UNCLOSED-DELIMITER", "左括号没有匹配的右括号"},
     RuleText{"SYNTAX-UNEXPECTED-CLOSER", "结束关键字没有对应的起始结构"},
     RuleText{"SYNTAX-UNCLOSED-CONSTRUCT", "HDL 语言结构没有正确闭合"},
+    RuleText{"PP-FRONTEND-EXPANSION", "宏或包含文件展开失败，命名检查输入无法可靠建立"},
+    RuleText{"PP-FRONTEND-DIRECTIVE", "存在未定义宏、不完整指令或无法确认的来源标记"},
+    RuleText{"PP-FRONTEND-LANGUAGE", "该展开器仅支持 Verilog/SystemVerilog"},
     RuleText{"PP-INCLUDE-NOT-FOUND", "找不到 include 指令引用的文件"},
     RuleText{"PP-UNEXPECTED-DIRECTIVE", "条件编译结束/分支指令没有对应起点"},
     RuleText{"PP-INVALID-DIRECTIVE", "define 或 include 指令参数无效"},
@@ -108,7 +111,7 @@ constexpr std::array ChineseRuleTexts{
     RuleText{"RTL-SHIFT-AMOUNT-OUT-OF-RANGE", "常量移位量大于或等于操作数位宽"},
     RuleText{"RTL-MULTIPLE-CLOCKS-PER-PROCESS", "同一时序过程包含多个独立时钟"},
 };
-static_assert(ChineseRuleTexts.size() == 96);
+static_assert(ChineseRuleTexts.size() == 99);
 } // namespace
 
 std::string_view chineseRuleSummary(std::string_view ruleId) {

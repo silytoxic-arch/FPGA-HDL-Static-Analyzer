@@ -1,0 +1,190 @@
+[
+  {
+    "offset": "0xde5610",
+    "text": "MACROMODULE"
+  },
+  {
+    "offset": "0xde5db8",
+    "text": "MACRO_USAGE"
+  },
+  {
+    "offset": "0xde5e88",
+    "text": "MACRO_NAME"
+  },
+  {
+    "offset": "0xde5f80",
+    "text": "MACRO_DELIMITER"
+  },
+  {
+    "offset": "0xde5f90",
+    "text": "MACRO_ESC_NEWLINE"
+  },
+  {
+    "offset": "0xde5fa8",
+    "text": "MACRO_ESC_QUOTATION_MARK"
+  },
+  {
+    "offset": "0xde5fc8",
+    "text": "MACRO_ESC_SEQ"
+  },
+  {
+    "offset": "0xde5fd8",
+    "text": "MACRO_QUOTATION_MARK"
+  },
+  {
+    "offset": "0xde5ff0",
+    "text": "MACRO_STRING"
+  },
+  {
+    "offset": "0xde6000",
+    "text": "MACRO_TEXT"
+  },
+  {
+    "offset": "0xde6618",
+    "text": "MACRO_ARGS"
+  },
+  {
+    "offset": "0xde6898",
+    "text": "MACRO_TEXT_MODE"
+  },
+  {
+    "offset": "0xde6d70",
+    "text": "'macromodule'"
+  },
+  {
+    "offset": "0xe480c0",
+    "text": "Can't open include file `%s'!"
+  },
+  {
+    "offset": "0xe48108",
+    "text": "Unimplemented compiler directive or undefined macro %s."
+  },
+  {
+    "offset": "0xe7b630",
+    "text": "        define the preprocessor symbol 'name' and set its optional value"
+  },
+  {
+    "offset": "0xe7ba90",
+    "text": "-- vhdl code after preprocessor --"
+  },
+  {
+    "offset": "0xeec378",
+    "text": "macromodule"
+  },
+  {
+    "offset": "0xf56dd0",
+    "text": "Additional -D<macro>[=<value>] options may be added after the option indicating"
+  },
+  {
+    "offset": "0xf56e90",
+    "text": "The macros YOSYS, SYNTHESIS, and VERIFIC are defined implicitly."
+  },
+  {
+    "offset": "0xf57000",
+    "text": "The macros YOSYS, SYNTHESIS/FORMAL, and VERIFIC are defined implicitly."
+  },
+  {
+    "offset": "0xf57088",
+    "text": "    +define    - defines macro"
+  },
+  {
+    "offset": "0xf575e0",
+    "text": "    verific -vlog-define <macro>[=<value>].."
+  },
+  {
+    "offset": "0xf57628",
+    "text": "    verific -vlog-undef <macro>.."
+  },
+  {
+    "offset": "0xf58a20",
+    "text": "    read -define <macro>[=<value>].."
+  },
+  {
+    "offset": "0xf58a78",
+    "text": "    read -undef <macro>.."
+  },
+  {
+    "offset": "0xf599b8",
+    "text": "Duplicate macro arguments with name `%s'."
+  },
+  {
+    "offset": "0xf599e8",
+    "text": "macro_%s_arg%d"
+  },
+  {
+    "offset": "0xf59a00",
+    "text": "Cannot expand macro `%s by giving only %d argument%s (argument %d has no default)."
+  },
+  {
+    "offset": "0xf59a98",
+    "text": "Mismatched brackets in macro argument: %c and %c."
+  },
+  {
+    "offset": "0xf59ae0",
+    "text": "Expected to find '(' to begin macro arguments for '%s', but instead found '%s'"
+  },
+  {
+    "offset": "0xf59b30",
+    "text": "`__restore_macro_arg "
+  },
+  {
+    "offset": "0xf59b48",
+    "text": "Backslash in macro arguments (not at end of line)."
+  },
+  {
+    "offset": "0xf59b80",
+    "text": "Trailing contents after identifier in macro argument `%s': expected '=', ',' or ')'."
+  },
+  {
+    "offset": "0xf59bf8",
+    "text": "Invalid name for macro definition: >>%s<<."
+  },
+  {
+    "offset": "0xf59c50",
+    "text": "Found %s outside of macro conditional branch!"
+  },
+  {
+    "offset": "0xf59cf8",
+    "text": "`__restore_macro_arg"
+  },
+  {
+    "offset": "0xf59d10",
+    "text": "Unterminated preprocessor conditional!"
+  },
+  {
+    "offset": "0xf5a940",
+    "text": "Depending on if read_verilog is run in -formal mode, either the macro"
+  },
+  {
+    "offset": "0xf5a9e0",
+    "text": "In addition, read_verilog always defines the macro YOSYS."
+  },
+  {
+    "offset": "0xf5ab30",
+    "text": "-- Verilog code after preprocessor --"
+  },
+  {
+    "offset": "0xf5adb8",
+    "text": "Define and undefine verilog preprocessor macros."
+  },
+  {
+    "offset": "0xf5ae10",
+    "text": "        undefine the preprocessor symbol 'name'"
+  },
+  {
+    "offset": "0xf5ae58",
+    "text": "        clear list of defined preprocessor symbols"
+  },
+  {
+    "offset": "0xf5aea0",
+    "text": "        list currently defined preprocessor symbols"
+  },
+  {
+    "offset": "0xfa1a60",
+    "text": "Print the code coverage counters collected using the cover() macro in the Yosys"
+  },
+  {
+    "offset": "0xfa2c70",
+    "text": "The Verilog front-end remembers defined macros and top-level declarations"
+  }
+]

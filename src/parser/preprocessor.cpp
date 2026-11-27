@@ -1,4 +1,7 @@
 #include "parser/preprocessor.h"
+#include "parser/frontend_preprocessor.h"
+#include "parser/design_parser.h"
+#include <unordered_set>
 
 #include <algorithm>
 #include <cctype>
@@ -40,6 +43,7 @@ std::optional<std::filesystem::path> resolveInclude(
     const std::filesystem::path& sourceFile, const std::string& requested,
     const PreprocessorOptions& options) {
     std::vector<std::filesystem::path> candidates;
+    candidates.emplace_back(requested); // Retained frontend tries CWD before source parent.
     candidates.push_back(sourceFile.parent_path() / requested);
     for (const auto& directory : options.includeDirectories) {
         candidates.push_back(directory / requested);
@@ -89,6 +93,10 @@ PreprocessorResult preprocess(const core::SourceFile& source,
         }
     }
 
+    std::unordered_set<std::size_t> directiveOffsets;
+    for (const auto& token:tokenize(source))
+        if (token.text=="`") directiveOffsets.insert(token.offset);
+    bool frontendIncludeValidation=false;
     std::vector<PreprocessorIssue> issues;
     std::vector<ConditionalFrame> conditionals;
     bool active = true;
@@ -101,7 +109,8 @@ PreprocessorResult preprocess(const core::SourceFile& source,
         const auto length = newline == std::string::npos ? content.size() - offset : newline - offset + 1;
         auto line = content.substr(offset, length);
         const auto first = line.find_first_not_of(" \t\r");
-        const bool directiveLine = first != std::string::npos && line[first] == '`';
+        const bool directiveLine = first != std::string::npos && line[first] == '`' &&
+            directiveOffsets.contains(offset+first);
         if (!directiveLine) {
             output += active ? line : blank(std::move(line));
             offset += length;
@@ -153,6 +162,10 @@ PreprocessorResult preprocess(const core::SourceFile& source,
             }
         } else if (active && directive == "undef") {
             macros.erase(macroName(arguments));
+        } else if (active && directive == "include" && arguments.find('`')!=std::string::npos) {
+            // Function/default/quoted include macros require the real token
+            // expansion engine. Do not mislabel a valid macro as a bad path.
+            frontendIncludeValidation=true;
         } else if (active && directive == "include") {
             const auto requested = includeName(arguments);
             if (!requested) {
@@ -170,6 +183,10 @@ PreprocessorResult preprocess(const core::SourceFile& source,
     for (const auto& frame : conditionals) {
         issues.push_back({"PP-UNCLOSED-CONDITIONAL",
                           "Conditional compilation block has no matching `endif", frame.location});
+    }
+    if (frontendIncludeValidation) {
+        const auto expanded=expandFrontendSource(source,options);
+        issues.insert(issues.end(),expanded.issues.begin(),expanded.issues.end());
     }
     return {core::SourceFile(source.path(), source.language(), std::move(output)),
             std::move(issues)};

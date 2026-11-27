@@ -26,3 +26,10 @@ when-else 条件表达式。
 `timing_analyzer` 同时识别 VHDL edge 函数与 `signal'event` + `'1'/'0'` 电平模板；其 VHDL
 architecture 摘要由 analysis 层跨文件合并回唯一 entity，再统一执行
 时钟/复位一致性、CDC/RDC 与同步器认证。
+
+
+V1.4.250 新增独立 `frontend_preprocessor`，移植版本对应、带 ISC 许可的 Yosys
+预处理器，恢复宏/include 展开后的文件与逻辑行。首批接入 5.2.1/.2/.4/.6/.12/.15
+命名规则，物理源码规则不使用展开文本。`preprocessor` 的位置保持视图仍供未迁移的
+模型使用；完整项目结构/语义、跨编译单元宏缓存及编译模式尚未完成统一迁移。
+来源、限制和定位差异见 docs/native_rule_recovery_pass132.md。

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(FPGAAnalyzer VERSION 1.4.249 LANGUAGES CXX)
+project(FPGAAnalyzer VERSION 1.4.250 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,6 +15,8 @@ target_compile_options(fpga_build_options INTERFACE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /utf-8>
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
 
+find_package(Threads REQUIRED)
+
 add_library(fpga_core STATIC
     src/analysis/analyzer.cpp
     src/analysis/baseline.cpp
@@ -28,13 +30,15 @@ add_library(fpga_core STATIC
     src/database/design_database.cpp
     src/parser/design_parser.cpp
     src/parser/preprocessor.cpp
+    src/parser/frontend_preprocessor.cpp
+    src/parser/vendor/yosys_preproc.cpp
     src/parser/semantic_analyzer.cpp
     src/parser/timing_analyzer.cpp
     src/project/config_file.cpp
     src/project/file_list.cpp
     src/report/report_writer.cpp)
 target_include_directories(fpga_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
-target_link_libraries(fpga_core PRIVATE fpga_build_options)
+target_link_libraries(fpga_core PRIVATE fpga_build_options Threads::Threads)
 
 add_executable(fpga_analyzer_cli src/cli/main.cpp src/cli/command_line.cpp)
 target_link_libraries(fpga_analyzer_cli PRIVATE fpga_core fpga_build_options)
@@ -135,6 +139,7 @@ if(FPGA_ANALYZER_BUILD_GUI)
             "execute_process(COMMAND \"${WINDEPLOYQT_EXECUTABLE}\" --release --dir \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\" \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/fpga_analyzer.exe\" COMMAND_ERROR_IS_FATAL ANY)")
     endif()
 endif()
+install(FILES THIRD_PARTY_NOTICES.md DESTINATION ".")
 install(FILES README.md
     DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 install(DIRECTORY docs/
