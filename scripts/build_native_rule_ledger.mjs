@@ -1223,6 +1223,13 @@ for(const clause of expandedExpressionClauses) {
   row.limitations += ' Full expression precedence, elaboration and proprietary runtime equivalence are unproved. The expanded adapter preserves the existing bounded expression subset and review-required no-finding state.';
   row.evidence.push('docs/native_rule_recovery_pass138.md', ...["reverse-tools/evidence/t_linter_pass138/condition_rule.txt#sha256=94a3d875c3e5c7410be92c6794f92cf9162ebff389bc6c37f2fc98f6c08d5413", "reverse-tools/evidence/t_linter_pass138/expanded_condition_input.patch#sha256=64eff88dec60c7b8a4a89786f8c1e16bd0f941e2806aa6b157f9f035a6553fbf", "reverse-tools/evidence/t_linter_pass138/if_ternary_lowering.txt#sha256=38c0410de12ee9383c815563915908ccd6fb81abb107b011f9c4c0db6976c51d", "reverse-tools/evidence/t_linter_pass138/if_ternary_replay.json#sha256=8b712c6853baf0b5e9b51dd7e4bfc5467b5384d7cba09f7c4e883e80755cfca7", "reverse-tools/evidence/t_linter_pass138/public_parser_excerpt.txt#sha256=af8986005b4aa462ec8506b7f79f8295a6d16d808022bdf21d3e02872ccfa5eb", "reverse-tools/evidence/t_linter_pass138/replay_if_grammar.py#sha256=a6a1864ce3bceecee637fb6da60da2e810109d7067ededa2d37b41e1b51e41a0", "reverse-tools/evidence/t_linter_pass138/repro/comparison.json#sha256=23251bca9b0cbd0b6498fa9d34d920ee667e9e5b7024004aedef98f878186e11", "reverse-tools/evidence/t_linter_pass138/repro/literal.sv#sha256=f321bf0dc4ae3ee1d2ff6854caf72845cdaff7889fd57f91336e87c1c809b044", "reverse-tools/evidence/t_linter_pass138/repro/macro.sv#sha256=f8764142ba76b316a875c74f5daf13fefad92d7245a00e5151958860c0638e70"]);
 }
+// Pass 139: precedence-correct bounded condition trees and procedural <= boundaries.
+{
+  const row=confirmed['GJB10157.9.2.10'];
+  row.predicate += ' V1.4.257 replaces prefix/any-comparison shortcuts with complete-range bounded expression-tree parsing. Native grammar-table derivations corroborate unary/addition, equality/bitwise OR and left-associative power grouping. Recovered flag-zero logical/comparison, arithmetic/bitwise, power, concat and fixed repetition widths compose by tree roots. Recognized procedural assignment operators establish nonblocking <= boundaries without removing relational <= from a ternary condition. Runtime comparison is not claimed.';
+  row.limitations += ' This tree parser is not complete HDL elaboration: unknown calls, casts/types, dynamic selections, shift-helper and ternary-result widths, complex event/delay/task input shapes and native error recovery remain unresolved. Whole expression consumption and a nesting budget reject unsupported or malformed shapes instead of inheriting a prefix width. No finding remains review-required.';
+  row.evidence.push('docs/native_rule_recovery_pass139.md', ...["reverse-tools/evidence/t_linter_pass139/condition_expression_integration.patch#sha256=248f189150104456793f72d49a4449242532655481a2583a90dd733ff4997340", "reverse-tools/evidence/t_linter_pass139/expression_derivations.json#sha256=f6a3e6352e384f5f60fafaf73698f4d1e6550c02467aad7e115dcd268389f15c", "reverse-tools/evidence/t_linter_pass139/replay_expression_grammar.py#sha256=05bf2455d80d9173d740eb5ee3b4da25e68e1e459b5ea6c56e36ec81632068a0", "reverse-tools/evidence/t_linter_pass139/repro/comparison.json#sha256=d00c28eaa606425569a5ff6b3456fc601006031620db6a93b1e7e25e777b79f5", "reverse-tools/evidence/t_linter_pass139/repro/logical_outer_arithmetic.sv#sha256=0c90b690230195d0e0077716c4235750739d7b182426a115693e36758aca348e", "reverse-tools/evidence/t_linter_pass139/repro/logical_prefix_arithmetic.sv#sha256=801ce8da167cb1608f9f1fda2e9b97cd0ceb4183b8deedd049eda9e35cdb7c9e", "reverse-tools/evidence/t_linter_pass139/repro/ternary_blocking.sv#sha256=2e6a3af40f055bf1d69a1bcf5f04a7ee0d2b244550d385a687fdfb80d2290ebb", "reverse-tools/evidence/t_linter_pass139/repro/ternary_nonblocking.sv#sha256=667453cc976758521fa1836102f87a956e5d9b23f6d8191fc3e9610df9305d46"]);
+}
 const rules = native.rules.map(rule => {
   // Accept both the raw REA entry inventory and the previously generated
   // ledger as the stable native-entry source. This keeps checkpoint rebuilds
@@ -1656,6 +1663,11 @@ for(const row of rules) if(row.clause==='GJB10157.9.2.10') {
   const tests=Array.isArray(row.additionalTests)?row.additionalTests:row.additionalTests?[row.additionalTests]:[];
   row.additionalTests=[...new Set([...tests,'tests/frontend_preprocessor_tests.cpp'])];
   row.expandedConditionInputRelease='docs/v1_4_256_release.md';
+}
+for(const row of rules) if(row.clause==='GJB10157.9.2.10') {
+  const tests=Array.isArray(row.additionalTests)?row.additionalTests:row.additionalTests?[row.additionalTests]:[];
+  row.additionalTests=[...new Set([...tests,'tests/frontend_preprocessor_tests.cpp','tests/verilog_condition_expression_tests.cpp'])];
+  row.conditionExpressionRelease='docs/v1_4_257_release.md';
 }
 if (rules.length !== 209 || new Set(rules.map(rule => rule.clause)).size !== 209)
   throw new Error('Expected 209 unique GJB rules');

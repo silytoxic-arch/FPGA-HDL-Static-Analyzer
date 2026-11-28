@@ -1,0 +1,43 @@
+{
+  "boundary": "Product version comparison, not vendor runtime oracle",
+  "baseline": "1.4.256 / df3653f97acb626fee9b933a25638ec993996eb3",
+  "current": "1.4.257",
+  "cases": {
+    "logical_prefix_arithmetic": {
+      "before": [],
+      "after": [
+        {
+          "line": 1,
+          "message": "if 条件为 4 位向量，应使用 1 位条件"
+        }
+      ]
+    },
+    "logical_outer_arithmetic": {
+      "before": [],
+      "after": []
+    },
+    "ternary_blocking": {
+      "before": [
+        {
+          "line": 1,
+          "message": "条件运算符条件为 4 位向量，应使用 1 位条件"
+        }
+      ],
+      "after": [
+        {
+          "line": 1,
+          "message": "条件运算符条件为 4 位向量，应使用 1 位条件"
+        }
+      ]
+    },
+    "ternary_nonblocking": {
+      "before": [],
+      "after": [
+        {
+          "line": 1,
+          "message": "条件运算符条件为 4 位向量，应使用 1 位条件"
+        }
+      ]
+    }
+  }
+}

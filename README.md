@@ -1,8 +1,10 @@
-# FPGA HDL Static Analyzer — V1.4.256
+# FPGA HDL Static Analyzer — V1.4.257
 
 [![Windows Build](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml/badge.svg)](https://github.com/silytoxic-arch/FPGA-HDL-Static-Analyzer/actions/workflows/windows-build.yml)
 
 公开源码仓库使用 GitHub Actions 在 Windows Server 2022、Visual Studio 2022 和 Qt 6.8.3 环境中自动编译、运行全部测试并生成 Windows x64 ZIP。可在仓库的 **Actions → Windows Build** 页面手动触发，构建完成后从 `FPGA-HDL-Static-Analyzer-Windows-x64` 工件下载。
+
+V1.4.257 按表达式树修正 A-11-4 的优先级判断，区分非阻塞赋值与关系运算的 `<=`，补充原生语法派生树证据。详见 [本轮记录](docs/v1_4_257_release.md)。
 
 V1.4.256 修复 A-11-4 对宏/include 生成条件的漏检，并通过原生语法表重放和静态动作复核补充 if/三目降低链证据。详见 [本轮记录](docs/v1_4_256_release.md)。
 

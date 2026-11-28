@@ -8,6 +8,7 @@
 #include "parser/frontend_source_view.h"
 #include "parser/semantic_analyzer.h"
 #include "analysis/verilog_constant_expression.h"
+#include "analysis/verilog_condition_expression.h"
 #include "analysis/native_verilog_integer.h"
 #include "analysis/verilog_function_checks.h"
 #include "analysis/unknown_arithmetic.h"
@@ -16376,43 +16377,40 @@ void checkNativeVerilogConditionWidths(AnalysisResult& result,
             if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
             const auto model = fixedVerilogModuleWidthModel(unit, source, tokens);
             if (!model) continue;
-            const auto conditionWidth = [&](std::size_t begin, std::size_t end)
-                    -> std::optional<std::size_t> {
-                while (end > begin + 1 && tokens[begin].text == "(" &&
-                       tokens[end - 1].text == ")") {
-                    int depth = 0;
-                    bool enclosesAll = true;
-                    for (auto at = begin; at < end; ++at) {
-                        if (tokens[at].text == "(") ++depth;
-                        else if (tokens[at].text == ")") --depth;
-                        if (depth == 0 && at + 1 != end) { enclosesAll = false; break; }
-                        if (depth < 0) return std::nullopt;
-                    }
-                    if (!enclosesAll || depth != 0) break;
-                    ++begin;
-                    --end;
-                }
-                if (begin >= end) return std::nullopt;
-                if (tokens[begin].text == "!") return std::size_t{1};
-                int parens = 0, brackets = 0, braces = 0;
-                for (auto at = begin; at < end; ++at) {
-                    const auto& text = tokens[at].text;
-                    if (text == "(") ++parens;
-                    else if (text == ")") --parens;
-                    else if (text == "[") ++brackets;
-                    else if (text == "]") --brackets;
-                    else if (text == "{") ++braces;
-                    else if (text == "}") --braces;
-                    else if (parens == 0 && brackets == 0 && braces == 0 &&
-                             (text == "&&" || text == "||" || text == "==" ||
-                              text == "!=" || text == "===" || text == "!==" ||
-                              text == "<" || text == "<=" || text == ">" ||
-                              text == ">=")) {
-                        return std::size_t{1};
-                    }
-                }
-                return fixedBoundedLogicalOperandWidth(*model, begin, end);
+            const auto conditionWidth = [&](std::size_t begin, std::size_t end) {
+                return detail::VerilogConditionExpression(tokens,begin,end,
+                    [&](auto first,auto last){return fixedBoundedLogicalOperandWidth(*model,first,last);},
+                    [&](auto first,auto last)->std::optional<std::size_t>{
+                        return last==first+1?fixedDecimalToken(tokens[first]):std::nullopt;
+                    }).width();
             };
+            // Establish procedural assignment operators before treating <= as
+            // a ternary boundary. Relational <= inside RHS expressions stays
+            // in the expression tree. Scan each process entry range once.
+            std::set<std::size_t> nonblockingAssignments;
+            std::vector<std::size_t> processes;
+            for(auto at=model->begin;at<model->end;++at) {
+                const auto& word=tokens[at].text;
+                if(word=="always"||word=="always_ff"||word=="always_comb"||
+                   word=="always_latch"||word=="initial")processes.push_back(at);
+            }
+            for(std::size_t p=0;p<processes.size();++p) {
+                auto begin=processes[p]+1;
+                const auto end=p+1<processes.size()?processes[p+1]:model->end;
+                if(begin<end&&tokens[begin].text=="@") {
+                    ++begin;
+                    if(begin<end&&tokens[begin].text=="(") {
+                        const auto close=closeParen(tokens,begin);
+                        if(close>=end)continue;
+                        begin=close+1;
+                    } else if(begin<end)++begin;
+                }
+                const auto assignments=detail::DefaultAssignmentScanner(tokens,begin,end,
+                    [](const auto&){return false;}).scan();
+                for(const auto& assignment:assignments.assignments)
+                    if(tokens[assignment.assignmentOperator].text=="<=")
+                        nonblockingAssignments.insert(assignment.assignmentOperator);
+            }
             for (auto i = model->begin + 1; i + 2 < model->end; ++i) {
                 if (tokens[i].text == "if" && tokens[i + 1].text == "(") {
                     int depth = 1;
@@ -16447,7 +16445,8 @@ void checkNativeVerilogConditionWidths(AnalysisResult& result,
                         if (braces == 0) break;
                         --braces;
                     } else if (parens == 0 && brackets == 0 && braces == 0 &&
-                               (text == "=" || text == "," || text == ":" ||
+                               (text == "=" || nonblockingAssignments.contains(candidate) ||
+                                text == "," || text == ":" ||
                                 text == "?" || text == ";")) {
                         break;
                     }
@@ -16455,7 +16454,8 @@ void checkNativeVerilogConditionWidths(AnalysisResult& result,
                 }
                 if (begin <= model->begin) continue;
                 const auto& before = tokens[begin - 1].text;
-                if (before != "=" && before != "(" && before != "," &&
+                if (!nonblockingAssignments.contains(begin-1) &&
+                    before != "=" && before != "(" && before != "," &&
                     before != ":" && before != "?") continue;
                 const auto width = conditionWidth(begin, i);
                 if (width && *width != 1)

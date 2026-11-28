@@ -543,6 +543,27 @@ int main() {
     linted=lint("`define MAKE module broken(input [3:0] c,output reg y);always @* if(c)y=1;else y=0;endmodule\n`MAKE\n`UNDEFINED\n");
     check(count(linted,"GJB10157.9.2.10")==0&&count(linted,"PP-FRONTEND-DIRECTIVE")>0,
         "failed root expansion does not fall back to raw condition diagnostics");
+
+    const std::vector<std::pair<std::string,int>> precedenceCases{
+        {"if(!a+b)y=1;else y=0;",1},{"if(!(a+b))y=1;else y=0;",0},
+        {"if(a==b|b)y=1;else y=0;",1},{"if(a==(b|b))y=1;else y=0;",0},
+        {"y<=b?1'b1:1'b0;",1},{"y<=a<=b?1'b1:1'b0;",0},
+        {"y=(a<=b)?1'b1:1'b0;",0},{"if(a<=b)y<=b?1'b1:1'b0;",1},
+        {"begin y<=b?1'b1:1'b0;end",1},{"if(a)y=0;else y<=b?1'b1:1'b0;",1},
+        {"if({!a,b})y=1;else y=0;",1},{"y<=f(a)?1'b1:1'b0;",0}
+    };
+    for(const auto& [body,expected]:precedenceCases) {
+        const auto text="module precedence_owner(input clk,input a,input [3:0] b,output reg y);always @(posedge clk) "+body+" endmodule";
+        const auto actual=count(lint(text+"\n"),"GJB10157.9.2.10");
+        if(actual!=expected)std::cerr<<"condition fixture: "<<body<<" expected "<<expected<<" got "<<actual<<'\n';
+        check(actual==expected,"procedural expression precedence and <= context");
+        check(count(lint("`define MAKE "+text+"\n`MAKE\n"),"GJB10157.9.2.10")==expected,
+            "macro form preserves procedural expression precedence and <= context");
+    }
+    linted=lint("module combinational(input [3:0] b,output reg y);always @* y<=b?1'b1:1'b0;endmodule\n");
+    check(count(linted,"GJB10157.9.2.10")==1,"bare combinational event control establishes nonblocking assignment boundary");
+    linted=lint("module combos(input [3:0] b,output reg y);always_comb y<=b?1'b1:1'b0;endmodule\n");
+    check(count(linted,"GJB10157.9.2.10")==1,"always_comb establishes nonblocking assignment boundary");
     std::cout<<checks<<" checks, "<<failures<<" failures\n";
     return failures?1:0;
 }

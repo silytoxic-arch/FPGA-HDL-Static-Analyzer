@@ -1,0 +1,251 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "scope": "Offline native grammar-table replay; predefined token kinds, no target lexer/semantic execution. Derivation trees prove grouping, not width results.",
+  "fixtures": [
+    {
+      "name": "logical_prefix_add",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_ASSIGN",
+        "TOK_ID",
+        "'='",
+        "'!'",
+        "TOK_ID",
+        "'+'",
+        "TOK_ID",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "derivation": {
+        "rule": 681,
+        "lhs": "basic_expr",
+        "children": [
+          {
+            "rule": 691,
+            "lhs": "basic_expr",
+            "children": [
+              "'!'@6",
+              {
+                "rule": 15,
+                "lhs": "attr",
+                "children": []
+              },
+              "TOK_ID@7"
+            ]
+          },
+          "'+'@8",
+          {
+            "rule": 15,
+            "lhs": "attr",
+            "children": []
+          },
+          "TOK_ID@9"
+        ]
+      }
+    },
+    {
+      "name": "logical_outer_add",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_ASSIGN",
+        "TOK_ID",
+        "'='",
+        "'!'",
+        "'('",
+        "TOK_ID",
+        "'+'",
+        "TOK_ID",
+        "')'",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "derivation": {
+        "rule": 691,
+        "lhs": "basic_expr",
+        "children": [
+          "'!'@6",
+          {
+            "rule": 15,
+            "lhs": "attr",
+            "children": []
+          },
+          {
+            "rule": 652,
+            "lhs": "basic_expr",
+            "children": [
+              "'('@7",
+              {
+                "rule": 681,
+                "lhs": "basic_expr",
+                "children": [
+                  "TOK_ID@8",
+                  "'+'@9",
+                  {
+                    "rule": 15,
+                    "lhs": "attr",
+                    "children": []
+                  },
+                  "TOK_ID@10"
+                ]
+              },
+              "')'@11"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "equality_then_or",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_ASSIGN",
+        "TOK_ID",
+        "'='",
+        "TOK_ID",
+        "OP_EQ",
+        "TOK_ID",
+        "'|'",
+        "TOK_ID",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "derivation": {
+        "rule": 659,
+        "lhs": "basic_expr",
+        "children": [
+          {
+            "rule": 675,
+            "lhs": "basic_expr",
+            "children": [
+              "TOK_ID@6",
+              "OP_EQ@7",
+              {
+                "rule": 15,
+                "lhs": "attr",
+                "children": []
+              },
+              "TOK_ID@8"
+            ]
+          },
+          "'|'@9",
+          {
+            "rule": 15,
+            "lhs": "attr",
+            "children": []
+          },
+          "TOK_ID@10"
+        ]
+      }
+    },
+    {
+      "name": "power_chain",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_ASSIGN",
+        "TOK_ID",
+        "'='",
+        "TOK_ID",
+        "OP_POW",
+        "TOK_ID",
+        "OP_POW",
+        "TOK_ID",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "derivation": {
+        "rule": 686,
+        "lhs": "basic_expr",
+        "children": [
+          {
+            "rule": 686,
+            "lhs": "basic_expr",
+            "children": [
+              "TOK_ID@6",
+              "OP_POW@7",
+              {
+                "rule": 15,
+                "lhs": "attr",
+                "children": []
+              },
+              "TOK_ID@8"
+            ]
+          },
+          "OP_POW@9",
+          {
+            "rule": 15,
+            "lhs": "attr",
+            "children": []
+          },
+          "TOK_ID@10"
+        ]
+      }
+    },
+    {
+      "name": "nonblocking_ternary",
+      "tokens": [
+        "TOK_MODULE",
+        "TOK_ID",
+        "';'",
+        "TOK_ALWAYS",
+        "'@'",
+        "'*'",
+        "TOK_ID",
+        "OP_LE",
+        "TOK_ID",
+        "'?'",
+        "TOK_CONSTVAL",
+        "':'",
+        "TOK_CONSTVAL",
+        "';'",
+        "TOK_ENDMODULE",
+        "$end"
+      ],
+      "accepted": true,
+      "derivation": {
+        "rule": 641,
+        "lhs": "expr",
+        "children": [
+          "TOK_ID@8",
+          "'?'@9",
+          {
+            "rule": 15,
+            "lhs": "attr",
+            "children": []
+          },
+          "TOK_CONSTVAL@10",
+          "':'@11",
+          "TOK_CONSTVAL@12"
+        ]
+      },
+      "assignmentReductions": [
+        {
+          "rule": 522,
+          "lhs": "simple_behavioral_stmt",
+          "rhs": [
+            "attr",
+            "lvalue",
+            "OP_LE",
+            "delay",
+            "expr"
+          ]
+        }
+      ]
+    }
+  ]
+}

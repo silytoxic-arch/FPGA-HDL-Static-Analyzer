@@ -1,0 +1,370 @@
+diff --git a/src/analysis/standard_evaluator.cpp b/src/analysis/standard_evaluator.cpp
+index 4697c77..c23db70 100644
+--- a/src/analysis/standard_evaluator.cpp
++++ b/src/analysis/standard_evaluator.cpp
+@@ -8,6 +8,7 @@
+ #include "parser/frontend_source_view.h"
+ #include "parser/semantic_analyzer.h"
+ #include "analysis/verilog_constant_expression.h"
++#include "analysis/verilog_condition_expression.h"
+ #include "analysis/native_verilog_integer.h"
+ #include "analysis/verilog_function_checks.h"
+ #include "analysis/unknown_arithmetic.h"
+@@ -16376,43 +16377,40 @@ void checkNativeVerilogConditionWidths(AnalysisResult& result,
+             if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
+             const auto model = fixedVerilogModuleWidthModel(unit, source, tokens);
+             if (!model) continue;
+-            const auto conditionWidth = [&](std::size_t begin, std::size_t end)
+-                    -> std::optional<std::size_t> {
+-                while (end > begin + 1 && tokens[begin].text == "(" &&
+-                       tokens[end - 1].text == ")") {
+-                    int depth = 0;
+-                    bool enclosesAll = true;
+-                    for (auto at = begin; at < end; ++at) {
+-                        if (tokens[at].text == "(") ++depth;
+-                        else if (tokens[at].text == ")") --depth;
+-                        if (depth == 0 && at + 1 != end) { enclosesAll = false; break; }
+-                        if (depth < 0) return std::nullopt;
+-                    }
+-                    if (!enclosesAll || depth != 0) break;
+-                    ++begin;
+-                    --end;
+-                }
+-                if (begin >= end) return std::nullopt;
+-                if (tokens[begin].text == "!") return std::size_t{1};
+-                int parens = 0, brackets = 0, braces = 0;
+-                for (auto at = begin; at < end; ++at) {
+-                    const auto& text = tokens[at].text;
+-                    if (text == "(") ++parens;
+-                    else if (text == ")") --parens;
+-                    else if (text == "[") ++brackets;
+-                    else if (text == "]") --brackets;
+-                    else if (text == "{") ++braces;
+-                    else if (text == "}") --braces;
+-                    else if (parens == 0 && brackets == 0 && braces == 0 &&
+-                             (text == "&&" || text == "||" || text == "==" ||
+-                              text == "!=" || text == "===" || text == "!==" ||
+-                              text == "<" || text == "<=" || text == ">" ||
+-                              text == ">=")) {
+-                        return std::size_t{1};
+-                    }
+-                }
+-                return fixedBoundedLogicalOperandWidth(*model, begin, end);
++            const auto conditionWidth = [&](std::size_t begin, std::size_t end) {
++                return detail::VerilogConditionExpression(tokens,begin,end,
++                    [&](auto first,auto last){return fixedBoundedLogicalOperandWidth(*model,first,last);},
++                    [&](auto first,auto last)->std::optional<std::size_t>{
++                        return last==first+1?fixedDecimalToken(tokens[first]):std::nullopt;
++                    }).width();
+             };
++            // Establish procedural assignment operators before treating <= as
++            // a ternary boundary. Relational <= inside RHS expressions stays
++            // in the expression tree. Scan each process entry range once.
++            std::set<std::size_t> nonblockingAssignments;
++            std::vector<std::size_t> processes;
++            for(auto at=model->begin;at<model->end;++at) {
++                const auto& word=tokens[at].text;
++                if(word=="always"||word=="always_ff"||word=="always_comb"||
++                   word=="always_latch"||word=="initial")processes.push_back(at);
++            }
++            for(std::size_t p=0;p<processes.size();++p) {
++                auto begin=processes[p]+1;
++                const auto end=p+1<processes.size()?processes[p+1]:model->end;
++                if(begin<end&&tokens[begin].text=="@") {
++                    ++begin;
++                    if(begin<end&&tokens[begin].text=="(") {
++                        const auto close=closeParen(tokens,begin);
++                        if(close>=end)continue;
++                        begin=close+1;
++                    } else if(begin<end)++begin;
++                }
++                const auto assignments=detail::DefaultAssignmentScanner(tokens,begin,end,
++                    [](const auto&){return false;}).scan();
++                for(const auto& assignment:assignments.assignments)
++                    if(tokens[assignment.assignmentOperator].text=="<=")
++                        nonblockingAssignments.insert(assignment.assignmentOperator);
++            }
+             for (auto i = model->begin + 1; i + 2 < model->end; ++i) {
+                 if (tokens[i].text == "if" && tokens[i + 1].text == "(") {
+                     int depth = 1;
+@@ -16447,7 +16445,8 @@ void checkNativeVerilogConditionWidths(AnalysisResult& result,
+                         if (braces == 0) break;
+                         --braces;
+                     } else if (parens == 0 && brackets == 0 && braces == 0 &&
+-                               (text == "=" || text == "," || text == ":" ||
++                               (text == "=" || nonblockingAssignments.contains(candidate) ||
++                                text == "," || text == ":" ||
+                                 text == "?" || text == ";")) {
+                         break;
+                     }
+@@ -16455,7 +16454,8 @@ void checkNativeVerilogConditionWidths(AnalysisResult& result,
+                 }
+                 if (begin <= model->begin) continue;
+                 const auto& before = tokens[begin - 1].text;
+-                if (before != "=" && before != "(" && before != "," &&
++                if (!nonblockingAssignments.contains(begin-1) &&
++                    before != "=" && before != "(" && before != "," &&
+                     before != ":" && before != "?") continue;
+                 const auto width = conditionWidth(begin, i);
+                 if (width && *width != 1)
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index cfc86cf..cd4a477 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -543,3 +543,7 @@ add_test(NAME frontend_preprocessor_unit COMMAND fpga_frontend_preprocessor_test
+ add_executable(fpga_frontend_source_view_tests frontend_source_view_tests.cpp)
+ target_link_libraries(fpga_frontend_source_view_tests PRIVATE fpga_core fpga_build_options)
+ add_test(NAME frontend_source_view_unit COMMAND fpga_frontend_source_view_tests)
++
++add_executable(fpga_verilog_condition_expression_tests verilog_condition_expression_tests.cpp)
++target_link_libraries(fpga_verilog_condition_expression_tests PRIVATE fpga_core fpga_build_options)
++add_test(NAME verilog_condition_expression_unit COMMAND fpga_verilog_condition_expression_tests)
+diff --git a/tests/frontend_preprocessor_tests.cpp b/tests/frontend_preprocessor_tests.cpp
+index 1dc5abe..8a522fa 100644
+--- a/tests/frontend_preprocessor_tests.cpp
++++ b/tests/frontend_preprocessor_tests.cpp
+@@ -543,6 +543,27 @@ int main() {
+     linted=lint("`define MAKE module broken(input [3:0] c,output reg y);always @* if(c)y=1;else y=0;endmodule\n`MAKE\n`UNDEFINED\n");
+     check(count(linted,"GJB10157.9.2.10")==0&&count(linted,"PP-FRONTEND-DIRECTIVE")>0,
+         "failed root expansion does not fall back to raw condition diagnostics");
++
++    const std::vector<std::pair<std::string,int>> precedenceCases{
++        {"if(!a+b)y=1;else y=0;",1},{"if(!(a+b))y=1;else y=0;",0},
++        {"if(a==b|b)y=1;else y=0;",1},{"if(a==(b|b))y=1;else y=0;",0},
++        {"y<=b?1'b1:1'b0;",1},{"y<=a<=b?1'b1:1'b0;",0},
++        {"y=(a<=b)?1'b1:1'b0;",0},{"if(a<=b)y<=b?1'b1:1'b0;",1},
++        {"begin y<=b?1'b1:1'b0;end",1},{"if(a)y=0;else y<=b?1'b1:1'b0;",1},
++        {"if({!a,b})y=1;else y=0;",1},{"y<=f(a)?1'b1:1'b0;",0}
++    };
++    for(const auto& [body,expected]:precedenceCases) {
++        const auto text="module precedence_owner(input clk,input a,input [3:0] b,output reg y);always @(posedge clk) "+body+" endmodule";
++        const auto actual=count(lint(text+"\n"),"GJB10157.9.2.10");
++        if(actual!=expected)std::cerr<<"condition fixture: "<<body<<" expected "<<expected<<" got "<<actual<<'\n';
++        check(actual==expected,"procedural expression precedence and <= context");
++        check(count(lint("`define MAKE "+text+"\n`MAKE\n"),"GJB10157.9.2.10")==expected,
++            "macro form preserves procedural expression precedence and <= context");
++    }
++    linted=lint("module combinational(input [3:0] b,output reg y);always @* y<=b?1'b1:1'b0;endmodule\n");
++    check(count(linted,"GJB10157.9.2.10")==1,"bare combinational event control establishes nonblocking assignment boundary");
++    linted=lint("module combos(input [3:0] b,output reg y);always_comb y<=b?1'b1:1'b0;endmodule\n");
++    check(count(linted,"GJB10157.9.2.10")==1,"always_comb establishes nonblocking assignment boundary");
+     std::cout<<checks<<" checks, "<<failures<<" failures\n";
+     return failures?1:0;
+ }
+diff --git a/src/analysis/verilog_condition_expression.h b/src/analysis/verilog_condition_expression.h
+new file mode 100644
+index 0000000..64fb111
+--- /dev/null
++++ b/src/analysis/verilog_condition_expression.h
+@@ -0,0 +1,144 @@
++#pragma once
++#include "parser/design_parser.h"
++#include <algorithm>
++#include <functional>
++#include <optional>
++#include <string_view>
++#include <utility>
++
++namespace fpga::analysis::detail {
++// Bounded expression-tree width adapter for the native flag-zero condition
++// helper. Input operators are normalized (as supplied by standardTokens).
++// The parser must consume the entire range; unsupported constructs
++// retain an unknown width. This is not HDL elaboration or type resolution.
++class VerilogConditionExpression {
++public:
++    using Width = std::optional<std::size_t>;
++    using Resolver = std::function<Width(std::size_t,std::size_t)>;
++    VerilogConditionExpression(const std::vector<parser::HdlToken>& tokens,
++        std::size_t begin,std::size_t end,Resolver leaf,Resolver count)
++        : tokens_(tokens),at_(begin),end_(std::min(end,tokens.size())),
++          leaf_(std::move(leaf)),count_(std::move(count)) {}
++    [[nodiscard]] Width width() {
++        const auto value=expression(0,0);
++        return value.valid && at_==end_ ? value.width : Width{};
++    }
++private:
++    struct Value { bool valid{};Width width; };
++    const std::vector<parser::HdlToken>& tokens_;
++    std::size_t at_,end_;
++    Resolver leaf_,count_;
++    bool is(std::string_view s) const {return at_<end_&&tokens_[at_].text==s;}
++    bool take(std::string_view s) {if(!is(s))return false;++at_;return true;}
++    // Native grammar table replay corroborates unary > power > arithmetic >
++    // relation > equality > bitwise > logical; power is left associative.
++    static int precedence(std::string_view op) {
++        if(op=="?")return 1;
++        if(op=="||")return 2;
++        if(op=="&&")return 3;
++        if(op=="|")return 4;
++        if(op=="^"||op=="^~"||op=="~^")return 5;
++        if(op=="&")return 6;
++        if(op=="=="||op=="!="||op=="==="||op=="!==")return 7;
++        if(op=="<"||op=="<="||op==">"||op==">=")return 8;
++        if(op=="<<"||op==">>"||op=="<<<"||op==">>>")return 9;
++        if(op=="+"||op=="-")return 10;
++        if(op=="*"||op=="/"||op=="%")return 11;
++        if(op=="**")return 12;
++        return -1;
++    }
++    Value expression(int minimum,unsigned depth) {
++        if(depth>128)return {};
++        auto left=primary(depth+1);
++        if(!left.valid)return {};
++        while(at_<end_) {
++            const auto op=tokens_[at_].text;
++            const auto rank=precedence(op);
++            if(rank<minimum)break;
++            ++at_;
++            if(op=="?") {
++                const auto yes=expression(0,depth+1);
++                if(!yes.valid||!take(":"))return {};
++                const auto no=expression(rank,depth+1);
++                if(!no.valid)return {};
++                // Full native ternary-result width semantics remain unproved.
++                left.width.reset();
++                continue;
++            }
++            const auto right=expression(rank+1,depth+1);
++            if(!right.valid)return {};
++            if(rank==2||rank==3||rank==7||rank==8)left.width=1;
++            else if(rank==9)left.width.reset(); // shift width helper not admitted
++            else if(left.width&&right.width) {
++                if(op!="**")left.width=std::max(*left.width,*right.width);
++            } else left.width.reset();
++        }
++        return left;
++    }
++    Value primary(unsigned depth) {
++        if(at_>=end_||depth>128)return {};
++        const auto start=at_;
++        const auto op=tokens_[at_].text;
++        if(op=="!"||op=="~"||op=="+"||op=="-"||op=="&"||op=="|"||
++           op=="^"||op=="~&"||op=="~|"||op=="~^"||op=="^~") {
++            ++at_;
++            auto child=expression(13,depth+1);
++            if(!child.valid)return {};
++            if(op=="!")child.width=1;
++            else if(op!="~"&&op!="+"&&op!="-")child.width.reset();
++            return child;
++        }
++        if(take("(")) {
++            auto value=expression(0,depth+1);
++            if(!value.valid||!take(")"))return {};
++            return value;
++        }
++        if(take("{")) {
++            const auto countBegin=at_;
++            auto first=expression(0,depth+1);
++            if(!first.valid)return {};
++            if(is("{")) {
++                const auto repetitions=count_(countBegin,at_);
++                const auto repeated=primary(depth+1);
++                if(!repeated.valid||!take("}"))return {};
++                Width width;
++                if(repetitions&&*repetitions>0&&repeated.width&&*repeated.width>0&&
++                   *repetitions<=65536 / *repeated.width)width=*repetitions * *repeated.width;
++                return {true,width};
++            }
++            Width total=first.width;
++            while(take(",")) {
++                const auto item=expression(0,depth+1);
++                if(!item.valid)return {};
++                if(total&&item.width&&*item.width<=65536&&*total<=65536-*item.width)*total+=*item.width;
++                else total.reset();
++            }
++            if(!take("}"))return {};
++            return {true,total};
++        }
++        if(tokens_[at_].kind!=parser::HdlTokenKind::Identifier&&
++           tokens_[at_].kind!=parser::HdlTokenKind::Number)return {};
++        ++at_;
++        bool unsupported=false;
++        for(;;) {
++            if(take("(")) {
++                unsupported=true;
++                if(!take(")")) {
++                    do {if(!expression(0,depth+1).valid)return {};}while(take(","));
++                    if(!take(")"))return {};
++                }
++            } else if(take("[")) {
++                if(!expression(0,depth+1).valid)return {};
++                if(take(":")||take("+:")||take("-:"))
++                    if(!expression(0,depth+1).valid)return {};
++                if(!take("]"))return {};
++            } else if(take(".")||take("::")) {
++                unsupported=true;
++                if(at_>=end_||tokens_[at_].kind!=parser::HdlTokenKind::Identifier)return {};
++                ++at_;
++            } else break;
++        }
++        return {true,unsupported?Width{}:leaf_(start,at_)};
++    }
++};
++} // namespace fpga::analysis::detail
+diff --git a/tests/verilog_condition_expression_tests.cpp b/tests/verilog_condition_expression_tests.cpp
+new file mode 100644
+index 0000000..4f0abd9
+--- /dev/null
++++ b/tests/verilog_condition_expression_tests.cpp
+@@ -0,0 +1,61 @@
++#include "analysis/verilog_condition_expression.h"
++#include <iostream>
++#include <map>
++int main() {
++    using namespace fpga;
++    int checks=0,failures=0;
++    const auto check=[&](bool okay,const char* label){++checks;if(!okay){++failures;std::cerr<<"FAIL "<<label<<'\n';}};
++    const auto width=[](const std::string& text) {
++        const auto raw=parser::tokenize({"expression.sv",core::HdlLanguage::SystemVerilog,text});
++        // The production adapter supplies normalized, comment-free operators.
++        std::vector<parser::HdlToken> tokens;
++        for(std::size_t i=0;i<raw.size();++i) {
++            auto token=raw[i];
++            if(i+1<raw.size()&&raw[i+1].offset==token.offset+token.text.size()) {
++                const auto pair=token.text+raw[i+1].text;
++                if(pair=="=="||pair=="&&"||pair=="**"||pair=="<<") {
++                    token.text=pair;++i;
++                }
++            }
++            tokens.push_back(std::move(token));
++        }
++        return analysis::detail::VerilogConditionExpression(tokens,0,tokens.size(),
++            [&](auto first,auto last)->std::optional<std::size_t>{
++                if(last!=first+1)return {};
++                const std::map<std::string,std::size_t> widths{{"a",1},{"b",4},{"c",8}};
++                const auto found=widths.find(tokens[first].text);
++                return found==widths.end()?std::nullopt:std::optional<std::size_t>{found->second};
++            },[&](auto first,auto last)->std::optional<std::size_t>{
++                return last==first+1&&tokens[first].text=="2"?std::optional<std::size_t>{2}:std::nullopt;
++            }).width();
++    };
++    check(width("!a+b")==4,"unary logical child does not turn arithmetic root into boolean");
++    check(width("!(a+b)")==1,"outer logical root is boolean");
++    check(width("(!a)+b")==4,"explicit unary child agrees with native precedence");
++    check(width("a==b|c")==8,"bitwise OR owns equality child");
++    check(width("a==(b|c)")==1,"explicit equality root is boolean");
++    check(width("a|b==c")==1,"equality binds above bitwise OR");
++    check(width("b|a==c")==4,"bitwise parent preserves wider child");
++    check(width("a+b==c")==1,"comparison owns arithmetic child");
++    check(width("a&&(b+c)")==1,"logical AND root is boolean");
++    check(width("a+(b==c)")==1,"known comparison can be arithmetic child");
++    check(width("!a*b")==4,"unary binds above multiplication");
++    check(width("~a+b")==4,"bitwise complement applies to one unary operand");
++    check(width("a**b+c")==8,"power propagates its base before outer addition");
++    check(width("a+b**c")==4,"power base width enters outer addition");
++    check(width("{!a,b}")==5,"concatenation sums inferred child widths");
++    check(width("{2{!a,b}}")==10,"replication count multiplies concatenation width");
++    check(!width("{unknown{a,b}}"),"unresolved replication count is unknown");
++    check(width("unknown==a")==1,"comparison root width does not require leaf width");
++    check(!width("unknown+a"),"arithmetic does require child widths");
++    check(!width("f(a)+b"),"unresolved call result is unknown");
++    check(width("!f(a)")==1,"logical result remains boolean for valid call subtree");
++    check(!width("a<<b"),"unrecovered shift helper branch stays unknown");
++    check(!width("a?b:c"),"unrecovered ternary-result branch stays unknown");
++    check(!width("!a+"),"incomplete binary expression cannot inherit unary width");
++    check(!width("!a garbage"),"trailing tokens cannot be silently ignored");
++    check(!width("(a+b"),"unbalanced expression is unknown");
++    check(!width(std::string(300,'!')+"a"),"nesting budget prevents unbounded recursion");
++    std::cout<<checks<<" checks, "<<failures<<" failures\n";
++    return failures?1:0;
++}

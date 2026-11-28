@@ -1,0 +1,14 @@
+{
+  "pass": 139,
+  "boundary": "Native table grouping proof + previously recovered width predicates + independent product implementation; no target execution",
+  "files": [
+    "reverse-tools/evidence/t_linter_pass139/condition_expression_integration.patch#sha256=248f189150104456793f72d49a4449242532655481a2583a90dd733ff4997340",
+    "reverse-tools/evidence/t_linter_pass139/expression_derivations.json#sha256=f6a3e6352e384f5f60fafaf73698f4d1e6550c02467aad7e115dcd268389f15c",
+    "reverse-tools/evidence/t_linter_pass139/replay_expression_grammar.py#sha256=05bf2455d80d9173d740eb5ee3b4da25e68e1e459b5ea6c56e36ec81632068a0",
+    "reverse-tools/evidence/t_linter_pass139/repro/comparison.json#sha256=d00c28eaa606425569a5ff6b3456fc601006031620db6a93b1e7e25e777b79f5",
+    "reverse-tools/evidence/t_linter_pass139/repro/logical_outer_arithmetic.sv#sha256=0c90b690230195d0e0077716c4235750739d7b182426a115693e36758aca348e",
+    "reverse-tools/evidence/t_linter_pass139/repro/logical_prefix_arithmetic.sv#sha256=801ce8da167cb1608f9f1fda2e9b97cd0ceb4183b8deedd049eda9e35cdb7c9e",
+    "reverse-tools/evidence/t_linter_pass139/repro/ternary_blocking.sv#sha256=2e6a3af40f055bf1d69a1bcf5f04a7ee0d2b244550d385a687fdfb80d2290ebb",
+    "reverse-tools/evidence/t_linter_pass139/repro/ternary_nonblocking.sv#sha256=667453cc976758521fa1836102f87a956e5d9b23f6d8191fc3e9610df9305d46"
+  ]
+}
