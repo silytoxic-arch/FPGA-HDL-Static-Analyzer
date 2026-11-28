@@ -7,6 +7,7 @@
 #include <fstream>
 #include <future>
 #include <iostream>
+#include <tuple>
 
 int main() {
     using namespace fpga;
@@ -564,6 +565,65 @@ int main() {
     check(count(linted,"GJB10157.9.2.10")==1,"bare combinational event control establishes nonblocking assignment boundary");
     linted=lint("module combos(input [3:0] b,output reg y);always_comb y<=b?1'b1:1'b0;endmodule\n");
     check(count(linted,"GJB10157.9.2.10")==1,"always_comb establishes nonblocking assignment boundary");
+
+    const std::string widthChild="module width_child(input [3:0] d);endmodule";
+    const std::string directionChild="module direction_child(input [3:0] d);endmodule";
+    const std::vector<std::tuple<std::string,std::string,std::string,int>> portCases{
+        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d(s));endmodule",1},
+        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(s);endmodule",1},
+        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] d);width_child u(.d);endmodule",1},
+        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d({s,s}));endmodule",0},
+        {"GJB10157.9.1.1",widthChild,"module parent(input [3:0] s);width_child u(.d(s));endmodule",0},
+        {"GJB10157.9.1.1",widthChild,"module parent; width_child u(.d());endmodule",0},
+        {"GJB10157.9.1.1",widthChild,"module parent; width_child u(.d(unknown));endmodule",0},
+        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d(s),.d(s));endmodule",0},
+        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] d);width_child u(.*);endmodule",0},
+        {"GJB10157.9.1.1","module width_child #(parameter W=4)(input [W-1:0] d);endmodule","module parent(input [1:0] s);width_child #(.W(2)) u(.d(s));endmodule",0},
+        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d(s));endmodule",1},
+        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(s);endmodule",1},
+        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] d);direction_child u(.d);endmodule",1},
+        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d({s}));endmodule",0},
+        {"GJB10157.7.3.3",directionChild,"module parent(input [3:0] s);direction_child u(.d(s));endmodule",0},
+        {"GJB10157.7.3.3","module direction_child(inout [3:0] d);endmodule","module parent(inout [3:0] s);direction_child u(.d(s));endmodule",0},
+        { "GJB10157.7.3.3",directionChild,"module parent(inout [3:0] d);direction_child u(.*);endmodule",0},
+        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d(s),.*);endmodule",1}
+    };
+    for(const auto& [rule,child,parent,expected]:portCases) {
+        const auto literal=lint(child+"\n"+parent+"\n");
+        if(count(literal,rule)!=expected)std::cerr<<"port fixture: "<<rule<<" "<<parent<<'\n';
+        check(count(literal,rule)==expected,"literal project binding fixture");
+        check(count(lint("`define CHILD "+child+"\n`CHILD\n"+parent+"\n"),rule)==expected,"macro child joins literal parent");
+        const auto macroParent=lint(child+"\n`define PARENT "+parent+"\n`PARENT\n");
+        check(count(macroParent,rule)==expected,"macro parent joins literal child");
+        for(const auto& v:macroParent.violations)if(v.ruleId==rule)
+            check(v.file==root&&v.line==3&&v.column==1,"bound diagnostic reports parent macro invocation");
+        const auto cross=analysis::Analyzer(projectOptions).analyzeSources({
+            {base/"child.sv",core::HdlLanguage::SystemVerilog,"`define CHILD "+child+"\n`CHILD\n"},
+            {root,core::HdlLanguage::SystemVerilog,"`define PARENT "+parent+"\n`PARENT\n"}});
+        check(count(cross,rule)==expected,"cross-file expanded parent/child binding");
+        {std::ofstream f(base/"bound_child.vh");f<<child<<'\n';}
+        check(count(lint("`include \"bound_child.vh\"\n"+parent+"\n"),rule)==expected,"included child participates in project binding");
+    }
+    for(const auto& [rule,child,parent]:std::vector<std::tuple<std::string,std::string,std::string>>{
+            {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d(s));endmodule"},
+            {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d(s));endmodule"}}) {
+        check(count(lint(child+"\n"+child+"\n"+parent+"\n"),rule)==0,"duplicate target is not arbitrarily selected");
+        check(count(lint(child+"\n"+parent+"\n"+parent+"\n"),rule)==0,"duplicate parent ownership remains unresolved");
+        const auto failed=analysis::Analyzer(projectOptions).analyzeSources({
+            {root,core::HdlLanguage::SystemVerilog,child+"\n"+parent+"\n"},
+            {base/"bad.sv",core::HdlLanguage::SystemVerilog,"`UNDEFINED_MODULE\n"}});
+        check(count(failed,rule)==0&&count(failed,"PP-FRONTEND-DIRECTIVE")>0,"unavailable root cannot prove unique project targets");
+        const auto samePath=analysis::Analyzer(projectOptions).analyzeSources({
+            {root,core::HdlLanguage::SystemVerilog,child+"\n"},
+            {root,core::HdlLanguage::SystemVerilog,parent+"\n"}});
+        check(count(samePath,rule)==1,"source identity is not collapsed by equal physical path keys");
+        const auto includedParent=base/"bound_parent.vh";
+        {std::ofstream f(includedParent);f<<parent<<'\n';}
+        const auto included=lint(child+"\n`include \"bound_parent.vh\"\n");
+        check(count(included,rule)==1,"included parent emits bound diagnostic");
+        for(const auto& v:included.violations)if(v.ruleId==rule)
+            check(v.file==includedParent&&v.line==1&&v.column==1,"bound diagnostic maps to included parent source");
+    }
     std::cout<<checks<<" checks, "<<failures<<" failures\n";
     return failures?1:0;
 }

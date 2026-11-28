@@ -1,0 +1,293 @@
+diff --git a/src/analysis/standard_evaluator.cpp b/src/analysis/standard_evaluator.cpp
+index c23db70..5faed93 100644
+--- a/src/analysis/standard_evaluator.cpp
++++ b/src/analysis/standard_evaluator.cpp
+@@ -17119,6 +17119,46 @@ void checkNativeVerilogCaseItemWidths(AnalysisResult& result,
+     });
+ }
+ 
++// Own virtual models and tokens together; joins never use reported offsets.
++// Duplicate ownership is indexed before width-model admission, so a definition
++// with an unresolved width cannot silently disappear from uniqueness checks.
++struct ExpandedProjectInputs {
++    struct Root {
++        parser::FrontendSourceView view;
++        std::vector<parser::HdlToken> tokens;
++        std::vector<parser::DesignUnitInfo> units;
++        Root(const core::SourceFile& source,const parser::FrontendPreprocessorResult& frame)
++            :view(source,frame),tokens(standardTokens(view.input())),
++             units(parser::parseDesignUnits(view.input())) {}
++    };
++    struct Binding { const Root* root;const parser::DesignUnitInfo* unit; };
++    std::vector<Root> roots;
++    std::map<std::string,std::vector<Binding>> owners;
++    bool inputsAvailable{true};
++    ExpandedProjectInputs(std::span<const core::SourceFile> sources,
++                          const FrontendInputMap& inputs) {
++        roots.reserve(sources.size());
++        for(const auto& source:sources) {
++            if(source.language()!=core::HdlLanguage::Verilog&&
++               source.language()!=core::HdlLanguage::SystemVerilog)continue;
++            const auto found=inputs.find(&source);
++            if(found==inputs.end()||!found->second||!found->second->issues.empty()) {
++                inputsAvailable=false;
++                continue;
++            }
++            roots.emplace_back(source,*found->second);
++        }
++        for(const auto& root:roots)for(const auto& unit:root.units)
++            if(unit.kind==parser::DesignUnitKind::VerilogModule)
++                owners[unit.name].push_back({&root,&unit});
++    }
++    const Binding* unique(const std::string& name) const {
++        if(!inputsAvailable)return nullptr;
++        const auto found=owners.find(name);
++        return found!=owners.end()&&found->second.size()==1?&found->second.front():nullptr;
++    }
++};
++
+ void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,
+                                              std::span<const core::SourceFile> sources,
+                                              const AnalysisOptions& options,
+@@ -17128,43 +17168,30 @@ void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,
+     // unequal width emits Warning. This adapter applies the recovered bounded
+     // flag-zero expression model after configured preprocessing.
+     // ev_916c75cf9432a04dd9416f4288f21b1e91d878b083a98e8fd9520b68f5f02d40
+-    std::map<std::string, std::vector<parser::HdlToken>> tokenCache;
+-    std::map<std::string, core::SourceFile> activeSources;
+-    for (const auto& source : sources) {
+-        if (!applicable(source, "GJB10157-2021")) continue;
+-        const auto preprocessed = projectPreprocess(source,options,frontendInputs);
+-        if (!preprocessed.issues.empty()) continue;
+-        const auto key = source.path().lexically_normal().generic_string();
+-        activeSources.emplace(key, preprocessed.source);
+-        tokenCache.emplace(key, standardTokens(preprocessed.source));
+-    }
++    (void)options;
++    const ExpandedProjectInputs project(sources,frontendInputs);
+     std::map<std::string, FixedVerilogModuleWidthModel> models;
+-    std::set<std::string> ambiguous;
+-    for (const auto& unit : result.structure) {
+-        if (unit.kind != parser::DesignUnitKind::VerilogModule) continue;
+-        const auto key = unit.location.file.lexically_normal().generic_string();
+-        const auto source = activeSources.find(key);
+-        if (source == activeSources.end()) continue;
+-        const auto tokens = tokenCache.find(key);
+-        if (tokens == tokenCache.end()) continue;
+-        const auto model = fixedVerilogModuleWidthModel(unit, source->second, tokens->second);
+-        if (!model) continue;
+-        if (!models.emplace(unit.name, *model).second) ambiguous.insert(unit.name);
++    for(const auto& [name,owners]:project.owners) {
++        const auto binding=project.unique(name);
++        if(!binding)continue;
++        const auto model=fixedVerilogModuleWidthModel(*binding->unit,
++            binding->root->view.input(),binding->root->tokens);
++        if(model)models.emplace(name,*model);
+     }
+-    for (const auto& unit : result.structure) {
+-        if (unit.kind != parser::DesignUnitKind::VerilogModule || ambiguous.contains(unit.name)) continue;
+-        const auto parent = models.find(unit.name);
+-        if (parent == models.end()) continue;
++    for(const auto& [name,owners]:project.owners) {
++        const auto binding=project.unique(name);
++        if(!binding)continue;
++        const auto& unit=*binding->unit;
++        const auto parent=models.find(name);
++        if(parent==models.end())continue;
+         for (const auto& instance : unit.instances) {
+-            if (ambiguous.contains(instance.target) || instance.hasWildcardConnection ||
++            if (instance.hasWildcardConnection ||
+                 (instance.hasNamedConnections && instance.hasPositionalConnections)) continue;
+             const auto child = models.find(instance.target);
+             if (child == models.end()) continue;
+-            const auto target = std::ranges::find_if(result.structure, [&](const auto& candidate) {
+-                return candidate.kind == parser::DesignUnitKind::VerilogModule &&
+-                       candidate.name == instance.target;
+-            });
+-            if (target == result.structure.end()) continue;
++            const auto targetBinding=project.unique(instance.target);
++            if(!targetBinding)continue;
++            const auto target=targetBinding->unit;
+             std::map<std::string, unsigned> namedCounts;
+             for (const auto& connection : instance.namedConnections) ++namedCounts[connection.formal];
+             for (const auto& connection : instance.namedConnections) {
+@@ -17181,8 +17208,8 @@ void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,
+                         parent->second, connection.actualLocation);
+                 }
+                 if (!actual || *actual == *formal->second) continue;
+-                emit(result, "GJB10157.9.1.1", *parent->second.source,
+-                     connection.location.line, connection.location.column,
++                emitAtLocation(result, "GJB10157.9.1.1",
++                     binding->root->view.report(connection.location.line,connection.location.column),
+                      "实例端口位宽不一致：" + instance.name + "." + connection.formal +
+                      " 需要 " + std::to_string(*formal->second) + " 位，连接值为 " +
+                      std::to_string(*actual) + " 位");
+@@ -17195,8 +17222,8 @@ void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,
+                 if (formal == child->second.portWidths.end() || !formal->second) continue;
+                 const auto actual = fixedConnectionActualWidth(parent->second, connection.location);
+                 if (!actual || *actual == *formal->second) continue;
+-                emit(result, "GJB10157.9.1.1", *parent->second.source,
+-                     connection.location.line, connection.location.column,
++                emitAtLocation(result, "GJB10157.9.1.1",
++                     binding->root->view.report(connection.location.line,connection.location.column),
+                      "实例位置端口位宽不一致：" + instance.name + "." + target->ports[index].name +
+                      " 需要 " + std::to_string(*formal->second) + " 位，连接值为 " +
+                      std::to_string(*actual) + " 位");
+@@ -17206,7 +17233,8 @@ void checkNativeVerilogPortConnectionWidths(AnalysisResult& result,
+ }
+ 
+ void checkNativeVerilogInoutToUnidirectionalPorts(
+-    AnalysisResult& result, std::span<const core::SourceFile> sources) {
++    AnalysisResult& result, std::span<const core::SourceFile> sources,
++    const FrontendInputMap& frontendInputs) {
+     // Native FUN_1806c9ed0 resolves instance associations, then reports when
+     // the actual declaration has both direction bytes +0xa0/+0xa1 set while
+     // the formal declaration has either byte clear.  The packaged examples
+@@ -17215,18 +17243,12 @@ void checkNativeVerilogInoutToUnidirectionalPorts(
+     // parsed port directions; unresolved library cells remain project context.
+     // ev_9d37e17a014972cb692902d2d3196184236e04217b9f86a7ec11fe29ebe95fe0
+     // ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b
+-    std::map<std::string, std::vector<const parser::DesignUnitInfo*>> modules;
+-    for (const auto& unit : result.structure) {
+-        if (unit.kind == parser::DesignUnitKind::VerilogModule)
+-            modules[unit.name].push_back(&unit);
+-    }
+-    for (const auto& parent : result.structure) {
+-        if (parent.kind != parser::DesignUnitKind::VerilogModule) continue;
+-        const auto source = std::ranges::find_if(sources, [&](const auto& candidate) {
+-            return candidate.path().lexically_normal() == parent.location.file.lexically_normal();
+-        });
+-        if (source == sources.end()) continue;
+-        const auto tokens = standardTokens(*source);
++    const ExpandedProjectInputs project(sources,frontendInputs);
++    for(const auto& [name,owners]:project.owners) {
++        const auto binding=project.unique(name);
++        if(!binding)continue;
++        const auto& parent=*binding->unit;
++        const auto& tokens=binding->root->tokens;
+         const auto actualNameAt = [&](const core::SourceLocation& location)
+             -> std::optional<std::string> {
+             if (location.file.empty()) return std::nullopt;
+@@ -17243,10 +17265,9 @@ void checkNativeVerilogInoutToUnidirectionalPorts(
+                    port->direction == parser::PortDirection::Inout;
+         };
+         for (const auto& instance : parent.instances) {
+-            const auto targets = modules.find(instance.target);
+-            if (!instance.resolved || instance.external || targets == modules.end() ||
+-                targets->second.size() != 1) continue;
+-            const auto& target = *targets->second.front();
++            const auto targetBinding=project.unique(instance.target);
++            if(!targetBinding)continue;
++            const auto& target=*targetBinding->unit;
+             const auto unidirectional = [](parser::PortDirection direction) {
+                 return direction == parser::PortDirection::Input ||
+                        direction == parser::PortDirection::Output;
+@@ -17265,8 +17286,8 @@ void checkNativeVerilogInoutToUnidirectionalPorts(
+                 // SystemVerilog shorthand .name binds the actual with the same name.
+                 if (!actual && connection.actualLocation.file.empty()) actual = connection.formal;
+                 if (!actual || !parentInout(*actual)) continue;
+-                emit(result, "GJB10157.7.3.3", *source,
+-                     connection.location.line, connection.location.column,
++                emitAtLocation(result, "GJB10157.7.3.3",
++                     binding->root->view.report(connection.location.line,connection.location.column),
+                      "双向端口 " + *actual + " 直接连接到单向形式端口 " +
+                          instance.name + "." + formal->name);
+             }
+@@ -17278,8 +17299,8 @@ void checkNativeVerilogInoutToUnidirectionalPorts(
+                     !unidirectional(formal.direction)) continue;
+                 const auto actual = actualNameAt(connection.location);
+                 if (!actual || !parentInout(*actual)) continue;
+-                emit(result, "GJB10157.7.3.3", *source,
+-                     connection.location.line, connection.location.column,
++                emitAtLocation(result, "GJB10157.7.3.3",
++                     binding->root->view.report(connection.location.line,connection.location.column),
+                      "双向端口 " + *actual + " 直接连接到单向形式端口 " +
+                          instance.name + "." + formal.name);
+             }
+@@ -17581,7 +17602,7 @@ static void evaluateStandardProfile(AnalysisResult& result,
+     if (profile->id == "GJB10157-2021")
+         checkNativeVerilogPortConnectionWidths(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+-        checkNativeVerilogInoutToUnidirectionalPorts(result, sources);
++        checkNativeVerilogInoutToUnidirectionalPorts(result, sources, frontendBySource);
+     if (profile->id == "GJB10157-2021")
+         checkNativeVerilogAssignmentWidths(result, sources, options,frontendBySource);
+     if (profile->id == "GJB10157-2021")
+diff --git a/tests/frontend_preprocessor_tests.cpp b/tests/frontend_preprocessor_tests.cpp
+index 8a522fa..31f80a3 100644
+--- a/tests/frontend_preprocessor_tests.cpp
++++ b/tests/frontend_preprocessor_tests.cpp
+@@ -7,6 +7,7 @@
+ #include <fstream>
+ #include <future>
+ #include <iostream>
++#include <tuple>
+ 
+ int main() {
+     using namespace fpga;
+@@ -564,6 +565,65 @@ int main() {
+     check(count(linted,"GJB10157.9.2.10")==1,"bare combinational event control establishes nonblocking assignment boundary");
+     linted=lint("module combos(input [3:0] b,output reg y);always_comb y<=b?1'b1:1'b0;endmodule\n");
+     check(count(linted,"GJB10157.9.2.10")==1,"always_comb establishes nonblocking assignment boundary");
++
++    const std::string widthChild="module width_child(input [3:0] d);endmodule";
++    const std::string directionChild="module direction_child(input [3:0] d);endmodule";
++    const std::vector<std::tuple<std::string,std::string,std::string,int>> portCases{
++        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d(s));endmodule",1},
++        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(s);endmodule",1},
++        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] d);width_child u(.d);endmodule",1},
++        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d({s,s}));endmodule",0},
++        {"GJB10157.9.1.1",widthChild,"module parent(input [3:0] s);width_child u(.d(s));endmodule",0},
++        {"GJB10157.9.1.1",widthChild,"module parent; width_child u(.d());endmodule",0},
++        {"GJB10157.9.1.1",widthChild,"module parent; width_child u(.d(unknown));endmodule",0},
++        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d(s),.d(s));endmodule",0},
++        {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] d);width_child u(.*);endmodule",0},
++        {"GJB10157.9.1.1","module width_child #(parameter W=4)(input [W-1:0] d);endmodule","module parent(input [1:0] s);width_child #(.W(2)) u(.d(s));endmodule",0},
++        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d(s));endmodule",1},
++        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(s);endmodule",1},
++        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] d);direction_child u(.d);endmodule",1},
++        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d({s}));endmodule",0},
++        {"GJB10157.7.3.3",directionChild,"module parent(input [3:0] s);direction_child u(.d(s));endmodule",0},
++        {"GJB10157.7.3.3","module direction_child(inout [3:0] d);endmodule","module parent(inout [3:0] s);direction_child u(.d(s));endmodule",0},
++        { "GJB10157.7.3.3",directionChild,"module parent(inout [3:0] d);direction_child u(.*);endmodule",0},
++        {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d(s),.*);endmodule",1}
++    };
++    for(const auto& [rule,child,parent,expected]:portCases) {
++        const auto literal=lint(child+"\n"+parent+"\n");
++        if(count(literal,rule)!=expected)std::cerr<<"port fixture: "<<rule<<" "<<parent<<'\n';
++        check(count(literal,rule)==expected,"literal project binding fixture");
++        check(count(lint("`define CHILD "+child+"\n`CHILD\n"+parent+"\n"),rule)==expected,"macro child joins literal parent");
++        const auto macroParent=lint(child+"\n`define PARENT "+parent+"\n`PARENT\n");
++        check(count(macroParent,rule)==expected,"macro parent joins literal child");
++        for(const auto& v:macroParent.violations)if(v.ruleId==rule)
++            check(v.file==root&&v.line==3&&v.column==1,"bound diagnostic reports parent macro invocation");
++        const auto cross=analysis::Analyzer(projectOptions).analyzeSources({
++            {base/"child.sv",core::HdlLanguage::SystemVerilog,"`define CHILD "+child+"\n`CHILD\n"},
++            {root,core::HdlLanguage::SystemVerilog,"`define PARENT "+parent+"\n`PARENT\n"}});
++        check(count(cross,rule)==expected,"cross-file expanded parent/child binding");
++        {std::ofstream f(base/"bound_child.vh");f<<child<<'\n';}
++        check(count(lint("`include \"bound_child.vh\"\n"+parent+"\n"),rule)==expected,"included child participates in project binding");
++    }
++    for(const auto& [rule,child,parent]:std::vector<std::tuple<std::string,std::string,std::string>>{
++            {"GJB10157.9.1.1",widthChild,"module parent(input [1:0] s);width_child u(.d(s));endmodule"},
++            {"GJB10157.7.3.3",directionChild,"module parent(inout [3:0] s);direction_child u(.d(s));endmodule"}}) {
++        check(count(lint(child+"\n"+child+"\n"+parent+"\n"),rule)==0,"duplicate target is not arbitrarily selected");
++        check(count(lint(child+"\n"+parent+"\n"+parent+"\n"),rule)==0,"duplicate parent ownership remains unresolved");
++        const auto failed=analysis::Analyzer(projectOptions).analyzeSources({
++            {root,core::HdlLanguage::SystemVerilog,child+"\n"+parent+"\n"},
++            {base/"bad.sv",core::HdlLanguage::SystemVerilog,"`UNDEFINED_MODULE\n"}});
++        check(count(failed,rule)==0&&count(failed,"PP-FRONTEND-DIRECTIVE")>0,"unavailable root cannot prove unique project targets");
++        const auto samePath=analysis::Analyzer(projectOptions).analyzeSources({
++            {root,core::HdlLanguage::SystemVerilog,child+"\n"},
++            {root,core::HdlLanguage::SystemVerilog,parent+"\n"}});
++        check(count(samePath,rule)==1,"source identity is not collapsed by equal physical path keys");
++        const auto includedParent=base/"bound_parent.vh";
++        {std::ofstream f(includedParent);f<<parent<<'\n';}
++        const auto included=lint(child+"\n`include \"bound_parent.vh\"\n");
++        check(count(included,rule)==1,"included parent emits bound diagnostic");
++        for(const auto& v:included.violations)if(v.ruleId==rule)
++            check(v.file==includedParent&&v.line==1&&v.column==1,"bound diagnostic maps to included parent source");
++    }
+     std::cout<<checks<<" checks, "<<failures<<" failures\n";
+     return failures?1:0;
+ }

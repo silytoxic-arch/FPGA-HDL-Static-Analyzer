@@ -1,0 +1,15 @@
+{
+  "targetSha256": "60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0",
+  "engine": "Ghidra 12.1.4 headless; fresh PE import, -noanalysis, explicit entry preparation",
+  "entries": [
+    "0x18057b2f0",
+    "0x1806c9ed0",
+    "0x18066e7e0"
+  ],
+  "knownWidthCall": "0x18066fe7b",
+  "observedRuntimeFunction": [
+    "0x18066e7e0",
+    "0x180670342"
+  ],
+  "boundary": "Static decompilation and instructions only. No target execution and no full-program analysis. Missing prior project databases were not assumed usable."
+}

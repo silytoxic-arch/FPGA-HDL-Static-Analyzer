@@ -6057,17 +6057,30 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native FUN_1806c9ed0 resolves instance associations and reports when the actual declaration has both direction bytes +0xa0/+0xa1 set while the resolved formal declaration has either byte clear. The packaged examples identify this as a parent INOUT actual connected to a child IN or OUT formal. Product compares parsed directions only for a uniquely resolved project-local Verilog module and supports named, shorthand, positional and identifier-rooted select actuals.",
+      "predicate": "Native FUN_1806c9ed0 resolves instance associations and reports when the actual declaration has both direction bytes +0xa0/+0xa1 set while the resolved formal declaration has either byte clear. The packaged examples identify this as a parent INOUT actual connected to a child IN or OUT formal. Product compares parsed directions only for a uniquely resolved project-local Verilog module and supports named, shorthand, positional and identifier-rooted select actuals. V1.4.258 evaluates project-local port joins in an ExpandedProjectInputs view owning matching expanded tokens and virtual design units. Ownership includes every parsed module before width admission, distinct roots are not collapsed by equal path strings, and reporting alone maps parent connection origins. All Verilog roots must have available expansion before a project-unique target is proved. Native port width thunk/body and inout direction branches were revalidated by fresh Ghidra import and explicit-entry static decompilation, with instruction confirmation of flag-zero and unknown-width gating. No vendor execution was performed.",
       "predicateEvidence": [
         "ev_9d37e17a014972cb692902d2d3196184236e04217b9f86a7ec11fe29ebe95fe0",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
-        "docs/evidence/native_verilog_inout_unidirectional_7_3_3_findings.md#recovered-predicate"
+        "docs/evidence/native_verilog_inout_unidirectional_7_3_3_findings.md#recovered-predicate",
+        "docs/native_rule_recovery_pass140.md",
+        "reverse-tools/evidence/t_linter_pass140/PreparePortEntries.java#sha256=33a456ad0c70e98cdefcc20c9c40e451e6fad2a3d7c1e20c523b8d4474306462",
+        "reverse-tools/evidence/t_linter_pass140/acquisition.json#sha256=680357a713c1cf0c266d9ff15a3c744aeb36c5fc0bbe208e7f077454388caeb8",
+        "reverse-tools/evidence/t_linter_pass140/expanded_port_binding.patch#sha256=2edd74ac09e0598e102a05fadf437904ff0fc9bcc39523239d1878520ea557d3",
+        "reverse-tools/evidence/t_linter_pass140/native_ports.txt#sha256=2129a4a27606195152b0fa23a290f497d12c24f284a1f8cf091ad5ab67971b04",
+        "reverse-tools/evidence/t_linter_pass140/repro/comparison.json#sha256=8ac1e127f70c0175451d222c91ff60d2cf0645832cb784f317e46e4cdafb9416",
+        "reverse-tools/evidence/t_linter_pass140/repro/literal.sv#sha256=84bfe6712a7e60cb3abc2c0d184bed2881767690a8605be9f99d54331481e4af",
+        "reverse-tools/evidence/t_linter_pass140/repro/macro_child.sv#sha256=05ae0b0389cae2da4a4b3bcc446513b216d4ffa07f4571fc191072ce5bcec762",
+        "reverse-tools/evidence/t_linter_pass140/repro/macro_parent.sv#sha256=88feb2d9698b3a985c29b2dfd0469ff783d8f38c8f76934063aef0470a0b27fe",
+        "reverse-tools/evidence/t_linter_pass140/width_call_instructions.txt#sha256=6acb12a08252dbfc11ac20b948a79df138a846fb48e9c909f14c696d35961f70"
       ],
       "entryObservation": null,
       "implementationMode": "ProjectContext",
       "implementationSource": "src/analysis/standard_evaluator.cpp",
       "regressionSource": "tests/standard_accuracy_tests.cpp",
-      "additionalTests": "tests/standard_accuracy_tests.cpp",
+      "additionalTests": [
+        "tests/standard_accuracy_tests.cpp",
+        "tests/frontend_preprocessor_tests.cpp"
+      ],
       "documentation": {
         "source": "/Users/pinger/Desktop/新建文件夹/t_linter/install/T-Linter-win64-V3.1.4.25120520251205115359/examples_html/GJB10157_VLOG.7.3.3.html",
         "sha256": "25da6f27f7d0a6d46fec548ff9fd08d8f0265b9adb8d69f94ae29a8d0b422ace",
@@ -6086,7 +6099,8 @@
           "matched": true
         }
       ],
-      "limitations": "The native direction-byte names are inferred from control flow and examples rather than recovered debug types. Native library resolution, association-record construction, primitive/interface ports, aliases, modports, generated hierarchy and exact diagnostic multiplicity remain unresolved. Product deliberately emits nothing for unresolved or ambiguous targets and leaves those cases ProjectContextRequired; full native equivalence is not claimed."
+      "limitations": "The native direction-byte names are inferred from control flow and examples rather than recovered debug types. Native library resolution, association-record construction, primitive/interface ports, aliases, modports, generated hierarchy and exact diagnostic multiplicity remain unresolved. Product deliberately emits nothing for unresolved or ambiguous targets and leaves those cases ProjectContextRequired; full native equivalence is not claimed. This project index is not full HDL elaboration. Parameter overrides, libraries/interfaces/multidimensional arrays, generated scopes, complex expressions, malformed recovery and native binding/diagnostic order remain incomplete. Duplicate parent/child owners and unavailable roots defer joins rather than selecting a guessed definition. Existing bounded wildcard/expression admission is retained; no finding remains review-required.",
+      "expandedPortBindingRelease": "docs/v1_4_258_release.md"
     },
     {
       "publicRuleId": "R-9-1",
@@ -6964,7 +6978,7 @@
         }
       ],
       "predicateStatus": "evidence-supported-core-predicate; partial-integration",
-      "predicate": "Native slot 0 stores each formal port width, calls FUN_1808f4650 with fifth argument zero to infer the bound actual width, skips actual width -1 as unknown, and emits Warning when the known actual width differs. Product compares uniquely resolved Verilog module instances with fixed numeric packed formal widths against the recovered bounded flag-zero actual-expression model: fixed signals/selections/literals, concatenation/static replication, bitwise and arithmetic trees, including named, positional and SystemVerilog shorthand bindings after configured preprocessing. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing.",
+      "predicate": "Native slot 0 stores each formal port width, calls FUN_1808f4650 with fifth argument zero to infer the bound actual width, skips actual width -1 as unknown, and emits Warning when the known actual width differs. Product compares uniquely resolved Verilog module instances with fixed numeric packed formal widths against the recovered bounded flag-zero actual-expression model: fixed signals/selections/literals, concatenation/static replication, bitwise and arithmetic trees, including named, positional and SystemVerilog shorthand bindings after configured preprocessing. V1.4.253 observes post-directive active state at the retained engine conditional exits without changing emitted HDL. A physical file/line stack distinct from logical line directives binds root conditions after includes to physical projection. Nine project preprocessing entry points reuse the same context; explicit top admission uses the expanded owner map. Rule-specific collectors/predicates remain unchanged. Ambiguous macro-generated control binding defers physical structure instead of guessing. V1.4.258 evaluates project-local port joins in an ExpandedProjectInputs view owning matching expanded tokens and virtual design units. Ownership includes every parsed module before width admission, distinct roots are not collapsed by equal path strings, and reporting alone maps parent connection origins. All Verilog roots must have available expansion before a project-unique target is proved. Native port width thunk/body and inout direction branches were revalidated by fresh Ghidra import and explicit-entry static decompilation, with instruction confirmation of flag-zero and unknown-width gating. No vendor execution was performed.",
       "predicateEvidence": [
         "ev_916c75cf9432a04dd9416f4288f21b1e91d878b083a98e8fd9520b68f5f02d40",
         "ev_aaa493aac258e6c8e9f4d04fcd2ebeb575f37e5d55e363a21c32a358a3f3965b",
@@ -6978,7 +6992,17 @@
         "reverse-tools/evidence/t_linter_pass135/parity/stream.out#sha256=d3876e07ac7685ac5f4ab76234748da206f0245fdb4d9d2e54c796d0ec73a971",
         "reverse-tools/evidence/t_linter_pass135/repro/comparison.json#sha256=a61bce044edf7f6a9bb2d49c018b74e073b92fd73dee1c0b171ce29c5b43faad",
         "reverse-tools/evidence/t_linter_pass135/repro/flags.vh#sha256=d08c6ee585ca128540fe5b001fec21ba10ab737d6c9400c72b4170bb88eafa5f",
-        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172"
+        "reverse-tools/evidence/t_linter_pass135/repro/top.sv#sha256=ad966a28d6e4e15c1fdd831250e372acbbabbdcc6d0a1ca0e7349c7ce8d65172",
+        "docs/native_rule_recovery_pass140.md",
+        "reverse-tools/evidence/t_linter_pass140/PreparePortEntries.java#sha256=33a456ad0c70e98cdefcc20c9c40e451e6fad2a3d7c1e20c523b8d4474306462",
+        "reverse-tools/evidence/t_linter_pass140/acquisition.json#sha256=680357a713c1cf0c266d9ff15a3c744aeb36c5fc0bbe208e7f077454388caeb8",
+        "reverse-tools/evidence/t_linter_pass140/expanded_port_binding.patch#sha256=2edd74ac09e0598e102a05fadf437904ff0fc9bcc39523239d1878520ea557d3",
+        "reverse-tools/evidence/t_linter_pass140/native_ports.txt#sha256=2129a4a27606195152b0fa23a290f497d12c24f284a1f8cf091ad5ab67971b04",
+        "reverse-tools/evidence/t_linter_pass140/repro/comparison.json#sha256=8ac1e127f70c0175451d222c91ff60d2cf0645832cb784f317e46e4cdafb9416",
+        "reverse-tools/evidence/t_linter_pass140/repro/literal.sv#sha256=84bfe6712a7e60cb3abc2c0d184bed2881767690a8605be9f99d54331481e4af",
+        "reverse-tools/evidence/t_linter_pass140/repro/macro_child.sv#sha256=05ae0b0389cae2da4a4b3bcc446513b216d4ffa07f4571fc191072ce5bcec762",
+        "reverse-tools/evidence/t_linter_pass140/repro/macro_parent.sv#sha256=88feb2d9698b3a985c29b2dfd0469ff783d8f38c8f76934063aef0470a0b27fe",
+        "reverse-tools/evidence/t_linter_pass140/width_call_instructions.txt#sha256=6acb12a08252dbfc11ac20b948a79df138a846fb48e9c909f14c696d35961f70"
       ],
       "entryObservation": null,
       "implementationMode": "Automated",
@@ -7003,8 +7027,9 @@
           "matched": true
         }
       ],
-      "limitations": "Parameterized formals and instance overrides, function calls, casts, dynamic selections, multidimensional arrays, interfaces, complete macro/generated bindings, blackboxes, malformed or duplicate modules, frontend binding order, locations and exact diagnostic multiplicity remain unresolved. The product leaves unsupported widths unknown and retains ManualReviewRequired when no mismatch is found; no full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required.",
-      "sharedInputRelease": "docs/v1_4_253_release.md"
+      "limitations": "Parameterized formals and instance overrides, function calls, casts, dynamic selections, multidimensional arrays, interfaces, complete macro/generated bindings, blackboxes, malformed or duplicate modules, frontend binding order, locations and exact diagnostic multiplicity remain unresolved. The product leaves unsupported widths unknown and retains ManualReviewRequired when no mismatch is found; no full native equivalence is claimed. This closes uniquely bound literal root-condition projection after includes, not complete textually generated AST, structural/semantic lowering, optional frontend or vendor runtime parity. Logical declaration origins and physical source projection remain separate. Full algorithms remain unverified and no-finding remains review-required. This project index is not full HDL elaboration. Parameter overrides, libraries/interfaces/multidimensional arrays, generated scopes, complex expressions, malformed recovery and native binding/diagnostic order remain incomplete. Duplicate parent/child owners and unavailable roots defer joins rather than selecting a guessed definition. Existing bounded wildcard/expression admission is retained; no finding remains review-required.",
+      "sharedInputRelease": "docs/v1_4_253_release.md",
+      "expandedPortBindingRelease": "docs/v1_4_258_release.md"
     },
     {
       "publicRuleId": "R-10-2",

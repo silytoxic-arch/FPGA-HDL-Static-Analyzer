@@ -1,0 +1,43 @@
+{
+  "boundary": "Product version comparison, not vendor runtime oracle",
+  "baseline": "1.4.257 / 66d6ce582f5dd754e00f6fb2b0f173809a90bcde",
+  "current": "1.4.258",
+  "cases": {
+    "literal": {
+      "before": [
+        {
+          "line": 2,
+          "column": 39,
+          "message": "实例端口位宽不一致：u.d 需要 4 位，连接值为 2 位"
+        }
+      ],
+      "after": [
+        {
+          "line": 2,
+          "column": 39,
+          "message": "实例端口位宽不一致：u.d 需要 4 位，连接值为 2 位"
+        }
+      ]
+    },
+    "macro_child": {
+      "before": [],
+      "after": [
+        {
+          "line": 3,
+          "column": 39,
+          "message": "实例端口位宽不一致：u.d 需要 4 位，连接值为 2 位"
+        }
+      ]
+    },
+    "macro_parent": {
+      "before": [],
+      "after": [
+        {
+          "line": 3,
+          "column": 1,
+          "message": "实例端口位宽不一致：u.d 需要 4 位，连接值为 2 位"
+        }
+      ]
+    }
+  }
+}

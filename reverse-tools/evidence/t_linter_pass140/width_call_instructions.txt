@@ -1,0 +1,22 @@
+Target: T-Linter.dll; SHA256: 60e6b52875f4d7c3fbdf494d869b3a4bcc3fdc8ee63d8620ea9614da5d6599b0
+Range: 18066fe54..18066feb5
+18066fe54  MOV ECX,dword ptr [RAX + 0x28]
+18066fe57  MOV dword ptr [RBP + -0x70],ECX
+18066fe5a  MOV RBX,qword ptr [0x18137cbd0]
+18066fe61  MOV qword ptr [0x18137cbd0],RDI
+18066fe68  MOV byte ptr [RSP + 0x20],0x0
+18066fe6d  XOR R9D,R9D
+18066fe70  LEA R8,[RBP + -0x78]
+18066fe74  LEA RDX,[RBP + -0x74]
+18066fe78  MOV RCX,RSI
+18066fe7b  CALL 0x1808f4650
+18066fe80  MOV qword ptr [0x18137cbd0],RBX
+18066fe87  MOV EAX,dword ptr [RBP + -0x74]
+18066fe8a  CMP EAX,-0x1
+18066fe8d  JZ 0x1806701bc
+18066fe93  CMP EAX,dword ptr [RBP + -0x70]
+18066fe96  JZ 0x1806701bc
+18066fe9c  MOV qword ptr [RBP + 0x288],R12
+18066fea3  MOV qword ptr [RBP + 0x290],R12
+18066feaa  MOV qword ptr [RBP + 0x290],0xf
+18066feb5  MOV qword ptr [RBP + 0x288],R12
